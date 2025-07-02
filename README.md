@@ -2,9 +2,11 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies and run the development server:
 
 ```bash
+# install dependencies
+npm install
 npm run dev
 # or
 yarn dev
@@ -15,6 +17,8 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+To view the WebGPU attractors demo navigate to [http://localhost:3000/attractors](http://localhost:3000/attractors). This demo requires a WebGPU-enabled browser (for example, Chrome with the `--enable-dawn-features=compat` flag or an experimental build).
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

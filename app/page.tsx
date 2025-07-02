@@ -35,6 +35,9 @@ export default function Home() {
               <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="#">
                 Careers
               </a>
+              <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="/login">
+                Sign in
+              </a>
               <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black transition-colors">
                 Get Started
               </Button>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Cloud, Zap, Menu } from "lucide-react";
+import NeuralAnimation from "@/components/NeuralAnimation";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,8 +47,9 @@ export default function Home() {
         </header>
 
         <main className="flex-1 pt-20">
-          <section className="w-full py-24 md:py-32 lg:py-48">
-            <div className="container mx-auto px-4 md:px-6">
+          <section className="relative overflow-hidden w-full py-24 md:py-32 lg:py-48">
+            <NeuralAnimation />
+            <div className="relative z-10 container mx-auto px-4 md:px-6">
               <div className="flex flex-col items-center space-y-4 text-center">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl max-w-3xl mx-auto leading-tight">
                   Unleash the Power of Neural Data Cloud

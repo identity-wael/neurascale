@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, HTMLAttributes } from 'react';
 
-interface CardProps {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
     className?: string;
 }
@@ -13,6 +13,6 @@ export function Card({ children, className = '', ...props }: CardProps) {
     );
 }
 
-export function CardContent({ children, ...props }: CardProps) {
-    return <div {...props}>{children}</div>;
+export function CardContent({ children, className = '', ...props }: CardProps) {
+    return <div className={className} {...props}>{children}</div>;
 }

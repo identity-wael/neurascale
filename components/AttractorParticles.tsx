@@ -154,9 +154,13 @@ export default function AttractorParticles() {
       const positionBuffer = instancedArray(count, 'vec3')
       const velocityBuffer = instancedArray(count, 'vec3')
 
-      const sphericalToVec3 = Fn(([phi, theta]) => {
+      const sphericalToVec3 = Fn(([phi, theta], _builder) => {
         const sinPhiRadius = sin(phi)
-        return vec3(sinPhiRadius.mul(sin(theta)), cos(phi), sinPhiRadius.mul(cos(theta)))
+        return vec3(
+          sinPhiRadius.mul(sin(theta)),
+          cos(phi),
+          sinPhiRadius.mul(cos(theta)),
+        )
       })
 
       const init = Fn(() => {

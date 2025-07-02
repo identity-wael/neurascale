@@ -52,9 +52,9 @@ export default function Home() {
                 <p className="mx-auto max-w-[700px] text-gray-400 md:text-xl/relaxed lg:text-2xl/relaxed">
                   NEURASCALE provides a cutting-edge platform for storing, processing, and analyzing neural data at scale.
                 </p>
-                <Button size="lg" className="mt-8 bg-white text-black hover:bg-gray-200 transition-colors">
+                <button className="rounded px-6 py-3 text-lg mt-8 bg-white text-black hover:bg-gray-200 transition-colors">
                   Explore Our Technology
-                </Button>
+                </button>
               </div>
             </div>
           </section>
@@ -118,9 +118,9 @@ export default function Home() {
                 <p className="mx-auto max-w-[600px] text-gray-400 md:text-xl/relaxed lg:text-2xl/relaxed">
                   Join the leading researchers and institutions already benefiting from NEURASCALE&apos;s advanced platform.
                 </p>
-                <Button size="lg" className="mt-8 bg-white text-black hover:bg-gray-200 transition-colors">
+                <button className="rounded px-6 py-3 text-lg mt-8 bg-white text-black hover:bg-gray-200 transition-colors">
                   Start Free Trial
-                </Button>
+                </button>
               </div>
             </div>
           </section>

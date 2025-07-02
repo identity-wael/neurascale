@@ -1,40 +1,144 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# **Neurascale: Neural Data Cloud Platform**
 
-## Getting Started
+## **1. Overview**
 
-First, install the dependencies and run the development server:
+Neurascale is a cutting-edge web application built with Next.js and React, designed to provide a robust platform for storing, processing, and analyzing neural data at scale. It offers a scalable cloud infrastructure, advanced neural processing capabilities, and real-time analytics to empower researchers and institutions in the field of neuroscience.
+
+This document provides a comprehensive guide for developers and contributors to the Neurascale project.
+
+-----
+
+## **2. Key Features**
+
+The platform boasts a range of features designed to streamline neural data management:
+
+  * **Advanced Neural Processing:** Utilizes state-of-the-art algorithms for efficient data analysis.
+  * **Scalable Cloud Infrastructure:** Capable of storing and managing petabytes of neural data.
+  * **Real-time Analytics:** Provides powerful tools to gain immediate insights from neural data.
+  * **User Authentication:** Secure sign-up, login, and profile management for users.
+
+-----
+
+## **3. Getting Started**
+
+### **3.1. Prerequisites**
+
+Before you begin, ensure you have the following installed on your local machine:
+
+  * Node.js (version 18.17.0 or higher)
+  * A package manager like `npm`, `yarn`, `pnpm`, or `bun`
+
+### **3.2. Installation and Setup**
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone <repository-url>
+    cd neurascale
+    ```
+
+2.  **Install dependencies:**
+    Choose one of the following commands based on your package manager:
+
+    ```bash
+    npm install
+    # or
+    yarn install
+    # or
+    pnpm install
+    # or
+    bun install
+    ```
+
+3.  **Run the development server:**
+
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
+    # or
+    bun dev
+    ```
+
+4.  **Open the application:**
+    Open [http://localhost:3000](http://localhost:3000) in your browser to see the running application.
+
+-----
+
+## **4. Developer Guidelines**
+
+### **4.1. Code Style**
+
+To maintain code consistency and quality, please adhere to the following guidelines as outlined in `AGENTS.md`:
+
+  * **TypeScript:** All components and logic should be written in TypeScript.
+  * **React:** Use functional components and React Hooks for building UI elements.
+  * **Styling:** Use Tailwind CSS for all styling purposes. The configuration is available in `tailwind.config.ts`.
+
+### **4.2. Linting**
+
+Before committing any changes, run the linter to check for code quality and style issues:
 
 ```bash
-# install dependencies
-npm install
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This command uses Next.js's built-in ESLint configuration to analyze the codebase.
 
-To view the WebGPU attractors demo navigate to [http://localhost:3000/attractors](http://localhost:3000/attractors). This demo requires a WebGPU-enabled browser (for example, Chrome with the `--enable-dawn-features=compat` flag or an experimental build).
+-----
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## **5. Project Structure**
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The project follows a standard Next.js `app` directory structure. Here are some of the key files and directories:
 
-## Learn More
+  * **`app/`**: Contains the core application, with each sub-directory mapping to a URL route.
+      * **`layout.tsx`**: The main layout that wraps all pages, including the `AuthProvider`.
+      * **`page.tsx`**: The main landing page of the application.
+      * **`login/page.tsx`**: The login page component.
+      * **`signup/page.tsx`**: The signup page component.
+      * **`profile/page.tsx`**: The user profile page, which is a protected route.
+  * **`components/`**: Contains reusable React components.
+      * **`AuthProvider.tsx`**: A client-side component that manages user authentication state.
+      * **`ui/`**: Directory for reusable UI elements like `Button` and `Card`.
+  * **`public/`**: For static assets like images and fonts.
+  * **`package.json`**: Defines project scripts and dependencies.
 
-To learn more about Next.js, take a look at the following resources:
+-----
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## **6. Authentication**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Neurascale uses a client-side authentication system managed by the `AuthProvider` component.
 
-## Deploy on Vercel
+### **6.1. How It Works**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  * The `AuthProvider` uses React's `Context` API to provide authentication state (`user`) and functions (`login`, `signup`, `logout`) to all components wrapped within it.
+  * User data is stored in the browser's `localStorage` to persist the session across page reloads.
+  * The `useAuth` hook provides a simple way for components to access the authentication context.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### **6.2. Protected Routes**
+
+The `ProfilePage` (`/profile`) is an example of a protected route. It uses a `useEffect` hook to check if a user is logged in. If not, it redirects them to the login page.
+
+-----
+
+## **7. Building and Deployment**
+
+### **7.1. Building for Production**
+
+To create a production-ready build of the application, run:
+
+```bash
+npm run build
+```
+
+This will generate an optimized build in the `.next` directory.
+
+### **7.2. Deployment**
+
+The `README.md` recommends deploying the application on the [Vercel Platform](https://vercel.com/new), which is designed for seamless Next.js deployments. For more details, refer to the [Next.js deployment documentation](https://nextjs.org/docs/deployment).
+
+-----
+
+This documentation provides a comprehensive starting point for any developer looking to contribute to the Neurascale project. For more specific questions, please refer to the source code and the official Next.js documentation.

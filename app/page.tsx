@@ -25,23 +25,16 @@ export default function Home() {
             </button>
             <nav className={`${isMenuOpen ? 'flex' : 'hidden'} lg:flex absolute lg:relative top-full left-0 right-0 bg-black lg:bg-transparent flex-col lg:flex-row items-center gap-4 p-4 lg:p-0`}>
               <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="#">
-                Features
-              </a>
-              <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="#">
-                Technology
-              </a>
-              <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="#">
                 About
-              </a>
-              <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="#">
-                Careers
               </a>
               <a className="text-sm font-medium hover:text-gray-300 transition-colors" href="/login">
                 Sign in
               </a>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black transition-colors">
-                Get Started
-              </Button>
+              <a href="/signup">
+                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black transition-colors">
+                  Sign up
+                </Button>
+              </a>
             </nav>
           </div>
         </header>

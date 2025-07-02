@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 import {
   float,
   If,
@@ -34,7 +34,7 @@ export default function AttractorParticles() {
     let scene: THREE.Scene
     let renderer: THREE.WebGPURenderer
     let controls: OrbitControls
-    let updateCompute: THREE.Compute
+    let updateCompute: THREE.ComputeNode
 
     function onWindowResize() {
       if (!camera || !renderer) return

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { WebGPURenderer } from 'three/src/renderers/webgpu/WebGPURenderer.js'
+import SpriteNodeMaterial from 'three/src/materials/nodes/SpriteNodeMaterial.js'
 import {
   float,
   If,
@@ -32,9 +34,9 @@ export default function AttractorParticles() {
   useEffect(() => {
     let camera: THREE.PerspectiveCamera
     let scene: THREE.Scene
-    let renderer: THREE.WebGPURenderer
+    let renderer: WebGPURenderer
     let controls: OrbitControls
-    let updateCompute: THREE.Compute
+    let updateCompute: any
 
     function onWindowResize() {
       if (!camera || !renderer) return
@@ -63,7 +65,7 @@ export default function AttractorParticles() {
       directionalLight.position.set(4, 2, 0)
       scene.add(directionalLight)
 
-      renderer = new THREE.WebGPURenderer({ antialias: true })
+      renderer = new WebGPURenderer({ antialias: true })
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.setAnimationLoop(animate)
@@ -137,7 +139,7 @@ export default function AttractorParticles() {
       }
 
       const count = 2 ** 18
-      const material = new THREE.SpriteNodeMaterial({ blending: THREE.AdditiveBlending, depthWrite: false })
+      const material = new SpriteNodeMaterial({ blending: THREE.AdditiveBlending, depthWrite: false })
 
       const attractorMass = uniform(Number(`1e${7}`))
       const particleGlobalMass = uniform(Number(`1e${4}`))

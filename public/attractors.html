@@ -29,6 +29,12 @@
       import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
+      if ( ! navigator.gpu ) {
+        const info = document.getElementById( 'info' );
+        if ( info ) info.textContent += ' - WebGPU not supported. Enable it in your browser.';
+        throw new Error( 'WebGPU not supported' );
+      }
+
       let camera, scene, renderer, controls, updateCompute;
 
       init();

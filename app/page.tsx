@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Cloud, Zap, Menu } from "lucide-react";
-import AttractorsAnimation from "@/components/AttractorsAnimation";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,7 +51,6 @@ export default function Home() {
                 <button className="rounded px-6 py-3 text-lg mt-8 bg-white text-black hover:bg-gray-200 transition-colors">
                   Explore Our Technology
                 </button>
-                <AttractorsAnimation />
               </div>
             </div>
           </section>

@@ -5,8 +5,8 @@ import { useRef } from 'react'
 import AnimatedText from '@/components/ui/AnimatedText'
 import dynamic from 'next/dynamic'
 
-const DataUniverse3D = dynamic(
-  () => import('@/components/visuals/DataUniverse3D'),
+const AttractorParticles3D = dynamic(
+  () => import('@/components/visuals/AttractorParticles3D'),
   { 
     ssr: false,
     loading: () => <div className="absolute inset-0 bg-black/50" />
@@ -44,9 +44,9 @@ export default function Problem() {
 
   return (
     <section ref={containerRef} className="min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-24 relative">
-      {/* 3D Data Universe Background */}
+      {/* 3D Attractor Particles Background */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full opacity-20 hidden lg:block">
-        <DataUniverse3D />
+        <AttractorParticles3D />
       </div>
 
       <motion.div

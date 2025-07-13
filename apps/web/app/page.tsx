@@ -10,7 +10,6 @@ import Careers from '@/components/sections/Careers'
 import Header from '@/components/layout/Header'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import SmoothScroll from '@/components/layout/SmoothScroll'
-import BackgroundEffects from '@/components/ui/BackgroundEffects'
 import { AnimatePresence } from 'framer-motion'
 
 export default function Home() {
@@ -32,7 +31,6 @@ export default function Home() {
       
       {!loading && (
         <SmoothScroll>
-          <BackgroundEffects />
           <Header />
           <main className="bg-black text-white relative">
             <Hero />

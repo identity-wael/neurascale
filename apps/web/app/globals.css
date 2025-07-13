@@ -16,6 +16,8 @@
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
   }
 
   body {
@@ -23,6 +25,8 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     overscroll-behavior: none;
     overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
     background: #000000;
     background-image: 
       radial-gradient(ellipse at top, #0a1628 0%, transparent 50%),

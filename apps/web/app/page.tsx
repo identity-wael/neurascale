@@ -5,6 +5,7 @@ import Hero from '@/components/sections/Hero'
 import Vision from '@/components/sections/Vision'
 import Problem from '@/components/sections/Problem'
 import Roadmap from '@/components/sections/Roadmap'
+import Architecture from '@/components/sections/Architecture'
 import Team from '@/components/sections/Team'
 import Community from '@/components/sections/Community'
 import Resources from '@/components/sections/Resources'
@@ -39,6 +40,7 @@ export default function Home() {
             <Vision />
             <Problem />
             <Roadmap />
+            <Architecture />
             <Team />
             <Community />
             <Resources />

@@ -41,6 +41,7 @@ export default function Header() {
           <a href="#vision" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Vision</a>
           <a href="#specificity" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Specificity</a>
           <a href="#roadmap" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Roadmap</a>
+          <a href="#architecture" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Architecture</a>
           <a href="#team" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Team</a>
           <a href="#community" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Community</a>
           <a href="#resources" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Resources</a>

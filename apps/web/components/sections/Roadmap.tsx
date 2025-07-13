@@ -34,10 +34,10 @@ export default function Roadmap() {
   const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -100])
 
   return (
-    <section id="roadmap" ref={containerRef} className="px-6 md:px-12 lg:px-24 py-8 relative">
+    <section id="roadmap" ref={containerRef} className="px-6 py-8 relative">
       <motion.div
         style={{ opacity, y }}
-        className="max-w-5xl relative z-10 w-full"
+        className="relative z-10 w-full"
       >
         <div className="flex items-start mb-6">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>

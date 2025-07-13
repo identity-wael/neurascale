@@ -6,6 +6,25 @@ Neurascale is a cutting-edge web application built with Next.js and React, desig
 
 This document provides a comprehensive guide for developers and contributors to the Neurascale project.
 
+## **Project Structure**
+
+This repository is organized as follows:
+
+```
+/
+├── webapp/              # Next.js web application (Neurascale platform)
+│   ├── app/            # Next.js app directory
+│   ├── components/     # React components
+│   ├── public/         # Static assets
+│   ├── package.json    # Web app dependencies
+│   └── ...             # Other Next.js config files
+├── README.md           # This file
+├── AGENTS.md          # Development guidelines
+└── .gitignore         # Git ignore rules
+```
+
+**Note:** The main web application is located in the `webapp/` directory. All development commands should be run from within that directory.
+
 -----
 
 ## **2. Key Features**

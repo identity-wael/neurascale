@@ -89,9 +89,12 @@ const Header: FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setCurrentPage('home')}>
           {/* keep logo consistent with existing site */}
-          <span className="font-black text-2xl tracking-wider" style={{ fontFamily: 'Proxima Nova, sans-serif' }}>
-            <span className="text-white">NEURA</span>
-            <span className="text-gray-400">SCALE</span>
+          <span
+            className="font-extrabold text-2xl tracking-wider"
+            style={{ fontFamily: 'Proxima Nova, sans-serif' }}
+          >
+            <span className="text-[#eeeeee]">NEURA</span>
+            <span className="text-[#4185f4]">SCALE</span>
           </span>
         </div>
         <nav className="hidden md:flex space-x-8">

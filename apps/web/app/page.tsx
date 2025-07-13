@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Hero from '@/components/sections/Hero'
+import Vision from '@/components/sections/Vision'
 import Problem from '@/components/sections/Problem'
 import Solution from '@/components/sections/Solution'
 import Technology from '@/components/sections/Technology'
@@ -40,6 +41,7 @@ export default function Home() {
           <Header />
           <main className="bg-black text-white relative">
             <Hero />
+            <Vision />
             <Problem />
             <Solution />
             <Technology />

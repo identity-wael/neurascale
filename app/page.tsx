@@ -14,9 +14,12 @@ export default function Home() {
           <div className="container mx-auto flex items-center justify-between">
             <a className="flex items-center justify-center" href="#">
               <span className="sr-only">NEURASCALE</span>
-              <span className="font-black text-2xl tracking-wider" style={{ fontFamily: 'Proxima Nova, sans-serif' }}>
-              <span className="text-white">NEURA</span>
-              <span className="text-gray-400">SCALE</span>
+              <span
+                className="font-extrabold text-2xl tracking-wider"
+                style={{ fontFamily: 'Proxima Nova, sans-serif' }}
+              >
+              <span className="text-[#eeeeee]">NEURA</span>
+              <span className="text-[#4185f4]">SCALE</span>
             </span>
             </a>
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden">

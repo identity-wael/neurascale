@@ -131,7 +131,7 @@ export default function Roadmap() {
               to cloud infrastructure and AI frameworks.
             </p>
           </div>
-          <div className="h-[600px] rounded-lg overflow-hidden border border-white/10">
+          <div className="h-[600px] w-full rounded-lg overflow-hidden border border-white/10">
             <DSMPeriodicTable />
           </div>
         </motion.div>

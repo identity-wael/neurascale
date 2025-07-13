@@ -1,209 +1,183 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { 
-  Environment,
-  ContactShadows,
-  PerspectiveCamera,
-  Sparkles
-} from '@react-three/drei'
-import * as THREE from 'three'
+import { useRef, useEffect } from 'react'
+import { Engine, Scene, ArcRotateCamera, HemisphericLight, DirectionalLight, Vector3, Color3, MeshBuilder, PBRMaterial, Texture, StandardMaterial, DynamicTexture } from '@babylonjs/core'
 
-function AttractorParticles() {
-  const { gl, scene } = useThree()
-  const [webgpuSupported, setWebgpuSupported] = useState(false)
-  const meshRef = useRef<THREE.Points>(null)
-  const updateComputeRef = useRef<any>(null)
+function BabylonGPUDie() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const sceneRef = useRef<Scene | null>(null)
+  const engineRef = useRef<Engine | null>(null)
 
   useEffect(() => {
-    // Check WebGPU support
-    if (!navigator.gpu) {
-      console.warn('WebGPU not supported, falling back to basic particles')
-      setWebgpuSupported(false)
-      return
-    }
-    
-    setWebgpuSupported(true)
-    
-    // Note: Full WebGPU TSL implementation would require importing three/webgpu
-    // For now, creating a simplified particle system with standard Three.js
-    
-    const count = 10000 // Reduced for performance
-    const positions = new Float32Array(count * 3)
-    const velocities = new Float32Array(count * 3)
-    const colors = new Float32Array(count * 3)
-    
-    // Initialize particles in a galaxy-like distribution
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3
-      const radius = Math.random() * 4 + 0.5
-      const angle = Math.random() * Math.PI * 2
-      const height = (Math.random() - 0.5) * 0.4
-      
-      positions[i3] = Math.cos(angle) * radius
-      positions[i3 + 1] = height
-      positions[i3 + 2] = Math.sin(angle) * radius
-      
-      // Initial velocities for orbital motion
-      const speed = 0.02 / Math.sqrt(radius)
-      velocities[i3] = -Math.sin(angle) * speed
-      velocities[i3 + 1] = 0
-      velocities[i3 + 2] = Math.cos(angle) * speed
-      
-      // Color based on distance from center
-      const normalizedRadius = radius / 4
-      colors[i3] = 0.35 + normalizedRadius * 0.65      // Red
-      colors[i3 + 1] = 0.0 + normalizedRadius * 1.0    // Green  
-      colors[i3 + 2] = 1.0 - normalizedRadius * 0.35   // Blue
-    }
-    
-    if (meshRef.current) {
-      meshRef.current.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-      meshRef.current.geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3))
-      meshRef.current.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-    }
-    
-  }, [gl, scene])
+    if (!canvasRef.current) return
 
-  useFrame((state) => {
-    if (!meshRef.current) return
+    // Create Babylon.js engine and scene
+    const engine = new Engine(canvasRef.current, true, { preserveDrawingBuffer: true, stencil: true })
+    const scene = new Scene(engine)
     
-    const positions = meshRef.current.geometry.attributes.position.array as Float32Array
-    const velocities = meshRef.current.geometry.attributes.velocity?.array as Float32Array
+    engineRef.current = engine
+    sceneRef.current = scene
+
+    // Set background color to black
+    scene.clearColor = new Color3(0, 0, 0)
+
+    // Create camera
+    const camera = new ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 2.5, 10, Vector3.Zero(), scene)
+    camera.attachControls(canvasRef.current, true)
+    camera.setTarget(Vector3.Zero())
+
+    // Lighting setup
+    const ambientLight = new HemisphericLight('ambientLight', new Vector3(0, 1, 0), scene)
+    ambientLight.intensity = 0.4
+
+    const directionalLight = new DirectionalLight('directionalLight', new Vector3(-1, -1, -1), scene)
+    directionalLight.intensity = 1.2
+    directionalLight.diffuse = new Color3(1, 1, 1)
+
+    // Create GPU die components
+    createGPUDie(scene)
+
+    // Render loop
+    engine.runRenderLoop(() => {
+      scene.render()
+    })
+
+    // Handle resize
+    const handleResize = () => {
+      engine.resize()
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      scene.dispose()
+      engine.dispose()
+    }
+  }, [])
+
+  const createGPUDie = (scene: Scene) => {
+    // Main GPU substrate
+    const substrate = MeshBuilder.CreateBox('substrate', { width: 8, height: 0.4, depth: 6 }, scene)
+    substrate.position.y = 0
     
-    if (!positions || !velocities) return
-    const time = state.clock.elapsedTime
+    const substrateMaterial = new PBRMaterial('substrateMaterial', scene)
+    substrateMaterial.baseColor = new Color3(0.25, 0.25, 0.25)
+    substrateMaterial.metallic = 0.8
+    substrateMaterial.roughness = 0.2
+    substrateMaterial.emissiveColor = new Color3(0.05, 0.05, 0.05)
+    substrate.material = substrateMaterial
+
+    // Central processing core
+    const core = MeshBuilder.CreateBox('core', { width: 3.5, height: 0.3, depth: 3.5 }, scene)
+    core.position.y = 0.35
     
-    // Simple gravity simulation toward multiple attractors
-    const attractors = [
-      { x: 0, y: 0, z: 0, mass: 5 },
-      { x: Math.cos(time * 0.3) * 2, y: 0.5, z: Math.sin(time * 0.3) * 2, mass: 2 },
-      { x: Math.cos(time * 0.5 + Math.PI) * 1.5, y: -0.3, z: Math.sin(time * 0.5 + Math.PI) * 1.5, mass: 1.5 }
-    ]
+    const coreMaterial = new PBRMaterial('coreMaterial', scene)
+    coreMaterial.baseColor = new Color3(0, 0, 0)
+    coreMaterial.metallic = 0.95
+    coreMaterial.roughness = 0.05
+    coreMaterial.emissiveColor = new Color3(0, 0.1, 0)
+    core.material = coreMaterial
+
+    // Glowing center die
+    const glowCore = MeshBuilder.CreateBox('glowCore', { width: 2.8, height: 0.15, depth: 2.8 }, scene)
+    glowCore.position.y = 0.5
     
-    for (let i = 0; i < positions.length / 3; i++) {
-      const i3 = i * 3
-      
-      let fx = 0, fy = 0, fz = 0
-      
-      // Calculate forces from all attractors
-      for (const attractor of attractors) {
-        const dx = attractor.x - positions[i3]
-        const dy = attractor.y - positions[i3 + 1]
-        const dz = attractor.z - positions[i3 + 2]
-        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+    const glowMaterial = new PBRMaterial('glowMaterial', scene)
+    glowMaterial.baseColor = new Color3(0, 1, 0.53)
+    glowMaterial.emissiveColor = new Color3(0, 0.8, 0.42)
+    glowMaterial.metallic = 0.3
+    glowMaterial.roughness = 0
+    glowCore.material = glowMaterial
+
+    // GPU cores grid (8x8)
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const gpuCore = MeshBuilder.CreateBox(`core-${row}-${col}`, { width: 0.18, height: 0.08, depth: 0.12 }, scene)
+        gpuCore.position.x = (col - 3.5) * 0.32
+        gpuCore.position.y = 0.55
+        gpuCore.position.z = (row - 3.5) * 0.22
         
-        if (distance > 0.1) {
-          const force = attractor.mass / (distance * distance + 0.1)
-          fx += (dx / distance) * force * 0.001
-          fy += (dy / distance) * force * 0.001
-          fz += (dz / distance) * force * 0.001
-        }
+        const gpuCoreMaterial = new PBRMaterial(`coreMateria-${row}-${col}`, scene)
+        gpuCoreMaterial.baseColor = new Color3(0.25, 0.52, 0.96)
+        gpuCoreMaterial.emissiveColor = new Color3(0.1, 0.25, 0.48)
+        gpuCoreMaterial.metallic = 0.6
+        gpuCoreMaterial.roughness = 0.3
+        gpuCore.material = gpuCoreMaterial
       }
-      
-      // Update velocities
-      velocities[i3] += fx
-      velocities[i3 + 1] += fy
-      velocities[i3 + 2] += fz
-      
-      // Apply damping
-      velocities[i3] *= 0.999
-      velocities[i3 + 1] *= 0.999
-      velocities[i3 + 2] *= 0.999
-      
-      // Update positions
-      positions[i3] += velocities[i3]
-      positions[i3 + 1] += velocities[i3 + 1]
-      positions[i3 + 2] += velocities[i3 + 2]
-      
-      // Boundary wrapping
-      const bound = 8
-      if (Math.abs(positions[i3]) > bound) positions[i3] = -Math.sign(positions[i3]) * bound
-      if (Math.abs(positions[i3 + 1]) > bound) positions[i3 + 1] = -Math.sign(positions[i3 + 1]) * bound
-      if (Math.abs(positions[i3 + 2]) > bound) positions[i3 + 2] = -Math.sign(positions[i3 + 2]) * bound
     }
-    
-    meshRef.current.geometry.attributes.position.needsUpdate = true
-  })
 
-  const material = new THREE.PointsMaterial({
-    size: 0.02,
-    vertexColors: true,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    opacity: 0.8
-  })
+    // HBM Memory modules
+    for (let i = 0; i < 6; i++) {
+      const hbm = MeshBuilder.CreateBox(`hbm-${i}`, { width: 0.5, height: 0.6, depth: 0.5 }, scene)
+      hbm.position.x = (i % 3 - 1) * 2
+      hbm.position.y = 0.5
+      hbm.position.z = i < 3 ? -2 : 2
+      
+      const hbmMaterial = new PBRMaterial(`hbmMaterial-${i}`, scene)
+      hbmMaterial.baseColor = new Color3(0, 0.4, 1)
+      hbmMaterial.emissiveColor = new Color3(0, 0.2, 0.5)
+      hbmMaterial.metallic = 0.8
+      hbmMaterial.roughness = 0.2
+      hbm.material = hbmMaterial
+    }
+
+    // Connection pins
+    const pinPositions = [
+      [-3.2, 0.15, -2.2],
+      [3.2, 0.15, -2.2],
+      [-3.2, 0.15, 2.2],
+      [3.2, 0.15, 2.2]
+    ]
+
+    pinPositions.forEach((pos, i) => {
+      const pin = MeshBuilder.CreateSphere(`pin-${i}`, { diameter: 0.18 }, scene)
+      pin.position.x = pos[0]
+      pin.position.y = pos[1]
+      pin.position.z = pos[2]
+      
+      const pinMaterial = new PBRMaterial(`pinMaterial-${i}`, scene)
+      pinMaterial.baseColor = new Color3(1, 0.84, 0)
+      pinMaterial.emissiveColor = new Color3(0.5, 0.42, 0)
+      pinMaterial.metallic = 0.9
+      pinMaterial.roughness = 0.1
+      pin.material = pinMaterial
+    })
+
+    // NEURASCALE logo
+    createNeurascaleLogo(scene)
+  }
+
+  const createNeurascaleLogo = (scene: Scene) => {
+    // Create dynamic texture for text
+    const textTexture = new DynamicTexture('textTexture', { width: 512, height: 128 }, scene)
+    textTexture.hasAlpha = true
+    
+    // Create text on texture
+    const font = 'bold 40px Arial'
+    textTexture.drawText('NEURASCALE', null, null, font, '#4185f4', 'transparent', true)
+    
+    // Create plane for logo
+    const logoPlane = MeshBuilder.CreatePlane('logoPlane', { width: 2.5, height: 0.6 }, scene)
+    logoPlane.position.y = 0.22
+    logoPlane.position.z = -2.2
+    logoPlane.rotation.x = Math.PI / 2
+    
+    const logoMaterial = new StandardMaterial('logoMaterial', scene)
+    logoMaterial.diffuseTexture = textTexture
+    logoMaterial.emissiveTexture = textTexture
+    logoMaterial.emissiveColor = new Color3(0.25, 0.52, 0.96)
+    logoMaterial.opacityTexture = textTexture
+    logoPlane.material = logoMaterial
+  }
 
   return (
-    <points ref={meshRef}>
-      <bufferGeometry>
-        <bufferAttribute 
-          attach="attributes-position" 
-          count={10000} 
-          array={new Float32Array(10000 * 3)} 
-          itemSize={3} 
-        />
-        <bufferAttribute 
-          attach="attributes-velocity" 
-          count={10000} 
-          array={new Float32Array(10000 * 3)} 
-          itemSize={3} 
-        />
-        <bufferAttribute 
-          attach="attributes-color" 
-          count={10000} 
-          array={new Float32Array(10000 * 3)} 
-          itemSize={3} 
-        />
-      </bufferGeometry>
-      <primitive object={material} />
-    </points>
+    <div className="absolute inset-0 w-full h-full">
+      <canvas ref={canvasRef} className="w-full h-full" />
+    </div>
   )
 }
 
 
 export default function NeuralProcessor3D() {
-  return (
-    <div className="absolute inset-0 w-full h-full">
-      <Canvas
-        shadows
-        gl={{ 
-          antialias: true, 
-          alpha: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.5
-        }}
-      >
-        <PerspectiveCamera makeDefault position={[0, 5, 10]} fov={60} />
-        
-        <ambientLight intensity={0.8} />
-        <pointLight position={[5, 5, 5]} intensity={2} castShadow />
-        <pointLight position={[-5, 5, 5]} intensity={1} />
-        <pointLight position={[0, 2, 8]} intensity={1.5} color="#00ff88" />
-        <directionalLight position={[0, 10, 0]} intensity={1} />
-        
-        <AttractorParticles />
-        
-        <ContactShadows
-          position={[0, -1, 0]}
-          opacity={0.4}
-          scale={10}
-          blur={2}
-          far={4}
-        />
-        
-        <Sparkles
-          count={50}
-          scale={10}
-          size={2}
-          speed={0.4}
-          opacity={0.3}
-          color="#00ff88"
-        />
-        
-        <Environment preset="night" />
-      </Canvas>
-    </div>
-  )
+  return <BabylonGPUDie />
 }

@@ -15,19 +15,19 @@ export default function Roadmap() {
   const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -100])
 
   return (
-    <section id="roadmap" ref={containerRef} className="min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-24 relative">
+    <section id="roadmap" ref={containerRef} className="px-6 md:px-12 lg:px-24 py-8 relative">
       <motion.div
         style={{ opacity, y }}
         className="max-w-5xl relative z-10 w-full"
       >
-        <div className="flex items-start mb-12">
+        <div className="flex items-start mb-6">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>
           <span className="text-white/40 text-sm uppercase tracking-wider">ROADMAP</span>
         </div>
 
         <AnimatedText
           text="Development Timeline"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-24"
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
           stagger={0.02}
         />
 
@@ -44,7 +44,7 @@ export default function Roadmap() {
             whileInView={{ scaleX: 1 }}
             transition={{ duration: 1.5, delay: 0.5 }}
             viewport={{ once: true }}
-            className="relative h-0.5 bg-gradient-to-r from-blue-400/20 via-blue-400/60 to-blue-400/20 mb-8 origin-left"
+            className="relative h-0.5 bg-gradient-to-r from-blue-400/20 via-blue-400/60 to-blue-400/20 mb-4 origin-left"
           />
           
           {/* Timeline cards */}

@@ -6,10 +6,11 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
+    --border: 0 0% 20%;
   }
 
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   html {

@@ -15,16 +15,40 @@ export default function Solution() {
 
   const features = [
     {
-      title: 'Real-Time Movement Decoding',
-      description: 'Instantly translates brain signals into commands to control external devices, restoring the direct link between intent and action.',
+      title: 'Restored Mobility',
+      description: 'Translates brain signals into commands for external devices, enabling individuals with paralysis to regain control over prosthetic limbs, exoskeletons, and assistive technologies.',
+      icon: '🦾',
+      details: 'Dramatically improves quality of life through direct neural control of mobility devices.'
+    },
+    {
+      title: 'Advanced Robotic Control',
+      description: 'Sophisticated, intuitive control over advanced robotics including prosthetic limbs, industrial robots, and drone swarms through direct brain-to-machine communication.',
+      icon: '🤖',
+      details: 'Precision control with unprecedented speed and accuracy for complex robotic systems.'
+    },
+    {
+      title: 'Immersive Realities',
+      description: '"Full-Dive" virtual reality experiences seamlessly integrated with neural intent, allowing direct thought-based interaction within virtual environments.',
+      icon: '🥽',
+      details: 'Revolutionary VR/XR/AR applications for entertainment, training, and therapeutic use.'
+    },
+    {
+      title: 'Neural Identity Security',
+      description: 'Passwordless "Neural ID" authentication using unique brain data patterns for enhanced security and convenience across all digital platforms.',
+      icon: '🧠',
+      details: 'Unbreakable biometric security that cannot be stolen, forgotten, or replicated.'
     },
     {
       title: 'Brain State Analysis',
-      description: 'Machine learning identifies conditions like focus, fatigue, or seizures from patterns in neural data for proactive care.',
+      description: 'Real-time identification of cognitive conditions like focus, fatigue, seizures, and emotional states from neural patterns for proactive care.',
+      icon: '📊',
+      details: 'Advanced ML models enable predictive healthcare and cognitive enhancement.'
     },
     {
       title: 'Memory Preservation',
-      description: 'Stimulation reinforces memory-related brain signals, restoring memory and fighting cognitive decline.',
+      description: 'Neural stimulation reinforces memory-related brain signals, restoring memory function and fighting cognitive decline through targeted interventions.',
+      icon: '💭',
+      details: 'Breakthrough treatments for Alzheimer\'s, dementia, and age-related memory loss.'
     },
   ]
 
@@ -65,25 +89,34 @@ export default function Solution() {
           NEURASCALE processes up to 492Mb/s of raw neural data through advanced AI models running on 640-core TPUs and 14592-core GPUs, achieving 100 trillion ops/sec.
         </motion.p>
 
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="text-left"
+              className="text-left group"
             >
               <div className="flex items-start mb-6">
                 <span className="text-white/40 text-sm font-mono mr-4">0{index + 1}</span>
                 <div className="w-12 h-[1px] bg-white/20 mt-3" />
               </div>
-              <h3 className="text-xl font-light mb-4 text-white/90">
-                {feature.title}
-              </h3>
-              <p className="text-white/60 leading-relaxed">
+              
+              <div className="flex items-center mb-4">
+                <span className="text-3xl mr-3">{feature.icon}</span>
+                <h3 className="text-xl font-light text-white/90">
+                  {feature.title}
+                </h3>
+              </div>
+              
+              <p className="text-white/60 leading-relaxed mb-4">
                 {feature.description}
+              </p>
+              
+              <p className="text-blue-400/80 text-sm leading-relaxed">
+                {feature.details}
               </p>
             </motion.div>
           ))}

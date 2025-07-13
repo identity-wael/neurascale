@@ -4,9 +4,15 @@ import { useState, useEffect } from 'react'
 import Hero from '@/components/sections/Hero'
 import Problem from '@/components/sections/Problem'
 import Solution from '@/components/sections/Solution'
+import Technology from '@/components/sections/Technology'
+import Careers from '@/components/sections/Careers'
+import Roadmap from '@/components/sections/Roadmap'
+import Business from '@/components/sections/Business'
+import Community from '@/components/sections/Community'
+import Resources from '@/components/sections/Resources'
+import Contact from '@/components/sections/Contact'
 import Compatibility from '@/components/sections/Compatibility'
 import Future from '@/components/sections/Future'
-import Careers from '@/components/sections/Careers'
 import Header from '@/components/layout/Header'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import SmoothScroll from '@/components/layout/SmoothScroll'
@@ -36,9 +42,15 @@ export default function Home() {
             <Hero />
             <Problem />
             <Solution />
+            <Technology />
+            <Careers />
+            <Roadmap />
+            <Business />
+            <Community />
+            <Resources />
+            <Contact />
             <Compatibility />
             <Future />
-            <Careers />
           </main>
         </SmoothScroll>
       )}

@@ -49,7 +49,7 @@ export default function Hero() {
         className="max-w-6xl relative z-10"
       >
         <AnimatedText
-          text="Neural-Prosthetics Application Cloud"
+          text="Bridging the Mind and the Physical World"
           className="text-5xl md:text-7xl lg:text-8xl font-light mb-8"
           delay={0.5}
           stagger={0.02}
@@ -59,10 +59,24 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1 }}
-          className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-white/80 max-w-4xl"
+          className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-white/80 max-w-4xl mb-8"
         >
-          An open-source project designed to process petabytes of complex brain data, blurring the boundaries between the human mind and the real world.
+          An open-source platform designed to process petabytes of real-time neural data, unlocking human potential through seamless brain-computer interaction.
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.3 }}
+          className="text-lg md:text-xl leading-relaxed text-white/70 max-w-5xl"
+        >
+          <p className="mb-6">
+            Over <span className="text-blue-400 font-medium">20 million people worldwide</span> live with paralysis from spinal cord injury and stroke—their minds fully capable but physically separated from the world. 
+          </p>
+          <p>
+            NEURASCALE breaks down these barriers, enabling <span className="text-blue-400 font-medium">restored mobility</span>, <span className="text-blue-400 font-medium">advanced robotics control</span>, and <span className="text-blue-400 font-medium">immersive reality experiences</span> through real-time neural signal processing.
+          </p>
+        </motion.div>
         
       </motion.div>
       <ScrollIndicator />

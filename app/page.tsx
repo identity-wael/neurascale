@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Cloud, Zap, Menu } from "lucide-react";
+import Waves from "@/components/Waves";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,6 +54,20 @@ export default function Home() {
                 </button>
               </div>
             </div>
+            <Waves
+              lineColor="#fff"
+              backgroundColor="rgba(255, 255, 255, 0.2)"
+              waveSpeedX={0.02}
+              waveSpeedY={0.01}
+              waveAmpX={40}
+              waveAmpY={20}
+              friction={0.9}
+              tension={0.01}
+              maxCursorMove={120}
+              xGap={12}
+              yGap={36}
+              className="pointer-events-none"
+            />
           </section>
           <section className="w-full py-24 md:py-32">
             <div className="container mx-auto px-4 md:px-6">

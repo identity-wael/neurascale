@@ -207,28 +207,28 @@ export default function Problem() {
               {
                 phase: 'Phase 1',
                 title: 'Foundation & Core Research',
-                timeline: 'Q1-Q2 2024',
+                timeline: 'Q1-Q2 2025',
                 status: 'Current',
                 color: 'border-green-400/20 bg-green-400/5'
               },
               {
                 phase: 'Phase 2', 
                 title: 'Platform Development',
-                timeline: 'Q3-Q4 2024',
+                timeline: 'Q3-Q4 2025',
                 status: 'In Progress',
                 color: 'border-blue-400/20 bg-blue-400/5'
               },
               {
                 phase: 'Phase 3',
                 title: 'Feature Expansion', 
-                timeline: 'Q1-Q2 2025',
+                timeline: 'Q1-Q2 2026',
                 status: 'Planned',
                 color: 'border-yellow-400/20 bg-yellow-400/5'
               },
               {
                 phase: 'Phase 4',
                 title: 'Ecosystem Growth',
-                timeline: 'Q3 2025+',
+                timeline: 'Q3 2026+',
                 status: 'Future', 
                 color: 'border-purple-400/20 bg-purple-400/5'
               }

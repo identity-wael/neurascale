@@ -1,7 +1,84 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+
+// Video Strip Component
+const VideoStrip = ({ 
+  videos, 
+  speed, 
+  direction = 'left',
+  className = '' 
+}: {
+  videos: Array<{ src: string; title: string; aspectRatio: string }>
+  speed: number
+  direction?: 'left' | 'right'
+  className?: string
+}) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <motion.div
+        className="flex gap-6"
+        animate={{
+          x: direction === 'left' ? [-100, -2000] : [100, 2000]
+        }}
+        transition={{
+          duration: speed,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+        style={{
+          width: 'max-content'
+        }}
+      >
+        {/* Duplicate videos for seamless loop */}
+        {[...videos, ...videos].map((video, index) => (
+          <motion.div
+            key={index}
+            className={`relative ${video.aspectRatio} bg-white/5 rounded-lg overflow-hidden border border-white/10`}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Video placeholder - replace with actual video element */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-400/20">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-2 mx-auto">
+                    <div className="w-0 h-0 border-l-4 border-l-white/80 border-y-2 border-y-transparent ml-1"></div>
+                  </div>
+                  <p className="text-white/60 text-xs">{video.title}</p>
+                </div>
+              </div>
+              
+              {/* Hover overlay */}
+              <motion.div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
+                transition={{ duration: 0.2 }}
+              />
+              
+              {/* Video would go here */}
+              {/* <video
+                className="w-full h-full object-cover"
+                autoPlay={hoveredIndex === index}
+                muted
+                loop
+                playsInline
+              >
+                <source src={video.src} type="video/mp4" />
+              </video> */}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
 
 export default function Vision() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -12,30 +89,92 @@ export default function Vision() {
 
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1])
 
+  // Video data - replace with actual video sources
+  const prostheticVideos = [
+    { src: '/videos/prosthetic-arm.mp4', title: 'Neural Prosthetic Arm', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/prosthetic-leg.mp4', title: 'Robotic Leg Control', aspectRatio: 'w-64 h-48' },
+    { src: '/videos/hand-movement.mp4', title: 'Hand Dexterity', aspectRatio: 'w-72 h-48' },
+    { src: '/videos/walking-demo.mp4', title: 'Walking Restoration', aspectRatio: 'w-80 h-48' },
+  ]
+
+  const brainVisualizationVideos = [
+    { src: '/videos/brain-signals.mp4', title: 'Neural Activity', aspectRatio: 'w-72 h-40' },
+    { src: '/videos/signal-processing.mp4', title: 'Signal Processing', aspectRatio: 'w-96 h-40' },
+    { src: '/videos/neural-patterns.mp4', title: 'Pattern Recognition', aspectRatio: 'w-64 h-40' },
+    { src: '/videos/brain-mapping.mp4', title: 'Brain Mapping', aspectRatio: 'w-80 h-40' },
+  ]
+
+  const vrRoboticsVideos = [
+    { src: '/videos/vr-control.mp4', title: 'VR Neural Control', aspectRatio: 'w-88 h-52' },
+    { src: '/videos/robot-swarm.mp4', title: 'Robot Swarm Control', aspectRatio: 'w-72 h-52' },
+    { src: '/videos/immersive-reality.mp4', title: 'Immersive Reality', aspectRatio: 'w-80 h-52' },
+    { src: '/videos/neural-vr.mp4', title: 'Neural VR Interface', aspectRatio: 'w-96 h-52' },
+  ]
+
   return (
-    <section ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
-      <motion.div style={{ scale }} className="relative z-10">
-        <div className="flex items-start mb-12">
-          <span className="text-white/40 text-sm font-mono mr-4">≡</span>
-          <span className="text-white/40 text-sm uppercase tracking-wider">VISION</span>
+    <section ref={containerRef} className="min-h-screen py-24 relative overflow-hidden">
+      {/* Content */}
+      <div className="px-6 md:px-12 lg:px-24 relative z-20">
+        <motion.div style={{ scale }} className="relative">
+          <div className="flex items-start mb-12">
+            <span className="text-white/40 text-sm font-mono mr-4">≡</span>
+            <span className="text-white/40 text-sm uppercase tracking-wider">VISION</span>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+            className="max-w-5xl relative z-10"
+          >
+            <p className="text-lg md:text-xl leading-relaxed text-white/70 mb-8">
+              Over <span className="text-blue-400 font-medium">20 million people worldwide</span> live with paralysis from spinal cord injury and stroke—their minds fully capable but physically separated from the world.
+            </p>
+            
+            <p className="text-lg md:text-xl leading-relaxed text-white/70">
+              NEURASCALE breaks down these barriers, enabling <span className="text-blue-400 font-medium">restored mobility</span>, <span className="text-blue-400 font-medium">advanced robotics control</span>, and <span className="text-blue-400 font-medium">immersive reality experiences</span> through real-time neural signal processing.
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Parallax Video Strips */}
+      <div className="absolute inset-0 z-10">
+        {/* Strip 1: Prosthetic Demos (Slow) */}
+        <div className="absolute top-1/4 left-0 right-0">
+          <VideoStrip 
+            videos={prostheticVideos} 
+            speed={80} 
+            direction="left"
+            className="opacity-30 blur-sm hover:opacity-70 hover:blur-none transition-all duration-500"
+          />
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-          className="max-w-5xl"
-        >
-          <p className="text-lg md:text-xl leading-relaxed text-white/70 mb-8">
-            Over <span className="text-blue-400 font-medium">20 million people worldwide</span> live with paralysis from spinal cord injury and stroke—their minds fully capable but physically separated from the world.
-          </p>
-          
-          <p className="text-lg md:text-xl leading-relaxed text-white/70">
-            NEURASCALE breaks down these barriers, enabling <span className="text-blue-400 font-medium">restored mobility</span>, <span className="text-blue-400 font-medium">advanced robotics control</span>, and <span className="text-blue-400 font-medium">immersive reality experiences</span> through real-time neural signal processing.
-          </p>
-        </motion.div>
-      </motion.div>
+        {/* Strip 2: Brain Visualizations (Medium) */}
+        <div className="absolute top-1/2 left-0 right-0">
+          <VideoStrip 
+            videos={brainVisualizationVideos} 
+            speed={60} 
+            direction="right"
+            className="opacity-40 blur-sm hover:opacity-80 hover:blur-none transition-all duration-500"
+          />
+        </div>
+
+        {/* Strip 3: VR/Robotics (Fast) */}
+        <div className="absolute top-3/4 left-0 right-0">
+          <VideoStrip 
+            videos={vrRoboticsVideos} 
+            speed={40} 
+            direction="left"
+            className="opacity-30 blur-sm hover:opacity-70 hover:blur-none transition-all duration-500"
+          />
+        </div>
+      </div>
+
+      {/* Gradient overlays for blending */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black z-15"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 z-15"></div>
     </section>
   )
 }

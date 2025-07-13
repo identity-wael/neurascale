@@ -14,151 +14,6 @@ const AttractorParticles3D = dynamic(
 )
 
 
-// Roadmap Timeline Component
-const RoadmapTimeline = () => {
-  const developmentPhases = [
-    {
-      phase: 'Phase 1',
-      title: 'Foundation & Core Research',
-      timeline: 'Q1-Q2 2024',
-      status: 'Current',
-      objectives: [
-        'Establish neural signal processing infrastructure',
-        'Develop initial AI/ML models for pattern recognition',
-        'Create basic brain-computer interface protocols'
-      ]
-    },
-    {
-      phase: 'Phase 2',
-      title: 'Platform Development',
-      timeline: 'Q3-Q4 2024',
-      status: 'In Progress',
-      objectives: [
-        'Complete Neural Management System architecture',
-        'Deploy multi-cloud infrastructure',
-        'Implement real-time data processing pipeline'
-      ]
-    },
-    {
-      phase: 'Phase 3',
-      title: 'Feature Expansion',
-      timeline: 'Q1-Q2 2025',
-      status: 'Planned',
-      objectives: [
-        'Expand neural interface capabilities',
-        'Integrate advanced robotics control',
-        'Deploy immersive VR/XR applications'
-      ]
-    },
-    {
-      phase: 'Phase 4',
-      title: 'Ecosystem Growth',
-      timeline: 'Q3 2025+',
-      status: 'Future',
-      objectives: [
-        'Global platform scaling',
-        'Open-source community expansion',
-        'Consumer market entry'
-      ]
-    }
-  ]
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Current':
-        return 'text-green-400 bg-green-400/10 border-green-400/20'
-      case 'In Progress':
-        return 'text-blue-400 bg-blue-400/10 border-blue-400/20'
-      case 'Planned':
-        return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20'
-      case 'Future':
-        return 'text-purple-400 bg-purple-400/10 border-purple-400/20'
-      default:
-        return 'text-white/60 bg-white/5 border-white/10'
-    }
-  }
-
-  return (
-    <div className="mt-16 mb-8">
-      <motion.h4
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        viewport={{ once: true }}
-        className="text-lg font-light mb-6 text-white/90"
-      >
-        Development Roadmap
-      </motion.h4>
-      
-      {/* Horizontal Timeline */}
-      <div className="relative">
-        {/* Timeline line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 1.5, delay: 0.5 }}
-          viewport={{ once: true }}
-          className="absolute top-8 left-6 right-6 h-0.5 bg-gradient-to-r from-blue-400/20 via-blue-400/60 to-blue-400/20 origin-left"
-        />
-        
-        {/* Timeline cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {developmentPhases.map((phase, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.8, 
-                delay: 0.6 + (index * 0.2),
-                ease: "easeOut"
-              }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              {/* Timeline node */}
-              <motion.div
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                transition={{ 
-                  duration: 0.4, 
-                  delay: 0.8 + (index * 0.2),
-                  type: "spring",
-                  stiffness: 200
-                }}
-                viewport={{ once: true }}
-                className="absolute top-6 left-6 w-4 h-4 rounded-full bg-blue-400 border-2 border-blue-400/30 z-10"
-              />
-              
-              {/* Card */}
-              <div className="p-4 pt-16 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-blue-400 font-mono text-xs">{phase.phase}</span>
-                    <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(phase.status)}`}>
-                      {phase.status}
-                    </span>
-                  </div>
-                  <h5 className="text-sm font-light text-white/90 mb-1">{phase.title}</h5>
-                  <p className="text-xs text-white/60">{phase.timeline}</p>
-                </div>
-                
-                <ul className="space-y-1">
-                  {phase.objectives.map((objective, objIndex) => (
-                    <li key={objIndex} className="text-xs text-white/60 flex items-start">
-                      <span className="text-blue-400/60 mr-1 mt-0.5">•</span>
-                      <span className="leading-relaxed">{objective}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function Problem() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -328,82 +183,81 @@ export default function Problem() {
             </div>
           </motion.div>
         </div>
+
+        {/* Full Width Roadmap Timeline */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          viewport={{ once: true }}
+          className="mt-24"
+        >
+          {/* Timeline line */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1.5, delay: 1 }}
+            viewport={{ once: true }}
+            className="relative h-0.5 bg-gradient-to-r from-blue-400/20 via-blue-400/60 to-blue-400/20 mb-8 origin-left"
+          />
+          
+          {/* Timeline cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                phase: 'Phase 1',
+                title: 'Foundation & Core Research',
+                timeline: 'Q1-Q2 2024',
+                status: 'Current',
+                color: 'border-green-400/20 bg-green-400/5'
+              },
+              {
+                phase: 'Phase 2', 
+                title: 'Platform Development',
+                timeline: 'Q3-Q4 2024',
+                status: 'In Progress',
+                color: 'border-blue-400/20 bg-blue-400/5'
+              },
+              {
+                phase: 'Phase 3',
+                title: 'Feature Expansion', 
+                timeline: 'Q1-Q2 2025',
+                status: 'Planned',
+                color: 'border-yellow-400/20 bg-yellow-400/5'
+              },
+              {
+                phase: 'Phase 4',
+                title: 'Ecosystem Growth',
+                timeline: 'Q3 2025+',
+                status: 'Future', 
+                color: 'border-purple-400/20 bg-purple-400/5'
+              }
+            ].map((phase, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 1.2 + (index * 0.1)
+                }}
+                viewport={{ once: true }}
+                className={`p-4 rounded-lg border ${phase.color} backdrop-blur-sm`}
+              >
+                <div className="text-center">
+                  <span className="text-blue-400 font-mono text-xs">{phase.phase}</span>
+                  <h5 className="text-sm font-light text-white/90 mt-1 mb-2">{phase.title}</h5>
+                  <p className="text-xs text-white/60 mb-2">{phase.timeline}</p>
+                  <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/70">
+                    {phase.status}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </motion.div>
 
-      {/* New Roadmap Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        viewport={{ once: true }}
-        className="mt-32 relative z-10"
-      >
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Left Column - Roadmap Timeline */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            viewport={{ once: true }}
-          >
-            <RoadmapTimeline />
-          </motion.div>
-
-          {/* Right Column - SVG Icon */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            viewport={{ once: true }}
-            className="flex justify-center items-center"
-          >
-            <div className="text-white/40">
-              <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Neural Network Pattern */}
-                <g opacity="0.6">
-                  {/* Outer Circuit */}
-                  <rect x="30" y="30" width="140" height="140" rx="20" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.3" />
-                  <rect x="50" y="50" width="100" height="100" rx="15" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.5" />
-                  <rect x="70" y="70" width="60" height="60" rx="10" fill="currentColor" opacity="0.1" />
-                  
-                  {/* Corner connectors */}
-                  <path d="M30 30 L45 30 L45 45" stroke="currentColor" strokeWidth="2" fill="none" />
-                  <path d="M155 30 L170 30 L170 45" stroke="currentColor" strokeWidth="2" fill="none" />
-                  <path d="M170 155 L170 170 L155 170" stroke="currentColor" strokeWidth="2" fill="none" />
-                  <path d="M45 170 L30 170 L30 155" stroke="currentColor" strokeWidth="2" fill="none" />
-                  
-                  {/* Neural nodes */}
-                  <circle cx="80" cy="80" r="3" fill="currentColor" opacity="0.8" />
-                  <circle cx="120" cy="80" r="3" fill="currentColor" opacity="0.8" />
-                  <circle cx="80" cy="120" r="3" fill="currentColor" opacity="0.8" />
-                  <circle cx="120" cy="120" r="3" fill="currentColor" opacity="0.8" />
-                  <circle cx="100" cy="100" r="4" fill="currentColor" opacity="1" />
-                  
-                  {/* Neural connections */}
-                  <path d="M80 80 L100 100" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                  <path d="M120 80 L100 100" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                  <path d="M80 120 L100 100" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                  <path d="M120 120 L100 100" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                  
-                  {/* Data flow indicators */}
-                  <path d="M50 100 L70 100" stroke="currentColor" strokeWidth="2" opacity="0.4" strokeDasharray="4,4">
-                    <animate attributeName="stroke-dashoffset" values="0;8" dur="2s" repeatCount="indefinite" />
-                  </path>
-                  <path d="M130 100 L150 100" stroke="currentColor" strokeWidth="2" opacity="0.4" strokeDasharray="4,4">
-                    <animate attributeName="stroke-dashoffset" values="0;8" dur="2s" repeatCount="indefinite" />
-                  </path>
-                  <path d="M100 50 L100 70" stroke="currentColor" strokeWidth="2" opacity="0.4" strokeDasharray="4,4">
-                    <animate attributeName="stroke-dashoffset" values="0;8" dur="2s" repeatCount="indefinite" />
-                  </path>
-                  <path d="M100 130 L100 150" stroke="currentColor" strokeWidth="2" opacity="0.4" strokeDasharray="4,4">
-                    <animate attributeName="stroke-dashoffset" values="0;8" dur="2s" repeatCount="indefinite" />
-                  </path>
-                </g>
-              </svg>
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
     </section>
   )
 }

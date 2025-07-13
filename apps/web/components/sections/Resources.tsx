@@ -4,6 +4,76 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import AnimatedText from '@/components/ui/AnimatedText'
 
+// SVG Icons for resources
+const RocketIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 6 L24 14 L32 16 L26 22 L20 34 L14 22 L8 16 L16 14 Z" 
+          stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <circle cx="20" cy="16" r="2" fill="currentColor" opacity="0.8" />
+    <path d="M12 24 L16 28" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+    <path d="M24 28 L28 24" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+    <path d="M18 32 L22 32" stroke="currentColor" strokeWidth="2" opacity="0.6" />
+  </svg>
+)
+
+const BookIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="8" width="20" height="26" rx="2" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <path d="M14 14 L26 14" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <path d="M14 18 L26 18" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <path d="M14 22 L22 22" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <path d="M14 26 L24 26" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <path d="M20 8 L20 34" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
+  </svg>
+)
+
+const DeveloperIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="8" width="30" height="24" rx="2" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M12 16 L8 20 L12 24" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M28 16 L32 20 L28 24" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M22 14 L18 26" stroke="currentColor" strokeWidth="1" opacity="0.8" />
+  </svg>
+)
+
+const ManualIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 6 L28 6 L32 10 L32 34 L12 34 Z" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M28 6 L28 10 L32 10" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M16 16 L28 16" stroke="currentColor" strokeWidth="0.5" opacity="0.8" />
+    <path d="M16 20 L28 20" stroke="currentColor" strokeWidth="0.5" opacity="0.8" />
+    <path d="M16 24 L24 24" stroke="currentColor" strokeWidth="0.5" opacity="0.8" />
+  </svg>
+)
+
+const ResearchIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="15" r="8" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <path d="M26 21 L32 27" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+    <circle cx="20" cy="15" r="4" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M28 29 L32 33" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+  </svg>
+)
+
+const NewsIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="10" width="24" height="20" rx="2" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M12 16 L20 16" stroke="currentColor" strokeWidth="1" opacity="0.8" />
+    <path d="M12 20 L28 20" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <path d="M12 24 L28 24" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <rect x="22" y="14" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
+    <circle cx="30" cy="8" r="2" fill="currentColor" opacity="0.8" />
+  </svg>
+)
+
+const CommunityIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 5 L25 15 L35 17 L27.5 24.5 L29.5 34.5 L20 29 L10.5 34.5 L12.5 24.5 L5 17 L15 15 Z" 
+          stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <circle cx="20" cy="20" r="2" fill="currentColor" />
+  </svg>
+)
+
 export default function Resources() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -17,25 +87,25 @@ export default function Resources() {
     {
       title: 'Getting Started',
       description: 'Quick setup guides, installation instructions, and your first neural interface application.',
-      icon: '🚀',
+      icon: <RocketIcon />,
       resources: ['Quick Start Guide', 'Installation Manual', 'First Project Tutorial', 'System Requirements']
     },
     {
       title: 'API Reference',
       description: 'Comprehensive documentation for all NEURASCALE APIs, endpoints, and integration methods.',
-      icon: '📖',
+      icon: <BookIcon />,
       resources: ['REST API Docs', 'WebSocket Interfaces', 'Neural Data Formats', 'SDK Documentation']
     },
     {
       title: 'Developer Guides',
       description: 'In-depth tutorials for building neural interface applications and integrating with existing systems.',
-      icon: '👨‍💻',
+      icon: <DeveloperIcon />,
       resources: ['Architecture Overview', 'Integration Patterns', 'Best Practices', 'Performance Optimization']
     },
     {
       title: 'User Manuals',
       description: 'End-user documentation for healthcare providers, researchers, and system administrators.',
-      icon: '📋',
+      icon: <ManualIcon />,
       resources: ['User Interface Guide', 'Patient Monitoring', 'System Administration', 'Troubleshooting']
     }
   ]
@@ -44,7 +114,7 @@ export default function Resources() {
     {
       category: 'Research Updates',
       description: 'Latest findings in neural interface technology and AI model improvements',
-      icon: '🔬',
+      icon: <ResearchIcon />,
       posts: [
         'Breakthrough in Real-time Neural Pattern Recognition',
         'Improving Prosthetic Control with ADAM Models',
@@ -54,7 +124,7 @@ export default function Resources() {
     {
       category: 'Product News',
       description: 'Platform updates, new features, and development milestones',
-      icon: '📢',
+      icon: <NewsIcon />,
       posts: [
         'NEURASCALE v2.1: Enhanced WebGPU Support',
         'New ROS Integration Platform Released',
@@ -64,7 +134,7 @@ export default function Resources() {
     {
       category: 'Community Spotlight',
       description: 'Featuring contributors, case studies, and success stories',
-      icon: '⭐',
+      icon: <CommunityIcon />,
       posts: [
         'Developer Spotlight: Building Neural VR Experiences',
         'Hospital Case Study: 90% Improvement in Patient Outcomes',
@@ -177,7 +247,7 @@ export default function Resources() {
                 className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
               >
                 <div className="flex items-center mb-4">
-                  <span className="text-2xl mr-3">{section.icon}</span>
+                  <div className="text-white/60 mr-3">{section.icon}</div>
                   <h4 className="text-lg font-light text-white/90">{section.title}</h4>
                 </div>
                 
@@ -224,7 +294,7 @@ export default function Resources() {
                 className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
               >
                 <div className="flex items-center mb-4">
-                  <span className="text-2xl mr-3">{category.icon}</span>
+                  <div className="text-white/60 mr-3">{category.icon}</div>
                   <h4 className="text-lg font-light text-white/90">{category.category}</h4>
                 </div>
                 

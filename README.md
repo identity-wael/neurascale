@@ -56,7 +56,13 @@ Before you begin, ensure you have the following installed on your local machine:
     cd neurascale
     ```
 
-2.  **Install dependencies:**
+2.  **Navigate to the web application:**
+
+    ```bash
+    cd webapp
+    ```
+
+3.  **Install dependencies:**
     Choose one of the following commands based on your package manager:
 
     ```bash
@@ -69,7 +75,7 @@ Before you begin, ensure you have the following installed on your local machine:
     bun install
     ```
 
-3.  **Run the development server:**
+4.  **Run the development server:**
 
     ```bash
     npm run dev
@@ -81,7 +87,7 @@ Before you begin, ensure you have the following installed on your local machine:
     bun dev
     ```
 
-4.  **Open the application:**
+5.  **Open the application:**
     Open [http://localhost:3000](http://localhost:3000) in your browser to see the running application.
 
 -----

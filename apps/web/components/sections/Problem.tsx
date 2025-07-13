@@ -44,15 +44,12 @@ export default function Problem() {
 
   return (
     <section ref={containerRef} className="min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-24 relative">
-      {/* 3D Attractor Particles Background */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full opacity-20 hidden lg:block">
-        <AttractorParticles3D />
-      </div>
-
-      <motion.div
-        style={{ opacity, y }}
-        className="max-w-5xl relative z-10"
-      >
+      <div className="grid lg:grid-cols-3 gap-12 w-full max-w-7xl mx-auto">
+        {/* Main Content - Left Side */}
+        <motion.div
+          style={{ opacity, y }}
+          className="lg:col-span-2 relative z-10"
+        >
         <div className="flex items-start mb-12">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>
           <span className="text-white/40 text-sm uppercase tracking-wider">SPECIFICITY</span>
@@ -221,13 +218,41 @@ export default function Problem() {
               <p className="text-white/60 text-sm">Up to 76 targets per minute</p>
             </div>
             <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <div className="text-white/40 mt-2">
-                <AIUnitIcon />
-              </div>
+              <h4 className="text-white/90 font-medium mb-2">Real-time Processing</h4>
+              <p className="text-white/60 text-sm">Ultra-low latency execution</p>
             </div>
           </div>
         </motion.div>
-      </motion.div>
+        </motion.div>
+
+        {/* Right Side - SVG Icon and Animation */}
+        <motion.div
+          style={{ opacity, y }}
+          className="lg:col-span-1 flex flex-col items-center justify-center space-y-8 relative z-10"
+        >
+          {/* AI Unit SVG Icon */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="text-white/40"
+          >
+            <AIUnitIcon />
+          </motion.div>
+
+          {/* 3D Attractor Particles Animation */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.7 }}
+            viewport={{ once: true }}
+            className="w-full h-96 opacity-60"
+          >
+            <AttractorParticles3D />
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   )
 }

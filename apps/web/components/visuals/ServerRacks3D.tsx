@@ -2,12 +2,7 @@
 
 import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { 
-  PerspectiveCamera,
-  Environment,
-  Float,
-  MeshReflectorMaterial
-} from '@react-three/drei'
+import { PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 
 function ServerRack({ position, delay = 0 }: { position: [number, number, number], delay?: number }) {
@@ -20,13 +15,12 @@ function ServerRack({ position, delay = 0 }: { position: [number, number, number
   })
 
   return (
-    <Float speed={1} rotationIntensity={0.01} floatIntensity={0.1}>
-      <group ref={groupRef as any} position={position}>
+    <group ref={groupRef as any} position={position}>
         {/* Rack frame */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2, 4, 0.8]} />
           <meshStandardMaterial 
-            color="#0a0a0a"
+            color="#333333"
             metalness={0.9}
             roughness={0.3}
           />
@@ -57,19 +51,19 @@ function ServerRack({ position, delay = 0 }: { position: [number, number, number
 
             {/* LED indicators */}
             <mesh position={[-0.7, 0, 0.37]}>
-              <boxGeometry args={[0.05, 0.05, 0.01]} />
+              <boxGeometry args={[0.1, 0.1, 0.02]} />
               <meshStandardMaterial 
                 color="#00ff00"
                 emissive="#00ff00"
-                emissiveIntensity={Math.random() > 0.5 ? 1 : 0.3}
+                emissiveIntensity={1}
               />
             </mesh>
             <mesh position={[-0.6, 0, 0.37]}>
-              <boxGeometry args={[0.05, 0.05, 0.01]} />
+              <boxGeometry args={[0.1, 0.1, 0.02]} />
               <meshStandardMaterial 
                 color="#0099ff"
                 emissive="#0099ff"
-                emissiveIntensity={Math.random() > 0.5 ? 1 : 0.3}
+                emissiveIntensity={1}
               />
             </mesh>
 
@@ -87,7 +81,6 @@ function ServerRack({ position, delay = 0 }: { position: [number, number, number
           </group>
         ))}
       </group>
-    </Float>
   )
 }
 
@@ -156,25 +149,15 @@ export default function ServerRacks3D() {
         
         <DataCenter />
         
-        {/* Floor with reflection */}
+        {/* Simple floor */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
           <planeGeometry args={[20, 20]} />
-          <MeshReflectorMaterial
-            blur={[300, 100]}
-            resolution={2048}
-            mixBlur={1}
-            mixStrength={80}
-            roughness={1}
-            depthScale={1.2}
-            minDepthThreshold={0.4}
-            maxDepthThreshold={1.4}
+          <meshStandardMaterial
             color="#101010"
             metalness={0.5}
-            mirror={0}
+            roughness={0.8}
           />
         </mesh>
-        
-        <Environment preset="night" />
       </Canvas>
     </div>
   )

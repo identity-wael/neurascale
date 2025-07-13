@@ -14,26 +14,17 @@ export default function AttractorParticles3D() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const initWebGPUAttractors = async () => {
+    const initAttractorParticles = async () => {
       try {
-        if (!navigator.gpu) {
-          throw new Error('WebGPU not supported')
-        }
+        // WebGPU check removed for build compatibility
 
         // Dynamic import of Three.js modules
         const THREE = await import('three')
 
         if (!canvasRef.current) return
 
-        // Initialize WebGPU renderer with fallback to WebGL
-        let renderer
-        try {
-          const { WebGPURenderer } = await import('three/webgpu')
-          renderer = new WebGPURenderer({ canvas: canvasRef.current, antialias: true })
-        } catch (webgpuError) {
-          console.warn('WebGPU not available, falling back to WebGL')
-          renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
-        }
+        // Initialize renderer (fallback to WebGL since WebGPU modules not available in build)
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
 
         renderer.setPixelRatio(window.devicePixelRatio)
         renderer.setSize(window.innerWidth, window.innerHeight)
@@ -220,21 +211,21 @@ export default function AttractorParticles3D() {
         }
 
       } catch (err) {
-        console.error('WebGPU Attractor Particles initialization error:', err)
-        setError(`WebGPU Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Attractor Particles initialization error:', err)
+        setError(`3D Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
     }
 
-    initWebGPUAttractors()
+    initAttractorParticles()
   }, [])
 
   if (error) {
     return (
       <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black text-white">
         <div className="text-center">
-          <p className="text-red-400 mb-2">WebGPU Attractor Particles Error</p>
+          <p className="text-red-400 mb-2">Attractor Particles Error</p>
           <p className="text-sm text-gray-400">{error}</p>
-          <p className="text-xs text-gray-500 mt-2">Try enabling WebGPU in your browser</p>
+          <p className="text-xs text-gray-500 mt-2">3D rendering not available</p>
         </div>
       </div>
     )

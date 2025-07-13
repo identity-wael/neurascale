@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useMemo, useState } from 'react'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
+import { Canvas, useFrame, useLoader, MeshProps } from '@react-three/fiber'
 import { 
   Float, 
   Environment,
@@ -40,7 +40,7 @@ function ProcessorChip() {
         onPointerOut={() => setHovered(false)}
       >
         {/* Base PCB */}
-        <mesh ref={meshRef} castShadow receiveShadow>
+        <mesh ref={meshRef as any} castShadow receiveShadow>
           <boxGeometry args={[4, 0.15, 4]} />
           <meshStandardMaterial 
             color="#0a0a0a"
@@ -84,7 +84,7 @@ function ProcessorChip() {
         </mesh>
 
         {/* Glowing green core */}
-        <mesh ref={glowRef} position={[0, 0.2, 0]}>
+        <mesh ref={glowRef as any} position={[0, 0.2, 0]}>
           <boxGeometry args={[1.2, 0.05, 1.2]} />
           <meshStandardMaterial 
             color="#00ff88"

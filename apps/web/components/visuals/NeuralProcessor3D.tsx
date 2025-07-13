@@ -105,12 +105,12 @@ export default function NeuralProcessor3D() {
         loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
           const textGeometry = new TextGeometry('NEURASCALE', {
             font: font,
-            size: 1.2,
-            height: 0.2,
+            size: 0.5,
+            height: 0.1,
             curveSegments: 12,
             bevelEnabled: true,
-            bevelThickness: 0.05,
-            bevelSize: 0.05,
+            bevelThickness: 0.02,
+            bevelSize: 0.02,
             bevelOffset: 0,
             bevelSegments: 5,
           })
@@ -119,17 +119,31 @@ export default function NeuralProcessor3D() {
           const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
           const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
 
-          // Create bright white text with intense glow positioned outside galaxy
+          // Create dark transparent background panel behind text
+          const panelGeometry = new THREE.PlaneGeometry(8, 2)
+          const panelMaterial = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide
+          })
+          const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial)
+          panelMesh.position.x = 0
+          panelMesh.position.y = -3
+          panelMesh.position.z = -0.1  // Behind text, in front of galaxy
+          scene.add(panelMesh)
+
+          // Create bright white text with intense glow
           const textMaterial = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             emissive: 0xffffff,
-            emissiveIntensity: 3.0,
+            emissiveIntensity: 2.5,
             transparent: false
           })
 
           const textMesh = new THREE.Mesh(textGeometry, textMaterial)
           textMesh.position.x = centerOffsetX
-          textMesh.position.y = centerOffsetY + 6  // Move text above galaxy
+          textMesh.position.y = centerOffsetY - 3  // Back to original position
           textMesh.position.z = 0
           scene.add(textMesh)
         })

@@ -24,7 +24,16 @@ export default function Header() {
     >
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-light tracking-widest">NEURASCALE</h1>
+          <a className="flex items-center justify-center" href="#">
+            <span className="sr-only">NEURASCALE</span>
+            <span
+              className="font-extrabold text-2xl tracking-wider"
+              style={{ fontFamily: 'Proxima Nova, sans-serif' }}
+            >
+              <span className="text-[#eeeeee]">NEURA</span>
+              <span className="text-[#4185f4]">SCALE</span>
+            </span>
+          </a>
           <div className="w-px h-6 bg-white/20" />
           <span className="text-xs uppercase tracking-wider text-white/60">Neural-Prosthetics Application Cloud</span>
         </div>

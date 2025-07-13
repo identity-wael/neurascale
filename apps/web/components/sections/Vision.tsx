@@ -261,18 +261,6 @@ export default function Vision() {
               </div>
             </motion.div>
 
-            {/* Call to action */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              viewport={{ once: true }}
-              className="mt-16 text-center"
-            >
-              <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
-                Explore the Technology
-              </button>
-            </motion.div>
           </div>
         </motion.div>
       </div>

@@ -1,160 +1,212 @@
 'use client'
 
-import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Text } from '@react-three/drei'
-import * as THREE from 'three'
+import { useRef, useEffect, useState } from 'react'
 
-function Galaxy() {
-  const pointsRef = useRef<THREE.Points>(null)
-  const particleCount = 15000
-
-  // Create galaxy particles
-  const positions = new Float32Array(particleCount * 3)
-  const colors = new Float32Array(particleCount * 3)
-  const sizes = new Float32Array(particleCount)
-
-  for (let i = 0; i < particleCount; i++) {
-    const i3 = i * 3
-    
-    // Create spiral galaxy shape
-    const radius = Math.random() * 8
-    const spinAngle = radius * 0.5
-    const branchAngle = (i % 3) * ((Math.PI * 2) / 3)
-    
-    const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3
-    const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3
-    const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3
-
-    positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX
-    positions[i3 + 1] = randomY
-    positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ
-
-    // Color transition: white at center to blue at edges
-    const distanceFromCenter = Math.sqrt(
-      positions[i3] * positions[i3] + 
-      positions[i3 + 2] * positions[i3 + 2]
-    )
-    const colorMix = Math.min(distanceFromCenter / 8, 1)
-    
-    // White (1,1,1) to Blue (#4185f4 = 0.255, 0.522, 0.957)
-    colors[i3] = 1 - colorMix * (1 - 0.255)     // Red
-    colors[i3 + 1] = 1 - colorMix * (1 - 0.522) // Green
-    colors[i3 + 2] = 1 - colorMix * (1 - 0.957) // Blue
-
-    // Size based on distance (smaller particles further out)
-    sizes[i] = Math.random() * 6 + 2 - colorMix * 3
+// Extend Navigator interface for WebGPU
+declare global {
+  interface Navigator {
+    gpu?: any
   }
-
-  useFrame((state) => {
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y = state.clock.elapsedTime * 0.05
-    }
-  })
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute 
-          attach="attributes-position" 
-          count={particleCount} 
-          array={positions} 
-          itemSize={3} 
-        />
-        <bufferAttribute 
-          attach="attributes-color" 
-          count={particleCount} 
-          array={colors} 
-          itemSize={3} 
-        />
-        <bufferAttribute 
-          attach="attributes-size" 
-          count={particleCount} 
-          array={sizes} 
-          itemSize={1} 
-        />
-      </bufferGeometry>
-      <pointsMaterial 
-        size={1}
-        sizeAttenuation={true}
-        vertexColors={true}
-        blending={THREE.AdditiveBlending}
-        transparent={true}
-        opacity={0.8}
-      />
-    </points>
-  )
 }
 
 export default function NeuralProcessor3D() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const initWebGPUGalaxy = async () => {
+      try {
+        if (!navigator.gpu) {
+          throw new Error('WebGPU not supported')
+        }
+
+        // Dynamic import of Three.js modules
+        const THREE = await import('three')
+        const { FontLoader } = await import('three/addons/loaders/FontLoader.js')
+        const { TextGeometry } = await import('three/addons/geometries/TextGeometry.js')
+
+        if (!canvasRef.current) return
+
+        // Initialize renderer (fallback to WebGL if WebGPU not available)
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
+        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setClearColor(0x000000)
+
+        // Setup scene and camera
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+        camera.position.set(3, 3, 3)
+
+        // Galaxy parameters
+        const parameters = {
+          count: 100000,
+          size: 0.01,
+          radius: 5,
+          branches: 3,
+          spin: 1,
+          randomness: 0.2,
+          randomnessPower: 3,
+          insideColor: '#ffffff',    // White center
+          outsideColor: '#4185f4'    // NEURASCALE blue
+        }
+
+        // Create galaxy geometry
+        const geometry = new THREE.BufferGeometry()
+        const positions = new Float32Array(parameters.count * 3)
+        const colors = new Float32Array(parameters.count * 3)
+
+        const colorInside = new THREE.Color(parameters.insideColor)
+        const colorOutside = new THREE.Color(parameters.outsideColor)
+
+        for (let i = 0; i < parameters.count; i++) {
+          const i3 = i * 3
+
+          // Position
+          const radius = Math.random() * parameters.radius
+          const spinAngle = radius * parameters.spin
+          const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+
+          const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+          const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+          const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+
+          positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX
+          positions[i3 + 1] = randomY
+          positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ
+
+          // Color - white center to blue edges
+          const mixedColor = colorInside.clone()
+          mixedColor.lerp(colorOutside, radius / parameters.radius)
+
+          colors[i3] = mixedColor.r
+          colors[i3 + 1] = mixedColor.g
+          colors[i3 + 2] = mixedColor.b
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
+        // Create material
+        const material = new THREE.PointsMaterial({
+          size: parameters.size,
+          sizeAttenuation: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          vertexColors: true
+        })
+
+        // Create points mesh
+        const points = new THREE.Points(geometry, material)
+        scene.add(points)
+
+        // Add NEURASCALE text inside the scene
+        const loader = new FontLoader()
+        loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
+          const textGeometry = new TextGeometry('NEURASCALE', {
+            font: font,
+            size: 0.5,
+            height: 0.1,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.02,
+            bevelSize: 0.02,
+            bevelOffset: 0,
+            bevelSegments: 5,
+          })
+
+          textGeometry.computeBoundingBox()
+          const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
+          const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
+
+          const textMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4185f4,
+            emissive: 0x4185f4,
+            emissiveIntensity: 0.3
+          })
+
+          const textMesh = new THREE.Mesh(textGeometry, textMaterial)
+          textMesh.position.x = centerOffsetX
+          textMesh.position.y = centerOffsetY - 3
+          textMesh.position.z = 0
+          scene.add(textMesh)
+        })
+        
+        // Simple lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        scene.add(ambientLight)
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+        directionalLight.position.set(1, 1, 1)
+        scene.add(directionalLight)
+
+        // Controls (simplified)
+        let mouseX = 0
+        let mouseY = 0
+        
+        const onMouseMove = (event: MouseEvent) => {
+          mouseX = (event.clientX / window.innerWidth) * 2 - 1
+          mouseY = -(event.clientY / window.innerHeight) * 2 + 1
+        }
+        
+        window.addEventListener('mousemove', onMouseMove)
+
+        // Animation loop
+        const animate = () => {
+          // Rotate galaxy
+          points.rotation.y += 0.001
+          
+          // Mouse interaction
+          camera.position.x = Math.sin(mouseX * 0.5) * 5
+          camera.position.z = Math.cos(mouseX * 0.5) * 5
+          camera.position.y = mouseY * 2 + 3
+          camera.lookAt(scene.position)
+
+          renderer.render(scene, camera)
+        }
+
+        renderer.setAnimationLoop(animate)
+
+        // Handle resize
+        const handleResize = () => {
+          camera.aspect = window.innerWidth / window.innerHeight
+          camera.updateProjectionMatrix()
+          renderer.setSize(window.innerWidth, window.innerHeight)
+        }
+
+        window.addEventListener('resize', handleResize)
+
+        return () => {
+          window.removeEventListener('mousemove', onMouseMove)
+          window.removeEventListener('resize', handleResize)
+          renderer.dispose()
+        }
+
+      } catch (err) {
+        console.error('WebGPU Galaxy initialization error:', err)
+        setError(`WebGPU Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      }
+    }
+
+    initWebGPUGalaxy()
+  }, [])
+
+  if (error) {
+    return (
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black text-white">
+        <div className="text-center">
+          <p className="text-red-400 mb-2">WebGPU Galaxy Error</p>
+          <p className="text-sm text-gray-400">{error}</p>
+          <p className="text-xs text-gray-500 mt-2">Try enabling WebGPU in your browser</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="absolute inset-0 w-full h-full">
-      <Canvas 
-        shadows 
-        camera={{ position: [0, 8, 15], fov: 60 }}
-        gl={{ 
-          antialias: true,
-          alpha: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2
-        }}
-      >
-        {/* Enhanced Lighting for Visibility */}
-        <ambientLight intensity={0.6} />
-        <directionalLight 
-          position={[10, 10, 5]} 
-          intensity={3} 
-          castShadow 
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-far={50}
-          shadow-camera-left={-20}
-          shadow-camera-right={20}
-          shadow-camera-top={20}
-          shadow-camera-bottom={-20}
-        />
-        <pointLight position={[-5, 8, 5]} intensity={1.5} color="#4185f4" />
-        <pointLight position={[5, 8, -5]} intensity={1.2} color="#ffffff" />
-        <pointLight position={[0, 10, 0]} intensity={2} color="#ffffff" />
-        <spotLight 
-          position={[0, 20, 0]} 
-          intensity={2} 
-          angle={0.4} 
-          penumbra={0.3}
-          castShadow
-          color="#ffffff"
-        />
-        
-        <Galaxy />
-        
-        {/* NEURASCALE Logo */}
-        <Text
-          position={[0, -3, 0]}
-          fontSize={1.2}
-          color="#4185f4"
-          anchorX="center"
-          anchorY="middle"
-          letterSpacing={0.02}
-        >
-          <meshStandardMaterial 
-            color="#4185f4"
-            emissive="#4185f4"
-            emissiveIntensity={0.3}
-          />
-          NEURASCALE
-        </Text>
-        
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxDistance={30}
-          minDistance={8}
-          maxPolarAngle={Math.PI / 1.5}
-          target={[0, 0, 0]}
-          enableDamping={true}
-          dampingFactor={0.05}
-        />
-      </Canvas>
+      <canvas ref={canvasRef} className="w-full h-full" />
+      
     </div>
   )
 }

@@ -10,7 +10,7 @@ function GPUChip() {
 
   useEffect(() => {
     // Floating animation for the whole chip
-    anime({
+    anime.default({
       targets: chipRef.current,
       translateY: [-5, 5],
       duration: 3000,
@@ -20,7 +20,7 @@ function GPUChip() {
     })
 
     // Pulsing cores animation
-    anime({
+    anime.default({
       targets: '.gpu-core',
       scale: [0.9, 1.1],
       duration: 2000,
@@ -31,7 +31,7 @@ function GPUChip() {
     })
 
     // Data flow animation
-    anime({
+    anime.default({
       targets: '.data-flow',
       translateX: [-100, 100],
       opacity: [0, 1, 0],
@@ -42,7 +42,7 @@ function GPUChip() {
     })
 
     // Memory blocks animation
-    anime({
+    anime.default({
       targets: '.memory-block',
       backgroundColor: ['#0066ff', '#00aaff', '#0066ff'],
       duration: 1000,

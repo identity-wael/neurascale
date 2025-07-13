@@ -104,4 +104,4 @@ Our world-class team brings together expertise from brain-computer interfaces, f
 
 ## 📄 License
 
-[Your License]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

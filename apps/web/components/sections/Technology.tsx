@@ -16,7 +16,7 @@ export default function Technology() {
 
 
   return (
-    <section id="technology" ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
+    <section id="technology" ref={containerRef} className="px-6 md:px-12 lg:px-24 py-8 relative">
       <motion.div style={{ scale }} className="relative z-10">
         
 

@@ -44,31 +44,35 @@ function GPUDie() {
       >
         {/* Main GPU Die Substrate */}
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[6, 0.2, 4]} />
+          <boxGeometry args={[8, 0.3, 6]} />
           <meshStandardMaterial 
-            color="#1a1a1a"
-            metalness={0.9}
-            roughness={0.1}
+            color="#404040"
+            metalness={0.8}
+            roughness={0.2}
+            emissive="#0a0a0a"
+            emissiveIntensity={0.1}
           />
         </mesh>
 
         {/* Central H100 Processing Core */}
-        <mesh position={[0, 0.15, 0]}>
-          <boxGeometry args={[2, 0.1, 2]} />
+        <mesh position={[0, 0.2, 0]}>
+          <boxGeometry args={[3, 0.2, 3]} />
           <meshStandardMaterial 
             color="#000000"
             metalness={0.95}
             roughness={0.05}
+            emissive="#001100"
+            emissiveIntensity={0.2}
           />
         </mesh>
 
         {/* Glowing Green Core */}
-        <mesh ref={glowRef} position={[0, 0.25, 0]}>
-          <boxGeometry args={[1.6, 0.05, 1.6]} />
+        <mesh ref={glowRef} position={[0, 0.35, 0]}>
+          <boxGeometry args={[2.5, 0.1, 2.5]} />
           <meshStandardMaterial 
             color="#00ff88"
             emissive="#00ff88"
-            emissiveIntensity={hovered ? 1.2 : 0.8}
+            emissiveIntensity={hovered ? 2 : 1.5}
             metalness={0.3}
             roughness={0}
           />
@@ -196,14 +200,23 @@ export default function NeuralProcessor3D() {
           toneMappingExposure: 1.5
         }}
       >
-        <PerspectiveCamera makeDefault position={[5, 4, 5]} fov={45} />
+        <PerspectiveCamera makeDefault position={[0, 5, 10]} fov={60} />
         
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} castShadow />
-        <pointLight position={[-10, 10, -10]} intensity={0.4} />
-        <pointLight position={[0, 5, 0]} intensity={0.6} color="#00ff88" />
+        <ambientLight intensity={0.8} />
+        <pointLight position={[5, 5, 5]} intensity={2} castShadow />
+        <pointLight position={[-5, 5, 5]} intensity={1} />
+        <pointLight position={[0, 2, 8]} intensity={1.5} color="#00ff88" />
+        <directionalLight position={[0, 10, 0]} intensity={1} />
         
-        <GPUDie />
+        {/* Debug cube to test visibility */}
+        <mesh position={[3, 0, 0]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
+        </mesh>
+        
+        <group position={[0, 1, 0]} scale={[1.5, 1.5, 1.5]}>
+          <GPUDie />
+        </group>
         
         <ContactShadows
           position={[0, -1, 0]}

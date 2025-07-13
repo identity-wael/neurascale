@@ -40,7 +40,7 @@ export default function Hero() {
       {/* 3D Neural Processor Background */}
       <div className="absolute inset-0 opacity-50">
         <Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-          <SimpleTest3D />
+          <NeuralProcessor3D />
         </Suspense>
       </div>
 

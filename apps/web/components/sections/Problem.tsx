@@ -44,12 +44,15 @@ export default function Problem() {
 
   return (
     <section ref={containerRef} className="min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-24 relative">
-      <div className="grid lg:grid-cols-3 gap-12 w-full max-w-7xl mx-auto">
-        {/* Main Content - Left Side */}
-        <motion.div
-          style={{ opacity, y }}
-          className="lg:col-span-2 relative z-10"
-        >
+      {/* 3D Attractor Particles Background */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full opacity-20 hidden lg:block">
+        <AttractorParticles3D />
+      </div>
+
+      <motion.div
+        style={{ opacity, y }}
+        className="max-w-5xl relative z-10"
+      >
         <div className="flex items-start mb-12">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>
           <span className="text-white/40 text-sm uppercase tracking-wider">SPECIFICITY</span>
@@ -57,202 +60,146 @@ export default function Problem() {
 
         <AnimatedText
           text="Breakthrough Neural Computing Architecture"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-8"
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-12"
           stagger={0.02}
         />
-        
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="text-xl text-white/70 mb-16 max-w-4xl"
-        >
-          NEURASCALE's next-generation platform delivers unprecedented performance for brain-computer interface applications through revolutionary hardware design.
-        </motion.p>
 
-        {/* Core Processing Power */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-light mb-6 text-white/90">Core Processing Power</h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <div className="text-2xl font-light text-blue-400 mb-2">640-core</div>
-              <p className="text-white/60 text-sm">TPU optimized for neural signal processing</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <div className="text-2xl font-light text-blue-400 mb-2">14592-core</div>
-              <p className="text-white/60 text-sm">GPU for parallel computation tasks</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <div className="text-2xl font-light text-blue-400 mb-2">100 trillion</div>
-              <p className="text-white/60 text-sm">operations per second neural engine capability</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Ultra-High-Speed Data Handling */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-light mb-6 text-white/90">Ultra-High-Speed Data Handling</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
-              <div className="text-xl font-light text-purple-400 mb-1">492Mb/s</div>
-              <p className="text-white/60 text-xs">raw neural data acquisition</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
-              <div className="text-xl font-light text-purple-400 mb-1">48Mb/s</div>
-              <p className="text-white/60 text-xs">wireless transmission</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
-              <div className="text-xl font-light text-purple-400 mb-1">30kS/s</div>
-              <p className="text-white/60 text-xs">per-channel sampling rate</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
-              <div className="text-xl font-light text-purple-400 mb-1">16-bit</div>
-              <p className="text-white/60 text-xs">ADC resolution</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Advanced System Architecture */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-light mb-8 text-white/90">Advanced System Architecture</h3>
-          <div className="space-y-6">
-            <div className="p-6 rounded-lg border border-blue-400/20 bg-blue-400/5">
-              <h4 className="text-lg font-medium text-blue-400 mb-3">AI Processing Unit</h4>
-              <p className="text-white/70 leading-relaxed">
-                Leveraging NEURASCALE's proprietary multi-physics computing core, our AI unit accelerates complex neural decoding tasks while achieving 10×–30× reduction in power consumption compared to traditional architectures.
-              </p>
-            </div>
-            <div className="p-6 rounded-lg border border-white/20 bg-white/5">
-              <h4 className="text-lg font-medium text-white/90 mb-3">Deterministic Control Unit</h4>
-              <p className="text-white/70 leading-relaxed">
-                Purpose-built for real-time neural applications, maximizing memory bandwidth efficiency and accelerating critical signal processing operations.
-              </p>
-            </div>
-            <div className="p-6 rounded-lg border border-white/20 bg-white/5">
-              <h4 className="text-lg font-medium text-white/90 mb-3">Extended Reality™ Engine</h4>
-              <p className="text-white/70 leading-relaxed">
-                Seamlessly integrates with both ADK-P and ADK-XR development platforms, enabling immersive neural interface applications.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Third-Generation 3nm Technology */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-light mb-6 text-white/90">Third-Generation 3nm Technology</h3>
-          <div className="p-6 rounded-lg border border-green-400/20 bg-green-400/5 mb-6">
-            <p className="text-white/70 mb-4">Built on cutting-edge 3nm fabrication process, delivering:</p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                <span className="text-white/80">Higher computational density</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                <span className="text-white/80">Superior energy efficiency</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                <span className="text-white/80">Enhanced thermal management</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                <span className="text-white/80">Compact form factor suitable for wearable and implantable devices</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Complete Development Ecosystem */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="text-2xl font-light mb-6 text-white/90">Complete Development Ecosystem</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">Hardware-accelerated simulation</h4>
-              <p className="text-white/60 text-sm">Rapid prototyping engine</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">Neural Implant ADK</h4>
-              <p className="text-white/60 text-sm">A2A support included</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">API Gateway</h4>
-              <p className="text-white/60 text-sm">Agentic applications ready</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">Neural Ledger</h4>
-              <p className="text-white/60 text-sm">Secure data management</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">Event-driven Architecture</h4>
-              <p className="text-white/60 text-sm">Up to 76 targets per minute</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 bg-white/5">
-              <h4 className="text-white/90 font-medium mb-2">Real-time Processing</h4>
-              <p className="text-white/60 text-sm">Ultra-low latency execution</p>
-            </div>
-          </div>
-        </motion.div>
-        </motion.div>
-
-        {/* Right Side - SVG Icon and Animation */}
-        <motion.div
-          style={{ opacity, y }}
-          className="lg:col-span-1 flex flex-col items-center justify-center space-y-8 relative z-10"
-        >
-          {/* AI Unit SVG Icon */}
+        <div className="grid md:grid-cols-2 gap-16 items-start">
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-white/40"
           >
-            <AIUnitIcon />
+            <h3 className="text-2xl font-light mb-6 text-white/90">Unlocking Human Potential Through Advanced Neural Processing</h3>
+            <p className="text-lg leading-relaxed text-white/70 mb-8">
+              NeuraScale's Neural-Prosthetics Application Cloud represents a paradigm shift in brain-computer interface technology, designed to process petabytes of real-time neural data and bridge the gap between the human mind and the physical world.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-light mb-3 text-blue-400">Core Architecture: Modular Monolith Design</h4>
+                <p className="text-white/60 text-sm leading-relaxed mb-4">
+                  Built on our proprietary Modular Monolith Architecture, the system ensures stable, scalable development with controlled dependencies. At its heart, the Neural Management System (NMS) orchestrates all operations across specialized layers:
+                </p>
+                <div className="space-y-2 text-sm pl-4">
+                  <div className="flex items-start">
+                    <span className="text-blue-400 mr-3">•</span>
+                    <span className="text-white/70"><strong>NIIL:</strong> Managing neural interfaces and mixed reality environments</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-blue-400 mr-3">•</span>
+                    <span className="text-white/70"><strong>PICL:</strong> Controlling robotic systems and IoT devices</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-blue-400 mr-3">•</span>
+                    <span className="text-white/70"><strong>ADAM:</strong> Housing our advanced AI/ML models for real-time processing</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-light mb-3 text-blue-400">Ultra-High-Speed Neural Data Processing</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Raw neural data acquisition:</span>
+                    <span className="text-blue-400 font-mono">492Mb/s</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Per-channel sampling:</span>
+                    <span className="text-blue-400 font-mono">30kS/s</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">ADC resolution:</span>
+                    <span className="text-blue-400 font-mono">16-bit</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Wireless transmission:</span>
+                    <span className="text-blue-400 font-mono">48Mb/s</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
-          {/* 3D Attractor Particles Animation */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.7 }}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
             viewport={{ once: true }}
-            className="w-full h-96 opacity-60"
+            className="space-y-8"
           >
-            <AttractorParticles3D />
+            <div>
+              <h4 className="text-lg font-light mb-4 text-white/90">Next-Generation Computing Power</h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center p-3 rounded border border-white/10 bg-white/5">
+                  <span className="text-white/70">640-core TPU</span>
+                  <span className="text-blue-400">Neural signal processing</span>
+                </div>
+                <div className="flex justify-between items-center p-3 rounded border border-white/10 bg-white/5">
+                  <span className="text-white/70">14,592-core GPU</span>
+                  <span className="text-blue-400">Parallel computation</span>
+                </div>
+                <div className="flex justify-between items-center p-3 rounded border border-white/10 bg-white/5">
+                  <span className="text-white/70">100 trillion ops/sec</span>
+                  <span className="text-blue-400">3nm Neural Engine</span>
+                </div>
+                <div className="flex justify-between items-center p-3 rounded border border-blue-400/20 bg-blue-400/5">
+                  <span className="text-white/70">10×–30× reduction</span>
+                  <span className="text-blue-400">Energy consumption</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-light mb-3 text-white/90">Advanced AI/ML Integration</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Movement Intention Classifiers (RNN/LSTM)</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Seizure Prediction Models (CNN/LSTM)</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Large Language Models for agentic applications</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Adaptive Learning Agents</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-light mb-3 text-white/90">Secure Neural Identity</h4>
+              <p className="text-white/60 text-sm leading-relaxed mb-3">
+                Revolutionary passwordless Neural ID - authentication derived from your unique neural patterns, providing secure access to robotic prosthetics, virtual environments, and agentic applications.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-light mb-3 text-white/90">Open-Source Innovation</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Tokenized reward system for contributions</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Multi-cloud deployment options</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-white/40 mr-3">•</span>
+                  <span className="text-white/70">Hardware-accelerated simulation engine</span>
+                </div>
+              </div>
+            </div>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   )
 }

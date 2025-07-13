@@ -71,33 +71,19 @@ function GPUChip() {
         })
       }
 
-      // Floating particles animation
-      const particles = document.querySelectorAll('.particle')
-      if (particles.length > 0) {
+      // Floating sparkles animation - matching original Three.js Sparkles
+      const sparkles = document.querySelectorAll('.sparkle')
+      if (sparkles.length > 0) {
         anime({
-          targets: '.particle',
-          translateY: [-20, 20],
-          translateX: [-10, 10],
-          scale: [0.5, 1.2, 0.5],
-          opacity: [0.3, 0.8, 0.3],
-          duration: 4000,
+          targets: '.sparkle',
+          translateY: [-30, 30],
+          translateX: [-15, 15],
+          scale: [0.8, 2, 0.8],
+          opacity: [0.1, 0.6, 0.1],
+          duration: 6000,
           loop: true,
-          delay: anime.stagger(100),
+          delay: anime.stagger(120),
           easing: 'easeInOutSine'
-        })
-      }
-
-      // Neural connections pulsing
-      const connections = document.querySelectorAll('.neural-connection')
-      if (connections.length > 0) {
-        anime({
-          targets: '.neural-connection',
-          scale: [0.8, 1.4, 0.8],
-          opacity: [0.2, 0.7, 0.2],
-          duration: 2500,
-          loop: true,
-          delay: anime.stagger(200),
-          easing: 'easeInOutQuad'
         })
       }
     }, 100)
@@ -208,33 +194,18 @@ function GPUChip() {
           </div>
         </div>
 
-        {/* Floating Particles */}
+        {/* Floating Sparkles - matching original Sparkles component */}
         <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {Array.from({ length: 50 }).map((_, i) => (
             <div
-              key={`particle-${i}`}
-              className="particle absolute w-1 h-1 bg-cyan-400 rounded-full opacity-60"
+              key={`sparkle-${i}`}
+              className="sparkle absolute w-0.5 h-0.5 bg-green-400 rounded-full opacity-30"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 4}s`,
-                boxShadow: '0 0 4px #00ffff'
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Neural Network Connections */}
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={`connection-${i}`}
-              className="neural-connection absolute w-2 h-2 bg-green-400 rounded-full opacity-40"
-              style={{
-                left: `${20 + Math.cos(i * 0.52) * 30}%`,
-                top: `${50 + Math.sin(i * 0.52) * 30}%`,
-                animationDelay: `${i * 0.2}s`,
-                boxShadow: '0 0 6px #00ff88'
+                boxShadow: '0 0 2px #00ff88',
+                background: '#00ff88'
               }}
             />
           ))}

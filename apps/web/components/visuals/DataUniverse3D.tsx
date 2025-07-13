@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export default function NeuralProcessor3D() {
+export default function DataUniverse3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -172,7 +172,7 @@ export default function NeuralProcessor3D() {
         }
 
       } catch (err) {
-        console.error('WebGPU Galaxy initialization error:', err)
+        console.error('WebGPU DataUniverse initialization error:', err)
         setError(`WebGPU Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
     }
@@ -184,7 +184,7 @@ export default function NeuralProcessor3D() {
     return (
       <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black text-white">
         <div className="text-center">
-          <p className="text-red-400 mb-2">WebGPU Galaxy Error</p>
+          <p className="text-red-400 mb-2">WebGPU DataUniverse Error</p>
           <p className="text-sm text-gray-400">{error}</p>
           <p className="text-xs text-gray-500 mt-2">Try enabling WebGPU in your browser</p>
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Cloud, Zap, Menu } from "lucide-react";
+import Threads from "@/components/Threads";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,8 +44,14 @@ export default function Home() {
 
         <main className="flex-1 pt-20">
           <section className="relative overflow-hidden w-full py-24 md:py-32 lg:py-48">
-            <div className="relative z-10 container mx-auto px-4 md:px-6">
-              <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="relative h-[350px] md:h-[500px] lg:h-[600px]">
+              <Threads
+                amplitude={5}
+                distance={0}
+                enableMouseInteraction
+                className="absolute inset-0"
+              />
+              <div className="relative z-10 flex flex-col items-center justify-center h-full container mx-auto px-4 md:px-6 text-center space-y-4">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl max-w-3xl mx-auto leading-tight">
                   Unleash the Power of Neural Data Cloud
                 </h1>

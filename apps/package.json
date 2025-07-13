@@ -7,11 +7,13 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check"
   },
-  "devDependencies": {
-    "turbo": "^2.0.0"
-  },
   "workspaces": [
     "web",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  }
 }

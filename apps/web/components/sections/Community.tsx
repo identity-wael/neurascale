@@ -297,7 +297,7 @@ export default function Community() {
                 <p className="text-white/60">Rewards for publishing research, sharing datasets, and algorithm improvements</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Call to Action */}

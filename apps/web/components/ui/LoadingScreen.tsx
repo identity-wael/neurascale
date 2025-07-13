@@ -32,9 +32,11 @@ export default function LoadingScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-4xl md:text-5xl font-light mb-8 tracking-wider"
+          className="text-5xl md:text-7xl font-extrabold mb-8 tracking-wider"
+          style={{ fontFamily: 'Proxima Nova, sans-serif' }}
         >
-          NEURAL-PROSTHETICS APPLICATION CLOUD
+          <span className="text-[#eeeeee]">NEURA</span>
+          <span className="text-[#4185f4]">SCALE</span>
         </motion.h1>
         
         <div className="w-64 mx-auto">

@@ -4,6 +4,55 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import AnimatedText from '@/components/ui/AnimatedText'
 
+// SVG Icons for roadmap projects
+const ProstheticsIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 8 C18 8, 20 10, 20 13 C20 16, 18 18, 15 18" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.8" />
+    <path d="M15 18 L15 25" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+    <path d="M12 25 L18 25" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+    <path d="M15 25 L15 32" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+    <circle cx="25" cy="15" r="3" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M25 18 L25 25" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <path d="M22 25 L28 25" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+  </svg>
+)
+
+const ROSIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="12" y="12" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <circle cx="16" cy="16" r="1.5" fill="currentColor" opacity="0.8" />
+    <circle cx="24" cy="16" r="1.5" fill="currentColor" opacity="0.8" />
+    <path d="M16 20 L24 20" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+    <path d="M20 8 L20 12" stroke="currentColor" strokeWidth="2" opacity="0.6" />
+    <path d="M8 18 L12 18" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <path d="M28 18 L32 18" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <path d="M15 24 L15 28" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <path d="M25 24 L25 28" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+  </svg>
+)
+
+const PlatformIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="14" width="24" height="12" rx="6" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <circle cx="15" cy="20" r="3" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <circle cx="25" cy="20" r="3" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <path d="M6 20 L8 20" stroke="currentColor" strokeWidth="2" opacity="0.6" />
+    <path d="M32 20 L34 20" stroke="currentColor" strokeWidth="2" opacity="0.6" />
+    <path d="M20 12 L20 14" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+    <circle cx="15" cy="20" r="1" fill="currentColor" opacity="0.8" />
+    <circle cx="25" cy="20" r="1" fill="currentColor" opacity="0.8" />
+  </svg>
+)
+
+const IdentityIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 6 L28 10 L28 20 C28 26, 24 30, 20 32 C16 30, 12 26, 12 20 L12 10 Z" 
+          stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
+    <circle cx="20" cy="18" r="3" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+    <rect x="18" y="20" width="4" height="6" rx="1" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+  </svg>
+)
+
 export default function Roadmap() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -76,7 +125,7 @@ export default function Roadmap() {
       timeline: 'Q2 2024 - Q1 2025',
       technologies: ['Neural Pattern Recognition', 'Robotics Control', 'Machine Learning'],
       impact: 'Restore natural mobility for amputees',
-      icon: '🦾'
+      icon: <ProstheticsIcon />
     },
     {
       title: 'ROS Integration Platform',
@@ -85,7 +134,7 @@ export default function Roadmap() {
       timeline: 'Q3 2024 - Q2 2025',
       technologies: ['NVIDIA ROS', 'Real-time Control', 'Multi-robot Systems'],
       impact: 'Enable neural control of robot swarms',
-      icon: '🤖'
+      icon: <ROSIcon />
     },
     {
       title: 'Modular 3D Platform',
@@ -94,7 +143,7 @@ export default function Roadmap() {
       timeline: 'Q4 2024 - Q3 2025',
       technologies: ['WebGPU', '3D Neural Visualization', 'Immersive Computing'],
       impact: 'Full-dive VR controlled by thought',
-      icon: '🥽'
+      icon: <PlatformIcon />
     },
     {
       title: 'Neural Identity System',
@@ -103,7 +152,7 @@ export default function Roadmap() {
       timeline: 'Q1 2025 - Q4 2025',
       technologies: ['Biometric Security', 'Neural Signatures', 'Cryptography'],
       impact: 'Unbreakable personal authentication',
-      icon: '🧠'
+      icon: <IdentityIcon />
     }
   ]
 
@@ -227,7 +276,7 @@ export default function Roadmap() {
                 className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
               >
                 <div className="flex items-center mb-4">
-                  <span className="text-2xl mr-3">{project.icon}</span>
+                  <div className="text-white/60 mr-3">{project.icon}</div>
                   <h4 className="text-lg font-light text-white/90">{project.title}</h4>
                 </div>
                 

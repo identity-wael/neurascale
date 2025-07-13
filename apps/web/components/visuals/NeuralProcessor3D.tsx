@@ -22,8 +22,9 @@ function ProcessorChip() {
     if (meshRef.current) {
       meshRef.current.rotation.y = state.clock.elapsedTime * 0.2
     }
-    if (glowRef.current) {
-      glowRef.current.material.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3
+    if (glowRef.current && glowRef.current.material) {
+      const material = glowRef.current.material as THREE.MeshStandardMaterial
+      material.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3
     }
   })
 

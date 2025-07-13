@@ -15,6 +15,15 @@ const NeuralProcessor3D = dynamic(
   }
 )
 
+// Simple test for debugging
+const SimpleTest3D = dynamic(
+  () => import('@/components/visuals/SimpleTest3D'),
+  { 
+    ssr: false,
+    loading: () => <div className="absolute inset-0 bg-red-500/20">Loading 3D...</div>
+  }
+)
+
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -31,7 +40,7 @@ export default function Hero() {
       {/* 3D Neural Processor Background */}
       <div className="absolute inset-0 opacity-50">
         <Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-          <NeuralProcessor3D />
+          <SimpleTest3D />
         </Suspense>
       </div>
 

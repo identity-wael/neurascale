@@ -35,34 +35,7 @@ export default function Header() {
             </span>
           </a>
           <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center">
-            <svg className="h-8 w-auto" viewBox="0 0 120 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <g fill="white" fillOpacity="0.6">
-                {/* MIT Logo */}
-                <path d="M8 4h8v28h-8V4zm12 0h8v28h-8V4zm12 0h8v28h-8V4z"/>
-                <path d="M4 32h40v4H4v-4z"/>
-                <path d="M8 0h8v4H8V0zm12 0h8v4h-8V0zm12 0h8v4h-8V0z"/>
-                
-                {/* MIT Text */}
-                <text x="52" y="16" fontSize="12" fontFamily="serif" fontWeight="bold">
-                  <tspan>M</tspan>
-                </text>
-                <text x="64" y="16" fontSize="12" fontFamily="serif" fontWeight="bold">
-                  <tspan>I</tspan>
-                </text>
-                <text x="70" y="16" fontSize="12" fontFamily="serif" fontWeight="bold">
-                  <tspan>T</tspan>
-                </text>
-                
-                <text x="52" y="28" fontSize="6" fontFamily="serif">
-                  <tspan>MASSACHUSETTS INSTITUTE</tspan>
-                </text>
-                <text x="52" y="34" fontSize="6" fontFamily="serif">
-                  <tspan>OF TECHNOLOGY</tspan>
-                </text>
-              </g>
-            </svg>
-          </div>
+          <span className="text-xs uppercase tracking-wider text-white/60">Neural-Prosthetics Application Cloud</span>
         </div>
         <nav className="flex items-center gap-6">
           <a href="#vision" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Vision</a>

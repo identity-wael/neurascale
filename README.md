@@ -80,7 +80,27 @@ When ready to implement the full monorepo:
 
 ## 👥 Team
 
-Led by Rob Franklin (SVP, Blackrock Neurotech), Wael El Ghazzawi (CTO, Brain Finance), and a world-class team of engineers and researchers.
+### Leadership & Engineering Excellence
+
+**Rob Franklin** - *SVP, Brain Computer Interface*  
+Blackrock Neurotech
+
+**Wael El Ghazzawi** - *CTO, Financial Technology*  
+Brain Finance
+
+**Ron Lehman** - *CEO, Geographic Information System*  
+RYKER
+
+**Donald Woodruff** - *Director of Technology, Cloud Solutions*  
+Lumen Technologies
+
+**Jason Franklin** - *CITO, E-Retail*  
+American Furniture Warehouse
+
+**Vincent Liu** - *VP Engineering, HealthCare*  
+CuraeSoft Inc
+
+Our world-class team brings together expertise from brain-computer interfaces, financial technology, cloud infrastructure, retail systems, and healthcare engineering to create the future of neural-prosthetics applications.
 
 ## 📄 License
 

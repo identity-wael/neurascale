@@ -7,7 +7,7 @@ import * as THREE from 'three'
 
 function NvidiaH100() {
   const boardRef = useRef<THREE.Group>(null)
-  const fanRefs = useRef<THREE.Mesh[]>([])
+  const fanRefs = useRef<any[]>([])
   const [hovered, setHovered] = useState(false)
 
   useFrame((state) => {

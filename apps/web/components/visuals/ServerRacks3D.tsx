@@ -121,9 +121,13 @@ function DataCenter() {
 
 export default function ServerRacks3D() {
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%' }}>
+      {/* Debug indicator */}
+      <div className="absolute top-4 right-4 z-50 text-blue-400 text-xs">Server Racks Loading...</div>
+      
       <Canvas
         shadows
+        style={{ width: '100%', height: '100%' }}
         gl={{ 
           antialias: true, 
           alpha: true,

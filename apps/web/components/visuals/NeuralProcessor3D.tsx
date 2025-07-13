@@ -153,9 +153,13 @@ function CircuitLines() {
 
 export default function NeuralProcessor3D() {
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%' }}>
+      {/* Debug indicator */}
+      <div className="absolute top-4 left-4 z-50 text-green-400 text-xs">Neural Processor Loading...</div>
+      
       <Canvas
         shadows
+        style={{ width: '100%', height: '100%' }}
         gl={{ 
           antialias: true, 
           alpha: true,

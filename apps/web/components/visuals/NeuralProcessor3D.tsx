@@ -105,12 +105,12 @@ export default function NeuralProcessor3D() {
         loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
           const textGeometry = new TextGeometry('NEURASCALE', {
             font: font,
-            size: 0.5,
-            height: 0.1,
+            size: 1.2,
+            height: 0.2,
             curveSegments: 12,
             bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.02,
+            bevelThickness: 0.05,
+            bevelSize: 0.05,
             bevelOffset: 0,
             bevelSegments: 5,
           })
@@ -119,17 +119,17 @@ export default function NeuralProcessor3D() {
           const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
           const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
 
-          // Create bright white text with intense glow
+          // Create bright white text with intense glow positioned outside galaxy
           const textMaterial = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             emissive: 0xffffff,
-            emissiveIntensity: 2.5,
+            emissiveIntensity: 3.0,
             transparent: false
           })
 
           const textMesh = new THREE.Mesh(textGeometry, textMaterial)
           textMesh.position.x = centerOffsetX
-          textMesh.position.y = centerOffsetY - 3
+          textMesh.position.y = centerOffsetY + 6  // Move text above galaxy
           textMesh.position.z = 0
           scene.add(textMesh)
         })

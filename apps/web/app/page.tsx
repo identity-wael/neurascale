@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Hero from '@/components/sections/Hero'
 import Vision from '@/components/sections/Vision'
 import Problem from '@/components/sections/Problem'
+import Roadmap from '@/components/sections/Roadmap'
 import Solution from '@/components/sections/Solution'
 import Technology from '@/components/sections/Technology'
 import Community from '@/components/sections/Community'
@@ -38,6 +39,7 @@ export default function Home() {
             <Hero />
             <Vision />
             <Problem />
+            <Roadmap />
             <Solution />
             <Technology />
             <Community />

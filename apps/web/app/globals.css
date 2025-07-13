@@ -15,16 +15,22 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     overscroll-behavior: none;
+    overflow-x: hidden;
     background: #000000;
     background-image: 
       radial-gradient(ellipse at top, #0a1628 0%, transparent 50%),
       radial-gradient(ellipse at bottom, #0d1117 0%, transparent 50%);
+    /* Optimize for smooth scrolling */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
   }
 
   ::selection {

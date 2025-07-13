@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import AnimatedText from '@/components/ui/AnimatedText'
+import InteractiveInfographic from '@/components/ui/InteractiveInfographic'
 
 export default function Solution() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -31,22 +32,8 @@ export default function Solution() {
   return (
     <section ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
       <motion.div style={{ scale }} className="relative z-10">
-        {/* Infographic Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-          className="mb-20 flex justify-center"
-        >
-          <div className="w-full max-w-6xl">
-            <img 
-              src="/infograph.svg" 
-              alt="NEURASCALE Neural-Prosthetics Application Cloud Infographic" 
-              className="w-full h-auto"
-            />
-          </div>
-        </motion.div>
+        {/* Interactive Infographic Section */}
+        <InteractiveInfographic />
 
         <AnimatedText
           text="Core capabilities that unlock human potential"

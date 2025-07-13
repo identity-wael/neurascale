@@ -153,13 +153,14 @@ The `ProfilePage` (`/profile`) is an example of a protected route. It uses a `us
 
 ### **7.1. Building for Production**
 
-To create a production-ready build of the application, run:
+To create a production-ready build of the application, navigate to the webapp directory and run:
 
 ```bash
+cd webapp
 npm run build
 ```
 
-This will generate an optimized build in the `.next` directory.
+This will generate an optimized build in the `webapp/.next` directory.
 
 ### **7.2. Deployment**
 

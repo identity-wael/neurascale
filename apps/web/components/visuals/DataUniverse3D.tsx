@@ -28,8 +28,6 @@ export default function DataUniverse3D() {
 
         // Dynamic import of Three.js modules
         const THREE = await import('three')
-        const { FontLoader } = await import('three/addons/loaders/FontLoader.js')
-        const { TextGeometry } = await import('three/addons/geometries/TextGeometry.js')
 
         if (!canvasRef.current) return
 

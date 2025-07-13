@@ -119,43 +119,12 @@ export default function NeuralProcessor3D() {
           const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
           const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
 
-          // Create outline text (larger, white)
-          const outlineGeometry = new TextGeometry('NEURASCALE', {
-            font: font,
-            size: 0.52,
-            height: 0.08,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0.04,
-            bevelSize: 0.04,
-            bevelOffset: 0,
-            bevelSegments: 5,
-          })
-
-          const outlineMaterial = new THREE.MeshStandardMaterial({
+          // Create bright white text with intense glow
+          const textMaterial = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             emissive: 0xffffff,
-            emissiveIntensity: 0.8,
-            transparent: true,
-            opacity: 0.9
-          })
-
-          const outlineMesh = new THREE.Mesh(outlineGeometry, outlineMaterial)
-          outlineGeometry.computeBoundingBox()
-          const outlineCenterOffsetX = -0.5 * (outlineGeometry.boundingBox!.max.x - outlineGeometry.boundingBox!.min.x)
-          const outlineCenterOffsetY = -0.5 * (outlineGeometry.boundingBox!.max.y - outlineGeometry.boundingBox!.min.y)
-          outlineMesh.position.x = outlineCenterOffsetX
-          outlineMesh.position.y = outlineCenterOffsetY - 3
-          outlineMesh.position.z = -0.02
-          scene.add(outlineMesh)
-
-          // Create main text (blue with strong glow)
-          const textMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4185f4,
-            emissive: 0x6aa6ff,
-            emissiveIntensity: 1.5,
-            transparent: true,
-            opacity: 1
+            emissiveIntensity: 2.5,
+            transparent: false
           })
 
           const textMesh = new THREE.Mesh(textGeometry, textMaterial)

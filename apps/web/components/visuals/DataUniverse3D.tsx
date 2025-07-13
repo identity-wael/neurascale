@@ -143,57 +143,58 @@ export default function DataUniverse3D() {
         const points = new THREE.Points(geometry, material)
         scene.add(points)
 
-        // Add NEURASCALE text with fallback for font loading issues
-        try {
-          const loader = new FontLoader()
-          
-          loader.load(
-            'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
-            (font) => {
-              try {
-                const textGeometry = new TextGeometry('NEURASCALE', {
-                  font: font,
-                  size: 0.5,
-                  height: 0.1,
-                  curveSegments: isSafari ? 8 : 12, // Reduce complexity on Safari
-                  bevelEnabled: !isSafari, // Disable bevel on Safari for performance
-                  bevelThickness: 0.02,
-                  bevelSize: 0.02,
-                  bevelOffset: 0,
-                  bevelSegments: 3,
-                })
-
-                textGeometry.computeBoundingBox()
-                if (textGeometry.boundingBox) {
-                  const centerOffsetX = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x)
-                  const centerOffsetY = -0.5 * (textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y)
-
-                  // Create bright blue text with Safari-compatible materials
-                  const textMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x4185f4,
-                    emissive: 0x6aa6ff,
-                    emissiveIntensity: isSafari ? 1.0 : 1.5,
-                    transparent: false,
-                    side: THREE.DoubleSide
+        // Skip 3D text on Safari to avoid positioning issues
+        if (!isSafari) {
+          try {
+            const loader = new FontLoader()
+            
+            loader.load(
+              'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+              (font) => {
+                try {
+                  const textGeometry = new TextGeometry('NEURASCALE', {
+                    font: font,
+                    size: 0.5,
+                    height: 0.1,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.02,
+                    bevelOffset: 0,
+                    bevelSegments: 3,
                   })
 
-                  const textMesh = new THREE.Mesh(textGeometry, textMaterial)
-                  textMesh.position.x = centerOffsetX
-                  textMesh.position.y = centerOffsetY - 3
-                  textMesh.position.z = 0
-                  scene.add(textMesh)
+                  textGeometry.computeBoundingBox()
+                  if (textGeometry.boundingBox) {
+                    const centerOffsetX = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x)
+                    const centerOffsetY = -0.5 * (textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y)
+
+                    const textMaterial = new THREE.MeshStandardMaterial({
+                      color: 0x4185f4,
+                      emissive: 0x6aa6ff,
+                      emissiveIntensity: 1.5,
+                      transparent: false,
+                      side: THREE.DoubleSide
+                    })
+
+                    const textMesh = new THREE.Mesh(textGeometry, textMaterial)
+                    textMesh.position.x = centerOffsetX
+                    textMesh.position.y = centerOffsetY - 3
+                    textMesh.position.z = 0
+                    scene.add(textMesh)
+                  }
+                } catch (textErr) {
+                  console.warn('Text geometry creation failed:', textErr)
                 }
-              } catch (textErr) {
-                console.warn('Text geometry creation failed:', textErr)
+              },
+              undefined,
+              (err) => {
+                console.warn('Font loading failed, continuing without text:', err)
               }
-            },
-            undefined,
-            (err) => {
-              console.warn('Font loading failed, continuing without text:', err)
-            }
-          )
-        } catch (fontErr) {
-          console.warn('Font loader initialization failed:', fontErr)
+            )
+          } catch (fontErr) {
+            console.warn('Font loader initialization failed:', fontErr)
+          }
         }
         
         // Simple lighting

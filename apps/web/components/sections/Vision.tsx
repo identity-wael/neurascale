@@ -52,23 +52,36 @@ const VideoStrip = ({
                 muted
                 loop
                 playsInline
+                preload="metadata"
                 onError={(e) => {
-                  // Hide video and show placeholder on error
+                  console.log('Video failed to load:', video.src);
+                  // Hide video and keep placeholder visible
                   e.currentTarget.style.display = 'none';
+                }}
+                onLoadedData={(e) => {
+                  console.log('Video loaded successfully:', video.src);
+                  // Hide placeholder when video loads
                   const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (placeholder) placeholder.style.display = 'flex';
+                  if (placeholder) placeholder.style.display = 'none';
+                }}
+                onCanPlay={(e) => {
+                  // Ensure video plays even if autoplay is blocked
+                  e.currentTarget.play().catch(() => {
+                    console.log('Autoplay prevented for:', video.src);
+                  });
                 }}
               >
                 <source src={video.src} type="video/mp4" />
               </video>
               
-              {/* Fallback placeholder (hidden by default, shown on video error) */}
-              <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
+              {/* Fallback placeholder - shows if video fails or while loading */}
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-400/10 to-blue-600/10">
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-2 mx-auto">
                     <div className="w-0 h-0 border-l-4 border-l-white/80 border-y-2 border-y-transparent ml-1"></div>
                   </div>
                   <p className="text-white/60 text-xs">{video.title}</p>
+                  <p className="text-white/40 text-xs mt-1">Loading video...</p>
                 </div>
               </div>
               

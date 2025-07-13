@@ -474,50 +474,6 @@ const DSMPeriodicTable = () => {
       
       <div ref={containerRef} className="w-full h-full" />
       
-      <div className="absolute top-2 left-2 text-white">
-        <p className="text-xs text-gray-400">Drag to rotate • Click and drag to control</p>
-      </div>
-      
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-        <button
-          onClick={() => window.transformToTable?.()}
-          className="px-2 py-1 text-xs text-cyan-400 bg-transparent border border-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-all"
-          style={{ backgroundColor: 'rgba(0,127,127,0.25)' }}
-        >
-          TABLE
-        </button>
-        <button
-          onClick={() => window.transformToSphere?.()}
-          className="px-2 py-1 text-xs text-cyan-400 bg-transparent border border-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-all"
-          style={{ backgroundColor: 'rgba(0,127,127,0.25)' }}
-        >
-          SPHERE
-        </button>
-        <button
-          onClick={() => window.transformToHelix?.()}
-          className="px-2 py-1 text-xs text-cyan-400 bg-transparent border border-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-all"
-          style={{ backgroundColor: 'rgba(0,127,127,0.25)' }}
-        >
-          HELIX
-        </button>
-        <button
-          onClick={() => window.transformToGrid?.()}
-          className="px-2 py-1 text-xs text-cyan-400 bg-transparent border border-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-all"
-          style={{ backgroundColor: 'rgba(0,127,127,0.25)' }}
-        >
-          GRID
-        </button>
-        <button
-          onClick={() => {
-            const isRotating = window.toggleAutoRotate?.();
-            event.target.textContent = isRotating ? 'STOP' : 'ROTATE';
-          }}
-          className="px-2 py-1 text-xs text-cyan-400 bg-transparent border border-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-all"
-          style={{ backgroundColor: 'rgba(0,127,127,0.25)' }}
-        >
-          STOP
-        </button>
-      </div>
     </div>
   );
 };

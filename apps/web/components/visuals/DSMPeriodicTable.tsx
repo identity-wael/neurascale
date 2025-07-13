@@ -75,7 +75,7 @@ const DSMPeriodicTable = () => {
       const height = container.clientHeight;
       const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);
       camera.position.z = 2500;
-      camera.position.y = 100; // Move camera slightly up to look down at content
+      camera.position.y = -100; // Move camera down to show content higher up
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);

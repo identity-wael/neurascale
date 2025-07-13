@@ -115,7 +115,9 @@ function NvidiaH100() {
           
           {/* Fan Blades */}
           <mesh 
-            ref={(el) => el && (fanRefs.current[i] = el)}
+            ref={(el) => {
+              if (el) fanRefs.current[i] = el
+            }}
             position={[0, 0.05, 0]}
           >
             {Array.from({ length: 6 }).map((_, blade) => (

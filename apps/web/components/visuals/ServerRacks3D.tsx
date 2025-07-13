@@ -166,6 +166,7 @@ export default function ServerRacks3D() {
             maxDepthThreshold={1.4}
             color="#101010"
             metalness={0.5}
+            mirror={0}
           />
         </mesh>
         

@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import * as anime from 'animejs'
+// @ts-ignore
+import anime from 'animejs'
 
 function GPUChip() {
   const chipRef = useRef<HTMLDivElement>(null)
@@ -10,7 +11,7 @@ function GPUChip() {
 
   useEffect(() => {
     // Floating animation for the whole chip
-    anime.default({
+    anime({
       targets: chipRef.current,
       translateY: [-5, 5],
       duration: 3000,
@@ -20,7 +21,7 @@ function GPUChip() {
     })
 
     // Pulsing cores animation
-    anime.default({
+    anime({
       targets: '.gpu-core',
       scale: [0.9, 1.1],
       duration: 2000,
@@ -31,7 +32,7 @@ function GPUChip() {
     })
 
     // Data flow animation
-    anime.default({
+    anime({
       targets: '.data-flow',
       translateX: [-100, 100],
       opacity: [0, 1, 0],
@@ -42,7 +43,7 @@ function GPUChip() {
     })
 
     // Memory blocks animation
-    anime.default({
+    anime({
       targets: '.memory-block',
       backgroundColor: ['#0066ff', '#00aaff', '#0066ff'],
       duration: 1000,

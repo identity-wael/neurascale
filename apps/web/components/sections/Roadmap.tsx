@@ -3,6 +3,16 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import AnimatedText from '@/components/ui/AnimatedText'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for DSM Periodic Table to avoid SSR issues
+const DSMPeriodicTable = dynamic(
+  () => import('@/components/visuals/DSMPeriodicTable'),
+  { 
+    ssr: false,
+    loading: () => <div className="w-full h-96 bg-black/50 flex items-center justify-center text-white/60">Loading DSM Periodic Table...</div>
+  }
+)
 
 export default function Roadmap() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -100,6 +110,29 @@ export default function Roadmap() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </motion.div>
+        
+        {/* DSM Periodic Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          viewport={{ once: true }}
+          className="mt-16"
+        >
+          <div className="mb-8">
+            <h3 className="text-2xl md:text-3xl font-light text-white/90 mb-4">
+              DSM Technology Stack
+            </h3>
+            <p className="text-white/70 max-w-3xl">
+              Explore our comprehensive technology ecosystem through an interactive periodic table. 
+              Each element represents a core component of the NEURASCALE platform, from neural interfaces 
+              to cloud infrastructure and AI frameworks.
+            </p>
+          </div>
+          <div className="h-96 rounded-lg overflow-hidden border border-white/10">
+            <DSMPeriodicTable />
           </div>
         </motion.div>
       </motion.div>

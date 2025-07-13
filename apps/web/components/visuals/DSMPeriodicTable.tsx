@@ -74,7 +74,7 @@ const DSMPeriodicTable = () => {
       const width = container.clientWidth;
       const height = container.clientHeight;
       const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);
-      camera.position.z = 3000;
+      camera.position.z = 2500;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
@@ -105,8 +105,8 @@ const DSMPeriodicTable = () => {
         // Create HTML element
         const elementDiv = document.createElement('div');
         elementDiv.className = 'element';
-        elementDiv.style.width = '120px';
-        elementDiv.style.height = '160px';
+        elementDiv.style.width = '140px';
+        elementDiv.style.height = '180px';
         elementDiv.style.position = 'absolute';
         elementDiv.style.left = '0';
         elementDiv.style.top = '0';
@@ -144,7 +144,7 @@ const DSMPeriodicTable = () => {
         symbol.style.top = '40px';
         symbol.style.left = '0px';
         symbol.style.right = '0px';
-        symbol.style.fontSize = '40px';
+        symbol.style.fontSize = '36px';
         symbol.style.fontWeight = 'bold';
         symbol.style.color = 'rgba(255,255,255,0.75)';
         symbol.style.textShadow = '0 0 10px rgba(0,255,255,0.95)';
@@ -157,7 +157,7 @@ const DSMPeriodicTable = () => {
         details.style.bottom = '15px';
         details.style.left = '0px';
         details.style.right = '0px';
-        details.style.fontSize = '10px';
+        details.style.fontSize = '11px';
         details.style.color = 'rgba(127,255,255,0.75)';
         details.style.padding = '0 5px';
         elementDiv.appendChild(details);
@@ -196,7 +196,7 @@ const DSMPeriodicTable = () => {
 
         // Table position - ensure proper grid spacing
         const tableObject = new THREE.Object3D();
-        const spacing = 180;
+        const spacing = 200;
         const offsetX = -(Math.max(...table.map(e => e.col)) * spacing) / 2;
         const offsetY = (Math.max(...table.map(e => e.row)) * spacing) / 2;
         
@@ -255,7 +255,7 @@ const DSMPeriodicTable = () => {
           const scale = Math.max(0.1, Math.min(1, 2000 / distance));
           
           // Apply transform with proper centering
-          element.style.transform = `translate(${x - 60}px, ${y - 80}px) scale(${scale})`;
+          element.style.transform = `translate(${x - 70}px, ${y - 90}px) scale(${scale})`;
           
           // Hide elements behind camera
           if (projectedVector.z > 1) {
@@ -378,15 +378,15 @@ const DSMPeriodicTable = () => {
       const camera = cameraRef.current;
       
       // Adjust camera distance based on formation type
-      let targetCameraZ = 3000;
+      let targetCameraZ = 2500;
       if (targets === targetsRef.current.table) {
-        targetCameraZ = 2000; // Closer for table view
+        targetCameraZ = 1800; // Closer for table view
       } else if (targets === targetsRef.current.sphere) {
-        targetCameraZ = 3000;
+        targetCameraZ = 2500;
       } else if (targets === targetsRef.current.helix) {
-        targetCameraZ = 3000;
+        targetCameraZ = 2500;
       } else if (targets === targetsRef.current.grid) {
-        targetCameraZ = 3500;
+        targetCameraZ = 3000;
       }
       
       // Animate camera position

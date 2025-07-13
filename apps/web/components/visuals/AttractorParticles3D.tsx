@@ -16,15 +16,26 @@ export default function AttractorParticles3D() {
   useEffect(() => {
     const initAttractorParticles = async () => {
       try {
-        // WebGPU check removed for build compatibility
-
         // Dynamic import of Three.js modules
         const THREE = await import('three')
 
         if (!canvasRef.current) return
 
-        // Initialize renderer (fallback to WebGL since WebGPU modules not available in build)
-        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
+        // Initialize WebGPU renderer with fallback to WebGL
+        let renderer
+        try {
+          // Try to import WebGPU renderer
+          const WebGPUModule = await import('three/examples/jsm/renderers/webgpu/WebGPURenderer.js')
+          if (navigator.gpu && WebGPUModule.default) {
+            renderer = new WebGPUModule.default({ canvas: canvasRef.current, antialias: true })
+            console.log('Using WebGPU renderer')
+          } else {
+            throw new Error('WebGPU not available')
+          }
+        } catch (webgpuError) {
+          console.warn('WebGPU not available, falling back to WebGL:', webgpuError)
+          renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
+        }
 
         renderer.setPixelRatio(window.devicePixelRatio)
         renderer.setSize(window.innerWidth, window.innerHeight)
@@ -43,8 +54,8 @@ export default function AttractorParticles3D() {
         directionalLight.position.set(4, 2, 0)
         scene.add(directionalLight)
 
-        // Create simple particle system with galaxy colors (fallback for WebGL)
-        const particleCount = 50000
+        // Create particle system with galaxy colors
+        const particleCount = 25000
         const geometry = new THREE.BufferGeometry()
         const positions = new Float32Array(particleCount * 3)
         const colors = new Float32Array(particleCount * 3)
@@ -76,10 +87,10 @@ export default function AttractorParticles3D() {
           positions[i3 + 1] = baseY + (Math.random() - 0.5) * spread
           positions[i3 + 2] = baseZ + (Math.random() - 0.5) * spread
 
-          // Initial velocities
-          velocities[i3] = (Math.random() - 0.5) * 0.02
-          velocities[i3 + 1] = (Math.random() - 0.5) * 0.02
-          velocities[i3 + 2] = (Math.random() - 0.5) * 0.02
+          // Initial velocities (slower)
+          velocities[i3] = (Math.random() - 0.5) * 0.005
+          velocities[i3 + 1] = (Math.random() - 0.5) * 0.005
+          velocities[i3 + 2] = (Math.random() - 0.5) * 0.005
 
           // Color based on distance from center
           const distance = Math.sqrt(positions[i3] ** 2 + positions[i3 + 1] ** 2 + positions[i3 + 2] ** 2)
@@ -112,14 +123,14 @@ export default function AttractorParticles3D() {
         // Animation variables
         let time = 0
         const attractorPositions = [
-          new THREE.Vector3(-2, 0, 0),
-          new THREE.Vector3(2, 0, -1),
-          new THREE.Vector3(0, 1, 2)
+          new THREE.Vector3(-1.5, 0, 0),
+          new THREE.Vector3(1.5, 0, -0.5),
+          new THREE.Vector3(0, 0.5, 1.5)
         ]
 
         // Animation loop
         const animate = () => {
-          time += 0.01
+          time += 0.005  // Slower time progression
 
           // Update particle positions with attractor physics
           const positionArray = geometry.attributes.position.array as Float32Array
@@ -143,39 +154,60 @@ export default function AttractorParticles3D() {
               const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
               
               if (distance > 0.1) {
-                const force = 0.0001 / (distance * distance)
+                const force = 0.00005 / (distance * distance)  // Weaker force
                 forceX += dx * force
                 forceY += dy * force
                 forceZ += dz * force
 
-                // Add spinning motion
-                const spinForce = 0.0002
+                // Add spinning motion (reduced)
+                const spinForce = 0.00005
                 forceX += -dy * spinForce
                 forceY += dx * spinForce
               }
             })
 
-            // Update velocities
+            // Update velocities (with limits)
             velocities[i3] += forceX
             velocities[i3 + 1] += forceY
             velocities[i3 + 2] += forceZ
 
-            // Apply damping
-            velocities[i3] *= 0.99
-            velocities[i3 + 1] *= 0.99
-            velocities[i3 + 2] *= 0.99
+            // Limit maximum velocity to prevent particles flying away
+            const maxVel = 0.01
+            velocities[i3] = Math.max(-maxVel, Math.min(maxVel, velocities[i3]))
+            velocities[i3 + 1] = Math.max(-maxVel, Math.min(maxVel, velocities[i3 + 1]))
+            velocities[i3 + 2] = Math.max(-maxVel, Math.min(maxVel, velocities[i3 + 2]))
+
+            // Apply stronger damping
+            velocities[i3] *= 0.995
+            velocities[i3 + 1] *= 0.995
+            velocities[i3 + 2] *= 0.995
 
             // Update positions
             positionArray[i3] += velocities[i3]
             positionArray[i3 + 1] += velocities[i3 + 1]
             positionArray[i3 + 2] += velocities[i3 + 2]
 
-            // Update colors based on speed
-            const speed = Math.sqrt(velocities[i3] ** 2 + velocities[i3 + 1] ** 2 + velocities[i3 + 2] ** 2)
-            const speedFactor = Math.min(speed * 100, 1)
+            // Boundary checking to keep particles in view
+            const boundary = 8
+            if (Math.abs(positionArray[i3]) > boundary) {
+              positionArray[i3] = Math.sign(positionArray[i3]) * boundary
+              velocities[i3] *= -0.5
+            }
+            if (Math.abs(positionArray[i3 + 1]) > boundary) {
+              positionArray[i3 + 1] = Math.sign(positionArray[i3 + 1]) * boundary
+              velocities[i3 + 1] *= -0.5
+            }
+            if (Math.abs(positionArray[i3 + 2]) > boundary) {
+              positionArray[i3 + 2] = Math.sign(positionArray[i3 + 2]) * boundary
+              velocities[i3 + 2] *= -0.5
+            }
+
+            // Update colors based on distance from center
+            const distance = Math.sqrt(positionArray[i3] ** 2 + positionArray[i3 + 1] ** 2 + positionArray[i3 + 2] ** 2)
+            const normalizedDistance = Math.min(distance / 6, 1)
             
             const mixedColor = colorInside.clone()
-            mixedColor.lerp(colorOutside, speedFactor)
+            mixedColor.lerp(colorOutside, normalizedDistance)
 
             colorArray[i3] = mixedColor.r
             colorArray[i3 + 1] = mixedColor.g
@@ -186,9 +218,10 @@ export default function AttractorParticles3D() {
           geometry.attributes.position.needsUpdate = true
           geometry.attributes.color.needsUpdate = true
 
-          // Rotate camera around the scene
-          camera.position.x = Math.cos(time * 0.1) * 8
-          camera.position.z = Math.sin(time * 0.1) * 8
+          // Slower camera rotation
+          camera.position.x = Math.cos(time * 0.05) * 6
+          camera.position.z = Math.sin(time * 0.05) * 6
+          camera.position.y = 2 + Math.sin(time * 0.03) * 1
           camera.lookAt(scene.position)
 
           renderer.render(scene, camera)
@@ -207,7 +240,9 @@ export default function AttractorParticles3D() {
 
         return () => {
           window.removeEventListener('resize', handleResize)
-          renderer.dispose()
+          if (renderer && 'dispose' in renderer) {
+            renderer.dispose()
+          }
         }
 
       } catch (err) {

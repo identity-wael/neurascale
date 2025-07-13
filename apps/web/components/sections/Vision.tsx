@@ -42,9 +42,13 @@ const VideoStrip = ({
             onMouseLeave={() => setHoveredIndex(null)}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
+            style={{
+              position: 'relative',
+              overflow: 'hidden'
+            }}
           >
             {/* Video element with fallback */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-blue-600/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-blue-600/20 overflow-hidden">
               {/* Show video if it exists, otherwise show placeholder */}
               <video
                 className="w-full h-full object-cover object-center"
@@ -57,7 +61,10 @@ const VideoStrip = ({
                   objectFit: 'cover',
                   objectPosition: 'center',
                   width: '100%',
-                  height: '100%'
+                  height: '100%',
+                  minWidth: '100%',
+                  minHeight: '100%',
+                  transform: 'scale(1.01)'
                 }}
                 onError={(e) => {
                   console.log('Video failed to load:', video.src);

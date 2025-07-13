@@ -32,17 +32,41 @@ export default function DataUniverse3D() {
 
         if (!canvasRef.current) return
 
-        // Initialize renderer with browser-specific optimizations
-        const rendererOptions = {
-          canvas: canvasRef.current,
-          antialias: !isSafari, // Disable antialiasing on Safari for better performance
-          alpha: true,
-          preserveDrawingBuffer: false,
-          powerPreference: isSafari ? 'default' : 'high-performance' as WebGLPowerPreference
+        // Initialize renderer: WebGPU for Chrome, WebGL for Safari
+        let renderer: any
+        
+        if (!isSafari && hasWebGPU) {
+          try {
+            // Try WebGPU for Chrome/Edge
+            const { WebGPURenderer } = await import('three/addons/renderers/webgpu/WebGPURenderer.js')
+            renderer = new WebGPURenderer({ canvas: canvasRef.current })
+            console.log('Using WebGPU renderer')
+          } catch (webgpuError) {
+            console.log('WebGPU failed, falling back to WebGL:', webgpuError)
+            // Fallback to WebGL
+            const rendererOptions = {
+              canvas: canvasRef.current,
+              antialias: true,
+              alpha: true,
+              preserveDrawingBuffer: false,
+              powerPreference: 'high-performance' as WebGLPowerPreference
+            }
+            renderer = new THREE.WebGLRenderer(rendererOptions)
+          }
+        } else {
+          // Use WebGL for Safari and browsers without WebGPU
+          const rendererOptions = {
+            canvas: canvasRef.current,
+            antialias: !isSafari,
+            alpha: true,
+            preserveDrawingBuffer: false,
+            powerPreference: isSafari ? 'default' : 'high-performance' as WebGLPowerPreference
+          }
+          renderer = new THREE.WebGLRenderer(rendererOptions)
+          console.log('Using WebGL renderer')
         }
         
-        const renderer = new THREE.WebGLRenderer(rendererOptions)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2)) // Limit pixel ratio on Safari
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2))
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.setClearColor(0x000000)
         

@@ -117,19 +117,19 @@ This command uses Next.js's built-in ESLint configuration to analyze the codebas
 
 ## **5. Project Structure**
 
-The project follows a standard Next.js `app` directory structure. Here are some of the key files and directories:
+The project follows a standard Next.js `app` directory structure within the `webapp/` folder. Here are some of the key files and directories:
 
-  * **`app/`**: Contains the core application, with each sub-directory mapping to a URL route.
+  * **`webapp/app/`**: Contains the core application, with each sub-directory mapping to a URL route.
       * **`layout.tsx`**: The main layout that wraps all pages, including the `AuthProvider`.
       * **`page.tsx`**: The main landing page of the application.
       * **`login/page.tsx`**: The login page component.
       * **`signup/page.tsx`**: The signup page component.
       * **`profile/page.tsx`**: The user profile page, which is a protected route.
-  * **`components/`**: Contains reusable React components.
+  * **`webapp/components/`**: Contains reusable React components.
       * **`AuthProvider.tsx`**: A client-side component that manages user authentication state.
       * **`ui/`**: Directory for reusable UI elements like `Button` and `Card`.
-  * **`public/`**: For static assets like images and fonts.
-  * **`package.json`**: Defines project scripts and dependencies.
+  * **`webapp/public/`**: For static assets like images and fonts.
+  * **`webapp/package.json`**: Defines project scripts and dependencies.
 
 -----
 

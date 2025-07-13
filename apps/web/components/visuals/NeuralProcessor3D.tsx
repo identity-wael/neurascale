@@ -26,13 +26,19 @@ function ProcessorChip() {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
+      {/* Debug cube to verify this component renders */}
+      <mesh position={[-3, 0, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#ffff00" />
+      </mesh>
+      
       {/* Base PCB */}
-      <mesh ref={meshRef as any} castShadow receiveShadow>
-        <boxGeometry args={[4, 0.15, 4]} />
+      <mesh ref={meshRef as any}>
+        <boxGeometry args={[2, 0.1, 2]} />
         <meshStandardMaterial 
-          color="#0a0a0a"
-          metalness={0.9}
-          roughness={0.2}
+          color="#333333"
+          metalness={0.5}
+          roughness={0.5}
         />
       </mesh>
 
@@ -57,14 +63,12 @@ function ProcessorChip() {
       </mesh>
 
       {/* Glowing green core */}
-      <mesh ref={glowRef as any} position={[0, 0.2, 0]}>
-        <boxGeometry args={[1.2, 0.05, 1.2]} />
+      <mesh ref={glowRef as any} position={[0, 0.15, 0]}>
+        <boxGeometry args={[1, 0.1, 1]} />
         <meshStandardMaterial 
           color="#00ff88"
           emissive="#00ff88"
-          emissiveIntensity={hovered ? 1 : 0.5}
-          metalness={0.5}
-          roughness={0}
+          emissiveIntensity={1}
         />
       </mesh>
 
@@ -108,24 +112,27 @@ export default function NeuralProcessor3D() {
   return (
     <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%' }}>
       {/* Debug indicator */}
-      <div className="absolute top-4 left-4 z-50 text-green-400 text-xs">Neural Processor Loading...</div>
+      <div className="absolute top-4 left-4 z-50 text-green-400 text-xs bg-black/50 p-2">
+        Neural Processor Active - Look for rotating objects
+      </div>
       
       <Canvas
-        shadows
         style={{ width: '100%', height: '100%' }}
+        camera={{ position: [0, 0, 10], fov: 50 }}
         gl={{ 
           antialias: true, 
-          alpha: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.5
+          alpha: true
         }}
       >
-        <PerspectiveCamera makeDefault position={[5, 4, 5]} fov={45} />
+        <ambientLight intensity={0.6} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <pointLight position={[0, 0, 10]} intensity={0.5} color="#00ff88" />
         
-        <ambientLight intensity={0.2} />
-        <pointLight position={[10, 10, 10]} intensity={0.5} castShadow />
-        <pointLight position={[-10, 10, -10]} intensity={0.3} />
-        <pointLight position={[0, 5, 0]} intensity={0.5} color="#00ff88" />
+        {/* Simple test cube to verify Canvas is working */}
+        <mesh position={[3, 0, 0]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#ff0000" />
+        </mesh>
         
         <ProcessorChip />
         <CircuitLines />

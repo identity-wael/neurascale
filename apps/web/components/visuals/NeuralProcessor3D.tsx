@@ -27,11 +27,6 @@ function ProcessorChip() {
       onPointerOut={() => setHovered(false)}
       position={[0, 0, 0]}
     >
-      {/* Large debug cube to verify this component renders */}
-      <mesh position={[0, 3, 0]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="#ffff00" emissive="#ffff00" emissiveIntensity={0.3} />
-      </mesh>
       
       {/* Base PCB - made larger and more visible */}
       <mesh ref={meshRef as any} position={[0, 0, 0]}>
@@ -94,21 +89,94 @@ function ProcessorChip() {
           <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} />
         </mesh>
       ))}
+      
+      {/* Neural network nodes floating around */}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <mesh 
+          key={`node-${i}`} 
+          position={[
+            Math.cos(i * 0.52) * 6,
+            Math.sin(i * 0.3) * 2 + 1,
+            Math.sin(i * 0.52) * 6
+          ]}
+        >
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial 
+            color="#00aaff" 
+            emissive="#00aaff" 
+            emissiveIntensity={0.6}
+          />
+        </mesh>
+      ))}
+      
+      {/* Data connections */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <mesh 
+          key={`connection-${i}`} 
+          position={[
+            Math.cos(i * 1.05) * 3.5,
+            0.8,
+            Math.sin(i * 1.05) * 3.5
+          ]}
+          rotation={[0, i * 1.05, 0]}
+        >
+          <cylinderGeometry args={[0.02, 0.02, 2, 8]} />
+          <meshStandardMaterial 
+            color="#0088ff" 
+            emissive="#0088ff" 
+            emissiveIntensity={0.3}
+            transparent
+            opacity={0.7}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }
 
 function CircuitLines() {
+  const linesRef = useRef<THREE.Group>(null)
+  
+  useFrame((state) => {
+    if (linesRef.current) {
+      linesRef.current.rotation.y = state.clock.elapsedTime * 0.1
+    }
+  })
+
   return (
-    <group position={[0, -2, 0]}>
+    <group ref={linesRef as any} position={[0, -1, 0]}>
+      {/* Animated circuit rings */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[3, 8, 6, 1]} />
-        <meshBasicMaterial color="#003366" opacity={0.3} transparent />
+        <ringGeometry args={[4, 6, 8, 1]} />
+        <meshBasicMaterial color="#00ff88" opacity={0.4} transparent />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[5, 6, 6, 1]} />
-        <meshBasicMaterial color="#003366" opacity={0.2} transparent />
+        <ringGeometry args={[6, 8, 12, 1]} />
+        <meshBasicMaterial color="#0066ff" opacity={0.3} transparent />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[8, 10, 16, 1]} />
+        <meshBasicMaterial color="#004488" opacity={0.2} transparent />
+      </mesh>
+      
+      {/* Data flow particles */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <mesh 
+          key={i} 
+          position={[
+            Math.cos(i * 0.314) * (4 + i * 0.3),
+            0.1,
+            Math.sin(i * 0.314) * (4 + i * 0.3)
+          ]}
+        >
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshStandardMaterial 
+            color="#00ffaa" 
+            emissive="#00ffaa" 
+            emissiveIntensity={0.8}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }
@@ -116,10 +184,6 @@ function CircuitLines() {
 export default function NeuralProcessor3D() {
   return (
     <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%', zIndex: 1 }}>
-      {/* Debug indicator */}
-      <div className="absolute top-4 left-4 z-50 text-green-400 text-xs bg-black/50 p-2">
-        Neural Processor Active - Objects should be visible
-      </div>
       
       <Canvas
         style={{ width: '100%', height: '100%', display: 'block' }}
@@ -135,16 +199,6 @@ export default function NeuralProcessor3D() {
         <pointLight position={[-5, 5, 5]} intensity={1} />
         <pointLight position={[0, 0, 8]} intensity={1} color="#00ff88" />
         
-        {/* Large visible test cubes */}
-        <mesh position={[4, 0, 0]}>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
-        </mesh>
-        
-        <mesh position={[-4, 0, 0]}>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="#0000ff" emissive="#0000ff" emissiveIntensity={0.3} />
-        </mesh>
         
         <ProcessorChip />
         <CircuitLines />

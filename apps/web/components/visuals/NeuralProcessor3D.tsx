@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import anime from 'animejs/lib/anime.es.js'
+import anime from 'animejs'
 
 function GPUChip() {
   const chipRef = useRef<HTMLDivElement>(null)

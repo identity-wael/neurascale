@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
-import AnimatedText from '@/components/ui/AnimatedText'
 
 // SVG Icons matching the professional style
 const MobilityIcon = () => (
@@ -128,10 +127,6 @@ export default function Solution() {
   return (
     <section id="solution" ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
       <motion.div style={{ scale }} className="relative z-10">
-        <AnimatedText
-          text="Core capabilities that unlock human potential"
-          className="text-3xl md:text-4xl lg:text-5xl font-light mb-16 max-w-4xl"
-        />
         
         <motion.p
           initial={{ opacity: 0 }}

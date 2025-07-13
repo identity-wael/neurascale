@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
-import AnimatedText from '@/components/ui/AnimatedText'
 
 // SVG Icons for contact channels
 const ChatIcon = () => (
@@ -174,21 +173,7 @@ export default function Contact() {
   return (
     <section id="contact" ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
       <motion.div style={{ scale }} className="relative z-10">
-        <AnimatedText
-          text="Let's unlock human potential together"
-          className="text-3xl md:text-4xl lg:text-5xl font-light mb-16 max-w-4xl"
-        />
         
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-          className="text-lg md:text-xl text-white/80 mb-20 max-w-4xl"
-        >
-          Whether you're a healthcare provider, researcher, developer, or someone interested in neural interface technology, 
-          we'd love to hear from you. Reach out to explore how NEURASCALE can advance your work.
-        </motion.p>
 
         {/* Contact Form */}
         <div className="grid lg:grid-cols-3 gap-12 mb-24">

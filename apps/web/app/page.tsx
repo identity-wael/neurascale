@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button, Card, CardContent } from "@neurascale/ui";
 import { BrainCircuit, Cloud, Zap, Menu } from "lucide-react";
 
 export default function Home() {

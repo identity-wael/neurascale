@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from '../../components/AuthProvider'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()

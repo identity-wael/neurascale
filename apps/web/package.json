@@ -1,0 +1,35 @@
+{
+  "name": "@neurascale/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "clean": "rm -rf .next && rm -rf .turbo"
+  },
+  "dependencies": {
+    "@neurascale/ui": "file:../packages/ui",
+    "@neurascale/utils": "file:../packages/utils",
+    "@neurascale/api": "file:../packages/api",
+    "@neurascale/config": "file:../packages/config",
+    "@react-three/drei": "^9.88.4",
+    "@react-three/fiber": "^8.13.5",
+    "lucide-react": "^0.436.0",
+    "next": "14.2.7",
+    "react": "^18",
+    "react-dom": "^18",
+    "three": "^0.178.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.7",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

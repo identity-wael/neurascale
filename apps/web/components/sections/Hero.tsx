@@ -38,7 +38,7 @@ export default function Hero() {
   return (
     <section ref={containerRef} className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden">
       {/* 3D Neural Processor Background */}
-      <div className="absolute inset-0" style={{ zIndex: 1 }}>
+      <div className="absolute inset-0 opacity-30" style={{ zIndex: 1 }}>
         <Suspense fallback={<div className="absolute inset-0 bg-red-500/20 flex items-center justify-center text-white">Loading Neural Processor...</div>}>
           <NeuralProcessor3D />
         </Suspense>

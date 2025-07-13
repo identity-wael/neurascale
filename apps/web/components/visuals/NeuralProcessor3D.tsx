@@ -119,25 +119,11 @@ export default function NeuralProcessor3D() {
           const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
           const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
 
-          // Create dark transparent background panel behind text
-          const panelGeometry = new THREE.PlaneGeometry(8, 2)
-          const panelMaterial = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            transparent: true,
-            opacity: 0.7,
-            side: THREE.DoubleSide
-          })
-          const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial)
-          panelMesh.position.x = 0
-          panelMesh.position.y = -3
-          panelMesh.position.z = -0.1  // Behind text, in front of galaxy
-          scene.add(panelMesh)
-
-          // Create bright white text with intense glow
+          // Create bright blue text with strong glow
           const textMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff,
-            emissiveIntensity: 2.5,
+            color: 0x4185f4,
+            emissive: 0x6aa6ff,
+            emissiveIntensity: 1.5,
             transparent: false
           })
 

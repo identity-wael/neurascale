@@ -5,131 +5,191 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 
-function ProcessorChip() {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const glowRef = useRef<THREE.Mesh>(null)
+function NvidiaH100() {
+  const boardRef = useRef<THREE.Group>(null)
+  const fanRefs = useRef<THREE.Mesh[]>([])
   const [hovered, setHovered] = useState(false)
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1
+    // Gentle floating animation
+    if (boardRef.current) {
+      boardRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05
+      boardRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.02
     }
-    if (glowRef.current && glowRef.current.material) {
-      const material = glowRef.current.material as THREE.MeshStandardMaterial
-      material.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3
-    }
+    
+    // Spinning fans
+    fanRefs.current.forEach((fan, i) => {
+      if (fan) {
+        fan.rotation.z = state.clock.elapsedTime * 8 + i
+      }
+    })
   })
 
   return (
     <group
+      ref={boardRef as any}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
       position={[0, 0, 0]}
     >
-      
-      {/* Base PCB - made larger and more visible */}
-      <mesh ref={meshRef as any} position={[0, 0, 0]}>
-        <boxGeometry args={[4, 0.2, 4]} />
+      {/* Main PCB Board */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[8, 0.15, 5]} />
         <meshStandardMaterial 
-          color="#333333"
-          metalness={0.5}
-          roughness={0.5}
-          emissive="#111111"
-          emissiveIntensity={0.1}
+          color="#0a4f0a"
+          metalness={0.3}
+          roughness={0.7}
         />
       </mesh>
 
-      {/* PCB Surface Details */}
-      <mesh position={[0, 0.08, 0]}>
-        <planeGeometry args={[3.8, 3.8]} />
+      {/* GPU Die/Chip */}
+      <mesh position={[0, 0.2, 0]}>
+        <boxGeometry args={[2.5, 0.1, 2.5]} />
         <meshStandardMaterial 
-          color="#111111"
-          metalness={0.7}
-          roughness={0.3}
-        />
-      </mesh>
-
-      {/* Central processor with glow - made larger */}
-      <mesh position={[0, 0.3, 0]}>
-        <boxGeometry args={[3, 0.2, 3]} />
-        <meshStandardMaterial 
-          color="#000000"
-          metalness={0.95}
+          color="#1a1a1a"
+          metalness={0.9}
           roughness={0.1}
-          emissive="#001100"
-          emissiveIntensity={0.2}
+          emissive="#00ff00"
+          emissiveIntensity={0.3}
         />
       </mesh>
 
-      {/* Glowing green core - made larger and brighter */}
-      <mesh ref={glowRef as any} position={[0, 0.4, 0]}>
-        <boxGeometry args={[2.5, 0.2, 2.5]} />
-        <meshStandardMaterial 
-          color="#00ff88"
-          emissive="#00ff88"
-          emissiveIntensity={1.5}
-        />
-      </mesh>
-
-      {/* Core details */}
-      <mesh position={[0, 0.25, 0]}>
-        <boxGeometry args={[0.8, 0.02, 0.8]} />
-        <meshStandardMaterial 
-          color="#00ff88"
-          emissive="#00ff88"
-          emissiveIntensity={0.8}
-        />
-      </mesh>
-
-      {/* Connection pins - simplified */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <mesh key={`pin-${i}`} position={[2.1, -0.05, -1.2 + i * 0.3]}>
-          <boxGeometry args={[0.2, 0.05, 0.08]} />
-          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} />
-        </mesh>
-      ))}
-      
-      {/* Neural network nodes floating around */}
-      {Array.from({ length: 12 }).map((_, i) => (
-        <mesh 
-          key={`node-${i}`} 
-          position={[
-            Math.cos(i * 0.52) * 6,
-            Math.sin(i * 0.3) * 2 + 1,
-            Math.sin(i * 0.52) * 6
-          ]}
-        >
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshStandardMaterial 
-            color="#00aaff" 
-            emissive="#00aaff" 
-            emissiveIntensity={0.6}
-          />
-        </mesh>
-      ))}
-      
-      {/* Data connections */}
+      {/* HBM Memory Modules (6 stacks) */}
       {Array.from({ length: 6 }).map((_, i) => (
         <mesh 
-          key={`connection-${i}`} 
+          key={`hbm-${i}`} 
           position={[
-            Math.cos(i * 1.05) * 3.5,
-            0.8,
-            Math.sin(i * 1.05) * 3.5
+            (i % 3 - 1) * 2.2,
+            0.25,
+            (i < 3 ? -2.2 : 2.2)
           ]}
-          rotation={[0, i * 1.05, 0]}
         >
-          <cylinderGeometry args={[0.02, 0.02, 2, 8]} />
+          <boxGeometry args={[0.6, 0.3, 0.6]} />
           <meshStandardMaterial 
-            color="#0088ff" 
-            emissive="#0088ff" 
-            emissiveIntensity={0.3}
-            transparent
-            opacity={0.7}
+            color="#2a2a2a"
+            metalness={0.8}
+            roughness={0.2}
+            emissive="#0066ff"
+            emissiveIntensity={0.2}
           />
         </mesh>
       ))}
+
+      {/* Heat Sink Base */}
+      <mesh position={[0, 0.4, 0]}>
+        <boxGeometry args={[3.5, 0.2, 3.5]} />
+        <meshStandardMaterial 
+          color="#888888"
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+
+      {/* Heat Sink Fins */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <mesh 
+          key={`fin-${i}`} 
+          position={[-1.6 + i * 0.16, 0.7, 0]}
+        >
+          <boxGeometry args={[0.1, 0.4, 3]} />
+          <meshStandardMaterial 
+            color="#aaaaaa"
+            metalness={0.8}
+            roughness={0.3}
+          />
+        </mesh>
+      ))}
+
+      {/* Cooling Fans */}
+      {Array.from({ length: 2 }).map((_, i) => (
+        <group key={`fan-group-${i}`} position={[(i - 0.5) * 2.5, 1.2, 0]}>
+          {/* Fan Housing */}
+          <mesh>
+            <cylinderGeometry args={[0.8, 0.8, 0.2, 12]} />
+            <meshStandardMaterial 
+              color="#333333"
+              metalness={0.7}
+              roughness={0.4}
+            />
+          </mesh>
+          
+          {/* Fan Blades */}
+          <mesh 
+            ref={(el) => el && (fanRefs.current[i] = el)}
+            position={[0, 0.05, 0]}
+          >
+            {Array.from({ length: 6 }).map((_, blade) => (
+              <mesh 
+                key={`blade-${blade}`}
+                position={[
+                  Math.cos(blade * Math.PI / 3) * 0.4,
+                  0,
+                  Math.sin(blade * Math.PI / 3) * 0.4
+                ]}
+                rotation={[0, blade * Math.PI / 3, 0]}
+              >
+                <boxGeometry args={[0.6, 0.02, 0.1]} />
+                <meshStandardMaterial 
+                  color="#444444"
+                  metalness={0.5}
+                  roughness={0.5}
+                />
+              </mesh>
+            ))}
+          </mesh>
+        </group>
+      ))}
+
+      {/* Power Connectors */}
+      {Array.from({ length: 2 }).map((_, i) => (
+        <mesh 
+          key={`power-${i}`} 
+          position={[3.5, 0.3, (i - 0.5) * 1.5]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <cylinderGeometry args={[0.15, 0.15, 0.5, 8]} />
+          <meshStandardMaterial 
+            color="#ffaa00"
+            metalness={0.8}
+            roughness={0.2}
+          />
+        </mesh>
+      ))}
+
+      {/* PCIe Connector */}
+      <mesh position={[-3.8, 0.1, 0]}>
+        <boxGeometry args={[0.3, 0.2, 4.5]} />
+        <meshStandardMaterial 
+          color="#ffd700"
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+
+      {/* Status LEDs */}
+      {Array.from({ length: 4 }).map((_, i) => (
+        <mesh 
+          key={`led-${i}`} 
+          position={[2.5 + i * 0.3, 0.2, 2]}
+        >
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshStandardMaterial 
+            color={i < 2 ? "#00ff00" : "#ff0000"}
+            emissive={i < 2 ? "#00ff00" : "#ff0000"}
+            emissiveIntensity={0.8}
+          />
+        </mesh>
+      ))}
+
+      {/* NVIDIA Logo Area */}
+      <mesh position={[0, 0.31, -1.8]}>
+        <boxGeometry args={[1.5, 0.02, 0.3]} />
+        <meshStandardMaterial 
+          color="#76b900"
+          emissive="#76b900"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
     </group>
   )
 }
@@ -200,7 +260,7 @@ export default function NeuralProcessor3D() {
         <pointLight position={[0, 0, 8]} intensity={1} color="#00ff88" />
         
         
-        <ProcessorChip />
+        <NvidiaH100 />
         <CircuitLines />
       </Canvas>
     </div>

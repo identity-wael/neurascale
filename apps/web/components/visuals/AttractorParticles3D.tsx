@@ -43,8 +43,8 @@ export default function AttractorParticles3D() {
 
         // Setup scene and camera
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 0.1, 100)
-        camera.position.set(3, 5, 8)
+        const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100)
+        camera.position.set(0, 8, 15)
 
         // Simple lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
@@ -69,20 +69,20 @@ export default function AttractorParticles3D() {
         for (let i = 0; i < particleCount; i++) {
           const i3 = i * 3
 
-          // Create multiple attractor points
+          // Create multiple attractor points centered around origin
           const attractorIndex = i % 3
           let baseX, baseY, baseZ
           
           if (attractorIndex === 0) {
             baseX = -2; baseY = 0; baseZ = 0
           } else if (attractorIndex === 1) {
-            baseX = 2; baseY = 0; baseZ = -1
+            baseX = 2; baseY = 0; baseZ = 0
           } else {
-            baseX = 0; baseY = 1; baseZ = 2
+            baseX = 0; baseY = 0; baseZ = 2
           }
 
           // Add some randomness around attractor points
-          const spread = 3
+          const spread = 2
           positions[i3] = baseX + (Math.random() - 0.5) * spread
           positions[i3 + 1] = baseY + (Math.random() - 0.5) * spread
           positions[i3 + 2] = baseZ + (Math.random() - 0.5) * spread
@@ -123,9 +123,9 @@ export default function AttractorParticles3D() {
         // Animation variables
         let time = 0
         const attractorPositions = [
-          new THREE.Vector3(-1.5, 0, 0),
-          new THREE.Vector3(1.5, 0, -0.5),
-          new THREE.Vector3(0, 0.5, 1.5)
+          new THREE.Vector3(-2, 0, 0),
+          new THREE.Vector3(2, 0, 0),
+          new THREE.Vector3(0, 0, 2)
         ]
 
         // Animation loop
@@ -187,8 +187,8 @@ export default function AttractorParticles3D() {
             positionArray[i3 + 1] += velocities[i3 + 1]
             positionArray[i3 + 2] += velocities[i3 + 2]
 
-            // Boundary checking to keep particles in view
-            const boundary = 8
+            // Boundary checking to keep particles in view (larger boundary)
+            const boundary = 12
             if (Math.abs(positionArray[i3]) > boundary) {
               positionArray[i3] = Math.sign(positionArray[i3]) * boundary
               velocities[i3] *= -0.5
@@ -218,11 +218,11 @@ export default function AttractorParticles3D() {
           geometry.attributes.position.needsUpdate = true
           geometry.attributes.color.needsUpdate = true
 
-          // Slower camera rotation
-          camera.position.x = Math.cos(time * 0.05) * 6
-          camera.position.z = Math.sin(time * 0.05) * 6
-          camera.position.y = 2 + Math.sin(time * 0.03) * 1
-          camera.lookAt(scene.position)
+          // Slower camera rotation centered around origin
+          camera.position.x = Math.cos(time * 0.03) * 12
+          camera.position.z = Math.sin(time * 0.03) * 12 + 8
+          camera.position.y = 6 + Math.sin(time * 0.02) * 2
+          camera.lookAt(0, 0, 0)
 
           renderer.render(scene, camera)
         }

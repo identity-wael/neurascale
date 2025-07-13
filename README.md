@@ -104,9 +104,10 @@ To maintain code consistency and quality, please adhere to the following guideli
 
 ### **4.2. Linting**
 
-Before committing any changes, run the linter to check for code quality and style issues:
+Before committing any changes, navigate to the webapp directory and run the linter to check for code quality and style issues:
 
 ```bash
+cd webapp
 npm run lint
 ```
 

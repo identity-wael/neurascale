@@ -75,7 +75,7 @@ const DSMPeriodicTable = () => {
       const height = container.clientHeight;
       const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);
       camera.position.z = 2500;
-      camera.position.y = -200; // Move camera down to center the view
+      camera.position.y = 300; // Move camera up to look down at content
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
@@ -199,7 +199,7 @@ const DSMPeriodicTable = () => {
         const tableObject = new THREE.Object3D();
         const spacing = 200;
         const offsetX = -(Math.max(...table.map(e => e.col)) * spacing) / 2;
-        const offsetY = (Math.max(...table.map(e => e.row)) * spacing) / 2 - 100; // Shift down for better centering
+        const offsetY = (Math.max(...table.map(e => e.row)) * spacing) / 2 - 300; // Shift down for better centering
         
         tableObject.position.x = (element.col - 1) * spacing + offsetX;
         tableObject.position.y = -(element.row - 1) * spacing + offsetY;
@@ -211,12 +211,12 @@ const DSMPeriodicTable = () => {
         const theta = Math.sqrt(table.length * Math.PI) * phi;
         const sphereObject = new THREE.Object3D();
         sphereObject.position.setFromSphericalCoords(1200, phi, theta);
-        sphereObject.position.y -= 100; // Shift sphere down for better centering
+        sphereObject.position.y -= 300; // Shift sphere down for better centering
         targets.sphere.push(sphereObject);
 
         // Helix position
         const helixTheta = i * 0.25 + Math.PI;
-        const helixY = -(i * 12) + 400; // Shift helix down for better centering
+        const helixY = -(i * 12) + 200; // Shift helix down for better centering
         const helixObject = new THREE.Object3D();
         helixObject.position.setFromCylindricalCoords(1200, helixTheta, helixY);
         targets.helix.push(helixObject);
@@ -224,7 +224,7 @@ const DSMPeriodicTable = () => {
         // Grid position
         const gridObject = new THREE.Object3D();
         gridObject.position.x = ((i % 5) * 500) - 1000;
-        gridObject.position.y = (-(Math.floor(i / 5) % 5) * 500) + 800; // Shift grid down for better centering
+        gridObject.position.y = (-(Math.floor(i / 5) % 5) * 500) + 500; // Shift grid down for better centering
         gridObject.position.z = (Math.floor(i / 25)) * 1500 - 2000;
         targets.grid.push(gridObject);
       });

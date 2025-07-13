@@ -10,48 +10,67 @@ function GPUChip() {
   const dataFlowRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    // Ensure anime is loaded
+    if (!anime) return
+
     // Floating animation for the whole chip
-    anime({
-      targets: chipRef.current,
-      translateY: [-5, 5],
-      duration: 3000,
-      direction: 'alternate',
-      loop: true,
-      easing: 'easeInOutSine'
-    })
+    if (chipRef.current) {
+      anime({
+        targets: chipRef.current,
+        translateY: [-5, 5],
+        duration: 3000,
+        direction: 'alternate',
+        loop: true,
+        easing: 'easeInOutSine'
+      })
+    }
 
-    // Pulsing cores animation
-    anime({
-      targets: '.gpu-core',
-      scale: [0.9, 1.1],
-      duration: 2000,
-      direction: 'alternate',
-      loop: true,
-      delay: anime.stagger(100),
-      easing: 'easeInOutQuad'
-    })
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      // Pulsing cores animation
+      const cores = document.querySelectorAll('.gpu-core')
+      if (cores.length > 0) {
+        anime({
+          targets: '.gpu-core',
+          scale: [0.9, 1.1],
+          duration: 2000,
+          direction: 'alternate',
+          loop: true,
+          delay: anime.stagger(100),
+          easing: 'easeInOutQuad'
+        })
+      }
 
-    // Data flow animation
-    anime({
-      targets: '.data-flow',
-      translateX: [-100, 100],
-      opacity: [0, 1, 0],
-      duration: 1500,
-      loop: true,
-      delay: anime.stagger(200),
-      easing: 'easeInOutCubic'
-    })
+      // Data flow animation
+      const dataFlows = document.querySelectorAll('.data-flow')
+      if (dataFlows.length > 0) {
+        anime({
+          targets: '.data-flow',
+          translateX: [-100, 100],
+          opacity: [0, 1, 0],
+          duration: 1500,
+          loop: true,
+          delay: anime.stagger(200),
+          easing: 'easeInOutCubic'
+        })
+      }
 
-    // Memory blocks animation
-    anime({
-      targets: '.memory-block',
-      backgroundColor: ['#0066ff', '#00aaff', '#0066ff'],
-      duration: 1000,
-      direction: 'alternate',
-      loop: true,
-      delay: anime.stagger(150),
-      easing: 'easeInOutSine'
-    })
+      // Memory blocks animation
+      const memoryBlocks = document.querySelectorAll('.memory-block')
+      if (memoryBlocks.length > 0) {
+        anime({
+          targets: '.memory-block',
+          backgroundColor: ['#0066ff', '#00aaff', '#0066ff'],
+          duration: 1000,
+          direction: 'alternate',
+          loop: true,
+          delay: anime.stagger(150),
+          easing: 'easeInOutSine'
+        })
+      }
+    }, 100)
 
   }, [])
 

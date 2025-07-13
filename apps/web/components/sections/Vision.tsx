@@ -47,12 +47,18 @@ const VideoStrip = ({
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-blue-600/20">
               {/* Show video if it exists, otherwise show placeholder */}
               <video
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-center"
                 autoPlay
                 muted
                 loop
                 playsInline
                 preload="metadata"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  width: '100%',
+                  height: '100%'
+                }}
                 onError={(e) => {
                   console.log('Video failed to load:', video.src);
                   // Hide video and keep placeholder visible
@@ -109,26 +115,26 @@ export default function Vision() {
 
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1])
 
-  // Video data - replace with actual video sources
+  // Video data - standardized aspect ratios for consistent edge-to-edge rendering
   const prostheticVideos = [
     { src: '/videos/prosthetic-arm.mp4', title: 'Neural Prosthetic Arm', aspectRatio: 'w-80 h-48' },
-    { src: '/videos/prosthetic-leg.mp4', title: 'Robotic Leg Control', aspectRatio: 'w-64 h-48' },
-    { src: '/videos/hand-movement.mp4', title: 'Hand Dexterity', aspectRatio: 'w-72 h-48' },
+    { src: '/videos/prosthetic-leg.mp4', title: 'Robotic Leg Control', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/hand-movement.mp4', title: 'Hand Dexterity', aspectRatio: 'w-80 h-48' },
     { src: '/videos/walking-demo.mp4', title: 'Walking Restoration', aspectRatio: 'w-80 h-48' },
   ]
 
   const brainVisualizationVideos = [
-    { src: '/videos/brain-signals.mp4', title: 'Neural Activity', aspectRatio: 'w-72 h-40' },
-    { src: '/videos/signal-processing.mp4', title: 'Signal Processing', aspectRatio: 'w-96 h-40' },
-    { src: '/videos/neural-patterns.mp4', title: 'Pattern Recognition', aspectRatio: 'w-64 h-40' },
-    { src: '/videos/brain-mapping.mp4', title: 'Brain Mapping', aspectRatio: 'w-80 h-40' },
+    { src: '/videos/brain-signals.mp4', title: 'Neural Activity', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/signal-processing.mp4', title: 'Signal Processing', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/neural-patterns.mp4', title: 'Pattern Recognition', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/brain-mapping.mp4', title: 'Brain Mapping', aspectRatio: 'w-80 h-48' },
   ]
 
   const vrRoboticsVideos = [
-    { src: '/videos/vr-control.mp4', title: 'VR Neural Control', aspectRatio: 'w-88 h-52' },
-    { src: '/videos/robot-swarm.mp4', title: 'Robot Swarm Control', aspectRatio: 'w-72 h-52' },
-    { src: '/videos/immersive-reality.mp4', title: 'Immersive Reality', aspectRatio: 'w-80 h-52' },
-    { src: '/videos/neural-vr.mp4', title: 'Neural VR Interface', aspectRatio: 'w-96 h-52' },
+    { src: '/videos/vr-control.mp4', title: 'VR Neural Control', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/robot-swarm.mp4', title: 'Robot Swarm Control', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/immersive-reality.mp4', title: 'Immersive Reality', aspectRatio: 'w-80 h-48' },
+    { src: '/videos/neural-vr.mp4', title: 'Neural VR Interface', aspectRatio: 'w-80 h-48' },
   ]
 
   return (
@@ -247,8 +253,8 @@ export default function Vision() {
                       <span className="text-lg text-white/80"><span className="text-blue-300 font-medium">Advanced robotics control</span> with thought</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-white/60"></div>
-                      <span className="text-lg text-white/80"><span className="text-white/90 font-medium">Immersive reality experiences</span> beyond physical limits</span>
+                      <div className="w-2 h-2 rounded-full bg-blue-200"></div>
+                      <span className="text-lg text-white/80"><span className="text-blue-200 font-medium">Immersive reality experiences</span> beyond physical limits</span>
                     </div>
                   </div>
                   

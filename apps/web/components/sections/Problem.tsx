@@ -13,24 +13,6 @@ const AttractorParticles3D = dynamic(
   }
 )
 
-// AI Unit Icon Component
-const AIUnitIcon = () => (
-  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="20" width="80" height="80" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.3" />
-    <rect x="30" y="30" width="60" height="60" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.5" />
-    <rect x="40" y="40" width="40" height="40" fill="currentColor" opacity="0.1" />
-    
-    {/* Corner elements */}
-    <path d="M20 20 L30 20 L30 30" stroke="currentColor" strokeWidth="2" fill="none" />
-    <path d="M90 20 L100 20 L100 30" stroke="currentColor" strokeWidth="2" fill="none" />
-    <path d="M100 90 L100 100 L90 100" stroke="currentColor" strokeWidth="2" fill="none" />
-    <path d="M30 100 L20 100 L20 90" stroke="currentColor" strokeWidth="2" fill="none" />
-    
-    {/* Center cross */}
-    <path d="M50 60 L70 60" stroke="currentColor" strokeWidth="1" opacity="0.8" />
-    <path d="M60 50 L60 70" stroke="currentColor" strokeWidth="1" opacity="0.8" />
-  </svg>
-)
 
 // Roadmap Timeline Component
 const RoadmapTimeline = () => {
@@ -266,6 +248,9 @@ export default function Problem() {
                 </div>
               </div>
             </div>
+
+            {/* Roadmap Timeline */}
+            <RoadmapTimeline />
           </motion.div>
 
           <motion.div
@@ -275,21 +260,6 @@ export default function Problem() {
             viewport={{ once: true }}
             className="space-y-8"
           >
-            {/* SVG Icon */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              viewport={{ once: true }}
-              className="flex justify-center mb-8"
-            >
-              <div className="text-white/60">
-                <AIUnitIcon />
-              </div>
-            </motion.div>
-
-            {/* Roadmap Timeline */}
-            <RoadmapTimeline />
 
             <div>
               <h4 className="text-lg font-light mb-4 text-white/90">Next-Generation Computing Power</h4>

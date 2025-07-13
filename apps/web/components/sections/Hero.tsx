@@ -64,14 +64,6 @@ export default function Hero() {
           An open-source project designed to process petabytes of complex brain data, blurring the boundaries between the human mind and the real world.
         </motion.p>
         
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.5 }}
-          className="text-lg md:text-xl mt-8 text-white/60"
-        >
-          Enabling communication at the speed of thought through real-time neural signal processing and agentic applications.
-        </motion.p>
       </motion.div>
       <ScrollIndicator />
     </section>

@@ -1,102 +1,87 @@
-# Neurascale
+# NEURASCALE - Neural-Prosthetics Application Cloud
 
-A neural data cloud platform built with Next.js and a Turborepo monorepo architecture.
+An open-source infrastructure for processing petabytes of brain data, enabling applications that restore mobility, unlock robotic control, and create immersive realities.
 
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 neurascale/
-├── apps/                       # Turborepo monorepo root
-│   ├── web/                    # Next.js web application
-│   ├── packages/
-│   │   └── ui/                 # Shared UI components
-│   ├── package.json            # Workspace root
-│   ├── turbo.json              # Turborepo configuration
-│   └── [future apps]           # iOS, Android, admin dashboard, etc.
-└── [other project components]  # Infrastructure, backend services, etc.
+├── apps/                       # Monorepo root
+│   ├── web/                    # Next.js web application (Vercel deploys from here)
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── public/
+│   │   └── package.json
+│   ├── packages/               # Shared packages
+│   │   ├── ui/                 # Shared UI components
+│   │   ├── config-typescript/  # TypeScript configs
+│   │   └── config-tailwind/    # Tailwind configs
+│   ├── package.json            # Workspace root (future)
+│   ├── turbo.json              # Turborepo config (future)
+│   └── pnpm-workspace.yaml     # PNPM workspaces (future)
+├── backend/                    # Future backend services
+├── infrastructure/             # Future IaC
+└── README.md                   # This file
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 18+ 
-- npm 9+
+- Node.js 18+
+- npm or pnpm
 
 ### Installation & Development
 
-1. Navigate to the monorepo directory:
 ```bash
-cd apps
-```
+# Navigate to the web app
+cd apps/web
 
-2. Install dependencies for all workspaces:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Start development server:
-```bash
-# Start all apps in development mode
-npm run dev
-
-# Or start just the web app
-cd web
+# Start development server
 npm run dev
 ```
 
-The web application will be available at `http://localhost:3000`.
+The app will be available at `http://localhost:3000`
 
-## 💻 Available Scripts
+## 🎨 Features
 
-From the monorepo root (`apps/`):
+- **3D Visualizations**: Neural processor and server rack animations using Three.js
+- **Smooth Animations**: Framer Motion for fluid transitions
+- **Loading Screen**: Professional loading experience
+- **Responsive Design**: Works on all devices
+- **Type Safety**: Full TypeScript support
 
-- `npm run dev` - Start development servers for all apps
-- `npm run build` - Build all apps and packages  
-- `npm run lint` - Lint all packages
-- `npm run type-check` - Run TypeScript checks
+## 🚢 Deployment
 
-## 📦 Packages
-
-### @neurascale/ui
-Shared UI components library with Button, Card, and other reusable components.
-
-## 🔧 Adding New Apps
-
-To add a new application (iOS, Android, admin dashboard, etc.):
-
-1. Create a new directory in `apps/`
-2. Add package.json with workspace dependency on shared packages
-3. Update root turbo.json pipeline if needed
-
-## 🔧 Adding New Packages
-
-To add a new shared package:
-
-1. Create directory in `apps/packages/`
-2. Add package.json with appropriate exports
-3. Add TypeScript configuration if needed
-
-## 🚀 Deployment
-
-### Vercel (Web App)
-The web application is deployed via Vercel with the following configuration:
+### Vercel Configuration
 - **Root Directory**: `apps/web`
-- **Build Command**: `npm run build`
 - **Framework Preset**: Next.js
+- **Build & Output**: Auto-detected
 
-### Other Deployments
-Future iOS and Android apps will have their own deployment configurations.
+## 🛠️ Technology Stack
 
-## 🏛️ Architecture
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **3D Graphics**: Three.js, React Three Fiber
+- **Animations**: Framer Motion, Lenis
+- **Language**: TypeScript
+- **Deployment**: Vercel
 
-This project uses a **hybrid monorepo approach**:
-- **Turborepo monorepo** in `apps/` for client applications and shared packages
-- **Project root** for infrastructure, backend services, and other components
-- **Shared packages** for UI components, utilities, and common code
+## 📦 Future Monorepo Setup
 
-This allows for:
-- Efficient code sharing between client applications
-- Independent deployment of different app types
-- Flexible project structure for various components
-- Scalable development workflow
+When ready to implement the full monorepo:
+
+1. Add workspace configuration files to `apps/`
+2. Move shared code to `apps/packages/`
+3. Update imports to use workspace packages
+4. Change Vercel root directory to `apps/`
+
+## 👥 Team
+
+Led by Rob Franklin (SVP, Blackrock Neurotech), Wael El Ghazzawi (CTO, Brain Finance), and a world-class team of engineers and researchers.
+
+## 📄 License
+
+[Your License]

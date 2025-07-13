@@ -43,9 +43,27 @@ const VideoStrip = ({
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Video placeholder - replace with actual video element */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-400/20">
-              <div className="absolute inset-0 flex items-center justify-center">
+            {/* Video element with fallback */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-blue-600/20">
+              {/* Show video if it exists, otherwise show placeholder */}
+              <video
+                className="w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                onError={(e) => {
+                  // Hide video and show placeholder on error
+                  e.currentTarget.style.display = 'none';
+                  const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (placeholder) placeholder.style.display = 'flex';
+                }}
+              >
+                <source src={video.src} type="video/mp4" />
+              </video>
+              
+              {/* Fallback placeholder (hidden by default, shown on video error) */}
+              <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-2 mx-auto">
                     <div className="w-0 h-0 border-l-4 border-l-white/80 border-y-2 border-y-transparent ml-1"></div>
@@ -61,17 +79,6 @@ const VideoStrip = ({
                 animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
                 transition={{ duration: 0.2 }}
               />
-              
-              {/* Video would go here */}
-              {/* <video
-                className="w-full h-full object-cover"
-                autoPlay={hoveredIndex === index}
-                muted
-                loop
-                playsInline
-              >
-                <source src={video.src} type="video/mp4" />
-              </video> */}
             </div>
           </motion.div>
         ))}

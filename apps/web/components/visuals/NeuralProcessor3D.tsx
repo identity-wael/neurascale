@@ -292,7 +292,7 @@ export default function NeuralProcessor3D() {
     <div className="absolute inset-0 w-full h-full">
       <Canvas 
         shadows 
-        camera={{ position: [8, 8, 8], fov: 45 }}
+        camera={{ position: [0, 8, 15], fov: 60 }}
         gl={{ 
           antialias: true,
           alpha: true,
@@ -300,26 +300,27 @@ export default function NeuralProcessor3D() {
           toneMappingExposure: 1.2
         }}
       >
-        {/* Professional Studio Lighting */}
-        <ambientLight intensity={0.3} />
+        {/* Enhanced Lighting for Visibility */}
+        <ambientLight intensity={0.6} />
         <directionalLight 
           position={[10, 10, 5]} 
-          intensity={2} 
+          intensity={3} 
           castShadow 
           shadow-mapSize={[2048, 2048]}
           shadow-camera-far={50}
-          shadow-camera-left={-10}
-          shadow-camera-right={10}
-          shadow-camera-top={10}
-          shadow-camera-bottom={-10}
+          shadow-camera-left={-20}
+          shadow-camera-right={20}
+          shadow-camera-top={20}
+          shadow-camera-bottom={-20}
         />
-        <pointLight position={[-5, 5, 5]} intensity={0.8} color="#4185f4" />
-        <pointLight position={[5, 5, -5]} intensity={0.6} color="#ffffff" />
+        <pointLight position={[-5, 8, 5]} intensity={1.5} color="#4185f4" />
+        <pointLight position={[5, 8, -5]} intensity={1.2} color="#ffffff" />
+        <pointLight position={[0, 10, 0]} intensity={2} color="#ffffff" />
         <spotLight 
-          position={[0, 15, 0]} 
-          intensity={1.5} 
-          angle={0.3} 
-          penumbra={0.5}
+          position={[0, 20, 0]} 
+          intensity={2} 
+          angle={0.4} 
+          penumbra={0.3}
           castShadow
           color="#ffffff"
         />
@@ -361,13 +362,12 @@ export default function NeuralProcessor3D() {
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          maxDistance={25}
-          minDistance={5}
-          maxPolarAngle={Math.PI / 1.8}
-          autoRotate={false}
-          autoRotateSpeed={0.5}
-          dampingFactor={0.05}
+          maxDistance={30}
+          minDistance={8}
+          maxPolarAngle={Math.PI / 1.5}
+          target={[0, 0, 0]}
           enableDamping={true}
+          dampingFactor={0.05}
         />
       </Canvas>
     </div>

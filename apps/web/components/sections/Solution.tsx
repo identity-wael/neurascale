@@ -128,25 +128,6 @@ export default function Solution() {
   return (
     <section ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
       <motion.div style={{ scale }} className="relative z-10">
-        {/* Infographic Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-          className="mb-20 flex justify-center"
-        >
-          <div className="w-full max-w-6xl relative">
-            <img 
-              src="/infograph.svg" 
-              alt="NEURASCALE Neural-Prosthetics Application Cloud Infographic" 
-              className="w-full h-auto"
-            />
-            {/* Transparent overlay to prevent SVG interaction */}
-            <div className="absolute inset-0 bg-transparent pointer-events-none" />
-          </div>
-        </motion.div>
-
         <AnimatedText
           text="Core capabilities that unlock human potential"
           className="text-3xl md:text-4xl lg:text-5xl font-light mb-16 max-w-4xl"

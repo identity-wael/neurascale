@@ -1,225 +1,229 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
-// @ts-ignore
-import anime from 'animejs'
+import { useRef, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { 
+  Float, 
+  Environment,
+  ContactShadows,
+  PerspectiveCamera,
+  Sparkles
+} from '@react-three/drei'
+import * as THREE from 'three'
 
-function GPUChip() {
-  const chipRef = useRef<HTMLDivElement>(null)
-  const coresRef = useRef<HTMLDivElement>(null)
-  const dataFlowRef = useRef<HTMLDivElement>(null)
+function GPUDie() {
+  const groupRef = useRef<THREE.Group>(null)
+  const glowRef = useRef<THREE.Mesh>(null)
+  const [hovered, setHovered] = useState(false)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    // Ensure anime is loaded
-    if (!anime) return
-
-    // Floating animation for the whole chip
-    if (chipRef.current) {
-      anime({
-        targets: chipRef.current,
-        translateY: [-5, 5],
-        duration: 3000,
-        direction: 'alternate',
-        loop: true,
-        easing: 'easeInOutSine'
-      })
+  useFrame((state) => {
+    // Gentle floating and rotation
+    if (groupRef.current) {
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.1
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
     }
-
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-      // Pulsing cores animation
-      const cores = document.querySelectorAll('.gpu-core')
-      if (cores.length > 0) {
-        anime({
-          targets: '.gpu-core',
-          scale: [0.9, 1.1],
-          duration: 2000,
-          direction: 'alternate',
-          loop: true,
-          delay: anime.stagger(100),
-          easing: 'easeInOutQuad'
-        })
-      }
-
-      // Data flow animation
-      const dataFlows = document.querySelectorAll('.data-flow')
-      if (dataFlows.length > 0) {
-        anime({
-          targets: '.data-flow',
-          translateX: [-100, 100],
-          opacity: [0, 1, 0],
-          duration: 1500,
-          loop: true,
-          delay: anime.stagger(200),
-          easing: 'easeInOutCubic'
-        })
-      }
-
-      // Memory blocks animation
-      const memoryBlocks = document.querySelectorAll('.memory-block')
-      if (memoryBlocks.length > 0) {
-        anime({
-          targets: '.memory-block',
-          backgroundColor: ['#0066ff', '#00aaff', '#0066ff'],
-          duration: 1000,
-          direction: 'alternate',
-          loop: true,
-          delay: anime.stagger(150),
-          easing: 'easeInOutSine'
-        })
-      }
-
-      // Floating sparkles animation - matching original Three.js Sparkles
-      const sparkles = document.querySelectorAll('.sparkle')
-      if (sparkles.length > 0) {
-        anime({
-          targets: '.sparkle',
-          translateY: [-30, 30],
-          translateX: [-15, 15],
-          scale: [0.8, 2, 0.8],
-          opacity: [0.1, 0.6, 0.1],
-          duration: 6000,
-          loop: true,
-          delay: anime.stagger(120),
-          easing: 'easeInOutSine'
-        })
-      }
-    }, 100)
-
-  }, [])
+    
+    // Pulsing glow effect
+    if (glowRef.current && glowRef.current.material) {
+      const material = glowRef.current.material as THREE.MeshStandardMaterial
+      material.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3
+    }
+  })
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <div 
-        ref={chipRef}
-        className="relative w-96 h-96 perspective-1000"
-        style={{
-          transform: 'rotateX(10deg) rotateY(15deg)',
-          transformStyle: 'preserve-3d'
-        }}
+    <Float
+      speed={1.5}
+      rotationIntensity={0.2}
+      floatIntensity={0.3}
+      floatingRange={[-0.1, 0.1]}
+    >
+      <group
+        ref={groupRef}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
       >
-        {/* Main GPU Die */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-2xl border border-gray-600">
-          {/* Central Processing Unit */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-green-500 to-green-700 rounded-sm shadow-lg">
-            <div className="absolute inset-2 bg-black/30 rounded-sm">
-              <div className="text-center pt-8 text-green-300 text-xs font-bold">
-                H100
-              </div>
-            </div>
-          </div>
+        {/* Main GPU Die Substrate */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[6, 0.2, 4]} />
+          <meshStandardMaterial 
+            color="#1a1a1a"
+            metalness={0.9}
+            roughness={0.1}
+          />
+        </mesh>
 
-          {/* GPU Cores Grid */}
-          <div 
-            ref={coresRef}
-            className="absolute inset-8 grid grid-cols-8 grid-rows-8 gap-1"
+        {/* Central H100 Processing Core */}
+        <mesh position={[0, 0.15, 0]}>
+          <boxGeometry args={[2, 0.1, 2]} />
+          <meshStandardMaterial 
+            color="#000000"
+            metalness={0.95}
+            roughness={0.05}
+          />
+        </mesh>
+
+        {/* Glowing Green Core */}
+        <mesh ref={glowRef} position={[0, 0.25, 0]}>
+          <boxGeometry args={[1.6, 0.05, 1.6]} />
+          <meshStandardMaterial 
+            color="#00ff88"
+            emissive="#00ff88"
+            emissiveIntensity={hovered ? 1.2 : 0.8}
+            metalness={0.3}
+            roughness={0}
+          />
+        </mesh>
+
+        {/* H100 Label */}
+        <mesh position={[0, 0.3, 0]}>
+          <boxGeometry args={[0.8, 0.02, 0.4]} />
+          <meshStandardMaterial 
+            color="#ffffff"
+            emissive="#ffffff"
+            emissiveIntensity={0.3}
+          />
+        </mesh>
+
+        {/* GPU Cores Grid (8x8 = 64 cores) */}
+        {Array.from({ length: 8 }).map((_, row) =>
+          Array.from({ length: 8 }).map((_, col) => (
+            <mesh 
+              key={`core-${row}-${col}`}
+              position={[
+                (col - 3.5) * 0.3,
+                0.35,
+                (row - 3.5) * 0.2
+              ]}
+            >
+              <boxGeometry args={[0.15, 0.02, 0.1]} />
+              <meshStandardMaterial 
+                color="#4185f4"
+                emissive="#4185f4"
+                emissiveIntensity={0.2 + Math.sin((row + col) * 0.5) * 0.1}
+                metalness={0.5}
+                roughness={0.3}
+              />
+            </mesh>
+          ))
+        )}
+
+        {/* HBM Memory Modules (6 stacks) */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <mesh 
+            key={`hbm-${i}`}
+            position={[
+              (i % 3 - 1) * 1.8,
+              0.4,
+              (i < 3 ? -1.5 : 1.5)
+            ]}
           >
-            {Array.from({ length: 64 }).map((_, i) => (
-              <div
-                key={i}
-                className="gpu-core w-full h-full bg-blue-500 rounded-sm opacity-80"
-                style={{
-                  boxShadow: '0 0 4px #4185f4',
-                  background: `linear-gradient(45deg, #4185f4, #1976d2)`
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Memory Blocks */}
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={`memory-${i}`}
-              className="memory-block absolute w-8 h-16 bg-blue-600 rounded-sm shadow-md"
-              style={{
-                top: '20px',
-                left: `${60 + i * 50}px`,
-                boxShadow: '0 0 8px #0066ff'
-              }}
+            <boxGeometry args={[0.4, 0.4, 0.4]} />
+            <meshStandardMaterial 
+              color="#0066ff"
+              emissive="#0066ff"
+              emissiveIntensity={0.3}
+              metalness={0.8}
+              roughness={0.2}
             />
-          ))}
+          </mesh>
+        ))}
 
-          {/* Data Flow Lines */}
-          <div ref={dataFlowRef} className="absolute inset-0">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={`flow-${i}`}
-                className="data-flow absolute h-0.5 w-20 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
-                style={{
-                  top: `${100 + i * 25}px`,
-                  left: '50px',
-                  boxShadow: '0 0 4px #00ffff'
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Circuit Traces */}
-          <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
-            {Array.from({ length: 20 }).map((_, i) => (
-              <path
-                key={`trace-${i}`}
-                d={`M${Math.random() * 400},${Math.random() * 400} Q${Math.random() * 400},${Math.random() * 400} ${Math.random() * 400},${Math.random() * 400}`}
-                stroke="#00ff88"
-                strokeWidth="1"
-                fill="none"
-                opacity="0.3"
-              />
-            ))}
-          </svg>
-
-          {/* Corner Pins */}
-          {[
-            { top: '10px', left: '10px' },
-            { top: '10px', right: '10px' },
-            { bottom: '10px', left: '10px' },
-            { bottom: '10px', right: '10px' }
-          ].map((pos, i) => (
-            <div
-              key={`pin-${i}`}
-              className="absolute w-3 h-3 bg-yellow-500 rounded-full shadow-md"
-              style={{
-                ...pos,
-                boxShadow: '0 0 6px #ffd700'
-              }}
+        {/* Corner Connection Pins */}
+        {[
+          [-2.8, 0.1, -1.8],
+          [2.8, 0.1, -1.8], 
+          [-2.8, 0.1, 1.8],
+          [2.8, 0.1, 1.8]
+        ].map((pos, i) => (
+          <mesh key={`pin-${i}`} position={pos as [number, number, number]}>
+            <sphereGeometry args={[0.08, 8, 8]} />
+            <meshStandardMaterial 
+              color="#ffd700"
+              emissive="#ffd700"
+              emissiveIntensity={0.4}
+              metalness={0.9}
+              roughness={0.1}
             />
-          ))}
+          </mesh>
+        ))}
 
-          {/* NEURASCALE Branding */}
-          <div className="absolute bottom-4 left-4 text-xs font-bold tracking-wider">
-            <span className="text-gray-300">NEURA</span>
-            <span className="text-blue-400">SCALE</span>
-          </div>
-        </div>
-
-        {/* Floating Sparkles - matching original Sparkles component */}
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 50 }).map((_, i) => (
-            <div
-              key={`sparkle-${i}`}
-              className="sparkle absolute w-0.5 h-0.5 bg-green-400 rounded-full opacity-30"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                boxShadow: '0 0 2px #00ff88',
-                background: '#00ff88'
-              }}
+        {/* Circuit Traces */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <mesh 
+            key={`trace-${i}`}
+            position={[
+              (Math.random() - 0.5) * 5,
+              0.12,
+              (Math.random() - 0.5) * 3
+            ]}
+            rotation={[0, Math.random() * Math.PI, 0]}
+          >
+            <boxGeometry args={[0.02, 0.01, 0.5]} />
+            <meshStandardMaterial 
+              color="#00ff88"
+              emissive="#00ff88"
+              emissiveIntensity={0.2}
+              transparent
+              opacity={0.6}
             />
-          ))}
-        </div>
-      </div>
-    </div>
+          </mesh>
+        ))}
+
+        {/* NEURASCALE Branding */}
+        <mesh position={[0, 0.13, -1.6]}>
+          <boxGeometry args={[1.2, 0.02, 0.2]} />
+          <meshStandardMaterial 
+            color="#4185f4"
+            emissive="#4185f4"
+            emissiveIntensity={0.4}
+          />
+        </mesh>
+      </group>
+    </Float>
   )
 }
 
 
 export default function NeuralProcessor3D() {
   return (
-    <div className="absolute inset-0 w-full h-full bg-black" style={{ minHeight: '100vh', width: '100%', zIndex: 1 }}>
-      <GPUChip />
+    <div className="absolute inset-0 w-full h-full">
+      <Canvas
+        shadows
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.5
+        }}
+      >
+        <PerspectiveCamera makeDefault position={[5, 4, 5]} fov={45} />
+        
+        <ambientLight intensity={0.3} />
+        <pointLight position={[10, 10, 10]} intensity={0.8} castShadow />
+        <pointLight position={[-10, 10, -10]} intensity={0.4} />
+        <pointLight position={[0, 5, 0]} intensity={0.6} color="#00ff88" />
+        
+        <GPUDie />
+        
+        <ContactShadows
+          position={[0, -1, 0]}
+          opacity={0.4}
+          scale={10}
+          blur={2}
+          far={4}
+        />
+        
+        <Sparkles
+          count={50}
+          scale={10}
+          size={2}
+          speed={0.4}
+          opacity={0.3}
+          color="#00ff88"
+        />
+        
+        <Environment preset="night" />
+      </Canvas>
     </div>
   )
 }

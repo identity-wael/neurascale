@@ -52,13 +52,10 @@
     scrollbar-width: none;  /* Firefox */
   }
 
-  /* Section styling for full viewport */
+  /* Section styling */
   section {
     position: relative;
     width: 100%;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
   }
 
   /* Smooth section transitions */

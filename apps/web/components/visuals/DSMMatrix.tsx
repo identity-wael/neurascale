@@ -214,22 +214,22 @@ const DSMMatrix = () => {
 
   const dsmMatrix = useMemo(() => generateDSMMatrix(), []);
 
-  // Show only first 20 components for better visibility in smaller space
-  const displayComponents = components.slice(0, 20);
-  const displayMatrix = dsmMatrix.slice(0, 20).map(row => row.slice(0, 20));
+  // Show more components to better fill the available space
+  const displayComponents = components.slice(0, 35);
+  const displayMatrix = dsmMatrix.slice(0, 35).map(row => row.slice(0, 35));
 
   return (
     <div className="w-full h-full overflow-auto bg-black p-2">
       <div className="inline-block">
         <div className="flex">
-          <div className="w-32"></div>
+          <div className="w-24"></div>
           {displayComponents.map((component, j) => (
             <div
               key={j}
-              className="w-4 h-24 flex items-end justify-center"
+              className="w-3 h-20 flex items-end justify-center"
               style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
-              <span className="text-[10px] text-gray-400 truncate max-h-24">
+              <span className="text-[9px] text-gray-400 truncate max-h-20">
                 {component.split(' ').slice(0, 2).join(' ')}
               </span>
             </div>
@@ -237,15 +237,15 @@ const DSMMatrix = () => {
         </div>
         {displayComponents.map((component, i) => (
           <div key={i} className="flex">
-            <div className="w-32 h-4 flex items-center pr-1">
-              <span className="text-[10px] text-gray-400 truncate">
+            <div className="w-24 h-3 flex items-center pr-1">
+              <span className="text-[9px] text-gray-400 truncate">
                 {component.split(' ').slice(0, 2).join(' ')}
               </span>
             </div>
             {displayComponents.map((_, j) => (
               <div
                 key={`${i}-${j}`}
-                className={`w-4 h-4 border border-gray-800 cursor-pointer transition-all duration-200 ${
+                className={`w-3 h-3 border border-gray-800 cursor-pointer transition-all duration-200 ${
                   i === j ? 'bg-gray-600' : ''
                 } ${
                   displayMatrix[i][j] === 1 ? 'bg-green-400' : ''

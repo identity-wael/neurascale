@@ -70,14 +70,22 @@ export default function AttractorParticles3D() {
           const i3 = i * 3
 
           // Create multiple attractor points centered around origin
-          const attractorIndex = i % attractorPositions.length
-          const attractor = attractorPositions[attractorIndex]
+          const attractorIndex = i % 3
+          let baseX, baseY, baseZ
+          
+          if (attractorIndex === 0) {
+            baseX = -2; baseY = 0; baseZ = 0
+          } else if (attractorIndex === 1) {
+            baseX = 2; baseY = 0; baseZ = 0
+          } else {
+            baseX = 0; baseY = 0; baseZ = 2
+          }
 
           // Add some randomness around attractor points
-          const spread = 1
-          positions[i3] = attractor.x + (Math.random() - 0.5) * spread
-          positions[i3 + 1] = attractor.y + (Math.random() - 0.5) * spread
-          positions[i3 + 2] = attractor.z + (Math.random() - 0.5) * spread
+          const spread = 2
+          positions[i3] = baseX + (Math.random() - 0.5) * spread
+          positions[i3 + 1] = baseY + (Math.random() - 0.5) * spread
+          positions[i3 + 2] = baseZ + (Math.random() - 0.5) * spread
 
           // Initial velocities (slower)
           velocities[i3] = (Math.random() - 0.5) * 0.005
@@ -112,16 +120,12 @@ export default function AttractorParticles3D() {
         const points = new THREE.Points(geometry, material)
         scene.add(points)
 
-        // Animation variables - more gravity points closer together
+        // Animation variables
         let time = 0
         const attractorPositions = [
-          new THREE.Vector3(-1, 0, 0),
-          new THREE.Vector3(1, 0, 0),
-          new THREE.Vector3(0, 0, 1),
-          new THREE.Vector3(0, 1, 0),
-          new THREE.Vector3(0, -1, 0),
-          new THREE.Vector3(-0.5, 0.5, 0.5),
-          new THREE.Vector3(0.5, -0.5, 0.5)
+          new THREE.Vector3(-2, 0, 0),
+          new THREE.Vector3(2, 0, 0),
+          new THREE.Vector3(0, 0, 2)
         ]
 
         // Animation loop
@@ -150,13 +154,13 @@ export default function AttractorParticles3D() {
               const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
               
               if (distance > 0.1) {
-                const force = 0.0001 / (distance * distance)  // Stronger force to keep particles closer
+                const force = 0.00005 / (distance * distance)  // Weaker force
                 forceX += dx * force
                 forceY += dy * force
                 forceZ += dz * force
 
                 // Add spinning motion (reduced)
-                const spinForce = 0.00008
+                const spinForce = 0.00005
                 forceX += -dy * spinForce
                 forceY += dx * spinForce
               }
@@ -183,8 +187,8 @@ export default function AttractorParticles3D() {
             positionArray[i3 + 1] += velocities[i3 + 1]
             positionArray[i3 + 2] += velocities[i3 + 2]
 
-            // Boundary checking to keep particles in view (smaller boundary for tighter clustering)
-            const boundary = 6
+            // Boundary checking to keep particles in view (larger boundary)
+            const boundary = 12
             if (Math.abs(positionArray[i3]) > boundary) {
               positionArray[i3] = Math.sign(positionArray[i3]) * boundary
               velocities[i3] *= -0.5
@@ -214,11 +218,11 @@ export default function AttractorParticles3D() {
           geometry.attributes.position.needsUpdate = true
           geometry.attributes.color.needsUpdate = true
 
-          // Camera positioned to show more of the left side
-          camera.position.x = Math.cos(time * 0.03) * 12 - 3  // Shift left
+          // Slower camera rotation centered around origin
+          camera.position.x = Math.cos(time * 0.03) * 12
           camera.position.z = Math.sin(time * 0.03) * 12 + 8
           camera.position.y = 6 + Math.sin(time * 0.02) * 2
-          camera.lookAt(-1, 0, 0)  // Look slightly left of center
+          camera.lookAt(0, 0, 0)
 
           renderer.render(scene, camera)
         }

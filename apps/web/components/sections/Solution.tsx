@@ -39,12 +39,14 @@ export default function Solution() {
           viewport={{ once: true }}
           className="mb-20 flex justify-center"
         >
-          <div className="w-full max-w-6xl">
+          <div className="w-full max-w-6xl relative">
             <img 
               src="/infograph.svg" 
               alt="NEURASCALE Neural-Prosthetics Application Cloud Infographic" 
               className="w-full h-auto"
             />
+            {/* Transparent overlay to prevent SVG interaction */}
+            <div className="absolute inset-0 bg-transparent pointer-events-none" />
           </div>
         </motion.div>
 

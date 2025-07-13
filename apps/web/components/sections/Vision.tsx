@@ -113,42 +113,41 @@ export default function Vision() {
 
   return (
     <section ref={containerRef} className="min-h-screen py-32 relative overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black">
-      {/* Parallax Video Strips Background */}
+      {/* Parallax Video Strips - More Visible */}
       <div className="absolute inset-0 z-0">
-        {/* Strip 1: Prosthetic Demos (Slow) */}
-        <div className="absolute top-1/5 left-0 right-0">
+        {/* Strip 1: Prosthetic Demos (Top) */}
+        <div className="absolute top-24 left-0 right-0">
           <VideoStrip 
             videos={prostheticVideos} 
             speed={80} 
             direction="left"
-            className="opacity-20 blur-[1px] hover:opacity-60 hover:blur-none transition-all duration-700"
+            className="opacity-70 hover:opacity-90 transition-all duration-500"
           />
         </div>
 
-        {/* Strip 2: Brain Visualizations (Medium) */}
-        <div className="absolute top-1/2 left-0 right-0">
+        {/* Strip 2: Brain Visualizations (Middle) */}
+        <div className="absolute top-1/2 transform -translate-y-1/2 left-0 right-0">
           <VideoStrip 
             videos={brainVisualizationVideos} 
             speed={60} 
             direction="right"
-            className="opacity-25 blur-[1px] hover:opacity-70 hover:blur-none transition-all duration-700"
+            className="opacity-60 hover:opacity-85 transition-all duration-500"
           />
         </div>
 
-        {/* Strip 3: VR/Robotics (Fast) */}
-        <div className="absolute top-4/5 left-0 right-0">
+        {/* Strip 3: VR/Robotics (Bottom) */}
+        <div className="absolute bottom-24 left-0 right-0">
           <VideoStrip 
             videos={vrRoboticsVideos} 
             speed={40} 
             direction="left"
-            className="opacity-20 blur-[1px] hover:opacity-60 hover:blur-none transition-all duration-700"
+            className="opacity-70 hover:opacity-90 transition-all duration-500"
           />
         </div>
 
-        {/* Enhanced gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/30 to-black"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
-        <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
+        {/* Refined gradient overlays for content readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40"></div>
       </div>
 
       {/* Content */}
@@ -201,11 +200,11 @@ export default function Vision() {
                 {/* Key statistics */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-center">
-                    <div className="text-2xl font-light text-purple-400 mb-1">5.4M</div>
+                    <div className="text-2xl font-light text-blue-300 mb-1">5.4M</div>
                     <div className="text-xs text-white/60 uppercase tracking-wide">New injuries annually</div>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-center">
-                    <div className="text-2xl font-light text-green-400 mb-1">100%</div>
+                    <div className="text-2xl font-light text-white/90 mb-1">100%</div>
                     <div className="text-xs text-white/60 uppercase tracking-wide">Mental capacity intact</div>
                   </div>
                 </div>
@@ -224,12 +223,12 @@ export default function Vision() {
                       <span className="text-lg text-white/80"><span className="text-blue-400 font-medium">Restored mobility</span> through neural prosthetics</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                      <span className="text-lg text-white/80"><span className="text-purple-400 font-medium">Advanced robotics control</span> with thought</span>
+                      <div className="w-2 h-2 rounded-full bg-blue-300"></div>
+                      <span className="text-lg text-white/80"><span className="text-blue-300 font-medium">Advanced robotics control</span> with thought</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                      <span className="text-lg text-white/80"><span className="text-green-400 font-medium">Immersive reality experiences</span> beyond physical limits</span>
+                      <div className="w-2 h-2 rounded-full bg-white/60"></div>
+                      <span className="text-lg text-white/80"><span className="text-white/90 font-medium">Immersive reality experiences</span> beyond physical limits</span>
                     </div>
                   </div>
                   
@@ -250,7 +249,7 @@ export default function Vision() {
               viewport={{ once: true }}
               className="mt-16 text-center"
             >
-              <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
+              <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
                 Explore the Technology
               </button>
             </motion.div>

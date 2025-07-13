@@ -145,7 +145,7 @@ export default function Vision() {
   ]
 
   return (
-    <section ref={containerRef} className="min-h-screen py-32 relative overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black">
+    <section id="vision" ref={containerRef} className="min-h-screen py-32 relative overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black">
       {/* Parallax Video Strips - More Visible */}
       <div className="absolute inset-0 z-0">
         {/* Strip 1: Prosthetic Demos (Top) */}

@@ -21,9 +21,10 @@ export default function DataUniverse3D() {
         
         // Browser detection
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+        const isChrome = /chrome/i.test(navigator.userAgent) && !isSafari
         const hasWebGPU = 'gpu' in navigator && navigator.gpu
         
-        console.log('Browser detection:', { isSafari, hasWebGPU })
+        console.log('Browser detection:', { isSafari, isChrome, hasWebGPU, userAgent: navigator.userAgent })
 
         // Dynamic import of Three.js modules
         const THREE = await import('three')
@@ -32,18 +33,37 @@ export default function DataUniverse3D() {
 
         if (!canvasRef.current) return
 
-        // Initialize renderer: WebGPU for Chrome, WebGL for Safari
+        // Initialize renderer: Force WebGPU for Chrome, WebGL for Safari
         let renderer: any
         
-        if (!isSafari && hasWebGPU) {
+        if (isChrome && hasWebGPU) {
           try {
-            // Try WebGPU for Chrome/Edge
-            const { WebGPURenderer } = await import('three/addons/renderers/webgpu/WebGPURenderer.js')
-            renderer = new WebGPURenderer({ canvas: canvasRef.current })
-            console.log('Using WebGPU renderer')
+            console.log('Attempting WebGPU initialization for Chrome...')
+            
+            // Test WebGPU availability first
+            const adapter = await navigator.gpu.requestAdapter()
+            if (!adapter) {
+              throw new Error('No WebGPU adapter available')
+            }
+            
+            const device = await adapter.requestDevice()
+            if (!device) {
+              throw new Error('WebGPU device creation failed')
+            }
+            
+            // Import and initialize WebGPU renderer
+            const WebGPURenderer = await import('three/examples/jsm/renderers/webgpu/WebGPURenderer.js')
+            renderer = new WebGPURenderer.WebGPURenderer({
+              canvas: canvasRef.current,
+              antialias: true
+            })
+            
+            await renderer.init()
+            console.log('✅ Successfully using WebGPU renderer')
+            
           } catch (webgpuError) {
-            console.log('WebGPU failed, falling back to WebGL:', webgpuError)
-            // Fallback to WebGL
+            console.log('❌ WebGPU failed, falling back to WebGL:', webgpuError)
+            // Fallback to high-performance WebGL for Chrome
             const rendererOptions = {
               canvas: canvasRef.current,
               antialias: true,
@@ -52,9 +72,10 @@ export default function DataUniverse3D() {
               powerPreference: 'high-performance' as WebGLPowerPreference
             }
             renderer = new THREE.WebGLRenderer(rendererOptions)
+            console.log('🔄 Using WebGL renderer (Chrome fallback)')
           }
         } else {
-          // Use WebGL for Safari and browsers without WebGPU
+          // Use WebGL for Safari and non-Chrome browsers
           const rendererOptions = {
             canvas: canvasRef.current,
             antialias: !isSafari,
@@ -63,7 +84,7 @@ export default function DataUniverse3D() {
             powerPreference: isSafari ? 'default' : 'high-performance' as WebGLPowerPreference
           }
           renderer = new THREE.WebGLRenderer(rendererOptions)
-          console.log('Using WebGL renderer')
+          console.log('🌐 Using WebGL renderer (Safari/other browsers)')
         }
         
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2))
@@ -81,10 +102,10 @@ export default function DataUniverse3D() {
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
         camera.position.set(3, 3, 3)
 
-        // Galaxy parameters with Safari optimization
+        // Galaxy parameters: Full quality for Chrome, optimized for Safari
         const parameters = {
-          count: isSafari ? 50000 : 100000, // Reduce particle count on Safari
-          size: isSafari ? 0.015 : 0.01,    // Slightly larger particles on Safari
+          count: isSafari ? 50000 : (isChrome ? 150000 : 100000), // Max particles for Chrome
+          size: isSafari ? 0.015 : 0.01,
           radius: 5,
           branches: 3,
           spin: 1,

@@ -30,9 +30,11 @@ function ProfessionalGPU() {
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[6, 1.2, 2.5]} />
         <meshStandardMaterial 
-          color="#1a1a1a"
-          metalness={0.8}
-          roughness={0.2}
+          color="#404040"
+          metalness={0.7}
+          roughness={0.3}
+          emissive="#0a0a0a"
+          emissiveIntensity={0.1}
         />
       </mesh>
 
@@ -40,9 +42,11 @@ function ProfessionalGPU() {
       <mesh position={[0, -0.65, 0]}>
         <boxGeometry args={[6, 0.1, 2.5]} />
         <meshStandardMaterial 
-          color="#0a0a0a"
-          metalness={0.9}
-          roughness={0.1}
+          color="#2a2a2a"
+          metalness={0.8}
+          roughness={0.2}
+          emissive="#050505"
+          emissiveIntensity={0.1}
         />
       </mesh>
 
@@ -53,9 +57,11 @@ function ProfessionalGPU() {
           <mesh>
             <torusGeometry args={[0.6, 0.05, 8, 16]} />
             <meshStandardMaterial 
-              color="#333333"
-              metalness={0.7}
-              roughness={0.3}
+              color="#666666"
+              metalness={0.6}
+              roughness={0.4}
+              emissive="#111111"
+              emissiveIntensity={0.2}
             />
           </mesh>
           
@@ -77,9 +83,11 @@ function ProfessionalGPU() {
               >
                 <boxGeometry args={[0.4, 0.02, 0.06]} />
                 <meshStandardMaterial 
-                  color="#2a2a2a"
-                  metalness={0.6}
-                  roughness={0.4}
+                  color="#555555"
+                  metalness={0.5}
+                  roughness={0.5}
+                  emissive="#0a0a0a"
+                  emissiveIntensity={0.1}
                 />
               </mesh>
             ))}
@@ -221,7 +229,6 @@ export default function NeuralProcessor3D() {
         
         
         <ProfessionalGPU />
-        <CircuitLines />
       </Canvas>
     </div>
   )

@@ -14,6 +14,15 @@ const DSMPeriodicTable = dynamic(
   }
 )
 
+// Dynamic import for DSM Matrix to avoid SSR issues
+const DSMMatrix = dynamic(
+  () => import('@/components/visuals/DSMMatrix'),
+  { 
+    ssr: false,
+    loading: () => <div className="w-full h-96 bg-black/50 flex items-center justify-center text-white/60">Loading DSM Matrix...</div>
+  }
+)
+
 export default function Roadmap() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -113,7 +122,7 @@ export default function Roadmap() {
           </div>
         </motion.div>
         
-        {/* DSM Periodic Table */}
+        {/* DSM Technology Stack */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -126,13 +135,31 @@ export default function Roadmap() {
               DSM Technology Stack
             </h3>
             <p className="text-white/70 max-w-3xl">
-              Explore our comprehensive technology ecosystem through an interactive periodic table. 
+              Explore our comprehensive technology ecosystem through an interactive periodic table and dependency matrix. 
               Each element represents a core component of the NEURASCALE platform, from neural interfaces 
               to cloud infrastructure and AI frameworks.
             </p>
           </div>
-          <div className="h-[600px] rounded-lg overflow-hidden border border-white/10">
-            <DSMPeriodicTable />
+          
+          {/* Two column layout */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Periodic Table */}
+            <div className="h-[600px] rounded-lg overflow-hidden border border-white/10">
+              <DSMPeriodicTable />
+            </div>
+            
+            {/* Matrix View */}
+            <div className="h-[600px] rounded-lg overflow-hidden border border-white/10 bg-gray-900">
+              <div className="p-4 border-b border-gray-700">
+                <h4 className="text-lg font-light text-white/90 mb-2">Dependency Matrix</h4>
+                <p className="text-sm text-white/60">
+                  Interactive matrix showing component dependencies and relationships
+                </p>
+              </div>
+              <div className="h-[calc(100%-80px)]">
+                <DSMMatrix />
+              </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>

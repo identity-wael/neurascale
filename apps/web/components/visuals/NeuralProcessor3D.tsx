@@ -25,20 +25,23 @@ function ProcessorChip() {
     <group
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
+      position={[0, 0, 0]}
     >
-      {/* Debug cube to verify this component renders */}
-      <mesh position={[-3, 0, 0]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#ffff00" />
+      {/* Large debug cube to verify this component renders */}
+      <mesh position={[0, 3, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#ffff00" emissive="#ffff00" emissiveIntensity={0.3} />
       </mesh>
       
-      {/* Base PCB */}
-      <mesh ref={meshRef as any}>
-        <boxGeometry args={[2, 0.1, 2]} />
+      {/* Base PCB - made larger and more visible */}
+      <mesh ref={meshRef as any} position={[0, 0, 0]}>
+        <boxGeometry args={[4, 0.2, 4]} />
         <meshStandardMaterial 
           color="#333333"
           metalness={0.5}
           roughness={0.5}
+          emissive="#111111"
+          emissiveIntensity={0.1}
         />
       </mesh>
 
@@ -52,23 +55,25 @@ function ProcessorChip() {
         />
       </mesh>
 
-      {/* Central processor with glow */}
-      <mesh position={[0, 0.15, 0]}>
-        <boxGeometry args={[1.5, 0.1, 1.5]} />
+      {/* Central processor with glow - made larger */}
+      <mesh position={[0, 0.3, 0]}>
+        <boxGeometry args={[3, 0.2, 3]} />
         <meshStandardMaterial 
           color="#000000"
           metalness={0.95}
           roughness={0.1}
+          emissive="#001100"
+          emissiveIntensity={0.2}
         />
       </mesh>
 
-      {/* Glowing green core */}
-      <mesh ref={glowRef as any} position={[0, 0.15, 0]}>
-        <boxGeometry args={[1, 0.1, 1]} />
+      {/* Glowing green core - made larger and brighter */}
+      <mesh ref={glowRef as any} position={[0, 0.4, 0]}>
+        <boxGeometry args={[2.5, 0.2, 2.5]} />
         <meshStandardMaterial 
           color="#00ff88"
           emissive="#00ff88"
-          emissiveIntensity={1}
+          emissiveIntensity={1.5}
         />
       </mesh>
 
@@ -110,28 +115,35 @@ function CircuitLines() {
 
 export default function NeuralProcessor3D() {
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%' }}>
+    <div className="absolute inset-0 w-full h-full" style={{ minHeight: '100vh', width: '100%', zIndex: 1 }}>
       {/* Debug indicator */}
       <div className="absolute top-4 left-4 z-50 text-green-400 text-xs bg-black/50 p-2">
-        Neural Processor Active - Look for rotating objects
+        Neural Processor Active - Objects should be visible
       </div>
       
       <Canvas
-        style={{ width: '100%', height: '100%' }}
-        camera={{ position: [0, 0, 10], fov: 50 }}
+        style={{ width: '100%', height: '100%', display: 'block' }}
+        camera={{ position: [0, 2, 8], fov: 60 }}
         gl={{ 
           antialias: true, 
-          alpha: true
+          alpha: true,
+          preserveDrawingBuffer: true
         }}
       >
-        <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <pointLight position={[0, 0, 10]} intensity={0.5} color="#00ff88" />
+        <ambientLight intensity={1} />
+        <pointLight position={[5, 5, 5]} intensity={2} />
+        <pointLight position={[-5, 5, 5]} intensity={1} />
+        <pointLight position={[0, 0, 8]} intensity={1} color="#00ff88" />
         
-        {/* Simple test cube to verify Canvas is working */}
-        <mesh position={[3, 0, 0]}>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshStandardMaterial color="#ff0000" />
+        {/* Large visible test cubes */}
+        <mesh position={[4, 0, 0]}>
+          <boxGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
+        </mesh>
+        
+        <mesh position={[-4, 0, 0]}>
+          <boxGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color="#0000ff" emissive="#0000ff" emissiveIntensity={0.3} />
         </mesh>
         
         <ProcessorChip />

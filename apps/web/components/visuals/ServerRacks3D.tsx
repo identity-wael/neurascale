@@ -21,7 +21,7 @@ function ServerRack({ position, delay = 0 }: { position: [number, number, number
 
   return (
     <Float speed={1} rotationIntensity={0.01} floatIntensity={0.1}>
-      <group ref={groupRef} position={position}>
+      <group ref={groupRef as any} position={position}>
         {/* Rack frame */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2, 4, 0.8]} />

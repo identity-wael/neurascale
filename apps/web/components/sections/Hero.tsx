@@ -36,7 +36,7 @@ export default function Hero() {
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -50])
 
   return (
-    <section ref={containerRef} className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden">
+    <section ref={containerRef} className="hero relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden">
       {/* 3D Data Universe Background */}
       <div className="absolute inset-0 opacity-30" style={{ zIndex: 1 }}>
         <Suspense fallback={<div className="absolute inset-0 bg-red-500/20 flex items-center justify-center text-white">Loading Data Universe...</div>}>

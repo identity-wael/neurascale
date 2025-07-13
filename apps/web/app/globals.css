@@ -57,6 +57,13 @@
     position: relative;
     width: 100%;
   }
+  
+  /* Full height centering for specific sections */
+  section.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
 
   /* Smooth section transitions */
   section.in-view {

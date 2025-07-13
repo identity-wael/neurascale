@@ -12,13 +12,18 @@ declare global {
 export default function DataUniverse3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const initWebGPUGalaxy = async () => {
+    const initGalaxy = async () => {
       try {
-        if (!navigator.gpu) {
-          throw new Error('WebGPU not supported')
-        }
+        setIsLoading(true)
+        
+        // Browser detection
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+        const hasWebGPU = 'gpu' in navigator && navigator.gpu
+        
+        console.log('Browser detection:', { isSafari, hasWebGPU })
 
         // Dynamic import of Three.js modules
         const THREE = await import('three')
@@ -27,21 +32,35 @@ export default function DataUniverse3D() {
 
         if (!canvasRef.current) return
 
-        // Initialize renderer (fallback to WebGL if WebGPU not available)
-        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
-        renderer.setPixelRatio(window.devicePixelRatio)
+        // Initialize renderer with browser-specific optimizations
+        const rendererOptions = {
+          canvas: canvasRef.current,
+          antialias: !isSafari, // Disable antialiasing on Safari for better performance
+          alpha: true,
+          preserveDrawingBuffer: false,
+          powerPreference: isSafari ? 'default' : 'high-performance' as WebGLPowerPreference
+        }
+        
+        const renderer = new THREE.WebGLRenderer(rendererOptions)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2)) // Limit pixel ratio on Safari
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.setClearColor(0x000000)
+        
+        // Safari-specific settings
+        if (isSafari) {
+          renderer.outputColorSpace = THREE.SRGBColorSpace
+          renderer.toneMapping = THREE.NoToneMapping
+        }
 
         // Setup scene and camera
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
         camera.position.set(3, 3, 3)
 
-        // Galaxy parameters
+        // Galaxy parameters with Safari optimization
         const parameters = {
-          count: 100000,
-          size: 0.01,
+          count: isSafari ? 50000 : 100000, // Reduce particle count on Safari
+          size: isSafari ? 0.015 : 0.01,    // Slightly larger particles on Safari
           radius: 5,
           branches: 3,
           spin: 1,
@@ -100,39 +119,58 @@ export default function DataUniverse3D() {
         const points = new THREE.Points(geometry, material)
         scene.add(points)
 
-        // Add NEURASCALE text inside the scene with glow/outline
-        const loader = new FontLoader()
-        loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-          const textGeometry = new TextGeometry('NEURASCALE', {
-            font: font,
-            size: 0.5,
-            height: 0.1,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.02,
-            bevelOffset: 0,
-            bevelSegments: 5,
-          })
+        // Add NEURASCALE text with fallback for font loading issues
+        try {
+          const loader = new FontLoader()
+          
+          loader.load(
+            'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+            (font) => {
+              try {
+                const textGeometry = new TextGeometry('NEURASCALE', {
+                  font: font,
+                  size: 0.5,
+                  height: 0.1,
+                  curveSegments: isSafari ? 8 : 12, // Reduce complexity on Safari
+                  bevelEnabled: !isSafari, // Disable bevel on Safari for performance
+                  bevelThickness: 0.02,
+                  bevelSize: 0.02,
+                  bevelOffset: 0,
+                  bevelSegments: 3,
+                })
 
-          textGeometry.computeBoundingBox()
-          const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
-          const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
+                textGeometry.computeBoundingBox()
+                if (textGeometry.boundingBox) {
+                  const centerOffsetX = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x)
+                  const centerOffsetY = -0.5 * (textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y)
 
-          // Create bright blue text with strong glow
-          const textMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4185f4,
-            emissive: 0x6aa6ff,
-            emissiveIntensity: 1.5,
-            transparent: false
-          })
+                  // Create bright blue text with Safari-compatible materials
+                  const textMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x4185f4,
+                    emissive: 0x6aa6ff,
+                    emissiveIntensity: isSafari ? 1.0 : 1.5,
+                    transparent: false,
+                    side: THREE.DoubleSide
+                  })
 
-          const textMesh = new THREE.Mesh(textGeometry, textMaterial)
-          textMesh.position.x = centerOffsetX
-          textMesh.position.y = centerOffsetY - 3  // Back to original position
-          textMesh.position.z = 0
-          scene.add(textMesh)
-        })
+                  const textMesh = new THREE.Mesh(textGeometry, textMaterial)
+                  textMesh.position.x = centerOffsetX
+                  textMesh.position.y = centerOffsetY - 3
+                  textMesh.position.z = 0
+                  scene.add(textMesh)
+                }
+              } catch (textErr) {
+                console.warn('Text geometry creation failed:', textErr)
+              }
+            },
+            undefined,
+            (err) => {
+              console.warn('Font loading failed, continuing without text:', err)
+            }
+          )
+        } catch (fontErr) {
+          console.warn('Font loader initialization failed:', fontErr)
+        }
         
         // Simple lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
@@ -156,6 +194,9 @@ export default function DataUniverse3D() {
         }
 
         renderer.setAnimationLoop(animate)
+        
+        // Mark as loaded
+        setIsLoading(false)
 
         // Handle resize
         const handleResize = () => {
@@ -172,21 +213,22 @@ export default function DataUniverse3D() {
         }
 
       } catch (err) {
-        console.error('WebGPU DataUniverse initialization error:', err)
-        setError(`WebGPU Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('DataUniverse initialization error:', err)
+        setError(`3D Rendering Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        setIsLoading(false)
       }
     }
 
-    initWebGPUGalaxy()
+    initGalaxy()
   }, [])
 
   if (error) {
     return (
       <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black text-white">
         <div className="text-center">
-          <p className="text-red-400 mb-2">WebGPU DataUniverse Error</p>
+          <p className="text-red-400 mb-2">3D Visualization Error</p>
           <p className="text-sm text-gray-400">{error}</p>
-          <p className="text-xs text-gray-500 mt-2">Try enabling WebGPU in your browser</p>
+          <p className="text-xs text-gray-500 mt-2">Your browser may not support WebGL</p>
         </div>
       </div>
     )
@@ -194,8 +236,15 @@ export default function DataUniverse3D() {
 
   return (
     <div className="absolute inset-0 w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black text-white z-10">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-sm text-gray-400">Loading 3D Visualization...</p>
+          </div>
+        </div>
+      )}
       <canvas ref={canvasRef} className="w-full h-full" />
-      
     </div>
   )
 }

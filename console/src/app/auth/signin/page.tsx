@@ -48,7 +48,7 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header with Logo */}
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <span
@@ -112,33 +112,20 @@ export default function SignInPage() {
                 </g>
               </svg>
               {/* MIT Text */}
-              <div className="flex flex-col">
-                <span
-                  className="text-xs text-black/70 leading-tight"
-                  style={{
-                    fontFamily:
-                      "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                    fontWeight: 500,
-                  }}
-                >
-                  Massachusetts Institute
-                </span>
-                <span
-                  className="text-xs text-black/70 leading-tight"
-                  style={{
-                    fontFamily:
-                      "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                    fontWeight: 500,
-                  }}
-                >
-                  of Technology
-                </span>
-                <div className="text-xs text-gray-500 font-medium mt-1">
-                  Console
-                </div>
-              </div>
+              <span
+                className="text-xs text-black leading-tight"
+                style={{
+                  fontFamily:
+                    "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                  fontWeight: 500,
+                }}
+              >
+                MIT Massachusetts Institute of Technology
+              </span>
             </div>
           </div>
+          {/* Console Label */}
+          <div className="text-sm text-gray-600 font-medium mt-2">Console</div>
         </div>
 
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">

@@ -45,46 +45,110 @@ npm run dev
 
 The app will be available at `http://localhost:3000`
 
-### Contact Form Configuration
+### Environment Variables Configuration
 
-The contact form sends emails to `identity@wael.ai`. To enable email functionality:
+The application requires the following environment variables:
+- `EMAIL_USER` - Email address for sending contact form messages
+- `EMAIL_PASS` - Email password/app password
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - Google Maps API key
 
-1. Copy the environment template:
-   ```bash
-   cp apps/web/.env.local.example apps/web/.env.local
-   ```
+#### Option 1: Vercel Environment Variables (Recommended for Production)
 
-2. Add your email credentials to `.env.local`:
+**Best for:** Production deployment, easier management, automatic integration
+
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard)
+2. Select your project
+3. Navigate to Settings → Environment Variables
+4. Add the following variables:
    ```
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
-   ```
-
-3. For Gmail users:
-   - You need an App Password (not your regular password)
-   - Generate one at: https://myaccount.google.com/apppasswords
-   - Enable 2-factor authentication if not already enabled
-
-**Note**: The contact form will work in development mode even without email credentials - submissions will be logged to the console.
-
-### Google Maps Configuration
-
-The contact page includes an interactive Google Map. To enable it:
-
-1. Get a Google Maps API key:
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select existing
-   - Enable "Maps JavaScript API"
-   - Create credentials (API Key)
-
-2. Add the API key to your `.env.local`:
-   ```
    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
    ```
+5. Choose the environments (Production, Preview, Development)
+6. Save and redeploy
 
-3. (Optional) Restrict your API key to your domain for security
+**Advantages:**
+- Automatic injection into your app during build/runtime
+- Secure storage with encryption
+- Easy to update without code changes
+- Different values for different environments
+- No risk of accidentally committing secrets
 
-**Note**: The map will show a development mode warning without a valid API key.
+#### Option 2: GitHub Secrets (For CI/CD)
+
+**Best for:** GitHub Actions, automated testing, build processes
+
+1. Go to your GitHub repository
+2. Navigate to Settings → Secrets and variables → Actions
+3. Add new repository secrets:
+   ```
+   EMAIL_USER
+   EMAIL_PASS
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+   ```
+4. Update your Vercel deployment to use GitHub secrets:
+
+Create `.github/workflows/deploy.yml`:
+```yaml
+name: Deploy to Vercel
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+        run: |
+          npm i -g vercel
+          vercel --prod --token=$VERCEL_TOKEN
+```
+
+#### Option 3: Local Development
+
+For local development, create `.env.local`:
+```bash
+cp apps/web/.env.local.example apps/web/.env.local
+```
+
+Then add your credentials to `.env.local`.
+
+### Recommended Approach
+
+**Use Vercel Environment Variables** for the following reasons:
+1. **Seamless Integration** - Vercel automatically injects env vars during build
+2. **Security** - Values are encrypted and never exposed in logs
+3. **Easy Management** - Update values without code changes
+4. **Environment-specific** - Different values for production/preview/development
+5. **No Additional Setup** - Works out of the box with your existing Vercel deployment
+
+### Setting Up Email Credentials
+
+For Gmail users:
+1. Enable 2-factor authentication
+2. Generate an App Password at: https://myaccount.google.com/apppasswords
+3. Use the app password (not your regular password) as `EMAIL_PASS`
+
+### Setting Up Google Maps
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable "Maps JavaScript API"
+4. Create credentials (API Key)
+5. Restrict the key to your domains:
+   - `localhost:3000` for development
+   - `your-domain.vercel.app` for production
+   - Your custom domain if applicable
+
+**Note**: Both the contact form and map will work in development mode with warnings if credentials are not configured.
 
 ## 🎨 Features
 

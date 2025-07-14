@@ -55,24 +55,6 @@ const ResearchIcon = () => (
   </svg>
 )
 
-const NewsIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="8" y="10" width="24" height="20" rx="2" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
-    <path d="M12 16 L20 16" stroke="currentColor" strokeWidth="1" opacity="0.8" />
-    <path d="M12 20 L28 20" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
-    <path d="M12 24 L28 24" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
-    <rect x="22" y="14" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="0.5" opacity="0.6" />
-    <circle cx="30" cy="8" r="2" fill="currentColor" opacity="0.8" />
-  </svg>
-)
-
-const CommunityIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 5 L25 15 L35 17 L27.5 24.5 L29.5 34.5 L20 29 L10.5 34.5 L12.5 24.5 L5 17 L15 15 Z" 
-          stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
-    <circle cx="20" cy="20" r="2" fill="currentColor" />
-  </svg>
-)
 
 export default function Resources() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -110,38 +92,6 @@ export default function Resources() {
     }
   ]
 
-  const blogCategories = [
-    {
-      category: 'Research Updates',
-      description: 'Latest findings in neural interface technology and AI model improvements',
-      icon: <ResearchIcon />,
-      posts: [
-        'Breakthrough in Real-time Neural Pattern Recognition',
-        'Improving Prosthetic Control with ADAM Models',
-        'Case Study: Restoring Mobility in Spinal Cord Patients'
-      ]
-    },
-    {
-      category: 'Product News',
-      description: 'Platform updates, new features, and development milestones',
-      icon: <NewsIcon />,
-      posts: [
-        'NEURASCALE v2.1: Enhanced WebGPU Support',
-        'New ROS Integration Platform Released',
-        'Multi-Cloud Deployment Now Available'
-      ]
-    },
-    {
-      category: 'Community Spotlight',
-      description: 'Featuring contributors, case studies, and success stories',
-      icon: <CommunityIcon />,
-      posts: [
-        'Developer Spotlight: Building Neural VR Experiences',
-        'Hospital Case Study: 90% Improvement in Patient Outcomes',
-        'Open Source Contribution of the Month'
-      ]
-    }
-  ]
 
   const whitepapers = [
     {
@@ -271,51 +221,6 @@ export default function Resources() {
           </div>
         </div>
 
-        {/* Blog & News */}
-        <div className="mb-24">
-          <motion.h3
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-light mb-12 text-white/90"
-          >
-            Blog & News
-          </motion.h3>
-          
-          <div className="grid lg:grid-cols-3 gap-8">
-            {blogCategories.map((category, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
-              >
-                <div className="flex items-center mb-4">
-                  <div className="text-white/60 mr-3">{category.icon}</div>
-                  <h4 className="text-lg font-light text-white/90">{category.category}</h4>
-                </div>
-                
-                <p className="text-white/70 text-sm mb-4 leading-relaxed">
-                  {category.description}
-                </p>
-                
-                <div>
-                  <span className="text-blue-400/80 text-xs font-medium block mb-3">Recent Posts</span>
-                  <ul className="space-y-2">
-                    {category.posts.map((post, postIndex) => (
-                      <li key={postIndex} className="text-white/60 text-xs leading-relaxed hover:text-white/80 cursor-pointer transition-colors">
-                        {post}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* Whitepapers & Research */}
         <div className="mb-24">

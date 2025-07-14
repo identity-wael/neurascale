@@ -62,7 +62,7 @@ export default function SignInPage() {
             <div className="w-px h-6 bg-gray-300" />
 
             {/* MIT Logo and Text */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <svg
                 className="h-8 w-auto"
                 viewBox="0 0 536.229 536.229"
@@ -113,9 +113,9 @@ export default function SignInPage() {
                 </g>
               </svg>
               {/* MIT Text - 3 lines */}
-              <div className="flex flex-col justify-center h-8 leading-none items-end">
+              <div className="flex flex-col justify-between h-8">
                 <span
-                  className="text-xs text-black font-medium"
+                  className="text-[10px] text-black font-medium leading-none"
                   style={{
                     fontFamily:
                       "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
@@ -124,7 +124,7 @@ export default function SignInPage() {
                   Massachusetts
                 </span>
                 <span
-                  className="text-xs text-black font-medium"
+                  className="text-[10px] text-black font-medium leading-none"
                   style={{
                     fontFamily:
                       "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
@@ -133,7 +133,7 @@ export default function SignInPage() {
                   Institute of
                 </span>
                 <span
-                  className="text-xs text-black font-medium"
+                  className="text-[10px] text-black font-medium leading-none"
                   style={{
                     fontFamily:
                       "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",

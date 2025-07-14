@@ -321,30 +321,6 @@ export default function Resources() {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center p-8 rounded-lg border border-blue-400/30 bg-blue-400/5 backdrop-blur-sm"
-        >
-          <h3 className="text-2xl font-light text-white/90 mb-4">Stay Updated</h3>
-          <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-            Subscribe to our newsletter for the latest research findings, platform updates, 
-            and neural interface industry insights delivered directly to your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <input 
-              type="email" 
-              placeholder="Enter your email address"
-              className="px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 min-w-64"
-            />
-            <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </motion.div>
       </motion.div>
     </section>
   )

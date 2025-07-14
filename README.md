@@ -1,5 +1,9 @@
 # NEURASCALE - Neural-Prosthetics Application Cloud
 
+[![CodeQL](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml)
+[![Dependency Review](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 An open-source infrastructure for processing petabytes of brain data, enabling applications that restore mobility, unlock robotic control, and create immersive realities.
 
 ## 📁 Project Structure

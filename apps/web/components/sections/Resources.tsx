@@ -156,19 +156,28 @@ export default function Resources() {
   ]
 
   return (
-    <section id="resources" ref={containerRef} className="min-h-screen px-6 md:px-12 lg:px-24 py-24 relative">
-      <motion.div style={{ scale }} className="relative z-10">
+    <section id="resources" ref={containerRef} className="px-6 py-16 relative">
+      <motion.div
+        style={{ scale }}
+        className="relative z-10 w-full"
+      >
+        <div className="flex items-start mb-8">
+          <span className="text-white/40 text-sm font-mono mr-4">≡</span>
+          <span className="text-white/40 text-sm uppercase tracking-wider">RESOURCES</span>
+        </div>
+
         <AnimatedText
           text="Knowledge hub for neural interface innovation"
-          className="text-3xl md:text-4xl lg:text-5xl font-light mb-16 max-w-4xl"
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+          stagger={0.02}
         />
         
         <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="text-lg md:text-xl text-white/80 mb-20 max-w-4xl"
+          className="text-white/70 text-lg max-w-4xl mb-16"
         >
           Access comprehensive documentation, research papers, tutorials, and community resources 
           to accelerate your neural interface development and stay current with the latest innovations.

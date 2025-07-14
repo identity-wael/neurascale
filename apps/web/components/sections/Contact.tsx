@@ -171,9 +171,33 @@ export default function Contact() {
   ]
 
   return (
-    <section id="contact" ref={containerRef} className="px-6 md:px-12 lg:px-24 py-24 relative">
-      <motion.div style={{ scale }} className="relative z-10">
-        
+    <section id="contact" ref={containerRef} className="px-6 py-16 relative">
+      <motion.div style={{ scale }} className="relative z-10 w-full">
+        <div className="flex items-start mb-8">
+          <span className="text-white/40 text-sm font-mono mr-4">≡</span>
+          <span className="text-white/40 text-sm uppercase tracking-wider">CONTACT</span>
+        </div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true }}
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+        >
+          Let's Connect
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          viewport={{ once: true }}
+          className="text-white/70 text-lg max-w-4xl mb-16"
+        >
+          Ready to explore neural interface technology? Get in touch for partnerships, 
+          demos, research collaboration, or technical support.
+        </motion.p>
 
         {/* Contact Form */}
         <div className="grid lg:grid-cols-3 gap-12 mb-24">
@@ -233,7 +257,7 @@ export default function Contact() {
                   <label className="block text-white/70 text-sm mb-2">Message</label>
                   <textarea 
                     rows={6}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 resize-vertical"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 resize-none"
                     placeholder="Tell us about your project, questions, or how we can help..."
                   />
                 </div>

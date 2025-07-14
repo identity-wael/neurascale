@@ -5,15 +5,12 @@ import { useState, useEffect } from 'react';
 
 export default function LoadingScreen() {
   const [progress, setProgress] = useState(0);
-  const [showAuthenticated, setShowAuthenticated] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          // Show authenticated text after progress completes
-          setTimeout(() => setShowAuthenticated(true), 200);
           return 100;
         }
         return prev + 2;
@@ -71,20 +68,6 @@ export default function LoadingScreen() {
             />
           </div>
         </div>
-
-        {/* Authenticated text animation */}
-        {showAuthenticated && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mt-6"
-          >
-            <p className="text-green-400 text-sm font-mono tracking-wider">
-              AUTHENTICATED
-            </p>
-          </motion.div>
-        )}
       </div>
     </motion.div>
   );

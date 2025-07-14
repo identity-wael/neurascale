@@ -61,70 +61,46 @@ export default function SignInPage() {
 
             <div className="w-px h-6 bg-gray-300" />
 
-            {/* MIT Logo and Text */}
-            <div className="flex items-center gap-2">
-              {/* MIT Logo */}
-              <svg
-                className="h-8 w-auto"
-                viewBox="0 0 536.229 536.229"
-                fill="black"
-                fillOpacity="0.8"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+            {/* MIT Logo */}
+            <svg
+              className="h-8 w-auto"
+              viewBox="0 0 536.229 536.229"
+              fill="black"
+              fillOpacity="0.8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g>
                 <g>
-                  <g>
-                    <rect y="130.031" width="58.206" height="276.168" />
-                    <rect
-                      x="95.356"
-                      y="130.031"
-                      width="58.206"
-                      height="190.712"
-                    />
-                    <rect
-                      x="190.712"
-                      y="130.031"
-                      width="58.206"
-                      height="276.168"
-                    />
-                    <rect
-                      x="381.425"
-                      y="217.956"
-                      width="58.212"
-                      height="188.236"
-                    />
-                    <rect
-                      x="381.425"
-                      y="130.031"
-                      width="154.805"
-                      height="58.206"
-                    />
-                    <rect
-                      x="286.074"
-                      y="217.956"
-                      width="58.2"
-                      height="188.236"
-                    />
-                    <rect
-                      x="286.074"
-                      y="130.031"
-                      width="58.2"
-                      height="58.206"
-                    />
-                  </g>
+                  <rect y="130.031" width="58.206" height="276.168" />
+                  <rect
+                    x="95.356"
+                    y="130.031"
+                    width="58.206"
+                    height="190.712"
+                  />
+                  <rect
+                    x="190.712"
+                    y="130.031"
+                    width="58.206"
+                    height="276.168"
+                  />
+                  <rect
+                    x="381.425"
+                    y="217.956"
+                    width="58.212"
+                    height="188.236"
+                  />
+                  <rect
+                    x="381.425"
+                    y="130.031"
+                    width="154.805"
+                    height="58.206"
+                  />
+                  <rect x="286.074" y="217.956" width="58.2" height="188.236" />
+                  <rect x="286.074" y="130.031" width="58.2" height="58.206" />
                 </g>
-              </svg>
-              {/* MIT Text */}
-              <span
-                className="text-sm text-black"
-                style={{
-                  fontFamily:
-                    "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                  fontWeight: 500,
-                }}
-              >
-                Massachusetts Institute of Technology
-              </span>
-            </div>
+              </g>
+            </svg>
           </div>
         </div>
 

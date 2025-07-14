@@ -113,11 +113,10 @@ export default function SignInPage() {
               </svg>
               {/* MIT Text */}
               <span
-                className="text-xs text-black leading-tight"
+                className="text-xs text-black leading-tight font-medium"
                 style={{
                   fontFamily:
-                    "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                  fontWeight: 500,
+                    "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 }}
               >
                 MIT Massachusetts Institute of Technology

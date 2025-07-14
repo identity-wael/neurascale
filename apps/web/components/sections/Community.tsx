@@ -240,7 +240,7 @@ export default function Community() {
     {
       platform: 'Forum',
       purpose: 'Long-form discussions, research papers, project announcements',
-      link: 'community.neurascale.org',
+      link: 'community.neurascale.io',
       members: '3.2K+',
       icon: <ForumIcon />
     },

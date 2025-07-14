@@ -94,28 +94,28 @@ export default function Contact() {
   const contactChannels = [
     {
       title: 'General Inquiries',
-      email: 'hello@neurascale.org',
+      email: 'hello@neurascale.io',
       description: 'Questions about NEURASCALE, partnership opportunities, or general information',
       icon: <ChatIcon />,
       responseTime: '24-48 hours'
     },
     {
       title: 'Technical Support',
-      email: 'support@neurascale.org',
+      email: 'support@neurascale.io',
       description: 'Platform issues, integration help, and technical documentation questions',
       icon: <SupportIcon />,
       responseTime: '12-24 hours'
     },
     {
       title: 'Sales & Partnerships',
-      email: 'sales@neurascale.org',
+      email: 'sales@neurascale.io',
       description: 'Enterprise solutions, custom deployments, and strategic partnerships',
       icon: <HandshakeIcon />,
       responseTime: '4-8 hours'
     },
     {
       title: 'Research Collaboration',
-      email: 'research@neurascale.org',
+      email: 'research@neurascale.io',
       description: 'Academic partnerships, clinical trials, and research data sharing',
       icon: <ResearchContactIcon />,
       responseTime: '24-48 hours'

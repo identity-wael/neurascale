@@ -8,21 +8,29 @@ export default function GoogleAnalytics() {
 
   if (!ga4Id) return null;
 
+  // Build the script content as a string
+  let scriptContent = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${ga4Id}');
+  `;
+  
+  if (googleAdsId) {
+    scriptContent += `gtag('config', '${googleAdsId}');`;
+  }
+
   return (
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
         strategy="afterInteractive"
       />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${ga4Id}');
-          ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ''}
-        `}
-      </Script>
+      <Script 
+        id="google-analytics" 
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: scriptContent }}
+      />
     </>
   );
 }

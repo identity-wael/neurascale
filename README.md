@@ -45,6 +45,28 @@ npm run dev
 
 The app will be available at `http://localhost:3000`
 
+### Contact Form Configuration
+
+The contact form sends emails to `identity@wael.ai`. To enable email functionality:
+
+1. Copy the environment template:
+   ```bash
+   cp apps/web/.env.local.example apps/web/.env.local
+   ```
+
+2. Add your email credentials to `.env.local`:
+   ```
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-password
+   ```
+
+3. For Gmail users:
+   - You need an App Password (not your regular password)
+   - Generate one at: https://myaccount.google.com/apppasswords
+   - Enable 2-factor authentication if not already enabled
+
+**Note**: The contact form will work in development mode even without email credentials - submissions will be logged to the console.
+
 ## 🎨 Features
 
 - **3D Visualizations**: Neural processor and server rack animations using Three.js

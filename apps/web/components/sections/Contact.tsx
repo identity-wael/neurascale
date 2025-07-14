@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 // SVG Icons for contact channels
 const ChatIcon = () => (
@@ -90,6 +90,59 @@ export default function Contact() {
   })
 
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1])
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    organization: '',
+    subject: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [statusMessage, setStatusMessage] = useState('')
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        setStatusMessage('Thank you for your message! We\'ll get back to you soon.')
+        setFormData({
+          name: '',
+          email: '',
+          organization: '',
+          subject: '',
+          message: ''
+        })
+      } else {
+        setSubmitStatus('error')
+        setStatusMessage('Failed to send message. Please try again.')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+      setStatusMessage('An error occurred. Please try again later.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const contactChannels = [
     {
@@ -211,12 +264,16 @@ export default function Contact() {
             >
               <h3 className="text-2xl font-light text-white/90 mb-6">Send us a message</h3>
               
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-white/70 text-sm mb-2">Name</label>
                     <input 
                       type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400"
                       placeholder="Your full name"
                     />
@@ -225,6 +282,10 @@ export default function Contact() {
                     <label className="block text-white/70 text-sm mb-2">Email</label>
                     <input 
                       type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400"
                       placeholder="your.email@example.com"
                     />
@@ -235,6 +296,9 @@ export default function Contact() {
                   <label className="block text-white/70 text-sm mb-2">Organization</label>
                   <input 
                     type="text" 
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400"
                     placeholder="Your company or institution"
                   />
@@ -242,7 +306,12 @@ export default function Contact() {
                 
                 <div>
                   <label className="block text-white/70 text-sm mb-2">Subject</label>
-                  <select className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400">
+                  <select 
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400">
                     <option value="" className="bg-black">Select a topic</option>
                     <option value="general" className="bg-black">General Inquiry</option>
                     <option value="partnership" className="bg-black">Partnership Opportunity</option>
@@ -256,6 +325,10 @@ export default function Contact() {
                 <div>
                   <label className="block text-white/70 text-sm mb-2">Message</label>
                   <textarea 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
                     rows={6}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 resize-none"
                     placeholder="Tell us about your project, questions, or how we can help..."
@@ -264,10 +337,19 @@ export default function Contact() {
                 
                 <button 
                   type="submit"
-                  className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
+                
+                {submitStatus !== 'idle' && (
+                  <div className={`mt-4 p-4 rounded-lg ${
+                    submitStatus === 'success' ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                  }`}>
+                    {statusMessage}
+                  </div>
+                )}
               </form>
             </motion.div>
           </div>

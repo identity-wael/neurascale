@@ -62,7 +62,8 @@ export default function SignInPage() {
             <div className="w-px h-6 bg-gray-300" />
 
             {/* MIT Logo and Text */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              {/* MIT Logo */}
               <svg
                 className="h-8 w-auto"
                 viewBox="0 0 536.229 536.229"
@@ -112,47 +113,26 @@ export default function SignInPage() {
                   </g>
                 </g>
               </svg>
-              {/* MIT Text - 3 lines */}
-              <div className="flex flex-col justify-between h-8">
-                <span
-                  className="text-[10px] text-black font-medium leading-none"
-                  style={{
-                    fontFamily:
-                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  }}
-                >
-                  Massachusetts
-                </span>
-                <span
-                  className="text-[10px] text-black font-medium leading-none"
-                  style={{
-                    fontFamily:
-                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  }}
-                >
-                  Institute of
-                </span>
-                <span
-                  className="text-[10px] text-black font-medium leading-none"
-                  style={{
-                    fontFamily:
-                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  }}
-                >
-                  Technology
-                </span>
-              </div>
+              {/* MIT Text */}
+              <span
+                className="text-sm text-black"
+                style={{
+                  fontFamily:
+                    "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                  fontWeight: 500,
+                }}
+              >
+                Massachusetts Institute of Technology
+              </span>
             </div>
           </div>
-          {/* Console Label - Larger and Bold */}
-          <div className="text-xl text-gray-800 font-bold mt-4">Console</div>
         </div>
 
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Access your neural computing infrastructure
+          Access your Application Cloud Console
         </p>
       </div>
 

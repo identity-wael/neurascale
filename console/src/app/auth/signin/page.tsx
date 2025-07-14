@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -38,11 +38,8 @@ export default function SignInPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header with Logo */}
         <div className="flex justify-center">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Brain className="h-6 w-6 text-white" />
-            </div>
-            <div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <span
                 className="font-extrabold text-2xl tracking-wider"
                 style={{ fontFamily: "Proxima Nova, sans-serif" }}
@@ -50,7 +47,85 @@ export default function SignInPage() {
                 <span className="text-black">NEURA</span>
                 <span className="text-[#4185f4]">SCALE</span>
               </span>
-              <div className="text-sm text-gray-600 font-medium">Console</div>
+            </div>
+            <div className="w-px h-6 bg-gray-300" />
+            <div className="flex items-center gap-3">
+              {/* MIT Logo */}
+              <svg
+                className="h-8 w-auto"
+                viewBox="0 0 536.229 536.229"
+                fill="black"
+                fillOpacity="0.8"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g>
+                  <g>
+                    <rect y="130.031" width="58.206" height="276.168" />
+                    <rect
+                      x="95.356"
+                      y="130.031"
+                      width="58.206"
+                      height="190.712"
+                    />
+                    <rect
+                      x="190.712"
+                      y="130.031"
+                      width="58.206"
+                      height="276.168"
+                    />
+                    <rect
+                      x="381.425"
+                      y="217.956"
+                      width="58.212"
+                      height="188.236"
+                    />
+                    <rect
+                      x="381.425"
+                      y="130.031"
+                      width="154.805"
+                      height="58.206"
+                    />
+                    <rect
+                      x="286.074"
+                      y="217.956"
+                      width="58.2"
+                      height="188.236"
+                    />
+                    <rect
+                      x="286.074"
+                      y="130.031"
+                      width="58.2"
+                      height="58.206"
+                    />
+                  </g>
+                </g>
+              </svg>
+              {/* MIT Text */}
+              <div className="flex flex-col">
+                <span
+                  className="text-xs text-black/70 leading-tight"
+                  style={{
+                    fontFamily:
+                      "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                    fontWeight: 500,
+                  }}
+                >
+                  Massachusetts Institute
+                </span>
+                <span
+                  className="text-xs text-black/70 leading-tight"
+                  style={{
+                    fontFamily:
+                      "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                    fontWeight: 500,
+                  }}
+                >
+                  of Technology
+                </span>
+                <div className="text-xs text-gray-500 font-medium mt-1">
+                  Console
+                </div>
+              </div>
             </div>
           </div>
         </div>

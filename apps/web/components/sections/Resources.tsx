@@ -249,16 +249,16 @@ export default function Resources() {
                   {section.description}
                 </p>
                 
-                <div>
-                  <span className="text-blue-400/80 text-xs font-medium block mb-2">Available Resources</span>
-                  <ul className="space-y-1">
-                    {section.resources.map((resource, resourceIndex) => (
-                      <li key={resourceIndex} className="text-white/60 text-sm flex items-center">
-                        <span className="text-blue-400 mr-2">•</span>
-                        {resource}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                  <span className="text-yellow-400 text-sm font-medium flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Coming Soon
+                  </span>
+                  <p className="text-yellow-400/80 text-xs mt-2">
+                    Documentation for {section.title.toLowerCase()} will be available shortly.
+                  </p>
                 </div>
               </motion.div>
             ))}

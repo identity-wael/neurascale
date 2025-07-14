@@ -100,7 +100,8 @@ export default function Resources() {
       summary: 'Development and testing of a self-contained, portable intracortical BCI weighing 1.5 kg, enabling users with paralysis to perform computer tasks outside laboratory settings.',
       category: 'BCI / Computing',
       pages: '16 pages',
-      date: '2019'
+      date: '2019',
+      url: 'https://www.researchgate.net/publication/338341319_Demonstration_of_a_portable_intracortical_brain-computer_interface'
     },
     {
       title: 'Fault-tolerant and Transactional Stateful Serverless Workflows',
@@ -108,39 +109,8 @@ export default function Resources() {
       summary: 'Beldi, a library and runtime system for writing fault-tolerant and transactional stateful serverless functions with strong consistency guarantees on AWS Lambda.',
       category: 'Cloud Computing / Computing',
       pages: '16 pages',
-      date: '2020'
-    },
-    {
-      title: 'MimicNet: Fast Performance Estimates for Data Center Networks with Machine Learning',
-      authors: 'Q. Zhang, K.K.W. Ng, C. Kazer, S. Yan, J. Sedoc, V. Liu',
-      summary: 'ML-based system for rapidly estimating data center network performance, providing fast and accurate predictions for evaluating design changes and traffic patterns.',
-      category: 'Cloud Computing / AI/ML Research',
-      pages: '18 pages',
-      date: '2021'
-    },
-    {
-      title: 'F10: A Fault-Tolerant Engineered Network',
-      authors: 'V. Liu, D. Halperin, A. Krishnamurthy, T. Anderson',
-      summary: 'Novel data center network architecture designed for high performance and microsecond-scale fault tolerance through co-designed topology and routing protocols.',
-      category: 'Cloud Computing / Computing',
-      pages: '14 pages',
-      date: '2013'
-    },
-    {
-      title: 'Ambient Backscatter: Wireless Communication Out of Thin Air',
-      authors: 'V. Liu, A. Parks, V. Talla, S. Gollakota, D. Wetherall, J.R. Smith',
-      summary: 'Groundbreaking communication paradigm enabling battery-free devices to communicate by backscattering ambient RF signals like TV and cellular transmissions.',
-      category: 'Computing / Wireless Networks',
-      pages: '12 pages',
-      date: '2013'
-    },
-    {
-      title: 'EgoZero: Robot Learning from Smart Glasses',
-      authors: 'V. Liu, A. Adeniji, H. Zhan, R. Bhirangi, P. Abbeel, L. Pinto',
-      summary: 'New paradigm for robot learning through first-person video observation, bridging the gap between human demonstration and robotic execution.',
-      category: 'Human-Robot Interaction / AI/ML Research',
-      pages: '16 pages',
-      date: '2025'
+      date: '2020',
+      url: 'https://www.researchgate.net/publication/344663207_Fault-tolerant_and_Transactional_Stateful_Serverless_Workflows_extended_version'
     }
   ]
 
@@ -290,9 +260,16 @@ export default function Resources() {
                   </div>
                 </div>
                 
-                <button className="px-4 py-2 border border-blue-400/30 text-blue-400 hover:bg-blue-400/10 rounded-lg text-sm transition-colors">
-                  Download PDF
-                </button>
+                {paper.url && (
+                  <a 
+                    href={paper.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 border border-blue-400/30 text-blue-400 hover:bg-blue-400/10 rounded-lg text-sm transition-colors"
+                  >
+                    Download PDF
+                  </a>
+                )}
               </motion.div>
             ))}
           </div>

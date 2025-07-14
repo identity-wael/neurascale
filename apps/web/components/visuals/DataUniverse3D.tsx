@@ -55,10 +55,10 @@ export default function DataUniverse3D() {
             }
 
             // Import and initialize WebGPU renderer
-            const WebGPURenderer = await import(
+            const { default: WebGPURenderer } = await import(
               'three/examples/jsm/renderers/webgpu/WebGPURenderer.js'
             );
-            renderer = new WebGPURenderer.WebGPURenderer({
+            renderer = new WebGPURenderer({
               canvas: canvasRef.current,
               antialias: true,
             });

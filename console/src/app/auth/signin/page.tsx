@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function SignInPage() {
   const { user, signInWithGoogle, loading } = useAuth();
   const router = useRouter();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -17,11 +18,21 @@ export default function SignInPage() {
   }, [user, router]);
 
   const handleSignIn = async () => {
+    console.log("Sign in button clicked");
+    setIsSigningIn(true);
     try {
+      console.log("Attempting Google sign in...");
       await signInWithGoogle();
+      console.log("Sign in successful");
     } catch (error) {
       console.error("Sign in failed:", error);
-      // You could add toast notification here
+      alert(
+        `Sign in failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -144,7 +155,8 @@ export default function SignInPage() {
             {/* Google Sign In Button */}
             <Button
               onClick={handleSignIn}
-              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isSigningIn}
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               variant="outline"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -165,7 +177,7 @@ export default function SignInPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              {isSigningIn ? "Signing in..." : "Continue with Google"}
             </Button>
 
             {/* Divider */}

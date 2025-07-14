@@ -55,11 +55,81 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <span className="text-white font-bold text-sm">N</span>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <a className="flex items-center justify-center" href="#">
+            <span className="sr-only">NEURASCALE</span>
+            <span
+              className="font-extrabold text-xl sm:text-2xl tracking-wider"
+              style={{ fontFamily: "Proxima Nova, sans-serif" }}
+            >
+              <span className="text-black">NEURA</span>
+              <span className="text-[#4185f4]">SCALE</span>
+            </span>
+          </a>
+          <div className="hidden sm:block w-px h-6 bg-black/20" />
+          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+            {/* MIT Logo */}
+            <svg
+              className="h-6 lg:h-8 w-auto"
+              viewBox="0 0 536.229 536.229"
+              fill="black"
+              fillOpacity="0.8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g>
+                <g>
+                  <rect y="130.031" width="58.206" height="276.168" />
+                  <rect
+                    x="95.356"
+                    y="130.031"
+                    width="58.206"
+                    height="190.712"
+                  />
+                  <rect
+                    x="190.712"
+                    y="130.031"
+                    width="58.206"
+                    height="276.168"
+                  />
+                  <rect
+                    x="381.425"
+                    y="217.956"
+                    width="58.212"
+                    height="188.236"
+                  />
+                  <rect
+                    x="381.425"
+                    y="130.031"
+                    width="154.805"
+                    height="58.206"
+                  />
+                  <rect x="286.074" y="217.956" width="58.2" height="188.236" />
+                  <rect x="286.074" y="130.031" width="58.2" height="58.206" />
+                </g>
+              </g>
+            </svg>
+            {/* MIT Text - hidden on smaller screens */}
+            <span
+              className="hidden lg:block text-sm text-black/70"
+              style={{
+                fontFamily:
+                  "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                fontWeight: 500,
+              }}
+            >
+              Massachusetts Institute of Technology
+            </span>
+            <span
+              className="lg:hidden text-xs text-black/70"
+              style={{
+                fontFamily:
+                  "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                fontWeight: 500,
+              }}
+            >
+              MIT
+            </span>
           </div>
-          <span className="text-lg font-medium text-gray-900">NeuraScale</span>
         </div>
       </div>
 

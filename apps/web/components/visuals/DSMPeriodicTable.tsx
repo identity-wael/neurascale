@@ -15,57 +15,111 @@ const DSMPeriodicTable = () => {
 
     // DSM Elements data
     const table = [
-      { code: "1NMS", name: "Neural Management Systems", category: "Core System", col: 1, row: 1 },
-      { code: "2NPT", name: "Neuroprosthetics", category: "Main Product", col: 2, row: 1 },
-      { code: "2BSI", name: "Brain-Robot Swarm Interface", category: "Main Product", col: 3, row: 1 },
-      { code: "2FDV", name: "Full-Dive VR", category: "Main Product", col: 4, row: 1 },
-      { code: "2HID", name: "Human Interface Device", category: "Neural Interface", col: 5, row: 1 },
-      { code: "2IBC", name: "Implantable Brain Computer Interface", category: "Neural Interface", col: 6, row: 1 },
-      { code: "2NBC", name: "Non-Invasive Brain Computer Interface", category: "Neural Interface", col: 7, row: 1 },
-      { code: "3CLD", name: "Cloud Infrastructure", category: "Cloud", col: 1, row: 2 },
-      { code: "3FSC", name: "Fully-Managed Serverless Compute", category: "Cloud", col: 2, row: 2 },
-      { code: "3FDS", name: "Fully-Managed Database Service", category: "Cloud", col: 3, row: 2 },
-      { code: "3FAI", name: "Fully-Managed AI Development Platform", category: "Cloud", col: 4, row: 2 },
-      { code: "3FAM", name: "Fully-Managed API Management Solution", category: "Cloud", col: 5, row: 2 },
-      { code: "3SGA", name: "Serverless GPU Acceleration", category: "Cloud", col: 6, row: 2 },
-      { code: "3STA", name: "Serverless TPU Acceleration", category: "Cloud", col: 7, row: 2 },
-      { code: "3FLB", name: "Fully-Managed Load Balancer", category: "Cloud", col: 8, row: 2 },
-      { code: "3TDP", name: "Threat Detection & Posture Management", category: "Cloud", col: 9, row: 2 },
-      { code: "4P5G", name: "Public 5G Network Slicing", category: "Network", col: 1, row: 3 },
-      { code: "4PHN", name: "Prosthetics Health Network Slice", category: "Network", col: 2, row: 3 },
-      { code: "4RCN", name: "Robotic Control Network Slice", category: "Network", col: 3, row: 3 },
-      { code: "4ROS", name: "Robotic Operation System", category: "Robotics", col: 13, row: 4 },
-      { code: "5GPU", name: "Graphics Processing Units", category: "Hardware", col: 4, row: 3 },
-      { code: "5NVB", name: "NVIDIA Blackwell B200", category: "Hardware", col: 5, row: 3 },
-      { code: "5TPU", name: "Tensor Processing Units", category: "Hardware", col: 6, row: 3 },
-      { code: "5GTT", name: "Google Trillium TPU v6", category: "Hardware", col: 7, row: 3 },
-      { code: "5FPG", name: "Field Programmable Gate Array", category: "Hardware", col: 8, row: 3 },
-      { code: "5AXV", name: "AMD Xilinx Versal VP1802", category: "Hardware", col: 9, row: 3 },
-      { code: "6PRL", name: "Programming Languages", category: "Software", col: 1, row: 4 },
-      { code: "6CPP", name: "C++ Programming Language", category: "Software", col: 2, row: 4 },
-      { code: "6PYT", name: "Python Programming Language", category: "Software", col: 3, row: 4 },
-      { code: "6VHD", name: "VHDL Programming Language", category: "Software", col: 4, row: 4 },
-      { code: "7IMS", name: "Identity Management System", category: "Security", col: 5, row: 4 },
-      { code: "7GID", name: "Google Identity", category: "Security", col: 6, row: 4 },
-      { code: "7AIG", name: "AWS IoT GreenGrass", category: "Security", col: 7, row: 4 },
-      { code: "8OPS", name: "Operating System", category: "OS", col: 8, row: 4 },
-      { code: "8LNX", name: "Linux OS", category: "OS", col: 9, row: 4 },
-      { code: "9DMS", name: "Database Management System", category: "Database", col: 10, row: 4 },
-      { code: "9ADB", name: "AlloyDB PostgreSQL", category: "Database", col: 11, row: 4 },
-      { code: "9BQD", name: "BigQuery Data Warehouse", category: "Database", col: 12, row: 4 },
-      { code: "9GST", name: "Google Storage", category: "Database", col: 10, row: 3 },
-      { code: "ALLM", name: "Large Language Models", category: "AI/ML", col: 1, row: 5 },
-      { code: "AMLF", name: "Machine Learning Frameworks", category: "AI/ML", col: 2, row: 5 },
-      { code: "AGFE", name: "Gemini 2.0 Flash Experimental", category: "AI/ML", col: 3, row: 5 },
-      { code: "BAPI", name: "Application Programmable Interface", category: "Interface", col: 4, row: 5 },
-      { code: "BIKM", name: "Inverse Kinematics Models", category: "Robotics", col: 5, row: 5 },
-      { code: "BRLI", name: "Robotic Limbs Interface", category: "Robotics", col: 6, row: 5 },
-      { code: "BASR", name: "Automatic Speech Recognition", category: "AI/ML", col: 7, row: 5 },
-      { code: "CM3P", name: "Modular 3D Platform", category: "VR", col: 11, row: 3 },
-      { code: "CNVO", name: "NVIDIA OmniVerse", category: "VR", col: 12, row: 3 },
-      { code: "CVID", name: "VR Interface Device", category: "VR", col: 13, row: 3 },
-      { code: "CAVP", name: "Apple Vision Pro", category: "VR", col: 14, row: 3 },
-      { code: "CMQU", name: "Meta Quest", category: "VR", col: 15, row: 3 }
+      { code: '1NMS', name: 'Neural Management Systems', category: 'Core System', col: 1, row: 1 },
+      { code: '2NPT', name: 'Neuroprosthetics', category: 'Main Product', col: 2, row: 1 },
+      {
+        code: '2BSI',
+        name: 'Brain-Robot Swarm Interface',
+        category: 'Main Product',
+        col: 3,
+        row: 1,
+      },
+      { code: '2FDV', name: 'Full-Dive VR', category: 'Main Product', col: 4, row: 1 },
+      {
+        code: '2HID',
+        name: 'Human Interface Device',
+        category: 'Neural Interface',
+        col: 5,
+        row: 1,
+      },
+      {
+        code: '2IBC',
+        name: 'Implantable Brain Computer Interface',
+        category: 'Neural Interface',
+        col: 6,
+        row: 1,
+      },
+      {
+        code: '2NBC',
+        name: 'Non-Invasive Brain Computer Interface',
+        category: 'Neural Interface',
+        col: 7,
+        row: 1,
+      },
+      { code: '3CLD', name: 'Cloud Infrastructure', category: 'Cloud', col: 1, row: 2 },
+      { code: '3FSC', name: 'Fully-Managed Serverless Compute', category: 'Cloud', col: 2, row: 2 },
+      { code: '3FDS', name: 'Fully-Managed Database Service', category: 'Cloud', col: 3, row: 2 },
+      {
+        code: '3FAI',
+        name: 'Fully-Managed AI Development Platform',
+        category: 'Cloud',
+        col: 4,
+        row: 2,
+      },
+      {
+        code: '3FAM',
+        name: 'Fully-Managed API Management Solution',
+        category: 'Cloud',
+        col: 5,
+        row: 2,
+      },
+      { code: '3SGA', name: 'Serverless GPU Acceleration', category: 'Cloud', col: 6, row: 2 },
+      { code: '3STA', name: 'Serverless TPU Acceleration', category: 'Cloud', col: 7, row: 2 },
+      { code: '3FLB', name: 'Fully-Managed Load Balancer', category: 'Cloud', col: 8, row: 2 },
+      {
+        code: '3TDP',
+        name: 'Threat Detection & Posture Management',
+        category: 'Cloud',
+        col: 9,
+        row: 2,
+      },
+      { code: '4P5G', name: 'Public 5G Network Slicing', category: 'Network', col: 1, row: 3 },
+      {
+        code: '4PHN',
+        name: 'Prosthetics Health Network Slice',
+        category: 'Network',
+        col: 2,
+        row: 3,
+      },
+      { code: '4RCN', name: 'Robotic Control Network Slice', category: 'Network', col: 3, row: 3 },
+      { code: '4ROS', name: 'Robotic Operation System', category: 'Robotics', col: 13, row: 4 },
+      { code: '5GPU', name: 'Graphics Processing Units', category: 'Hardware', col: 4, row: 3 },
+      { code: '5NVB', name: 'NVIDIA Blackwell B200', category: 'Hardware', col: 5, row: 3 },
+      { code: '5TPU', name: 'Tensor Processing Units', category: 'Hardware', col: 6, row: 3 },
+      { code: '5GTT', name: 'Google Trillium TPU v6', category: 'Hardware', col: 7, row: 3 },
+      { code: '5FPG', name: 'Field Programmable Gate Array', category: 'Hardware', col: 8, row: 3 },
+      { code: '5AXV', name: 'AMD Xilinx Versal VP1802', category: 'Hardware', col: 9, row: 3 },
+      { code: '6PRL', name: 'Programming Languages', category: 'Software', col: 1, row: 4 },
+      { code: '6CPP', name: 'C++ Programming Language', category: 'Software', col: 2, row: 4 },
+      { code: '6PYT', name: 'Python Programming Language', category: 'Software', col: 3, row: 4 },
+      { code: '6VHD', name: 'VHDL Programming Language', category: 'Software', col: 4, row: 4 },
+      { code: '7IMS', name: 'Identity Management System', category: 'Security', col: 5, row: 4 },
+      { code: '7GID', name: 'Google Identity', category: 'Security', col: 6, row: 4 },
+      { code: '7AIG', name: 'AWS IoT GreenGrass', category: 'Security', col: 7, row: 4 },
+      { code: '8OPS', name: 'Operating System', category: 'OS', col: 8, row: 4 },
+      { code: '8LNX', name: 'Linux OS', category: 'OS', col: 9, row: 4 },
+      { code: '9DMS', name: 'Database Management System', category: 'Database', col: 10, row: 4 },
+      { code: '9ADB', name: 'AlloyDB PostgreSQL', category: 'Database', col: 11, row: 4 },
+      { code: '9BQD', name: 'BigQuery Data Warehouse', category: 'Database', col: 12, row: 4 },
+      { code: '9GST', name: 'Google Storage', category: 'Database', col: 10, row: 3 },
+      { code: 'ALLM', name: 'Large Language Models', category: 'AI/ML', col: 1, row: 5 },
+      { code: 'AMLF', name: 'Machine Learning Frameworks', category: 'AI/ML', col: 2, row: 5 },
+      { code: 'AGFE', name: 'Gemini 2.0 Flash Experimental', category: 'AI/ML', col: 3, row: 5 },
+      {
+        code: 'BAPI',
+        name: 'Application Programmable Interface',
+        category: 'Interface',
+        col: 4,
+        row: 5,
+      },
+      { code: 'BIKM', name: 'Inverse Kinematics Models', category: 'Robotics', col: 5, row: 5 },
+      { code: 'BRLI', name: 'Robotic Limbs Interface', category: 'Robotics', col: 6, row: 5 },
+      { code: 'BASR', name: 'Automatic Speech Recognition', category: 'AI/ML', col: 7, row: 5 },
+      { code: 'CM3P', name: 'Modular 3D Platform', category: 'VR', col: 11, row: 3 },
+      { code: 'CNVO', name: 'NVIDIA OmniVerse', category: 'VR', col: 12, row: 3 },
+      { code: 'CVID', name: 'VR Interface Device', category: 'VR', col: 13, row: 3 },
+      { code: 'CAVP', name: 'Apple Vision Pro', category: 'VR', col: 14, row: 3 },
+      { code: 'CMQU', name: 'Meta Quest', category: 'VR', col: 15, row: 3 },
     ];
 
     const init = () => {
@@ -119,11 +173,11 @@ const DSMPeriodicTable = () => {
         elementDiv.style.cursor = 'pointer';
         elementDiv.style.pointerEvents = 'auto';
         elementDiv.style.fontFamily = 'Helvetica, sans-serif';
-        
+
         // Add gradient background with more blue
-        elementDiv.style.background = `linear-gradient(135deg, 
-          rgba(100,200,255,0.2) 0%, 
-          rgba(0,100,200,0.6) 50%, 
+        elementDiv.style.background = `linear-gradient(135deg,
+          rgba(100,200,255,0.2) 0%,
+          rgba(0,100,200,0.6) 50%,
           rgba(0,50,150,0.8) 100%)`;
         elementDiv.style.backdropFilter = 'blur(5px)';
         elementDiv.style.webkitBackdropFilter = 'blur(5px)';
@@ -165,9 +219,9 @@ const DSMPeriodicTable = () => {
 
         // Add hover effects
         elementDiv.addEventListener('mouseenter', () => {
-          elementDiv.style.background = `linear-gradient(135deg, 
-            rgba(150,220,255,0.3) 0%, 
-            rgba(0,150,255,0.7) 50%, 
+          elementDiv.style.background = `linear-gradient(135deg,
+            rgba(150,220,255,0.3) 0%,
+            rgba(0,150,255,0.7) 50%,
             rgba(0,100,200,0.9) 100%)`;
           elementDiv.style.boxShadow = '0px 0px 20px rgba(0,150,255,0.8)';
           elementDiv.style.border = '1px solid rgba(100,200,255,0.5)';
@@ -175,9 +229,9 @@ const DSMPeriodicTable = () => {
         });
 
         elementDiv.addEventListener('mouseleave', () => {
-          elementDiv.style.background = `linear-gradient(135deg, 
-            rgba(100,200,255,0.2) 0%, 
-            rgba(0,100,200,0.6) 50%, 
+          elementDiv.style.background = `linear-gradient(135deg,
+            rgba(100,200,255,0.2) 0%,
+            rgba(0,100,200,0.6) 50%,
             rgba(0,50,150,0.8) 100%)`;
           elementDiv.style.boxShadow = '0px 0px 12px rgba(0,255,255,0.5)';
           elementDiv.style.border = '1px solid rgba(127,255,255,0.25)';
@@ -198,9 +252,9 @@ const DSMPeriodicTable = () => {
         // Table position - ensure proper grid spacing
         const tableObject = new THREE.Object3D();
         const spacing = 200;
-        const offsetX = -(Math.max(...table.map(e => e.col)) * spacing) / 2;
-        const offsetY = (Math.max(...table.map(e => e.row)) * spacing) / 2 - 300; // Shift down for better centering
-        
+        const offsetX = -(Math.max(...table.map((e) => e.col)) * spacing) / 2;
+        const offsetY = (Math.max(...table.map((e) => e.row)) * spacing) / 2 - 300; // Shift down for better centering
+
         tableObject.position.x = (element.col - 1) * spacing + offsetX;
         tableObject.position.y = -(element.row - 1) * spacing + offsetY;
         tableObject.position.z = 0;
@@ -223,9 +277,9 @@ const DSMPeriodicTable = () => {
 
         // Grid position
         const gridObject = new THREE.Object3D();
-        gridObject.position.x = ((i % 5) * 500) - 1000;
-        gridObject.position.y = (-(Math.floor(i / 5) % 5) * 500) + 500; // Shift grid down for better centering
-        gridObject.position.z = (Math.floor(i / 25)) * 1500 - 2000;
+        gridObject.position.x = (i % 5) * 500 - 1000;
+        gridObject.position.y = -(Math.floor(i / 5) % 5) * 500 + 500; // Shift grid down for better centering
+        gridObject.position.z = Math.floor(i / 25) * 1500 - 2000;
         targets.grid.push(gridObject);
       });
 
@@ -236,29 +290,29 @@ const DSMPeriodicTable = () => {
       const render = () => {
         objects.forEach((object) => {
           const element = object.element;
-          
+
           // Get world position
           const vector = new THREE.Vector3();
           vector.setFromMatrixPosition(object.matrixWorld);
-          
+
           // Project to screen coordinates
           const projectedVector = vector.clone();
           projectedVector.project(camera);
-          
+
           // Calculate screen position
           const container = containerRef.current;
           const width = container.clientWidth;
           const height = container.clientHeight;
-          const x = (projectedVector.x * width * 0.5) + (width * 0.5);
-          const y = (-projectedVector.y * height * 0.5) + (height * 0.5);
-          
+          const x = projectedVector.x * width * 0.5 + width * 0.5;
+          const y = -projectedVector.y * height * 0.5 + height * 0.5;
+
           // Calculate scale based on distance
           const distance = vector.distanceTo(camera.position);
           const scale = Math.max(0.1, Math.min(1, 2000 / distance));
-          
+
           // Apply transform with proper centering
           element.style.transform = `translate(${x - 70}px, ${y - 90}px) scale(${scale})`;
-          
+
           // Hide elements behind camera
           if (projectedVector.z > 1) {
             element.style.display = 'none';
@@ -266,15 +320,17 @@ const DSMPeriodicTable = () => {
             element.style.display = 'block';
             element.style.opacity = Math.max(0.3, 1 - projectedVector.z * 0.5);
           }
-          
+
           // Set z-index for proper layering
           element.style.zIndex = Math.floor((1 - projectedVector.z) * 1000);
         });
       };
 
       // Mouse controls
-      let mouseX = 0, mouseY = 0;
-      let targetRotationX = 0, targetRotationY = 0;
+      let mouseX = 0,
+        mouseY = 0;
+      let targetRotationX = 0,
+        targetRotationY = 0;
       let isMouseDown = false;
       let mouseXOnMouseDown = 0;
       let mouseYOnMouseDown = 0;
@@ -294,10 +350,10 @@ const DSMPeriodicTable = () => {
 
       const onMouseMove = (event) => {
         if (!isMouseDown) return;
-        
+
         mouseX = event.clientX - mouseXOnMouseDown;
         mouseY = event.clientY - mouseYOnMouseDown;
-        
+
         targetRotationY = targetRotationYOnMouseDown + mouseX * 0.002;
         targetRotationX = targetRotationXOnMouseDown + mouseY * 0.002;
       };
@@ -324,7 +380,7 @@ const DSMPeriodicTable = () => {
         requestAnimationFrame(animate);
 
         // Update tweens
-        tweensRef.current = tweensRef.current.filter(tween => tween.update());
+        tweensRef.current = tweensRef.current.filter((tween) => tween.update());
 
         // Smooth rotation
         scene.rotation.y += (targetRotationY - scene.rotation.y) * 0.05;
@@ -338,7 +394,7 @@ const DSMPeriodicTable = () => {
         // Update element positions
         scene.updateMatrixWorld();
         render();
-        
+
         renderer.render(scene, camera);
       };
 
@@ -371,14 +427,14 @@ const DSMPeriodicTable = () => {
 
     const transform = (targets, duration) => {
       // Cancel existing tweens
-      tweensRef.current.forEach(tween => {
+      tweensRef.current.forEach((tween) => {
         if (tween.stop) tween.stop();
       });
       tweensRef.current = [];
 
       const objects = objectsRef.current;
       const camera = cameraRef.current;
-      
+
       // Adjust camera distance based on formation type
       let targetCameraZ = 2500;
       if (targets === targetsRef.current.table) {
@@ -390,25 +446,25 @@ const DSMPeriodicTable = () => {
       } else if (targets === targetsRef.current.grid) {
         targetCameraZ = 3000;
       }
-      
+
       // Animate camera position
       const cameraStartZ = camera.position.z;
       const cameraStartTime = Date.now();
-      
+
       const cameraAnimation = {
         update: () => {
           const elapsed = Date.now() - cameraStartTime;
           const progress = Math.min(elapsed / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 3);
-          
+
           camera.position.z = cameraStartZ + (targetCameraZ - cameraStartZ) * eased;
-          
+
           return progress < 1;
         },
-        stop: () => {}
+        stop: () => {},
       };
       tweensRef.current.push(cameraAnimation);
-      
+
       objects.forEach((object, i) => {
         const target = targets[i];
         const startPos = {
@@ -417,7 +473,7 @@ const DSMPeriodicTable = () => {
           z: object.position.z,
           rx: object.rotation.x,
           ry: object.rotation.y,
-          rz: object.rotation.z
+          rz: object.rotation.z,
         };
 
         const startTime = Date.now();
@@ -427,7 +483,7 @@ const DSMPeriodicTable = () => {
           update: () => {
             const elapsed = Date.now() - startTime - randomDelay;
             if (elapsed < 0) return true;
-            
+
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3); // Cubic ease out
 
@@ -440,7 +496,7 @@ const DSMPeriodicTable = () => {
 
             return progress < 1;
           },
-          stop: () => {}
+          stop: () => {},
         };
 
         tweensRef.current.push(tween);
@@ -468,14 +524,13 @@ const DSMPeriodicTable = () => {
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
         }
-        
+
         .element:hover {
           transform: scale(1.02);
         }
       `}</style>
-      
+
       <div ref={containerRef} className="w-full h-full" />
-      
     </div>
   );
 };

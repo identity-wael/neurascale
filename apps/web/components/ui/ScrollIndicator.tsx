@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
 export default function ScrollIndicator() {
   return (
@@ -19,15 +19,15 @@ export default function ScrollIndicator() {
       </motion.p>
       <motion.div
         animate={{ y: [0, 8, 0] }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
         className="w-6 h-10 border border-white/30 rounded-full mx-auto flex items-start justify-center p-2 hover:border-white/50 transition-colors"
       >
-        <motion.div 
-          animate={{ height: ["20%", "40%", "20%"] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="w-1 bg-white/60 rounded-full" 
+        <motion.div
+          animate={{ height: ['20%', '40%', '20%'] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+          className="w-1 bg-white/60 rounded-full"
         />
       </motion.div>
     </motion.div>
-  )
+  );
 }

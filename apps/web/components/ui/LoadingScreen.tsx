@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function LoadingScreen() {
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval)
-          return 100
+          clearInterval(interval);
+          return 100;
         }
-        return prev + 2
-      })
-    }, 50)
+        return prev + 2;
+      });
+    }, 50);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <motion.div
@@ -38,7 +38,7 @@ export default function LoadingScreen() {
           <span className="text-[#eeeeee]">NEURA</span>
           <span className="text-[#4185f4]">SCALE</span>
         </motion.h1>
-        
+
         <div className="w-64 mx-auto">
           <div className="flex justify-between items-center mb-2">
             <motion.span
@@ -58,7 +58,7 @@ export default function LoadingScreen() {
               {progress.toString().padStart(2, '0')}%
             </motion.span>
           </div>
-          
+
           <div className="h-[1px] bg-white/10 relative overflow-hidden">
             <motion.div
               className="absolute inset-y-0 left-0 bg-white/80"
@@ -70,5 +70,5 @@ export default function LoadingScreen() {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
 const jobs = [
   {
@@ -23,7 +23,7 @@ const jobs = [
     position: 'Full-Stack Developer (Agentic Applications)',
     location: 'Remote',
   },
-]
+];
 
 export default function JobTable() {
   return (
@@ -48,14 +48,12 @@ export default function JobTable() {
               <td className="py-6 px-4">{job.position}</td>
               <td className="py-6 px-4 text-white/70">{job.location}</td>
               <td className="py-6 px-4">
-                <button className="text-white/60 hover:text-white transition-colors">
-                  →
-                </button>
+                <button className="text-white/60 hover:text-white transition-colors">→</button>
               </td>
             </motion.tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
+  );
 }

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       organization,
       subject,
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Check if email credentials are configured
@@ -51,29 +51,23 @@ export async function POST(request: NextRequest) {
       `,
       text: `
         New Contact Form Submission
-        
+
         Name: ${name}
         Email: ${email}
         Organization: ${organization || 'Not provided'}
         Subject: ${subject}
-        
+
         Message:
         ${message}
-      `
+      `,
     };
 
     // Send email
     await transporter.sendMail(mailOptions);
 
-    return NextResponse.json(
-      { message: 'Email sent successfully' },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: 'Email sent successfully' }, { status: 200 });
   } catch (error) {
     console.error('Error sending email:', error);
-    return NextResponse.json(
-      { error: 'Failed to send email' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }

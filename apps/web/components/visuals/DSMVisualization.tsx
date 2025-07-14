@@ -9,186 +9,206 @@ const DSMVisualization = () => {
   const [viewMode, setViewMode] = useState('3d'); // '3d', 'matrix', 'force'
   const [hoveredCell, setHoveredCell] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // DSM Data
   const components = [
-    "Neural Management Systems", "Neuroprosthetics", "Brain–Robot Swarm Interface",
-    "Full-Dive VR", "Human Interface Device", "Implantable Brain Computer Interface",
-    "Non-Invasive Brain Computer Interface", "Cloud Infrastructure", 
-    "Fully-Managed Serverless Compute", "Fully-Managed Database Service",
-    "Fully-Managed AI Development Platform", "Fully-Managed API Management Solution",
-    "Serverless GPU Acceleration", "Serverless TPU Acceleration",
-    "Fully-Managed Load Balancer", "Threat Detection & Posture Management",
-    "Public 5G Network Slicing", "Prosthetics Health Network Slice",
-    "Robotic Control Network Slice", "Graphics Procesing Units",
-    "NVIDIA Blackwell B200", "Tensor Processing Units", "Google Trillium TPU v6",
-    "Field Programable Gate Array", "AMD Xilinx Versal VP1802",
-    "Programming Languages", "C++ Programing Language", "Python Programing Language",
-    "VHDL Programing Language", "Identity Management System", "Google Identity",
-    "AWS IoT GreenGrass", "Operating System", "Linux OS", "Robotic Operation System",
-    "Database Management System", "AlloyDB PostgreSQL", "BigQuery Data Warehouse",
-    "Google Storage", "Large Language Models", "Machine Learning Frameworks",
-    "Gemini 2.0 Flash Experimental", "Application Programmable Interface",
-    "Inverse Kinematics Models", "Robotic Limbs Interface",
-    "Automatic Speech Recognition", "Modular 3D Platform", "NVIDIA OmniVerse",
-    "VR Interface Device", "Apple Vision Pro", "Meta Quest"
+    'Neural Management Systems',
+    'Neuroprosthetics',
+    'Brain–Robot Swarm Interface',
+    'Full-Dive VR',
+    'Human Interface Device',
+    'Implantable Brain Computer Interface',
+    'Non-Invasive Brain Computer Interface',
+    'Cloud Infrastructure',
+    'Fully-Managed Serverless Compute',
+    'Fully-Managed Database Service',
+    'Fully-Managed AI Development Platform',
+    'Fully-Managed API Management Solution',
+    'Serverless GPU Acceleration',
+    'Serverless TPU Acceleration',
+    'Fully-Managed Load Balancer',
+    'Threat Detection & Posture Management',
+    'Public 5G Network Slicing',
+    'Prosthetics Health Network Slice',
+    'Robotic Control Network Slice',
+    'Graphics Procesing Units',
+    'NVIDIA Blackwell B200',
+    'Tensor Processing Units',
+    'Google Trillium TPU v6',
+    'Field Programable Gate Array',
+    'AMD Xilinx Versal VP1802',
+    'Programming Languages',
+    'C++ Programing Language',
+    'Python Programing Language',
+    'VHDL Programing Language',
+    'Identity Management System',
+    'Google Identity',
+    'AWS IoT GreenGrass',
+    'Operating System',
+    'Linux OS',
+    'Robotic Operation System',
+    'Database Management System',
+    'AlloyDB PostgreSQL',
+    'BigQuery Data Warehouse',
+    'Google Storage',
+    'Large Language Models',
+    'Machine Learning Frameworks',
+    'Gemini 2.0 Flash Experimental',
+    'Application Programmable Interface',
+    'Inverse Kinematics Models',
+    'Robotic Limbs Interface',
+    'Automatic Speech Recognition',
+    'Modular 3D Platform',
+    'NVIDIA OmniVerse',
+    'VR Interface Device',
+    'Apple Vision Pro',
+    'Meta Quest',
   ];
 
   // DSM matrix based on NeuraScale project architecture
   const generateDSMMatrix = () => {
-    const matrix = Array(components.length).fill(null).map(() => 
-      Array(components.length).fill(0)
-    );
-    
+    const matrix = Array(components.length)
+      .fill(null)
+      .map(() => Array(components.length).fill(0));
+
     // Dependencies extracted from the NeuraScale project document
     const dependencies = {
       // Neural Management System (NMS) is the central orchestrator
-      "Neural Management Systems": [
-        "Neuroprosthetics",
-        "Brain–Robot Swarm Interface", 
-        "Full-Dive VR",
-        "Implantable Brain Computer Interface",
-        "Non-Invasive Brain Computer Interface",
-        "Cloud Infrastructure",
-        "Machine Learning Frameworks"
+      'Neural Management Systems': [
+        'Neuroprosthetics',
+        'Brain–Robot Swarm Interface',
+        'Full-Dive VR',
+        'Implantable Brain Computer Interface',
+        'Non-Invasive Brain Computer Interface',
+        'Cloud Infrastructure',
+        'Machine Learning Frameworks',
       ],
-      
+
       // Neural Interaction & Immersion Layer (NIIL) components
-      "Full-Dive VR": [
-        "VR Interface Device",
-        "Apple Vision Pro",
-        "Meta Quest",
-        "NVIDIA OmniVerse",
-        "Modular 3D Platform"
+      'Full-Dive VR': [
+        'VR Interface Device',
+        'Apple Vision Pro',
+        'Meta Quest',
+        'NVIDIA OmniVerse',
+        'Modular 3D Platform',
       ],
-      
+
       // Neuroprosthetics dependencies (3IKM project)
-      "Neuroprosthetics": [
-        "Inverse Kinematics Models",
-        "Robotic Limbs Interface",
-        "Implantable Brain Computer Interface",
-        "Non-Invasive Brain Computer Interface"
+      Neuroprosthetics: [
+        'Inverse Kinematics Models',
+        'Robotic Limbs Interface',
+        'Implantable Brain Computer Interface',
+        'Non-Invasive Brain Computer Interface',
       ],
-      
+
       // Brain-Robot Swarm Interface (4ROS project)
-      "Brain–Robot Swarm Interface": [
-        "Robotic Operation System",
-        "AWS IoT GreenGrass",
-        "Robotic Control Network Slice",
-        "Machine Learning Frameworks"
+      'Brain–Robot Swarm Interface': [
+        'Robotic Operation System',
+        'AWS IoT GreenGrass',
+        'Robotic Control Network Slice',
+        'Machine Learning Frameworks',
       ],
-      
+
       // Cloud Infrastructure dependencies
-      "Cloud Infrastructure": [
-        "Fully-Managed Serverless Compute",
-        "Fully-Managed Database Service",
-        "Fully-Managed AI Development Platform",
-        "Fully-Managed API Management Solution",
-        "Fully-Managed Load Balancer",
-        "Threat Detection & Posture Management"
+      'Cloud Infrastructure': [
+        'Fully-Managed Serverless Compute',
+        'Fully-Managed Database Service',
+        'Fully-Managed AI Development Platform',
+        'Fully-Managed API Management Solution',
+        'Fully-Managed Load Balancer',
+        'Threat Detection & Posture Management',
       ],
-      
+
       // Processing units dependencies
-      "Graphics Procesing Units": ["NVIDIA Blackwell B200"],
-      "Tensor Processing Units": ["Google Trillium TPU v6"],
-      "Field Programable Gate Array": ["AMD Xilinx Versal VP1802"],
-      
+      'Graphics Procesing Units': ['NVIDIA Blackwell B200'],
+      'Tensor Processing Units': ['Google Trillium TPU v6'],
+      'Field Programable Gate Array': ['AMD Xilinx Versal VP1802'],
+
       // AI/ML Models dependencies
-      "Large Language Models": [
-        "Gemini 2.0 Flash Experimental",
-        "Machine Learning Frameworks",
-        "Python Programing Language"
+      'Large Language Models': [
+        'Gemini 2.0 Flash Experimental',
+        'Machine Learning Frameworks',
+        'Python Programing Language',
       ],
-      
-      "Machine Learning Frameworks": [
-        "Tensor Processing Units",
-        "Graphics Procesing Units",
-        "Python Programing Language",
-        "C++ Programing Language",
-        "Large Language Models",
-        "Application Programmable Interface"
+
+      'Machine Learning Frameworks': [
+        'Tensor Processing Units',
+        'Graphics Procesing Units',
+        'Python Programing Language',
+        'C++ Programing Language',
+        'Large Language Models',
+        'Application Programmable Interface',
       ],
-      
+
       // Database dependencies
-      "Database Management System": [
-        "AlloyDB PostgreSQL",
-        "BigQuery Data Warehouse",
-        "Google Storage"
+      'Database Management System': [
+        'AlloyDB PostgreSQL',
+        'BigQuery Data Warehouse',
+        'Google Storage',
       ],
-      
+
       // Operating System dependencies
-      "Operating System": [
-        "Linux OS",
-        "Robotic Operation System"
-      ],
-      
+      'Operating System': ['Linux OS', 'Robotic Operation System'],
+
       // Programming Language dependencies
-      "Programming Languages": [
-        "C++ Programing Language",
-        "Python Programing Language",
-        "VHDL Programing Language"
+      'Programming Languages': [
+        'C++ Programing Language',
+        'Python Programing Language',
+        'VHDL Programing Language',
       ],
-      
+
       // Network slicing dependencies
-      "Public 5G Network Slicing": [
-        "Prosthetics Health Network Slice",
-        "Robotic Control Network Slice"
+      'Public 5G Network Slicing': [
+        'Prosthetics Health Network Slice',
+        'Robotic Control Network Slice',
       ],
-      
+
       // Identity Management
-      "Identity Management System": [
-        "Google Identity",
-        "Neural Management Systems"
-      ],
-      
+      'Identity Management System': ['Google Identity', 'Neural Management Systems'],
+
       // Hardware acceleration dependencies
-      "Serverless GPU Acceleration": ["Graphics Procesing Units"],
-      "Serverless TPU Acceleration": ["Tensor Processing Units"],
-      
+      'Serverless GPU Acceleration': ['Graphics Procesing Units'],
+      'Serverless TPU Acceleration': ['Tensor Processing Units'],
+
       // Interface dependencies
-      "Human Interface Device": [
-        "Implantable Brain Computer Interface",
-        "Non-Invasive Brain Computer Interface"
+      'Human Interface Device': [
+        'Implantable Brain Computer Interface',
+        'Non-Invasive Brain Computer Interface',
       ],
-      
+
       // API dependencies
-      "Application Programmable Interface": [
-        "Fully-Managed API Management Solution"
-      ],
-      
+      'Application Programmable Interface': ['Fully-Managed API Management Solution'],
+
       // Voice/Speech dependencies
-      "Automatic Speech Recognition": [
-        "Machine Learning Frameworks",
-        "Large Language Models"
-      ],
-      
+      'Automatic Speech Recognition': ['Machine Learning Frameworks', 'Large Language Models'],
+
       // Additional layer dependencies
-      "Implantable Brain Computer Interface": ["Neural Management Systems"],
-      "Non-Invasive Brain Computer Interface": ["Neural Management Systems"],
-      
+      'Implantable Brain Computer Interface': ['Neural Management Systems'],
+      'Non-Invasive Brain Computer Interface': ['Neural Management Systems'],
+
       // Compute dependencies
-      "Fully-Managed Serverless Compute": [
-        "Serverless GPU Acceleration",
-        "Serverless TPU Acceleration"
+      'Fully-Managed Serverless Compute': [
+        'Serverless GPU Acceleration',
+        'Serverless TPU Acceleration',
       ],
-      
+
       // Additional bidirectional relationships
-      "Cloud Infrastructure": ["Neural Management Systems"],
-      "Database Management System": ["Cloud Infrastructure"],
-      "Operating System": ["Cloud Infrastructure"]
+      'Cloud Infrastructure': ['Neural Management Systems'],
+      'Database Management System': ['Cloud Infrastructure'],
+      'Operating System': ['Cloud Infrastructure'],
     };
-    
+
     // Create component index mapping
     const componentIndex = {};
     components.forEach((name, idx) => {
       componentIndex[name] = idx;
     });
-    
+
     // Fill in the dependencies
     for (const [source, targets] of Object.entries(dependencies)) {
       const sourceIdx = componentIndex[source];
       if (sourceIdx !== undefined) {
-        targets.forEach(target => {
+        targets.forEach((target) => {
           const targetIdx = componentIndex[target];
           if (targetIdx !== undefined) {
             matrix[sourceIdx][targetIdx] = 1;
@@ -196,16 +216,16 @@ const DSMVisualization = () => {
         });
       }
     }
-    
+
     // Add some bidirectional relationships based on the architecture
     const bidirectionalPairs = [
-      ["Cloud Infrastructure", "Database Management System"],
-      ["Machine Learning Frameworks", "Application Programmable Interface"],
-      ["Programming Languages", "Machine Learning Frameworks"],
-      ["Implantable Brain Computer Interface", "Neuroprosthetics"],
-      ["Non-Invasive Brain Computer Interface", "Neuroprosthetics"]
+      ['Cloud Infrastructure', 'Database Management System'],
+      ['Machine Learning Frameworks', 'Application Programmable Interface'],
+      ['Programming Languages', 'Machine Learning Frameworks'],
+      ['Implantable Brain Computer Interface', 'Neuroprosthetics'],
+      ['Non-Invasive Brain Computer Interface', 'Neuroprosthetics'],
     ];
-    
+
     bidirectionalPairs.forEach(([a, b]) => {
       const aIdx = componentIndex[a];
       const bIdx = componentIndex[b];
@@ -214,7 +234,7 @@ const DSMVisualization = () => {
         matrix[bIdx][aIdx] = 1;
       }
     });
-    
+
     return matrix;
   };
 
@@ -223,31 +243,62 @@ const DSMVisualization = () => {
   // Category colors based on component types and NeuraScale layers
   const getCategoryColor = (name) => {
     // Neural and Brain interfaces - Cyan (NIIL Layer)
-    if (name.includes('Neural') || name.includes('Brain') || name.includes('Implantable') || name.includes('Non-Invasive')) 
+    if (
+      name.includes('Neural') ||
+      name.includes('Brain') ||
+      name.includes('Implantable') ||
+      name.includes('Non-Invasive')
+    )
       return '#00ffff';
     // Network and communication - Purple
-    if (name.includes('Network') || name.includes('5G') || name.includes('Identity')) 
+    if (name.includes('Network') || name.includes('5G') || name.includes('Identity'))
       return '#ff00ff';
-    // Cloud infrastructure - Green  
-    if (name.includes('Cloud') || name.includes('Serverless') || name.includes('Fully-Managed')) 
+    // Cloud infrastructure - Green
+    if (name.includes('Cloud') || name.includes('Serverless') || name.includes('Fully-Managed'))
       return '#00ff00';
     // Processing units (TPU/GPU/FPGA) - Orange
-    if (name.includes('TPU') || name.includes('GPU') || name.includes('Processing Units') || name.includes('FPGA')) 
+    if (
+      name.includes('TPU') ||
+      name.includes('GPU') ||
+      name.includes('Processing Units') ||
+      name.includes('FPGA')
+    )
       return '#ff6600';
     // VR/AR/Interface (NIIL Layer) - Yellow
-    if (name.includes('VR') || name.includes('Interface') || name.includes('OmniVerse') || name.includes('Vision Pro') || name.includes('Quest')) 
+    if (
+      name.includes('VR') ||
+      name.includes('Interface') ||
+      name.includes('OmniVerse') ||
+      name.includes('Vision Pro') ||
+      name.includes('Quest')
+    )
       return '#ffff00';
     // Database and storage - Pink
-    if (name.includes('Database') || name.includes('Storage') || name.includes('BigQuery') || name.includes('AlloyDB')) 
+    if (
+      name.includes('Database') ||
+      name.includes('Storage') ||
+      name.includes('BigQuery') ||
+      name.includes('AlloyDB')
+    )
       return '#ff0066';
     // Robotics and prosthetics (PICL Layer) - Red
-    if (name.includes('Robot') || name.includes('Prosthetic') || name.includes('Kinematic') || name.includes('Limb')) 
+    if (
+      name.includes('Robot') ||
+      name.includes('Prosthetic') ||
+      name.includes('Kinematic') ||
+      name.includes('Limb')
+    )
       return '#ff3333';
     // AI/ML Models (ADAM Layer) - Light Blue
-    if (name.includes('Model') || name.includes('Machine Learning') || name.includes('Language Models') || name.includes('Speech')) 
+    if (
+      name.includes('Model') ||
+      name.includes('Machine Learning') ||
+      name.includes('Language Models') ||
+      name.includes('Speech')
+    )
       return '#66ccff';
     // Programming and OS - Gray
-    if (name.includes('Programming') || name.includes('Operating System') || name.includes('Linux')) 
+    if (name.includes('Programming') || name.includes('Operating System') || name.includes('Linux'))
       return '#999999';
     // Default - Blue
     return '#6666ff';
@@ -289,18 +340,18 @@ const DSMVisualization = () => {
         emissive: getCategoryColor(name),
         emissiveIntensity: 0.3,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.8,
       });
       const sphere = new THREE.Mesh(geometry, material);
-      
+
       // Position nodes in a sphere
-      const phi = Math.acos(1 - 2 * (i + 0.5) / components.length);
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / components.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-      
+
       sphere.position.x = 100 * Math.sin(phi) * Math.cos(theta);
       sphere.position.y = 100 * Math.sin(phi) * Math.sin(theta);
       sphere.position.z = 100 * Math.cos(phi);
-      
+
       sphere.userData = { index: i, name };
       scene.add(sphere);
       return sphere;
@@ -313,12 +364,12 @@ const DSMVisualization = () => {
         if (dsmMatrix[i][j] === 1) {
           const geometry = new THREE.BufferGeometry().setFromPoints([
             nodes[i].position,
-            nodes[j].position
+            nodes[j].position,
           ]);
           const material = new THREE.LineBasicMaterial({
             color: 0x00ff00,
             opacity: 0.3,
-            transparent: true
+            transparent: true,
           });
           const line = new THREE.Line(geometry, material);
           scene.add(line);
@@ -338,7 +389,7 @@ const DSMVisualization = () => {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(nodes);
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         node.scale.setScalar(1);
         node.material.emissiveIntensity = 0.3;
       });
@@ -347,7 +398,7 @@ const DSMVisualization = () => {
         const intersected = intersects[0].object;
         intersected.scale.setScalar(1.5);
         intersected.material.emissiveIntensity = 0.8;
-        
+
         // Highlight connected nodes
         const index = intersected.userData.index;
         for (let j = 0; j < components.length; j++) {
@@ -413,36 +464,28 @@ const DSMVisualization = () => {
       <div className="inline-block">
         <div className="flex">
           <div className="w-48"></div>
-          {filteredIndices.map(j => (
+          {filteredIndices.map((j) => (
             <div
               key={j}
               className="w-6 h-32 flex items-end justify-center"
               style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
-              <span className="text-xs text-gray-400 truncate max-h-32">
-                {components[j]}
-              </span>
+              <span className="text-xs text-gray-400 truncate max-h-32">{components[j]}</span>
             </div>
           ))}
         </div>
-        {filteredIndices.map(i => (
+        {filteredIndices.map((i) => (
           <div key={i} className="flex">
             <div className="w-48 h-6 flex items-center pr-2">
-              <span className="text-xs text-gray-400 truncate">
-                {components[i]}
-              </span>
+              <span className="text-xs text-gray-400 truncate">{components[i]}</span>
             </div>
-            {filteredIndices.map(j => (
+            {filteredIndices.map((j) => (
               <div
                 key={`${i}-${j}`}
                 className={`w-6 h-6 border border-gray-800 cursor-pointer transition-all duration-200 ${
                   i === j ? 'bg-gray-800' : ''
-                } ${
-                  dsmMatrix[i][j] === 1 ? 'bg-green-500' : ''
-                } ${
-                  hoveredCell?.i === i || hoveredCell?.j === j
-                    ? 'border-cyan-400 border-2'
-                    : ''
+                } ${dsmMatrix[i][j] === 1 ? 'bg-green-500' : ''} ${
+                  hoveredCell?.i === i || hoveredCell?.j === j ? 'border-cyan-400 border-2' : ''
                 }`}
                 onMouseEnter={() => setHoveredCell({ i, j })}
                 onMouseLeave={() => setHoveredCell(null)}
@@ -468,9 +511,7 @@ const DSMVisualization = () => {
       const width = window.innerWidth - 100;
       const height = window.innerHeight - 200;
 
-      const svg = d3.select(svgRef.current)
-        .attr('width', width)
-        .attr('height', height);
+      const svg = d3.select(svgRef.current).attr('width', width).attr('height', height);
 
       svg.selectAll('*').remove();
 
@@ -478,7 +519,7 @@ const DSMVisualization = () => {
       const nodes = components.map((name, i) => ({
         id: i,
         name,
-        color: getCategoryColor(name)
+        color: getCategoryColor(name),
       }));
 
       const links = [];
@@ -491,84 +532,94 @@ const DSMVisualization = () => {
       }
 
       // Create force simulation
-      const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(50))
+      const simulation = d3
+        .forceSimulation(nodes)
+        .force(
+          'link',
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance(50)
+        )
         .force('charge', d3.forceManyBody().strength(-300))
         .force('center', d3.forceCenter(width / 2, height / 2))
         .force('collision', d3.forceCollide().radius(20));
 
       // Add zoom
       const g = svg.append('g');
-      
-      svg.call(d3.zoom()
-        .scaleExtent([0.1, 10])
-        .on('zoom', (event) => {
-          g.attr('transform', event.transform);
-        }));
+
+      svg.call(
+        d3
+          .zoom()
+          .scaleExtent([0.1, 10])
+          .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+          })
+      );
 
       // Draw links
-      const link = g.append('g')
+      const link = g
+        .append('g')
         .selectAll('line')
         .data(links)
-        .enter().append('line')
+        .enter()
+        .append('line')
         .attr('stroke', '#00ff00')
         .attr('stroke-opacity', 0.3)
         .attr('stroke-width', 1);
 
       // Draw nodes
-      const node = g.append('g')
+      const node = g
+        .append('g')
         .selectAll('circle')
         .data(nodes)
-        .enter().append('circle')
+        .enter()
+        .append('circle')
         .attr('r', 8)
-        .attr('fill', d => d.color)
+        .attr('fill', (d) => d.color)
         .attr('stroke', '#fff')
         .attr('stroke-width', 1)
-        .call(d3.drag()
-          .on('start', dragstarted)
-          .on('drag', dragged)
-          .on('end', dragended));
+        .call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));
 
       // Add labels
-      const label = g.append('g')
+      const label = g
+        .append('g')
         .selectAll('text')
         .data(nodes)
-        .enter().append('text')
-        .text(d => d.name)
+        .enter()
+        .append('text')
+        .text((d) => d.name)
         .attr('font-size', 10)
         .attr('fill', '#fff')
         .attr('dx', 12)
         .attr('dy', 4);
 
       // Add hover effects
-      node.on('mouseover', function(event, d) {
-        d3.select(this).attr('r', 12);
-        
-        // Highlight connected links
-        link.attr('stroke-opacity', l => 
-          l.source.id === d.id || l.target.id === d.id ? 0.8 : 0.1
-        );
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('r', 8);
-        link.attr('stroke-opacity', 0.3);
-      });
+      node
+        .on('mouseover', function (event, d) {
+          d3.select(this).attr('r', 12);
+
+          // Highlight connected links
+          link.attr('stroke-opacity', (l) =>
+            l.source.id === d.id || l.target.id === d.id ? 0.8 : 0.1
+          );
+        })
+        .on('mouseout', function () {
+          d3.select(this).attr('r', 8);
+          link.attr('stroke-opacity', 0.3);
+        });
 
       // Update positions
       simulation.on('tick', () => {
         link
-          .attr('x1', d => d.source.x)
-          .attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x)
-          .attr('y2', d => d.target.y);
+          .attr('x1', (d) => d.source.x)
+          .attr('y1', (d) => d.source.y)
+          .attr('x2', (d) => d.target.x)
+          .attr('y2', (d) => d.target.y);
 
-        node
-          .attr('cx', d => d.x)
-          .attr('cy', d => d.y);
+        node.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 
-        label
-          .attr('x', d => d.x)
-          .attr('y', d => d.y);
+        label.attr('x', (d) => d.x).attr('y', (d) => d.y);
       });
 
       function dragstarted(event, d) {
@@ -620,9 +671,7 @@ const DSMVisualization = () => {
               <button
                 onClick={() => setViewMode('3d')}
                 className={`px-4 py-2 rounded-lg transition-all ${
-                  viewMode === '3d'
-                    ? 'bg-cyan-500 text-black'
-                    : 'bg-gray-700 hover:bg-gray-600'
+                  viewMode === '3d' ? 'bg-cyan-500 text-black' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 3D Graph
@@ -630,9 +679,7 @@ const DSMVisualization = () => {
               <button
                 onClick={() => setViewMode('matrix')}
                 className={`px-4 py-2 rounded-lg transition-all ${
-                  viewMode === 'matrix'
-                    ? 'bg-cyan-500 text-black'
-                    : 'bg-gray-700 hover:bg-gray-600'
+                  viewMode === 'matrix' ? 'bg-cyan-500 text-black' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 Matrix
@@ -640,9 +687,7 @@ const DSMVisualization = () => {
               <button
                 onClick={() => setViewMode('force')}
                 className={`px-4 py-2 rounded-lg transition-all ${
-                  viewMode === 'force'
-                    ? 'bg-cyan-500 text-black'
-                    : 'bg-gray-700 hover:bg-gray-600'
+                  viewMode === 'force' ? 'bg-cyan-500 text-black' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 Force Graph
@@ -657,7 +702,7 @@ const DSMVisualization = () => {
         {viewMode === '3d' && <div ref={mountRef} className="w-full h-full" />}
         {viewMode === 'matrix' && <MatrixView />}
         {viewMode === 'force' && <ForceGraphView />}
-        
+
         {/* Info Panel */}
         {selectedNode && (
           <div className="absolute top-4 right-4 bg-gray-800 p-4 rounded-lg max-w-sm">
@@ -693,7 +738,7 @@ const DSMVisualization = () => {
               <span>NIIL - Neural Interaction & Immersion</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{backgroundColor: '#66ccff'}}></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#66ccff' }}></div>
               <span>ADAM - AI Domain Agnostic Models</span>
             </div>
             <div className="flex items-center gap-2">

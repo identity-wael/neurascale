@@ -1,8 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Environment schema validation
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_API_URL: z.string().url().optional(),
   DATABASE_URL: z.string().optional(),
@@ -18,7 +20,9 @@ export function validateEnv(): Env {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map(err => err.path.join('.')).join(', ');
+      const missingVars = error.errors
+        .map((err) => err.path.join("."))
+        .join(", ");
       throw new Error(`❌ Invalid environment variables: ${missingVars}`);
     }
     throw error;
@@ -29,6 +33,6 @@ export function validateEnv(): Env {
 export const env = validateEnv();
 
 // Environment helpers
-export const isDevelopment = env.NODE_ENV === 'development';
-export const isProduction = env.NODE_ENV === 'production';
-export const isTest = env.NODE_ENV === 'test';
+export const isDevelopment = env.NODE_ENV === "development";
+export const isProduction = env.NODE_ENV === "production";
+export const isTest = env.NODE_ENV === "test";

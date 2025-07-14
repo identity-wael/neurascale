@@ -22,14 +22,15 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
     overscroll-behavior: none;
     overflow-x: hidden;
     overflow-y: auto;
     min-height: 100%;
     background: #000000;
-    background-image: 
-      radial-gradient(ellipse at top, #0a1628 0%, transparent 50%),
+    background-image: radial-gradient(ellipse at top, #0a1628 0%, transparent 50%),
       radial-gradient(ellipse at bottom, #0d1117 0%, transparent 50%);
     /* Optimize for smooth scrolling */
     -webkit-font-smoothing: antialiased;
@@ -48,8 +49,8 @@
 
   /* Hide scrollbar for IE, Edge and Firefox */
   body {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 
   /* Section styling */
@@ -57,7 +58,7 @@
     position: relative;
     width: 100%;
   }
-  
+
   /* Full height centering for specific sections */
   section.hero {
     min-height: 100vh;
@@ -75,7 +76,7 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent;
   }
@@ -120,8 +121,12 @@
 
   /* Fade animations */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes fadeUp {
@@ -144,11 +149,21 @@
   }
 
   /* Stagger delay utilities */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
-  .delay-500 { animation-delay: 500ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  .delay-500 {
+    animation-delay: 500ms;
+  }
 
   /* Glass morphism effect */
   .glass {
@@ -157,7 +172,7 @@
 
   /* Noise overlay */
   .noise::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;

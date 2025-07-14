@@ -1,76 +1,82 @@
-'use client'
+'use client';
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react';
 
 // Extend Navigator interface for WebGPU
 declare global {
   interface Navigator {
-    gpu?: any
+    gpu?: any;
   }
 }
 
 export default function DataUniverse3D() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initGalaxy = async () => {
       try {
-        setIsLoading(true)
-        
+        setIsLoading(true);
+
         // Browser detection
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-        const isChrome = /chrome/i.test(navigator.userAgent) && !isSafari
-        const hasWebGPU = 'gpu' in navigator && navigator.gpu
-        
-        console.log('Browser detection:', { isSafari, isChrome, hasWebGPU, userAgent: navigator.userAgent })
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isChrome = /chrome/i.test(navigator.userAgent) && !isSafari;
+        const hasWebGPU = 'gpu' in navigator && navigator.gpu;
+
+        console.log('Browser detection:', {
+          isSafari,
+          isChrome,
+          hasWebGPU,
+          userAgent: navigator.userAgent,
+        });
 
         // Dynamic import of Three.js modules
-        const THREE = await import('three')
+        const THREE = await import('three');
 
-        if (!canvasRef.current) return
+        if (!canvasRef.current) return;
 
         // Initialize renderer: Force WebGPU for Chrome, WebGL for Safari
-        let renderer: any
-        
+        let renderer: any;
+
         if (isChrome && hasWebGPU) {
           try {
-            console.log('Attempting WebGPU initialization for Chrome...')
-            
+            console.log('Attempting WebGPU initialization for Chrome...');
+
             // Test WebGPU availability first
-            const adapter = await navigator.gpu.requestAdapter()
+            const adapter = await navigator.gpu.requestAdapter();
             if (!adapter) {
-              throw new Error('No WebGPU adapter available')
+              throw new Error('No WebGPU adapter available');
             }
-            
-            const device = await adapter.requestDevice()
+
+            const device = await adapter.requestDevice();
             if (!device) {
-              throw new Error('WebGPU device creation failed')
+              throw new Error('WebGPU device creation failed');
             }
-            
+
             // Import and initialize WebGPU renderer
-            const WebGPURenderer = await import('three/examples/jsm/renderers/webgpu/WebGPURenderer.js')
+            const WebGPURenderer = await import(
+              'three/examples/jsm/renderers/webgpu/WebGPURenderer.js'
+            );
             renderer = new WebGPURenderer.WebGPURenderer({
               canvas: canvasRef.current,
-              antialias: true
-            })
-            
-            await renderer.init()
-            console.log('✅ Successfully using WebGPU renderer')
-            
+              antialias: true,
+            });
+
+            await renderer.init();
+            console.log('✅ Successfully using WebGPU renderer');
           } catch (webgpuError) {
-            console.log('❌ WebGPU failed, falling back to WebGL:', webgpuError)
+            console.log('❌ WebGPU failed, falling back to WebGL:', webgpuError);
             // Fallback to high-performance WebGL for Chrome
             const rendererOptions = {
               canvas: canvasRef.current,
               antialias: true,
               alpha: true,
               preserveDrawingBuffer: false,
-              powerPreference: 'high-performance' as WebGLPowerPreference
-            }
-            renderer = new THREE.WebGLRenderer(rendererOptions)
-            console.log('🔄 Using WebGL renderer (Chrome fallback)')
+              powerPreference: 'high-performance' as WebGLPowerPreference,
+            };
+            renderer = new THREE.WebGLRenderer(rendererOptions);
+            console.log('🔄 Using WebGL renderer (Chrome fallback)');
           }
         } else {
           // Use WebGL for Safari and non-Chrome browsers
@@ -79,75 +85,92 @@ export default function DataUniverse3D() {
             antialias: !isSafari,
             alpha: true,
             preserveDrawingBuffer: false,
-            powerPreference: isSafari ? 'default' : 'high-performance' as WebGLPowerPreference
-          }
-          renderer = new THREE.WebGLRenderer(rendererOptions)
-          console.log('🌐 Using WebGL renderer (Safari/other browsers)')
+            powerPreference: isSafari ? 'default' : ('high-performance' as WebGLPowerPreference),
+          };
+          renderer = new THREE.WebGLRenderer(rendererOptions);
+          console.log('🌐 Using WebGL renderer (Safari/other browsers)');
         }
-        
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2))
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        renderer.setClearColor(0x000000)
-        
+
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSafari ? 1 : 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000);
+
         // Safari-specific settings
         if (isSafari) {
-          renderer.outputColorSpace = THREE.SRGBColorSpace
-          renderer.toneMapping = THREE.NoToneMapping
+          renderer.outputColorSpace = THREE.SRGBColorSpace;
+          renderer.toneMapping = THREE.NoToneMapping;
         }
 
         // Setup scene and camera
-        const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
-        camera.position.set(3, 3, 3)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.set(3, 3, 3);
 
         // Galaxy parameters: Full quality for Chrome, optimized for Safari
         const parameters = {
-          count: isSafari ? 50000 : (isChrome ? 150000 : 100000), // Max particles for Chrome
+          count: isSafari ? 50000 : isChrome ? 150000 : 100000, // Max particles for Chrome
           size: isSafari ? 0.015 : 0.01,
           radius: 5,
           branches: 3,
           spin: 1,
           randomness: 0.2,
           randomnessPower: 3,
-          insideColor: '#ffffff',    // White center
-          outsideColor: '#4185f4'    // NEURASCALE blue
-        }
+          insideColor: '#ffffff', // White center
+          outsideColor: '#4185f4', // NEURASCALE blue
+        };
 
         // Create galaxy geometry
-        const geometry = new THREE.BufferGeometry()
-        const positions = new Float32Array(parameters.count * 3)
-        const colors = new Float32Array(parameters.count * 3)
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(parameters.count * 3);
+        const colors = new Float32Array(parameters.count * 3);
 
-        const colorInside = new THREE.Color(parameters.insideColor)
-        const colorOutside = new THREE.Color(parameters.outsideColor)
+        const colorInside = new THREE.Color(parameters.insideColor);
+        const colorOutside = new THREE.Color(parameters.outsideColor);
 
         for (let i = 0; i < parameters.count; i++) {
-          const i3 = i * 3
+          const i3 = i * 3;
 
           // Position
-          const radius = Math.random() * parameters.radius
-          const spinAngle = radius * parameters.spin
-          const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+          const radius = Math.random() * parameters.radius;
+          const spinAngle = radius * parameters.spin;
+          const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
 
-          const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
-          const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
-          const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+          const randomX =
+            Math.pow(Math.random(), parameters.randomnessPower) *
+            (Math.random() < 0.5 ? 1 : -1) *
+            parameters.randomness *
+            radius;
+          const randomY =
+            Math.pow(Math.random(), parameters.randomnessPower) *
+            (Math.random() < 0.5 ? 1 : -1) *
+            parameters.randomness *
+            radius;
+          const randomZ =
+            Math.pow(Math.random(), parameters.randomnessPower) *
+            (Math.random() < 0.5 ? 1 : -1) *
+            parameters.randomness *
+            radius;
 
-          positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX
-          positions[i3 + 1] = randomY
-          positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ
+          positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+          positions[i3 + 1] = randomY;
+          positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
           // Color - white center to blue edges
-          const mixedColor = colorInside.clone()
-          mixedColor.lerp(colorOutside, radius / parameters.radius)
+          const mixedColor = colorInside.clone();
+          mixedColor.lerp(colorOutside, radius / parameters.radius);
 
-          colors[i3] = mixedColor.r
-          colors[i3 + 1] = mixedColor.g
-          colors[i3 + 2] = mixedColor.b
+          colors[i3] = mixedColor.r;
+          colors[i3 + 1] = mixedColor.g;
+          colors[i3 + 2] = mixedColor.b;
         }
 
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
         // Create material
         const material = new THREE.PointsMaterial({
@@ -155,65 +178,64 @@ export default function DataUniverse3D() {
           sizeAttenuation: true,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
-          vertexColors: true
-        })
+          vertexColors: true,
+        });
 
         // Create points mesh
-        const points = new THREE.Points(geometry, material)
-        scene.add(points)
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
 
         // Skip 3D text for all browsers to avoid positioning issues
         // Focus on clean particle galaxy animation only
-        
+
         // Simple lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-        scene.add(ambientLight)
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-        directionalLight.position.set(1, 1, 1)
-        scene.add(directionalLight)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
 
         // No mouse controls - static camera position
 
         // Animation loop
         const animate = () => {
           // Rotate galaxy
-          points.rotation.y += 0.001
-          
+          points.rotation.y += 0.001;
+
           // Static camera looking at center
-          camera.lookAt(scene.position)
+          camera.lookAt(scene.position);
 
-          renderer.render(scene, camera)
-        }
+          renderer.render(scene, camera);
+        };
 
-        renderer.setAnimationLoop(animate)
-        
+        renderer.setAnimationLoop(animate);
+
         // Mark as loaded
-        setIsLoading(false)
+        setIsLoading(false);
 
         // Handle resize
         const handleResize = () => {
-          camera.aspect = window.innerWidth / window.innerHeight
-          camera.updateProjectionMatrix()
-          renderer.setSize(window.innerWidth, window.innerHeight)
-        }
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        };
 
-        window.addEventListener('resize', handleResize)
+        window.addEventListener('resize', handleResize);
 
         return () => {
-          window.removeEventListener('resize', handleResize)
-          renderer.dispose()
-        }
-
+          window.removeEventListener('resize', handleResize);
+          renderer.dispose();
+        };
       } catch (err) {
-        console.error('DataUniverse initialization error:', err)
-        setError(`3D Rendering Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
-        setIsLoading(false)
+        console.error('DataUniverse initialization error:', err);
+        setError(`3D Rendering Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        setIsLoading(false);
       }
-    }
+    };
 
-    initGalaxy()
-  }, [])
+    initGalaxy();
+  }, []);
 
   if (error) {
     return (
@@ -224,7 +246,7 @@ export default function DataUniverse3D() {
           <p className="text-xs text-gray-500 mt-2">Your browser may not support WebGL</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -239,5 +261,5 @@ export default function DataUniverse3D() {
       )}
       <canvas ref={canvasRef} className="w-full h-full" />
     </div>
-  )
+  );
 }

@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 interface AnimatedTextProps {
-  text: string
-  className?: string
-  delay?: number
-  stagger?: number
+  text: string;
+  className?: string;
+  delay?: number;
+  stagger?: number;
 }
 
-export default function AnimatedText({ 
-  text, 
-  className = '', 
+export default function AnimatedText({
+  text,
+  className = '',
   delay = 0,
-  stagger = 0.03 
+  stagger = 0.03,
 }: AnimatedTextProps) {
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true,
-  })
+  });
 
-  const words = text.split(' ')
+  const words = text.split(' ');
 
   const container = {
     hidden: { opacity: 0 },
@@ -32,7 +32,7 @@ export default function AnimatedText({
         staggerChildren: stagger,
       },
     },
-  }
+  };
 
   const child = {
     hidden: {
@@ -47,7 +47,7 @@ export default function AnimatedText({
         ease: [0.215, 0.61, 0.355, 1],
       },
     },
-  }
+  };
 
   return (
     <motion.div
@@ -58,14 +58,10 @@ export default function AnimatedText({
       className={`${className} flex flex-wrap`}
     >
       {words.map((word, i) => (
-        <motion.span
-          key={i}
-          variants={child}
-          className="inline-block mr-[0.25em] last:mr-0"
-        >
+        <motion.span key={i} variants={child} className="inline-block mr-[0.25em] last:mr-0">
           {word}
         </motion.span>
       ))}
     </motion.div>
-  )
+  );
 }

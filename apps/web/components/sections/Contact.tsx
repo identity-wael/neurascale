@@ -1,7 +1,8 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
 
 // SVG Icons for contact channels
 const ChatIcon = () => (
@@ -44,6 +45,47 @@ const ResearchContactIcon = () => (
   </svg>
 )
 
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '400px',
+  borderRadius: '0.5rem',
+}
+
+const center = {
+  lat: 42.3601,
+  lng: -71.0942,
+}
+
+const mapOptions = {
+  disableDefaultUI: true,
+  zoomControl: true,
+  styles: [
+    {
+      featureType: 'all',
+      elementType: 'all',
+      stylers: [
+        { saturation: -100 },
+        { lightness: -20 },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [
+        { lightness: -50 },
+        { visibility: 'simplified' },
+      ],
+    },
+    {
+      featureType: 'water',
+      elementType: 'all',
+      stylers: [
+        { color: '#1a1a2e' },
+      ],
+    },
+  ],
+}
 
 export default function Contact() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -106,6 +148,16 @@ export default function Contact() {
       setIsSubmitting(false)
     }
   }
+
+  const [map, setMap] = useState(null)
+
+  const onLoad = useCallback((map: any) => {
+    setMap(map)
+  }, [])
+
+  const onUnmount = useCallback(() => {
+    setMap(null)
+  }, [])
 
   const contactChannels = [
     {
@@ -339,51 +391,34 @@ export default function Contact() {
               </div>
             </motion.div>
 
-            {/* Stylized Map */}
+            {/* Google Map */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
               viewport={{ once: true }}
-              className="relative p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden"
+              className="relative rounded-lg border border-white/10 overflow-hidden"
             >
-              {/* Grid Background */}
-              <div className="absolute inset-0 opacity-10">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
-              </div>
-
-              {/* MIT Campus Representation */}
-              <div className="relative z-10 h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-blue-400/50 bg-blue-400/10 mb-4 relative">
-                    <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></div>
-                    <svg className="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <p className="text-white/90 font-light text-lg mb-2">MIT Campus</p>
-                  <p className="text-white/60 text-sm">Cambridge, Massachusetts</p>
-                  
-                  {/* Coordinate Display */}
-                  <div className="mt-6 p-3 rounded bg-white/5 border border-white/10">
-                    <p className="text-blue-400 font-mono text-xs">42.3601° N, 71.0942° W</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Decorative Elements */}
-              <div className="absolute top-4 right-4 text-white/20">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
+              <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={center}
+                  zoom={15}
+                  onLoad={onLoad}
+                  onUnmount={onUnmount}
+                  options={mapOptions}
+                >
+                  <Marker
+                    position={center}
+                  />
+                </GoogleMap>
+              </LoadScript>
+              
+              {/* Overlay with location info */}
+              <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                <h4 className="text-white/90 font-light text-lg mb-1">MIT Campus</h4>
+                <p className="text-white/60 text-sm">Cambridge, Massachusetts</p>
+                <p className="text-blue-400 font-mono text-xs mt-2">42.3601° N, 71.0942° W</p>
               </div>
             </motion.div>
           </div>

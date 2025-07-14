@@ -67,6 +67,25 @@ The contact form sends emails to `identity@wael.ai`. To enable email functionali
 
 **Note**: The contact form will work in development mode even without email credentials - submissions will be logged to the console.
 
+### Google Maps Configuration
+
+The contact page includes an interactive Google Map. To enable it:
+
+1. Get a Google Maps API key:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing
+   - Enable "Maps JavaScript API"
+   - Create credentials (API Key)
+
+2. Add the API key to your `.env.local`:
+   ```
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+   ```
+
+3. (Optional) Restrict your API key to your domain for security
+
+**Note**: The map will show a development mode warning without a valid API key.
+
 ## 🎨 Features
 
 - **3D Visualizations**: Neural processor and server rack animations using Three.js

@@ -163,25 +163,29 @@ export default function Resources() {
     {
       title: 'NVIDIA Holoscan Platform',
       description: 'High-performance computing platform for AI applications in healthcare and life sciences',
-      url: 'developer.nvidia.com/holoscan',
+      url: 'https://developer.nvidia.com/holoscan-sdk',
+      displayUrl: 'developer.nvidia.com/holoscan-sdk',
       category: 'Platform'
     },
     {
       title: 'DGX Cloud Infrastructure',
       description: 'Cloud-native AI supercomputing for training and inference at scale',
-      url: 'nvidia.com/en-us/data-center/dgx-cloud',
+      url: 'https://developer.nvidia.com/dgx-cloud',
+      displayUrl: 'developer.nvidia.com/dgx-cloud',
       category: 'Infrastructure'
     },
     {
       title: 'AWS IoT Core Documentation',
       description: 'Managed cloud service for IoT device connectivity and data processing',
-      url: 'docs.aws.amazon.com/iot',
+      url: 'https://aws.amazon.com/iot-core/',
+      displayUrl: 'aws.amazon.com/iot-core',
       category: 'IoT Integration'
     },
     {
       title: 'Robot Operating System (ROS)',
       description: 'Open-source robotics middleware suite for robot application development',
-      url: 'ros.org',
+      url: 'https://www.ros.org/',
+      displayUrl: 'ros.org',
       category: 'Robotics'
     }
   ]
@@ -334,13 +338,16 @@ export default function Resources() {
           
           <div className="grid md:grid-cols-2 gap-6">
             {externalReferences.map((ref, index) => (
-              <motion.div
+              <motion.a
                 key={index}
+                href={ref.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm hover:border-white/20 transition-colors cursor-pointer"
+                className="block p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm hover:border-white/20 transition-colors cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
                   <h4 className="text-lg font-light text-white/90">{ref.title}</h4>
@@ -351,10 +358,10 @@ export default function Resources() {
                   {ref.description}
                 </p>
                 
-                <div className="text-blue-400/80 text-xs font-mono">
-                  {ref.url}
+                <div className="text-blue-400/80 text-xs font-mono hover:text-blue-300 transition-colors">
+                  {ref.displayUrl || ref.url} →
                 </div>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>

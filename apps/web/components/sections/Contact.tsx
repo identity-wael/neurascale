@@ -139,26 +139,11 @@ export default function Contact() {
   ]
 
 
-  const officeLocations = [
-    {
-      city: 'San Francisco',
-      address: '123 Neural Avenue, Suite 400\nSan Francisco, CA 94103',
-      type: 'Headquarters',
-      focus: 'Research & Development'
-    },
-    {
-      city: 'Boston',
-      address: '456 Medical Center Drive\nBoston, MA 02115',
-      type: 'Clinical Research',
-      focus: 'Healthcare Partnerships'
-    },
-    {
-      city: 'Austin',
-      address: '789 Innovation Boulevard\nAustin, TX 78701',
-      type: 'Engineering Hub',
-      focus: 'Platform Development'
-    }
-  ]
+  const officeLocation = {
+    city: 'Boston',
+    address: 'MIT Campus\nCambridge, MA 02139',
+    focus: 'Research & Development'
+  }
 
   return (
     <section id="contact" ref={containerRef} className="px-6 py-16 relative">
@@ -321,7 +306,7 @@ export default function Contact() {
         </div>
 
 
-        {/* Office Locations */}
+        {/* Office Location */}
         <div className="mb-20">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
@@ -330,34 +315,77 @@ export default function Contact() {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl font-light mb-12 text-white/90"
           >
-            Our Locations
+            Our Location
           </motion.h3>
           
-          <div className="grid lg:grid-cols-3 gap-8">
-            {officeLocations.map((location, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h4 className="text-lg font-light text-white/90">{location.city}</h4>
-                  <span className="text-purple-400 text-xs font-medium">{location.type}</span>
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Location Info */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
+            >
+              <h4 className="text-2xl font-light text-white/90 mb-4">{officeLocation.city}</h4>
+              
+              <div className="text-white/70 text-base mb-6 whitespace-pre-line">
+                {officeLocation.address}
+              </div>
+              
+              <div className="border-t border-white/10 pt-6">
+                <span className="text-blue-400 text-sm font-medium block mb-2">Focus Area</span>
+                <p className="text-white/90 text-lg">{officeLocation.focus}</p>
+              </div>
+            </motion.div>
+
+            {/* Stylized Map */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="relative p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden"
+            >
+              {/* Grid Background */}
+              <div className="absolute inset-0 opacity-10">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+              </div>
+
+              {/* MIT Campus Representation */}
+              <div className="relative z-10 h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-blue-400/50 bg-blue-400/10 mb-4 relative">
+                    <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></div>
+                    <svg className="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-white/90 font-light text-lg mb-2">MIT Campus</p>
+                  <p className="text-white/60 text-sm">Cambridge, Massachusetts</p>
+                  
+                  {/* Coordinate Display */}
+                  <div className="mt-6 p-3 rounded bg-white/5 border border-white/10">
+                    <p className="text-blue-400 font-mono text-xs">42.3601° N, 71.0942° W</p>
+                  </div>
                 </div>
-                
-                <div className="text-white/60 text-sm mb-4 whitespace-pre-line">
-                  {location.address}
-                </div>
-                
-                <div>
-                  <span className="text-blue-400/80 text-xs font-medium">Focus Area</span>
-                  <p className="text-white/60 text-xs">{location.focus}</p>
-                </div>
-              </motion.div>
-            ))}
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 text-white/20">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+            </motion.div>
           </div>
         </div>
 

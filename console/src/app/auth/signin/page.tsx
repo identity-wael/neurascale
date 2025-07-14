@@ -49,22 +49,22 @@ export default function SignInPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header with Logo */}
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {/* NeuraScale Logo */}
             <span
-              className="font-extrabold text-4xl tracking-wider"
+              className="font-extrabold text-2xl tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
 
-            <div className="w-px h-12 bg-gray-300" />
+            <div className="w-px h-6 bg-gray-300" />
 
             {/* MIT Logo and Text */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <svg
-                className="h-12 w-auto"
+                className="h-8 w-auto"
                 viewBox="0 0 536.229 536.229"
                 fill="black"
                 fillOpacity="0.8"
@@ -113,7 +113,7 @@ export default function SignInPage() {
                 </g>
               </svg>
               {/* MIT Text - 3 lines */}
-              <div className="flex flex-col justify-center h-12 leading-none">
+              <div className="flex flex-col justify-center h-8 leading-none">
                 <span
                   className="text-xs text-black font-medium"
                   style={{

@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+project_id  = "your-gcp-project-id"
+region      = "us-central1"
+db_tier     = "db-f1-micro"  # Use db-custom-1-3840 for production
+db_username = "neurascale_user"
+environment = "dev"

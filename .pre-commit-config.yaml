@@ -4,7 +4,9 @@ repos:
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^(node_modules|.next|dist|build)/
       - id: end-of-file-fixer
+        exclude: ^(node_modules|.next|dist|build)/
       - id: check-yaml
       - id: check-added-large-files
         args: ['--maxkb=1000']
@@ -29,7 +31,9 @@ repos:
     hooks:
       - id: eslint
         files: \.(js|jsx|ts|tsx)$
+        exclude: ^(node_modules|.next|dist|build)/
         args: ['--fix']
         additional_dependencies:
           - eslint@8.56.0
           - eslint-config-next@14.0.4
+          - typescript@5.3.3

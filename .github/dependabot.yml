@@ -19,7 +19,7 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    
+
   # Enable version updates for npm in apps/web
   - package-ecosystem: "npm"
     directory: "/apps/web"
@@ -37,7 +37,7 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    
+
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"

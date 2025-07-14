@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['@neurascale/eslint-config'],
+  extends: ['next/core-web-vitals'],
 };

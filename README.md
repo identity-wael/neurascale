@@ -191,22 +191,22 @@ When ready to implement the full monorepo:
 
 ### Leadership & Engineering Excellence
 
-**Rob Franklin** - *SVP, Brain Computer Interface*  
+**Rob Franklin** - *SVP, Brain Computer Interface*
 Blackrock Neurotech
 
-**Wael El Ghazzawi** - *CTO, Financial Technology*  
+**Wael El Ghazzawi** - *CTO, Financial Technology*
 Brain Finance
 
-**Ron Lehman** - *CEO, Geographic Information System*  
+**Ron Lehman** - *CEO, Geographic Information System*
 RYKER
 
-**Donald Woodruff** - *Director of Technology, Cloud Solutions*  
+**Donald Woodruff** - *Director of Technology, Cloud Solutions*
 Lumen Technologies
 
-**Jason Franklin** - *CITO, E-Retail*  
+**Jason Franklin** - *CITO, E-Retail*
 American Furniture Warehouse
 
-**Vincent Liu** - *VP Engineering, HealthCare*  
+**Vincent Liu** - *VP Engineering, HealthCare*
 CuraeSoft Inc
 
 Our world-class team brings together expertise from brain-computer interfaces, financial technology, cloud infrastructure, retail systems, and healthcare engineering to create the future of neural-prosthetics applications.

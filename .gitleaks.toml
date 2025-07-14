@@ -4,17 +4,6 @@
 [extend]
 useDefault = true
 
-[allowlist]
-description = "Allowlisted files and paths"
-paths = [
-    '''node_modules''',
-    '''.git''',
-    '''dist''',
-    '''build''',
-    '''.next''',
-    '''out''',
-]
-
 # Additional custom rules for NeuraScale
 [[rules]]
 description = "Google Maps API Key"
@@ -31,12 +20,20 @@ description = "Email Password"
 regex = '''(EMAIL_PASS|EMAIL_PASSWORD|MAIL_PASSWORD)\s*=\s*['\"]?[^\s'\"]+['\"]?'''
 tags = ["password", "email"]
 
-# Exclude test files and examples
-[allowlist.regexTarget]
-regexTarget = "line"
+# Configuration for allowlisted paths and patterns
+[allowlist]
+description = "Allowlisted files and paths"
+paths = [
+    '''node_modules''',
+    '''.git''',
+    '''dist''',
+    '''build''',
+    '''.next''',
+    '''out''',
+]
 regexes = [
     '''your-api-key-here''',
-    '''your-email@gmail.com''',
+    '''your-email@gmail\.com''',
     '''your-app-password''',
-    '''example\.com''',
+    '''example\.com'''
 ]

@@ -111,6 +111,60 @@ export default function Resources() {
       pages: '16 pages',
       date: '2020',
       url: 'https://www.researchgate.net/publication/344663207_Fault-tolerant_and_Transactional_Stateful_Serverless_Workflows_extended_version'
+    },
+    {
+      title: 'Behavioral Demonstration of a Somatosensory Neuroprosthesis',
+      authors: 'S.J. Bensmaia, L.E. Miller, R. Franklin, et al.',
+      summary: 'Implementation of a somatosensory prosthesis using intracortical microstimulation to provide graded tactile feedback for prosthetic limb control in Rhesus macaques.',
+      category: 'Neuroprosthetics / BCI',
+      pages: '8 pages',
+      date: '2013',
+      url: 'https://www.researchgate.net/publication/235895922_Behavioral_Demonstration_of_a_Somatosensory_Neuroprosthesis'
+    },
+    {
+      title: 'A Comparison of Fabrication Methods for Iridium Oxide Reference Electrodes',
+      authors: 'R. Franklin, et al.',
+      summary: 'Characterization of SIROF and AIROF fabrication methods for IrOx films used as reference electrodes in neurochemical recordings, establishing AIROF superiority.',
+      category: 'Neural Electrodes',
+      pages: '4 pages',
+      date: '2009',
+      url: 'https://www.researchgate.net/publication/224107954_A_Comparison_of_Fabrication_Methods_for_Iridium_Oxide_Reference_Electrodes'
+    },
+    {
+      title: 'Implantable microelectrode arrays for simultaneous electrophysiological and neurochemical recordings',
+      authors: 'P.E. Takmakov, K. Zachek, R.B. Keithley, E.A. Bucher, G.S. McCarty, R.M. Wightman, R. Franklin, et al.',
+      summary: 'Multi-modal neural recording arrays enabling simultaneous measurement of spikes, field potentials, and dopamine overflow at matching spatiotemporal scales.',
+      category: 'Neural Recording',
+      pages: '10 pages',
+      date: '2008',
+      url: 'https://www.researchgate.net/publication/23160768_Implantable_microelectrode_arrays_for_simultaneous_electrophysiological_and_neurochemical_recordings'
+    },
+    {
+      title: 'A wireless transmission neural interface system for unconstrained non-human primates',
+      authors: 'D.A. Schwarz, M.A. Lebedev, T.L. Hanson, D.F. Dimitrov, G. Lehew, J. Meloy, S. Rajangam, V. Subramanian, P.J. Ifft, Z. Li, A. Ramakrishnan, A. Tate, K.Z. Zhuang, M.A.L. Nicolelis, R. Franklin, et al.',
+      summary: 'High-fidelity 96-channel wireless system for recording neural activity in freely moving primates, revealing behavioral-state dependent neural dynamics.',
+      category: 'Wireless BCI',
+      pages: '15 pages',
+      date: '2015',
+      url: 'https://www.researchgate.net/publication/280945213_A_wireless_transmission_neural_interface_system_for_unconstrained_non-human_primates'
+    },
+    {
+      title: 'High channel-count neural interfaces for multiple degree-of-freedom neuroprosthetics',
+      authors: 'R. Franklin, et al.',
+      summary: 'Advanced neural interface integrating Utah Electrode Arrays with custom ASIC for 200-channel recordings to control 17-DoF prosthetic devices.',
+      category: 'Neural Interfaces',
+      pages: '2 pages',
+      date: '2011',
+      url: 'https://www.researchgate.net/publication/271614384_High_channel-count_neural_interfaces_for_multiple_degree-_of-freedom_neuroprosthetics'
+    },
+    {
+      title: 'Analog Circuit Design Methodologies to Improve Negative-Bias Temperature Instability Degradation',
+      authors: 'R. Franklin, et al.',
+      summary: 'Novel techniques for mitigating NBTI effects in PMOS devices through input switching and body-bias modulation in differential pairs.',
+      category: 'Circuit Design',
+      pages: '6 pages',
+      date: '2010',
+      url: 'https://www.researchgate.net/publication/221295849_Analog_Circuit_Design_Methodologies_to_Improve_Negative-Bias_Temperature_Instability_Degradation'
     }
   ]
 

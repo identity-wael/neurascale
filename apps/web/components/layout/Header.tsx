@@ -35,7 +35,7 @@ export default function Header() {
             </span>
           </a>
           <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* MIT Logo */}
             <svg className="h-8 w-auto" viewBox="0 0 536.229 536.229" fill="white" fillOpacity="0.8" xmlns="http://www.w3.org/2000/svg">
               <g>
@@ -51,11 +51,9 @@ export default function Header() {
               </g>
             </svg>
             {/* MIT Text */}
-            <div className="flex flex-col">
-              <span className="text-xs text-white/60" style={{ fontFamily: 'Times, serif' }}>Massachusetts</span>
-              <span className="text-xs text-white/60" style={{ fontFamily: 'Times, serif' }}>Institute of</span>
-              <span className="text-xs text-white/60" style={{ fontFamily: 'Times, serif' }}>Technology</span>
-            </div>
+            <span className="text-sm text-white/70" style={{ fontFamily: 'Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif', fontWeight: 500 }}>
+              Massachusetts Institute of Technology
+            </span>
           </div>
         </div>
         <nav className="flex items-center gap-6">

@@ -141,7 +141,7 @@ export default function Header() {
               href="https://console.neurascale.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors uppercase tracking-wider"
+              className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider border border-white/20 hover:border-white/40 px-3 py-1.5 rounded"
               title="NeuraScale Console"
             >
               Console
@@ -235,7 +235,7 @@ export default function Header() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: (menuItems.length + 1) * 0.05 }}
-                className="mx-6 my-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors uppercase tracking-wider text-center"
+                className="mx-6 my-3 px-3 py-2 border border-white/20 hover:border-white/40 text-white/70 hover:text-white text-sm transition-colors uppercase tracking-wider text-center rounded"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Console

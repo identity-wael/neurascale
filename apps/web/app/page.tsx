@@ -6,7 +6,6 @@ import Vision from '@/components/sections/Vision'
 import Problem from '@/components/sections/Problem'
 import Roadmap from '@/components/sections/Roadmap'
 import Team from '@/components/sections/Team'
-import Community from '@/components/sections/Community'
 import Resources from '@/components/sections/Resources'
 import Contact from '@/components/sections/Contact'
 import Header from '@/components/layout/Header'
@@ -40,7 +39,6 @@ export default function Home() {
             <Problem />
             <Roadmap />
             <Team />
-            <Community />
             <Resources />
             <Contact />
           </main>

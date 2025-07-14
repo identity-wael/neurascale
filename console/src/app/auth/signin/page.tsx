@@ -49,21 +49,22 @@ export default function SignInPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header with Logo */}
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <span
-                className="font-extrabold text-2xl tracking-wider"
-                style={{ fontFamily: "Proxima Nova, sans-serif" }}
-              >
-                <span className="text-black">NEURA</span>
-                <span className="text-[#4185f4]">SCALE</span>
-              </span>
-            </div>
-            <div className="w-px h-6 bg-gray-300" />
-            <div className="flex items-center gap-3">
-              {/* MIT Logo */}
+          <div className="flex items-center gap-6">
+            {/* NeuraScale Logo */}
+            <span
+              className="font-extrabold text-4xl tracking-wider"
+              style={{ fontFamily: "Proxima Nova, sans-serif" }}
+            >
+              <span className="text-black">NEURA</span>
+              <span className="text-[#4185f4]">SCALE</span>
+            </span>
+
+            <div className="w-px h-12 bg-gray-300" />
+
+            {/* MIT Logo and Text */}
+            <div className="flex items-center gap-4">
               <svg
-                className="h-8 w-auto"
+                className="h-12 w-auto"
                 viewBox="0 0 536.229 536.229"
                 fill="black"
                 fillOpacity="0.8"
@@ -111,20 +112,40 @@ export default function SignInPage() {
                   </g>
                 </g>
               </svg>
-              {/* MIT Text */}
-              <span
-                className="text-xs text-black leading-tight font-medium"
-                style={{
-                  fontFamily:
-                    "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
-              >
-                MIT Massachusetts Institute of Technology
-              </span>
+              {/* MIT Text - 3 lines */}
+              <div className="flex flex-col leading-tight">
+                <span
+                  className="text-sm text-black font-medium"
+                  style={{
+                    fontFamily:
+                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  }}
+                >
+                  Massachusetts
+                </span>
+                <span
+                  className="text-sm text-black font-medium"
+                  style={{
+                    fontFamily:
+                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  }}
+                >
+                  Institute of
+                </span>
+                <span
+                  className="text-sm text-black font-medium"
+                  style={{
+                    fontFamily:
+                      "'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  }}
+                >
+                  Technology
+                </span>
+              </div>
             </div>
           </div>
-          {/* Console Label */}
-          <div className="text-sm text-gray-600 font-medium mt-2">Console</div>
+          {/* Console Label - Larger and Bold */}
+          <div className="text-xl text-gray-800 font-bold mt-4">Console</div>
         </div>
 
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">

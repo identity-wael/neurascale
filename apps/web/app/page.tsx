@@ -9,6 +9,7 @@ import Team from '@/components/sections/Team'
 import Resources from '@/components/sections/Resources'
 import Contact from '@/components/sections/Contact'
 import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import SmoothScroll from '@/components/layout/SmoothScroll'
 import { AnimatePresence } from 'framer-motion'
@@ -42,6 +43,7 @@ export default function Home() {
             <Resources />
             <Contact />
           </main>
+          <Footer />
         </SmoothScroll>
       )}
     </>

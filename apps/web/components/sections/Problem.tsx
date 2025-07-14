@@ -45,6 +45,7 @@ export default function Problem() {
           text="Breakthrough Neural Computing Architecture"
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-6 md:mb-8 lg:mb-12"
           stagger={0.02}
+          as="h2"
         />
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">

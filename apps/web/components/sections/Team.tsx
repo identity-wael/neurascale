@@ -86,6 +86,7 @@ export default function Team() {
           text="Meet the Team"
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
           stagger={0.02}
+          as="h2"
         />
 
         <motion.p

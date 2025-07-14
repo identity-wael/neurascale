@@ -53,6 +53,7 @@ export default function Hero() {
           className="text-5xl md:text-7xl lg:text-8xl font-light mb-8"
           delay={0.5}
           stagger={0.02}
+          as="h1"
         />
         
         <motion.p

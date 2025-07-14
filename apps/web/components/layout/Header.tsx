@@ -59,7 +59,7 @@ export default function Header() {
             <div className="hidden sm:block w-px h-6 bg-white/20" />
             <div className="hidden md:flex items-center gap-2 lg:gap-4">
               {/* MIT Logo */}
-              <svg className="h-6 lg:h-8 w-auto" viewBox="0 0 536.229 536.229" fill="white" fillOpacity="0.8" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-6 lg:h-8 w-auto" viewBox="0 0 536.229 536.229" fill="white" fillOpacity="0.8" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MIT Logo">
                 <g>
                   <g>
                     <rect y="130.031" width="58.206" height="276.168"/>
@@ -83,7 +83,7 @@ export default function Header() {
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
             {menuItems.map((item) => (
               <a
                 key={item.href}

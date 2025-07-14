@@ -372,29 +372,6 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Footer CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center p-8 rounded-lg border border-green-400/30 bg-green-400/5 backdrop-blur-sm"
-        >
-          <h3 className="text-2xl font-light text-white/90 mb-4">Ready to Get Started?</h3>
-          <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-            Join the neural interface revolution. Whether you want to integrate NEURASCALE into your 
-            healthcare practice, contribute to open-source development, or explore research partnerships, 
-            we're here to help make it happen.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
-              Schedule a Demo
-            </button>
-            <button className="px-6 py-3 border border-white/20 text-white/90 hover:bg-white/10 rounded-lg transition-colors">
-              Explore Documentation
-            </button>
-          </div>
-        </motion.div>
       </motion.div>
     </section>
   )

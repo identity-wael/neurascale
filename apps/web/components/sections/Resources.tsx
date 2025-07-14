@@ -103,22 +103,6 @@ export default function Resources() {
       date: '2019'
     },
     {
-      title: 'Automating the development lifecycle beyond DevOps',
-      authors: 'W. El Ghazzawi',
-      summary: 'Advanced automation strategies in software development, presenting a revolutionary approach to scaling software development automation through the Dops platform.',
-      category: 'Computing / Cloud Computing',
-      pages: 'N/A (Presentation)',
-      date: '2019'
-    },
-    {
-      title: 'Distributed Energy Resources (DER) Modeling & Data Pipeline',
-      authors: 'RYKER (Authored under company, led by R. Lehman)',
-      summary: 'Custom modeling of DER and robust data pipeline creation to improve utility enterprise operations and support grid modernization efforts.',
-      category: 'Computing / Geographic Information System',
-      pages: 'N/A (Web Case Study)',
-      date: 'Undisclosed'
-    },
-    {
       title: 'Fault-tolerant and Transactional Stateful Serverless Workflows',
       authors: 'H. Zhang, A. Cardoza, P.B. Chen, S. Angel, V. Liu',
       summary: 'Beldi, a library and runtime system for writing fault-tolerant and transactional stateful serverless functions with strong consistency guarantees on AWS Lambda.',

@@ -35,7 +35,28 @@ export default function Header() {
             </span>
           </a>
           <div className="w-px h-6 bg-white/20" />
-          <span className="text-xs uppercase tracking-wider text-white/60">Neural-Prosthetics Application Cloud</span>
+          <div className="flex items-center gap-3">
+            {/* MIT Logo */}
+            <svg className="h-6 w-auto" viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g fill="white" fillOpacity="0.8">
+                {/* Classic MIT building columns */}
+                <rect x="6" y="4" width="6" height="16" />
+                <rect x="16" y="4" width="6" height="16" />
+                <rect x="26" y="4" width="6" height="16" />
+                {/* Base */}
+                <rect x="4" y="20" width="32" height="2" />
+                {/* Top elements */}
+                <rect x="6" y="2" width="6" height="2" />
+                <rect x="16" y="2" width="6" height="2" />
+                <rect x="26" y="2" width="6" height="2" />
+              </g>
+            </svg>
+            {/* MIT Text */}
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-white/80" style={{ fontFamily: 'Times, serif' }}>MIT</span>
+              <span className="text-xs text-white/60" style={{ fontFamily: 'Times, serif' }}>Massachusetts Institute of Technology</span>
+            </div>
+          </div>
         </div>
         <nav className="flex items-center gap-6">
           <a href="#vision" className="text-sm text-white/70 hover:text-white transition-colors uppercase tracking-wider">Vision</a>

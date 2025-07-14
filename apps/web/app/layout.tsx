@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
+  const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
   
   return (
     <html lang="en">
@@ -26,8 +27,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Analytics />
         </AuthProvider>
         
-        {/* Google Ads Conversion Tracking */}
-        {googleAdsId && (
+        {/* Google Analytics 4 */}
+        {ga4Id && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${ga4Id}');
+                ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ''}
+              `}
+            </Script>
+          </>
+        )}
+        
+        {/* Google Ads Conversion Tracking (only if no GA4) */}
+        {googleAdsId && !ga4Id && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}

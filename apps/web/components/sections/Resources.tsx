@@ -95,36 +95,68 @@ export default function Resources() {
 
   const whitepapers = [
     {
-      title: 'Neural Signal Processing at Scale',
-      authors: 'R. Franklin, W. El Ghazzawi, D. Woodruff',
-      summary: 'Architecture and implementation of real-time neural data processing systems handling petabytes of information.',
-      category: 'Technical Architecture',
-      pages: '28 pages',
-      date: '2024'
+      title: 'Demonstration of a portable intracortical brain-computer interface',
+      authors: 'J.D. Collinger, R.A. Gaunt, J.E. Downey, S.M. Flesher, J.L. Weiss, J.L. Foldes, E.C. Tyler-Kabara, A.B. Wodlinger, M.L. Boninger, D.J. Weber, R. Franklin, et al.',
+      summary: 'Development and testing of a self-contained, portable intracortical BCI weighing 1.5 kg, enabling users with paralysis to perform computer tasks outside laboratory settings.',
+      category: 'BCI / Computing',
+      pages: '16 pages',
+      date: '2019'
     },
     {
-      title: 'ADAM: AI Domain Agnostic Models for Neural Interfaces',
-      authors: 'D. Woodruff, V. Liu, R. Lehman',
-      summary: 'Novel machine learning approaches for cross-domain neural pattern recognition and predictive modeling.',
-      category: 'AI/ML Research',
-      pages: '42 pages',
-      date: '2024'
+      title: 'Automating the development lifecycle beyond DevOps',
+      authors: 'W. El Ghazzawi',
+      summary: 'Advanced automation strategies in software development, presenting a revolutionary approach to scaling software development automation through the Dops platform.',
+      category: 'Computing / Cloud Computing',
+      pages: 'N/A (Presentation)',
+      date: '2019'
     },
     {
-      title: 'Open Standards for Neural Interface Interoperability',
-      authors: 'J. Franklin, R. Franklin, W. El Ghazzawi',
-      summary: 'Proposed standards for neural data formats, device communication protocols, and cross-platform compatibility.',
-      category: 'Standards & Protocols',
-      pages: '35 pages',
-      date: '2024'
+      title: 'Distributed Energy Resources (DER) Modeling & Data Pipeline',
+      authors: 'RYKER (Authored under company, led by R. Lehman)',
+      summary: 'Custom modeling of DER and robust data pipeline creation to improve utility enterprise operations and support grid modernization efforts.',
+      category: 'Computing / Geographic Information System',
+      pages: 'N/A (Web Case Study)',
+      date: 'Undisclosed'
     },
     {
-      title: 'Security and Privacy in Neural Computing',
-      authors: 'W. El Ghazzawi, J. Franklin',
-      summary: 'Comprehensive analysis of security challenges and solutions for brain-computer interface systems.',
-      category: 'Security',
-      pages: '31 pages',
-      date: '2024'
+      title: 'Fault-tolerant and Transactional Stateful Serverless Workflows',
+      authors: 'H. Zhang, A. Cardoza, P.B. Chen, S. Angel, V. Liu',
+      summary: 'Beldi, a library and runtime system for writing fault-tolerant and transactional stateful serverless functions with strong consistency guarantees on AWS Lambda.',
+      category: 'Cloud Computing / Computing',
+      pages: '16 pages',
+      date: '2020'
+    },
+    {
+      title: 'MimicNet: Fast Performance Estimates for Data Center Networks with Machine Learning',
+      authors: 'Q. Zhang, K.K.W. Ng, C. Kazer, S. Yan, J. Sedoc, V. Liu',
+      summary: 'ML-based system for rapidly estimating data center network performance, providing fast and accurate predictions for evaluating design changes and traffic patterns.',
+      category: 'Cloud Computing / AI/ML Research',
+      pages: '18 pages',
+      date: '2021'
+    },
+    {
+      title: 'F10: A Fault-Tolerant Engineered Network',
+      authors: 'V. Liu, D. Halperin, A. Krishnamurthy, T. Anderson',
+      summary: 'Novel data center network architecture designed for high performance and microsecond-scale fault tolerance through co-designed topology and routing protocols.',
+      category: 'Cloud Computing / Computing',
+      pages: '14 pages',
+      date: '2013'
+    },
+    {
+      title: 'Ambient Backscatter: Wireless Communication Out of Thin Air',
+      authors: 'V. Liu, A. Parks, V. Talla, S. Gollakota, D. Wetherall, J.R. Smith',
+      summary: 'Groundbreaking communication paradigm enabling battery-free devices to communicate by backscattering ambient RF signals like TV and cellular transmissions.',
+      category: 'Computing / Wireless Networks',
+      pages: '12 pages',
+      date: '2013'
+    },
+    {
+      title: 'EgoZero: Robot Learning from Smart Glasses',
+      authors: 'V. Liu, A. Adeniji, H. Zhan, R. Bhirangi, P. Abbeel, L. Pinto',
+      summary: 'New paradigm for robot learning through first-person video observation, bridging the gap between human demonstration and robotic execution.',
+      category: 'Human-Robot Interaction / AI/ML Research',
+      pages: '16 pages',
+      date: '2025'
     }
   ]
 

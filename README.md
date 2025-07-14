@@ -24,13 +24,22 @@ neurascale/
 │   ├── turbo.json              # Turborepo config (future)
 │   └── pnpm-workspace.yaml     # PNPM workspaces (future)
 ├── backend/                    # Future backend services
+├── docs/                       # Documentation
+│   ├── GOOGLE_ANALYTICS_SETUP.md
+│   └── fix-google-maps.md
 ├── infrastructure/             # Future IaC
+├── scripts/                    # Utility scripts
+│   └── google/                 # Google services utilities
+│       ├── google_analytics_setup.py
+│       ├── google_ads_setup.py
+│       └── google-ads.yaml
 └── README.md                   # This file
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or pnpm
 
@@ -52,9 +61,12 @@ The app will be available at `http://localhost:3000`
 ### Environment Variables Configuration
 
 The application requires the following environment variables:
+
 - `EMAIL_USER` - Email address for sending contact form messages
 - `EMAIL_PASS` - Email password/app password
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - Google Maps API key
+- `NEXT_PUBLIC_GA4_MEASUREMENT_ID` - Google Analytics 4 measurement ID
+- `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID` - Google Ads conversion tracking ID (optional)
 
 #### Option 1: Vercel Environment Variables (Recommended for Production)
 
@@ -73,6 +85,7 @@ The application requires the following environment variables:
 6. Save and redeploy
 
 **Advantages:**
+
 - Automatic injection into your app during build/runtime
 - Secure storage with encryption
 - Easy to update without code changes
@@ -94,6 +107,7 @@ The application requires the following environment variables:
 4. Update your Vercel deployment to use GitHub secrets:
 
 Create `.github/workflows/deploy.yml`:
+
 ```yaml
 name: Deploy to Vercel
 on:
@@ -119,6 +133,7 @@ jobs:
 #### Option 3: Local Development
 
 For local development, create `.env.local`:
+
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
 ```
@@ -128,6 +143,7 @@ Then add your credentials to `.env.local`.
 ### Recommended Approach
 
 **Use Vercel Environment Variables** for the following reasons:
+
 1. **Seamless Integration** - Vercel automatically injects env vars during build
 2. **Security** - Values are encrypted and never exposed in logs
 3. **Easy Management** - Update values without code changes
@@ -137,6 +153,7 @@ Then add your credentials to `.env.local`.
 ### Setting Up Email Credentials
 
 For Gmail users:
+
 1. Enable 2-factor authentication
 2. Generate an App Password at: https://myaccount.google.com/apppasswords
 3. Use the app password (not your regular password) as `EMAIL_PASS`
@@ -154,6 +171,26 @@ For Gmail users:
 
 **Note**: Both the contact form and map will work in development mode with warnings if credentials are not configured.
 
+## 🔧 Google Services Integration
+
+### Google Analytics 4
+
+1. See `docs/GOOGLE_ANALYTICS_SETUP.md` for complete setup guide
+2. Use the setup script to test your configuration:
+   ```bash
+   python3 scripts/google/google_analytics_setup.py
+   ```
+
+### Google Maps
+
+- If you see "For development purposes only" watermark, see `docs/fix-google-maps.md`
+- Ensure billing is enabled on your Google Cloud project
+
+### Google Ads
+
+- Configuration template available at `scripts/google/google-ads.yaml`
+- Setup script: `scripts/google/google_ads_setup.py`
+
 ## 🎨 Features
 
 - **3D Visualizations**: Neural processor and server rack animations using Three.js
@@ -165,6 +202,7 @@ For Gmail users:
 ## 🚢 Deployment
 
 ### Vercel Configuration
+
 - **Root Directory**: `apps/web`
 - **Framework Preset**: Next.js
 - **Build & Output**: Auto-detected
@@ -191,22 +229,22 @@ When ready to implement the full monorepo:
 
 ### Leadership & Engineering Excellence
 
-**Rob Franklin** - *SVP, Brain Computer Interface*
+**Rob Franklin** - _SVP, Brain Computer Interface_
 Blackrock Neurotech
 
-**Wael El Ghazzawi** - *CTO, Financial Technology*
+**Wael El Ghazzawi** - _CTO, Financial Technology_
 Brain Finance
 
-**Ron Lehman** - *CEO, Geographic Information System*
+**Ron Lehman** - _CEO, Geographic Information System_
 RYKER
 
-**Donald Woodruff** - *Director of Technology, Cloud Solutions*
+**Donald Woodruff** - _Director of Technology, Cloud Solutions_
 Lumen Technologies
 
-**Jason Franklin** - *CITO, E-Retail*
+**Jason Franklin** - _CITO, E-Retail_
 American Furniture Warehouse
 
-**Vincent Liu** - *VP Engineering, HealthCare*
+**Vincent Liu** - _VP Engineering, HealthCare_
 CuraeSoft Inc
 
 Our world-class team brings together expertise from brain-computer interfaces, financial technology, cloud infrastructure, retail systems, and healthcare engineering to create the future of neural-prosthetics applications.

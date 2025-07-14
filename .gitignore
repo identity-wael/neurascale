@@ -42,6 +42,9 @@ next-env.d.ts
 # Google Ads API
 google-ads.yaml
 google-ads-*.yaml
+scripts/google/google-ads.yaml
+scripts/google/google-ads-*.yaml
 
 # Google Analytics
 ga4-config.json
+scripts/google/ga4-config.json

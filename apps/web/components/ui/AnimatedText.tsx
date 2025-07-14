@@ -8,15 +8,13 @@ interface AnimatedTextProps {
   className?: string
   delay?: number
   stagger?: number
-  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div'
 }
 
 export default function AnimatedText({ 
   text, 
   className = '', 
   delay = 0,
-  stagger = 0.03,
-  as: Component = 'div' 
+  stagger = 0.03 
 }: AnimatedTextProps) {
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -51,10 +49,8 @@ export default function AnimatedText({
     },
   }
 
-  const MotionComponent = motion(Component as any)
-
   return (
-    <MotionComponent
+    <motion.div
       ref={ref}
       variants={container}
       initial="hidden"
@@ -70,6 +66,6 @@ export default function AnimatedText({
           {word}
         </motion.span>
       ))}
-    </MotionComponent>
+    </motion.div>
   )
 }

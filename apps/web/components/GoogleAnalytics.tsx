@@ -1,36 +1,29 @@
 'use client';
 
-import Script from 'next/script';
+import { useEffect } from 'react';
 
 export default function GoogleAnalytics() {
   const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
-  const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
 
-  if (!ga4Id) return null;
+  useEffect(() => {
+    if (!ga4Id) return;
 
-  // Build the script content as a string
-  let scriptContent = `
+    // Load the Google Analytics script
+    const script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${ga4Id}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    // Initialize gtag
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '${ga4Id}');
-  `;
-  
-  if (googleAdsId) {
-    scriptContent += `gtag('config', '${googleAdsId}');`;
-  }
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    window.gtag = gtag;
 
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-        strategy="afterInteractive"
-      />
-      <Script 
-        id="google-analytics" 
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{ __html: scriptContent }}
-      />
-    </>
-  );
+    gtag('js', new Date());
+    gtag('config', ga4Id);
+  }, [ga4Id]);
+
+  return null;
 }

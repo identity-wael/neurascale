@@ -37,18 +37,17 @@ export default function Header() {
           <div className="w-px h-6 bg-white/20" />
           <div className="flex items-center gap-3">
             {/* MIT Logo */}
-            <svg className="h-6 w-auto" viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g fill="white" fillOpacity="0.8">
-                {/* Classic MIT building columns */}
-                <rect x="6" y="4" width="6" height="16" />
-                <rect x="16" y="4" width="6" height="16" />
-                <rect x="26" y="4" width="6" height="16" />
-                {/* Base */}
-                <rect x="4" y="20" width="32" height="2" />
-                {/* Top elements */}
-                <rect x="6" y="2" width="6" height="2" />
-                <rect x="16" y="2" width="6" height="2" />
-                <rect x="26" y="2" width="6" height="2" />
+            <svg className="h-6 w-auto" viewBox="0 0 536.229 536.229" fill="white" fillOpacity="0.8" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <g>
+                  <rect y="130.031" width="58.206" height="276.168"/>
+                  <rect x="95.356" y="130.031" width="58.206" height="190.712"/>
+                  <rect x="190.712" y="130.031" width="58.206" height="276.168"/>
+                  <rect x="381.425" y="217.956" width="58.212" height="188.236"/>
+                  <rect x="381.425" y="130.031" width="154.805" height="58.206"/>
+                  <rect x="286.074" y="217.956" width="58.2" height="188.236"/>
+                  <rect x="286.074" y="130.031" width="58.2" height="58.206"/>
+                </g>
               </g>
             </svg>
             {/* MIT Text */}

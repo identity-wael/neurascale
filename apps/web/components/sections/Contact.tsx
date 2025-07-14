@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState } from 'react'
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
 
 // SVG Icons for contact channels
@@ -48,7 +48,8 @@ const ResearchContactIcon = () => (
 
 const mapContainerStyle = {
   width: '100%',
-  height: '400px',
+  height: '100%',
+  minHeight: '300px',
   borderRadius: '0.5rem',
 }
 
@@ -266,7 +267,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" ref={containerRef} className="px-6 py-16 relative">
+    <section id="contact" ref={containerRef} className="px-4 sm:px-6 md:px-12 lg:px-24 py-8 md:py-12 lg:py-16 relative">
       <motion.div style={{ scale }} className="relative z-10 w-full">
         <div className="flex items-start mb-8">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>
@@ -278,7 +279,7 @@ export default function Contact() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
         >
           Let's Connect
         </motion.h2>
@@ -288,26 +289,26 @@ export default function Contact() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="text-white/70 text-lg max-w-4xl mb-16"
+          className="text-white/70 text-base md:text-lg max-w-4xl mb-8 md:mb-12 lg:mb-16"
         >
           Ready to explore neural interface technology? Get in touch for partnerships, 
           demos, research collaboration, or technical support.
         </motion.p>
 
         {/* Contact Form */}
-        <div className="grid lg:grid-cols-3 gap-12 mb-24">
+        <div className="grid lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12 mb-12 md:mb-16 lg:mb-24">
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
+              className="p-4 sm:p-6 md:p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
             >
-              <h3 className="text-2xl font-light text-white/90 mb-6">Send us a message</h3>
+              <h3 className="text-xl md:text-2xl font-light text-white/90 mb-4 md:mb-6">Send us a message</h3>
               
               <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block text-white/70 text-sm mb-2">Name</label>
                     <input 
@@ -433,19 +434,19 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-light mb-12 text-white/90"
+            className="text-xl sm:text-2xl md:text-3xl font-light mb-6 md:mb-8 lg:mb-12 text-white/90"
           >
             Our Location
           </motion.h3>
           
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
             {/* Location Info */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
+              className="p-4 sm:p-6 md:p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
             >
               <h4 className="text-2xl font-light text-white/90 mb-4">{officeLocation.city}</h4>
               
@@ -465,7 +466,7 @@ export default function Contact() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
               viewport={{ once: true }}
-              className="relative rounded-lg border border-white/10 overflow-hidden"
+              className="relative rounded-lg border border-white/10 overflow-hidden h-[300px] sm:h-[350px] md:h-[400px]"
             >
               <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
                 <GoogleMap

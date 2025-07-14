@@ -34,7 +34,7 @@ export default function Roadmap() {
   const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -100])
 
   return (
-    <section id="roadmap" ref={containerRef} className="px-6 py-8 relative">
+    <section id="roadmap" ref={containerRef} className="px-4 sm:px-6 md:px-12 lg:px-24 py-8 md:py-12 lg:py-16 relative">
       <motion.div
         style={{ opacity, y }}
         className="relative z-10 w-full"
@@ -46,7 +46,7 @@ export default function Roadmap() {
 
         <AnimatedText
           text="Development Timeline"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
           stagger={0.02}
         />
 

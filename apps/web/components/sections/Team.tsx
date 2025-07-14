@@ -72,7 +72,7 @@ export default function Team() {
   }
 
   return (
-    <section id="team" ref={containerRef} className="px-6 py-16 relative">
+    <section id="team" ref={containerRef} className="px-4 sm:px-6 md:px-12 lg:px-24 py-8 md:py-12 lg:py-16 relative">
       <motion.div
         style={{ opacity, y }}
         className="relative z-10 w-full"
@@ -84,7 +84,7 @@ export default function Team() {
 
         <AnimatedText
           text="Meet the Team"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
           stagger={0.02}
         />
 
@@ -93,7 +93,7 @@ export default function Team() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="text-white/70 text-lg max-w-4xl mb-16"
+          className="text-white/70 text-base md:text-lg max-w-4xl mb-8 md:mb-12 lg:mb-16"
         >
           Our multidisciplinary team brings together decades of experience in brain-computer interfaces, 
           artificial intelligence, cloud computing, and data systems. Each member contributes unique expertise 
@@ -101,7 +101,7 @@ export default function Team() {
         </motion.p>
 
         {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {teamMembers.map((member, index) => (
             <motion.div
               key={index}
@@ -114,7 +114,7 @@ export default function Team() {
               viewport={{ once: true }}
               className="group"
             >
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 h-full 
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 sm:p-5 md:p-6 h-full 
                             hover:bg-white/10 transition-all duration-500 hover:border-white/20 
                             hover:shadow-xl hover:shadow-blue-500/10"
               >
@@ -153,13 +153,13 @@ export default function Team() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
           viewport={{ once: true }}
-          className="mt-20 text-center"
+          className="mt-10 md:mt-16 lg:mt-20 text-center"
         >
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl md:text-3xl font-light text-white/90 mb-6">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-light text-white/90 mb-4 md:mb-6">
               Our Mission
             </h3>
-            <p className="text-white/70 text-lg leading-relaxed">
+            <p className="text-white/70 text-base md:text-lg leading-relaxed">
               We are united by a shared vision to revolutionize human potential through advanced neural interfaces. 
               Our diverse backgrounds in neurotechnology, artificial intelligence, and enterprise systems enable us 
               to tackle the most complex challenges in brain-computer interface development, creating solutions that 

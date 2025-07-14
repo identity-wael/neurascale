@@ -191,7 +191,7 @@ export default function Resources() {
   ]
 
   return (
-    <section id="resources" ref={containerRef} className="px-6 py-16 relative">
+    <section id="resources" ref={containerRef} className="px-4 sm:px-6 md:px-12 lg:px-24 py-8 md:py-12 lg:py-16 relative">
       <motion.div
         style={{ scale }}
         className="relative z-10 w-full"
@@ -203,7 +203,7 @@ export default function Resources() {
 
         <AnimatedText
           text="Knowledge hub for neural interface innovation"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
           stagger={0.02}
         />
         
@@ -212,7 +212,7 @@ export default function Resources() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="text-white/70 text-lg max-w-4xl mb-16"
+          className="text-white/70 text-base md:text-lg max-w-4xl mb-8 md:mb-12 lg:mb-16"
         >
           Access comprehensive documentation, research papers, tutorials, and community resources 
           to accelerate your neural interface development and stay current with the latest innovations.
@@ -225,12 +225,12 @@ export default function Resources() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-light mb-12 text-white/90"
+            className="text-xl sm:text-2xl md:text-3xl font-light mb-6 md:mb-8 lg:mb-12 text-white/90"
           >
             Documentation
           </motion.h3>
           
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
             {documentationSections.map((section, index) => (
               <motion.div
                 key={index}
@@ -238,7 +238,7 @@ export default function Resources() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
+                className="p-4 sm:p-5 md:p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
               >
                 <div className="flex items-center mb-4">
                   <div className="text-white/60 mr-3">{section.icon}</div>
@@ -267,18 +267,18 @@ export default function Resources() {
 
 
         {/* Whitepapers & Research */}
-        <div className="mb-24">
+        <div className="mb-12 md:mb-16 lg:mb-24">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-light mb-12 text-white/90"
+            className="text-xl sm:text-2xl md:text-3xl font-light mb-6 md:mb-8 lg:mb-12 text-white/90"
           >
             Whitepapers & Research
           </motion.h3>
           
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {whitepapers.map((paper, index) => (
               <motion.div
                 key={index}
@@ -286,7 +286,7 @@ export default function Resources() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
+                className="p-4 sm:p-5 md:p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
               >
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-4">
                   <div className="flex-1">
@@ -325,18 +325,18 @@ export default function Resources() {
         </div>
 
         {/* External References */}
-        <div className="mb-20">
+        <div className="mb-10 md:mb-16 lg:mb-20">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-light mb-12 text-white/90"
+            className="text-xl sm:text-2xl md:text-3xl font-light mb-6 md:mb-8 lg:mb-12 text-white/90"
           >
             External References
           </motion.h3>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {externalReferences.map((ref, index) => (
               <motion.a
                 key={index}

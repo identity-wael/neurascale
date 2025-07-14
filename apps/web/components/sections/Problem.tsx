@@ -26,7 +26,7 @@ export default function Problem() {
   const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -100])
 
   return (
-    <section id="specificity" ref={containerRef} className="min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-24 relative">
+    <section id="specificity" ref={containerRef} className="min-h-screen flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-12 md:py-20 lg:py-24 relative">
       {/* 3D Attractor Particles Background */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full opacity-20 hidden lg:block">
         <AttractorParticles3D />
@@ -36,25 +36,25 @@ export default function Problem() {
         style={{ opacity, y }}
         className="max-w-5xl relative z-10"
       >
-        <div className="flex items-start mb-12">
+        <div className="flex items-start mb-6 md:mb-8 lg:mb-12">
           <span className="text-white/40 text-sm font-mono mr-4">≡</span>
           <span className="text-white/40 text-sm uppercase tracking-wider">SPECIFICITY</span>
         </div>
 
         <AnimatedText
           text="Breakthrough Neural Computing Architecture"
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-12"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-6 md:mb-8 lg:mb-12"
           stagger={0.02}
         />
 
-        <div className="grid md:grid-cols-2 gap-16 items-start">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-light mb-6 text-white/90">Unlocking Human Potential Through Advanced Neural Processing</h3>
+            <h3 className="text-xl sm:text-2xl font-light mb-4 md:mb-6 text-white/90">Unlocking Human Potential Through Advanced Neural Processing</h3>
             <p className="text-lg leading-relaxed text-white/70 mb-8">
               NeuraScale's Neural-Prosthetics Application Cloud represents a paradigm shift in brain-computer interface technology, designed to process petabytes of real-time neural data and bridge the gap between the human mind and the physical world.
             </p>

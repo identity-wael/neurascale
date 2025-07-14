@@ -113,7 +113,7 @@ export default function SignInPage() {
                 </g>
               </svg>
               {/* MIT Text - 3 lines */}
-              <div className="flex flex-col justify-center h-8 leading-none">
+              <div className="flex flex-col justify-center h-8 leading-none items-end">
                 <span
                   className="text-xs text-black font-medium"
                   style={{

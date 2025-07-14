@@ -104,15 +104,6 @@ export default function Resources() {
       url: 'https://www.researchgate.net/publication/338341319_Demonstration_of_a_portable_intracortical_brain-computer_interface'
     },
     {
-      title: 'Fault-tolerant and Transactional Stateful Serverless Workflows',
-      authors: 'H. Zhang, A. Cardoza, P.B. Chen, S. Angel, V. Liu',
-      summary: 'Beldi, a library and runtime system for writing fault-tolerant and transactional stateful serverless functions with strong consistency guarantees on AWS Lambda.',
-      category: 'Cloud Computing / Computing',
-      pages: '16 pages',
-      date: '2020',
-      url: 'https://www.researchgate.net/publication/344663207_Fault-tolerant_and_Transactional_Stateful_Serverless_Workflows_extended_version'
-    },
-    {
       title: 'Behavioral Demonstration of a Somatosensory Neuroprosthesis',
       authors: 'S.J. Bensmaia, L.E. Miller, R. Franklin, et al.',
       summary: 'Implementation of a somatosensory prosthesis using intracortical microstimulation to provide graded tactile feedback for prosthetic limb control in Rhesus macaques.',

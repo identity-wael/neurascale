@@ -38,3 +38,7 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Google Ads API
+google-ads.yaml
+google-ads-*.yaml

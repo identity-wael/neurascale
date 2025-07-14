@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
+import { useGoogleAds } from '@/hooks/useGoogleAds'
 
 // SVG Icons for contact channels
 const ChatIcon = () => (
@@ -173,6 +174,7 @@ export default function Contact() {
   })
 
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1])
+  const { trackContactForm } = useGoogleAds()
 
   // Form state
   const [formData, setFormData] = useState({
@@ -208,6 +210,10 @@ export default function Contact() {
       if (response.ok) {
         setSubmitStatus('success')
         setStatusMessage('Thank you for your message! We\'ll get back to you soon.')
+        
+        // Track conversion
+        trackContactForm()
+        
         setFormData({
           name: '',
           email: '',
@@ -291,7 +297,7 @@ export default function Contact() {
           viewport={{ once: true }}
           className="text-white/70 text-base md:text-lg max-w-4xl mb-8 md:mb-12 lg:mb-16"
         >
-          Ready to explore neural interface technology? Get in touch for partnerships, 
+          Ready to explore neural interface technology? Get in touch for partnerships,
           demos, research collaboration, or technical support.
         </motion.p>
 
@@ -306,13 +312,13 @@ export default function Contact() {
               className="p-4 sm:p-6 md:p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
             >
               <h3 className="text-xl md:text-2xl font-light text-white/90 mb-4 md:mb-6">Send us a message</h3>
-              
+
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block text-white/70 text-sm mb-2">Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
@@ -323,8 +329,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <label className="block text-white/70 text-sm mb-2">Email</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
@@ -334,11 +340,11 @@ export default function Contact() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-white/70 text-sm mb-2">Organization</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="organization"
                     value={formData.organization}
                     onChange={handleInputChange}
@@ -346,10 +352,10 @@ export default function Contact() {
                     placeholder="Your company or institution"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-white/70 text-sm mb-2">Subject</label>
-                  <select 
+                  <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
@@ -364,10 +370,10 @@ export default function Contact() {
                     <option value="press" className="bg-black">Press & Media</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-white/70 text-sm mb-2">Message</label>
-                  <textarea 
+                  <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
@@ -377,15 +383,15 @@ export default function Contact() {
                     placeholder="Tell us about your project, questions, or how we can help..."
                   />
                 </div>
-                
-                <button 
+
+                <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
-                
+
                 {submitStatus !== 'idle' && (
                   <div className={`mt-4 p-4 rounded-lg ${
                     submitStatus === 'success' ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'
@@ -396,7 +402,7 @@ export default function Contact() {
               </form>
             </motion.div>
           </div>
-          
+
           {/* Contact Channels */}
           <div>
             <motion.div
@@ -407,7 +413,7 @@ export default function Contact() {
               className="space-y-6"
             >
               <h3 className="text-xl font-light text-white/90 mb-6">Direct Contact</h3>
-              
+
               {contactChannels.map((channel, index) => (
                 <div
                   key={index}
@@ -438,7 +444,7 @@ export default function Contact() {
           >
             Our Location
           </motion.h3>
-          
+
           <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
             {/* Location Info */}
             <motion.div
@@ -449,11 +455,11 @@ export default function Contact() {
               className="p-4 sm:p-6 md:p-8 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
             >
               <h4 className="text-2xl font-light text-white/90 mb-4">{officeLocation.city}</h4>
-              
+
               <div className="text-white/70 text-base mb-6 whitespace-pre-line">
                 {officeLocation.address}
               </div>
-              
+
               <div className="border-t border-white/10 pt-6">
                 <span className="text-blue-400 text-sm font-medium block mb-2">Focus Area</span>
                 <p className="text-white/90 text-lg">{officeLocation.focus}</p>
@@ -480,7 +486,7 @@ export default function Contact() {
                   />
                 </GoogleMap>
               </LoadScript>
-              
+
               {/* Overlay with location info */}
               <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/20">
                 <h4 className="text-white/90 font-light text-lg mb-1">MIT Campus</h4>

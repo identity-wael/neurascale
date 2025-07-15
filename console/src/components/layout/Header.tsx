@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Menu, HelpCircle, User } from "lucide-react";
+import { Search, Menu, HelpCircle, User, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsIcon } from "@/components/icons/GCPIcons";
 
 interface HeaderProps {
@@ -27,6 +28,7 @@ export default function Header({
   isSidebarHidden,
 }: HeaderProps) {
   const { user, signInWithGoogle, logout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [searchValue, setSearchValue] = useState("");
 
   const handleSignIn = async () => {
@@ -211,6 +213,25 @@ export default function Header({
               d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
+        </button>
+
+        <button
+          className="p-2 rounded-full transition-colors"
+          style={{ color: "var(--foreground)" }}
+          onClick={toggleDarkMode}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDarkMode ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
         </button>
 
         <button

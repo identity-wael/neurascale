@@ -135,30 +135,54 @@ export default function Header({
       </div>
 
       {/* Center - Search */}
-      <div className="flex-1 max-w-2xl mx-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search (/) for resources, docs, products, and more"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-12 pr-4 py-2 rounded-md focus:outline-none transition-all duration-200 text-sm"
+      <div className="flex-1 max-w-2xl mx-6">
+        <div className="flex items-center">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search (/) for resources, docs, products, and more"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="w-full pl-4 pr-10 py-2.5 rounded-l-md focus:outline-none transition-all duration-200 text-[14px]"
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRight: "none",
+                color: "var(--foreground)",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 255, 255, 0.08)";
+                e.currentTarget.style.borderColor = "#4185f4";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+              }}
+            />
+          </div>
+          <button
+            className="px-5 py-2.5 rounded-r-md font-medium text-[14px] transition-colors flex items-center justify-center gap-2"
             style={{
-              backgroundColor: "var(--card-bg)",
-              border: "1px solid var(--border)",
-              color: "var(--foreground)",
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderLeft: "none",
+              color: "#8ab4f8",
             }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--primary)";
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.12)";
             }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.08)";
             }}
-          />
-          <Search
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5"
-            style={{ color: "var(--foreground)", opacity: 0.5 }}
-          />
+            title="Search"
+          >
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+          </button>
         </div>
       </div>
 

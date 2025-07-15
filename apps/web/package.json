@@ -35,8 +35,12 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.0.0",
     "eslint-config-next": "^15.4.1",
-    "postcss": "^8.4.32",
+    "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "nanoid": "^5.0.0",
+    "cross-spawn": "^7.0.6"
   }
 }

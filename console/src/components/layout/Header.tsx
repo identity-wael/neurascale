@@ -48,7 +48,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-sm px-6 py-3 h-16 shadow-sm">
+    <header className="relative z-40 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-3 h-16 shadow-sm">
       {/* Left section */}
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" onClick={onMenuClick}>

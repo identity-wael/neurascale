@@ -23,6 +23,10 @@ neurascale/
 │   ├── package.json            # Workspace root (future)
 │   ├── turbo.json              # Turborepo config (future)
 │   └── pnpm-workspace.yaml     # PNPM workspaces (future)
+├── console/                    # NeuraScale Console (console.neurascale.io)
+│   ├── src/                    # Next.js 15 app with Firebase auth
+│   ├── public/
+│   └── package.json
 ├── backend/                    # Future backend services
 ├── docs/                       # Documentation
 │   ├── GOOGLE_ANALYTICS_SETUP.md
@@ -193,7 +197,7 @@ For Gmail users:
 
 ## 🎨 Features
 
-- **3D Visualizations**: Neural processor and server rack animations using Three.js
+- **3D Visualizations**: Neural ID Galaxy visualization using Three.js
 - **Smooth Animations**: Framer Motion for fluid transitions
 - **Loading Screen**: Professional loading experience
 - **Responsive Design**: Works on all devices
@@ -209,7 +213,7 @@ For Gmail users:
 
 ## 🛠️ Technology Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS
 - **3D Graphics**: Three.js, React Three Fiber
 - **Animations**: Framer Motion, Lenis

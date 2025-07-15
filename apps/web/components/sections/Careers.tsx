@@ -122,12 +122,6 @@ export default function Careers() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
           {[
             {
-              name: 'Rob Franklin',
-              role: 'Co-Founder & Chief Architect',
-              expertise: 'Neural Interface Design, AI/ML Systems',
-              bio: 'Leading expert in neural signal processing with 15+ years developing brain-computer interfaces for medical applications.',
-            },
-            {
               name: 'Wael El Ghazzawi',
               role: 'Co-Founder & CTO',
               expertise: 'Scalable Cloud Infrastructure, Data Engineering',

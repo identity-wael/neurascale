@@ -16,13 +16,6 @@ export default function Team() {
 
   const teamMembers = [
     {
-      name: 'Rob Franklin',
-      role: 'SVP, Brain Computer Interface',
-      company: 'Blackrock Neurotech',
-      expertise: 'BCI',
-      bio: 'Leading expert in brain-computer interface technology with extensive experience in neural signal processing and implantable systems.',
-    },
-    {
       name: 'Wael El Ghazzawi',
       role: 'CTO, Financial Technology',
       company: 'Brain Finance',

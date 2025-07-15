@@ -52,18 +52,18 @@ export default function SignInPage() {
           <div className="flex items-center gap-4">
             {/* NeuraScale Logo */}
             <span
-              className="font-extrabold text-3xl tracking-wider"
+              className="font-extrabold text-2xl tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
 
-            <div className="w-px h-8 bg-gray-300" />
+            <div className="w-px h-6 bg-gray-300" />
 
             {/* MIT Logo */}
             <svg
-              className="h-10 w-auto"
+              className="h-8 w-auto"
               viewBox="0 0 536.229 536.229"
               fill="black"
               fillOpacity="0.8"
@@ -104,15 +104,15 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <h2 className="mt-8 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-12 text-center text-3xl font-bold text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-3 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-gray-600">
           Access your Application Cloud Console
         </p>
       </div>
 
-      <div className="mt-10 w-full max-w-md">
+      <div className="mt-16 w-full max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           <div className="space-y-6">
             {/* Google Sign In Button */}
@@ -144,7 +144,7 @@ export default function SignInPage() {
             </Button>
 
             {/* Divider */}
-            <div className="relative">
+            <div className="relative mt-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
@@ -156,7 +156,7 @@ export default function SignInPage() {
             </div>
 
             {/* Info */}
-            <div className="text-center">
+            <div className="text-center mt-8">
               <p className="text-xs text-gray-500">
                 By signing in, you agree to our Terms of Service and Privacy
                 Policy.

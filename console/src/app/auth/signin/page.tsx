@@ -45,8 +45,8 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
         {/* Header with Logo */}
         <div className="flex justify-center">
           <div className="flex items-center gap-4">
@@ -112,7 +112,7 @@ export default function SignInPage() {
         </p>
       </div>
 
-      <div className="mt-8 mx-auto w-full max-w-md">
+      <div className="mt-8 w-full max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="space-y-6">
             {/* Google Sign In Button */}

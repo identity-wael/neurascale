@@ -104,15 +104,22 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <h2 className="mt-12 text-center text-3xl font-bold text-gray-900">
+        <div className="h-16"></div>
+
+        <h2 className="text-center text-3xl font-bold text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-6 text-center text-sm text-gray-600">
+
+        <div className="h-8"></div>
+
+        <p className="text-center text-sm text-gray-600">
           Access your Application Cloud Console
         </p>
       </div>
 
-      <div className="mt-16 w-full max-w-md">
+      <div className="h-20"></div>
+
+      <div className="w-full max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           <div className="space-y-6">
             {/* Google Sign In Button */}
@@ -143,8 +150,10 @@ export default function SignInPage() {
               {isSigningIn ? "Signing in..." : "Continue with Google"}
             </Button>
 
+            <div className="h-8"></div>
+
             {/* Divider */}
-            <div className="relative mt-8">
+            <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
@@ -155,8 +164,10 @@ export default function SignInPage() {
               </div>
             </div>
 
+            <div className="h-8"></div>
+
             {/* Info */}
-            <div className="text-center mt-8">
+            <div className="text-center">
               <p className="text-xs text-gray-500">
                 By signing in, you agree to our Terms of Service and Privacy
                 Policy.

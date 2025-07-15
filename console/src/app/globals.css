@@ -25,6 +25,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode - prefers-color-scheme */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0b;
@@ -32,7 +33,26 @@
     --card-bg: #131316;
     --card-hover: #1a1a1f;
     --border: #27272a;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
   }
+}
+
+/* Dark mode - class based for manual toggle */
+.dark {
+  --background: #0a0a0b;
+  --foreground: #f7f7f8;
+  --card-bg: #131316;
+  --card-hover: #1a1a1f;
+  --border: #27272a;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
 }
 
 * {
@@ -92,7 +112,8 @@ h3 {
 
 p {
   line-height: 1.6;
-  color: rgb(107 114 128);
+  color: var(--foreground);
+  opacity: 0.8;
 }
 
 /* Custom scrollbar for a more refined look */
@@ -177,17 +198,10 @@ p {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--card-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glass-card {
-    background: rgba(19, 19, 22, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+  border: 1px solid var(--border);
 }
 
 .hover-lift {

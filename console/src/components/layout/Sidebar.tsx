@@ -203,28 +203,42 @@ function NavItemComponent({
       <button
         onClick={hasChildren ? onToggle : undefined}
         className={cn(
-          "w-full flex items-center justify-between text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors group",
+          "w-full flex items-center justify-between text-sm rounded-md transition-colors group",
           level === 0 ? "px-3 py-1.5" : "px-3 py-1 ml-6",
         )}
+        style={{
+          color: "var(--foreground)",
+          opacity: 0.8,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "var(--card-hover)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "transparent";
+        }}
         title={isCollapsed ? item.name : undefined}
       >
         <div className="flex items-center gap-3">
-          <GCPIcon icon={item.icon} className="text-gray-600" />
+          <GCPIcon icon={item.icon} />
           {!isCollapsed && <span>{item.name}</span>}
         </div>
         {!isCollapsed && (
           <div className="flex items-center gap-1">
             {item.badge && (
-              <span className="px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded">
+              <span
+                className="px-2 py-0.5 text-xs font-medium text-white rounded"
+                style={{ backgroundColor: "var(--primary)" }}
+              >
                 {item.badge}
               </span>
             )}
             {hasChildren && (
               <ChevronRight
                 className={cn(
-                  "h-4 w-4 text-gray-400 transition-transform",
+                  "h-4 w-4 transition-transform",
                   isExpanded && "rotate-90",
                 )}
+                style={{ color: "var(--foreground)", opacity: 0.5 }}
               />
             )}
           </div>
@@ -236,12 +250,26 @@ function NavItemComponent({
           {item.children!.map((child) => (
             <button
               key={child.href}
-              className="w-full flex items-center gap-3 px-3 py-1 ml-8 text-sm text-gray-600 hover:bg-gray-50 rounded-md transition-colors group"
+              className="w-full flex items-center gap-3 px-3 py-1 ml-8 text-sm rounded-md transition-colors group"
+              style={{
+                color: "var(--foreground)",
+                opacity: 0.7,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--card-hover)";
+                e.currentTarget.style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.opacity = "0.7";
+              }}
             >
-              <GCPIcon icon={child.icon} className="w-4 h-4 text-gray-500" />
-              <span className="group-hover:text-gray-800 transition-colors">
-                {child.name}
-              </span>
+              <GCPIcon
+                icon={child.icon}
+                className="w-4 h-4"
+                style={{ opacity: 0.8 }}
+              />
+              <span className="transition-colors">{child.name}</span>
             </button>
           ))}
         </div>
@@ -279,11 +307,15 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "bg-white border-r border-gray-200 overflow-y-auto transition-all duration-200 flex-shrink-0",
+          "overflow-y-auto transition-all duration-200 flex-shrink-0",
           "fixed inset-y-0 left-0 z-40 h-full lg:relative lg:z-0",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           isCollapsed ? "w-12" : "w-64",
         )}
+        style={{
+          backgroundColor: "var(--card-bg)",
+          borderRight: "1px solid var(--border)",
+        }}
       >
         <nav className={cn("space-y-1", isCollapsed ? "p-1" : "p-3")}>
           {mainNavItems.map((item) => (

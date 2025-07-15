@@ -234,11 +234,8 @@ export default function Sidebar({
       <aside
         className={cn(
           "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/90 backdrop-blur-sm border-r border-gray-100 transform transition-all duration-300 ease-in-out z-50 overflow-y-auto shadow-lg",
-          // Mobile: show/hide based on isOpen
           isOpen ? "translate-x-0" : "-translate-x-full",
-          // Desktop: always visible, but can be collapsed
           "lg:translate-x-0 lg:static lg:transform-none lg:shadow-none",
-          // Width changes for collapsed state
           isCollapsed ? "w-16" : "w-64",
         )}
       >

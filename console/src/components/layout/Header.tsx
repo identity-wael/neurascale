@@ -55,7 +55,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-6">
           <a className="flex items-center justify-center" href="#">
             <span className="sr-only">NEURASCALE</span>
             <span
@@ -66,8 +66,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </a>
-          <div className="hidden sm:block w-px h-6 bg-black/20" />
-          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+          <div className="w-px h-8 bg-gray-200" />
+          <div className="flex items-center">
             {/* MIT Logo */}
             <svg
               className="h-6 lg:h-8 w-auto"
@@ -108,41 +108,20 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </g>
               </g>
             </svg>
-            {/* MIT Text - hidden on smaller screens */}
-            <span
-              className="hidden lg:block text-sm text-black/70"
-              style={{
-                fontFamily:
-                  "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                fontWeight: 500,
-              }}
-            >
-              Massachusetts Institute of Technology
-            </span>
-            <span
-              className="lg:hidden text-xs text-black/70"
-              style={{
-                fontFamily:
-                  "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                fontWeight: 500,
-              }}
-            >
-              MIT
-            </span>
           </div>
         </div>
       </div>
 
       {/* Center - Search */}
-      <div className="flex-1 max-w-2xl mx-8">
+      <div className="flex-1 max-w-md mx-4">
         <div className="relative group">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search NeuraScale services and resources"
+            placeholder="Search services and resources"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 placeholder:text-gray-400"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 placeholder:text-gray-400 text-sm"
           />
         </div>
       </div>

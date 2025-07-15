@@ -53,28 +53,25 @@ export default function ServiceCard({
       onClick={onClick}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <div className="relative z-10 flex items-start justify-between">
-        <div className="flex items-start space-x-4">
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-3">
           <div
             className={`p-3 bg-gradient-to-br ${statusStyle.icon} rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300`}
           >
             <Icon className="h-6 w-6 text-white" />
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 group-hover:bg-clip-text transition-all duration-300">
-              {title}
-            </h3>
-            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-              {description}
-            </p>
-          </div>
+          <span
+            className={`px-3 py-1.5 text-xs font-semibold rounded-full border ${statusStyle.badge} shadow-sm`}
+          >
+            {status}
+          </span>
         </div>
-
-        <span
-          className={`px-3 py-1.5 text-xs font-semibold rounded-full border ${statusStyle.badge} shadow-sm`}
-        >
-          {status}
-        </span>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 group-hover:bg-clip-text transition-all duration-300 mb-2">
+            {title}
+          </h3>
+          <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+        </div>
       </div>
     </div>
   );

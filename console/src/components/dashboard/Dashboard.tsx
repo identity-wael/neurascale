@@ -14,6 +14,13 @@ import {
   Settings,
   Activity,
   ArrowRight,
+  CloudLightning,
+  Layers,
+  Sparkles,
+  Workflow,
+  Globe,
+  Lock,
+  TrendingUp,
 } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,7 +42,7 @@ export default function Dashboard() {
       title: "Neuroprosthetics Platform",
       description:
         "Control and configure advanced neuroprosthetic devices and interfaces",
-      icon: Cpu,
+      icon: Workflow,
       status: "Active" as const,
     },
     {
@@ -51,7 +58,7 @@ export default function Dashboard() {
       title: "Full-Dive Virtual Reality",
       description:
         "Immersive neural interface for complete virtual world experiences",
-      icon: Zap,
+      icon: Sparkles,
       status: "Beta" as const,
     },
     {
@@ -59,7 +66,7 @@ export default function Dashboard() {
       title: "Cloud Infrastructure",
       description:
         "Scalable compute, storage, and networking resources for neural processing",
-      icon: Server,
+      icon: CloudLightning,
       status: "Active" as const,
     },
     {
@@ -67,7 +74,7 @@ export default function Dashboard() {
       title: "Neural Databases",
       description:
         "Specialized databases optimized for neural pattern storage and retrieval",
-      icon: Database,
+      icon: Layers,
       status: "Active" as const,
     },
     {
@@ -75,7 +82,7 @@ export default function Dashboard() {
       title: "AI & ML Platform",
       description:
         "Machine learning tools for neural pattern analysis and enhancement",
-      icon: Bot,
+      icon: Sparkles,
       status: "Active" as const,
     },
     {
@@ -83,7 +90,7 @@ export default function Dashboard() {
       title: "Neural Networking",
       description:
         "High-speed networking infrastructure for neural data transmission",
-      icon: Network,
+      icon: Globe,
       status: "Active" as const,
     },
     {
@@ -91,7 +98,7 @@ export default function Dashboard() {
       title: "Neuro-Security Suite",
       description:
         "Advanced security protocols for protecting neural interfaces and data",
-      icon: Shield,
+      icon: Lock,
       status: "Active" as const,
     },
     {
@@ -99,7 +106,7 @@ export default function Dashboard() {
       title: "Neural Analytics",
       description:
         "Real-time monitoring and analysis of neural system performance",
-      icon: BarChart3,
+      icon: TrendingUp,
       status: "Active" as const,
     },
   ];
@@ -107,7 +114,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-blue-50/20"></div>
-      <div className="relative z-10 space-y-8 p-8">
+      <div className="relative z-10 space-y-10 p-8">
         {/* Welcome Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5"></div>
@@ -131,7 +138,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8 pb-10">
           <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
             Quick Actions
           </h2>
@@ -177,7 +184,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
             NeuraScale Services
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
             {services.map((service) => (
               <ServiceCard
                 key={service.id}

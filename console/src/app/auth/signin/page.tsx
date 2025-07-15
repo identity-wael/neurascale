@@ -38,14 +38,23 @@ export default function SignInPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--background)" }}
+      >
+        <div
+          className="animate-spin rounded-full h-32 w-32 border-b-2"
+          style={{ borderColor: "var(--primary)" }}
+        ></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ backgroundColor: "var(--background)" }}
+    >
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="flex justify-center">
@@ -57,7 +66,10 @@ export default function SignInPage() {
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
-            <div className="w-px h-6 bg-gray-300" />
+            <div
+              className="w-px h-6"
+              style={{ backgroundColor: "var(--border)" }}
+            />
             <svg
               className="h-8 w-auto"
               viewBox="0 0 536.229 536.229"
@@ -105,11 +117,17 @@ export default function SignInPage() {
 
         {/* Title Section */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2
+            className="text-3xl font-bold"
+            style={{ color: "var(--foreground)" }}
+          >
             Sign in to your account
           </h2>
           <div style={{ height: "12px" }}></div>
-          <p className="text-sm text-gray-600">
+          <p
+            className="text-sm"
+            style={{ color: "var(--foreground)", opacity: 0.7 }}
+          >
             Access your Application Cloud Console
           </p>
         </div>
@@ -119,14 +137,30 @@ export default function SignInPage() {
 
         {/* Card Section */}
         <div
-          className="bg-white shadow-md rounded-lg"
-          style={{ padding: "32px 28px" }}
+          className="shadow-md rounded-lg"
+          style={{
+            backgroundColor: "var(--card-bg)",
+            padding: "32px 28px",
+            border: "1px solid var(--border)",
+          }}
         >
           {/* Google Sign In Button */}
           <Button
             onClick={handleSignIn}
             disabled={isSigningIn}
-            className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex justify-center items-center px-4 py-3 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--card-bg)",
+              color: "var(--foreground)",
+              "--tw-ring-color": "var(--primary)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--card-hover)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--card-bg)";
+            }}
             variant="outline"
           >
             <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -156,10 +190,20 @@ export default function SignInPage() {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div
+                className="w-full border-t"
+                style={{ borderColor: "var(--border)" }}
+              />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-gray-500">
+              <span
+                className="px-3"
+                style={{
+                  backgroundColor: "var(--card-bg)",
+                  color: "var(--foreground)",
+                  opacity: 0.5,
+                }}
+              >
                 Secure authentication powered by Firebase
               </span>
             </div>
@@ -170,7 +214,10 @@ export default function SignInPage() {
 
           {/* Terms */}
           <div className="text-center">
-            <p className="text-xs text-gray-500 leading-5">
+            <p
+              className="text-xs leading-5"
+              style={{ color: "var(--foreground)", opacity: 0.5 }}
+            >
               By signing in, you agree to our Terms of Service and Privacy
               Policy.
               <br />
@@ -186,7 +233,14 @@ export default function SignInPage() {
         <div className="text-center">
           <a
             href="https://neurascale.io"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center text-sm transition-colors"
+            style={{ color: "var(--foreground)", opacity: 0.7 }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.7";
+            }}
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to NeuraScale

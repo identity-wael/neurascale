@@ -163,14 +163,20 @@ const mainNavItems: NavItem[] = [
 ];
 
 // Google Cloud Icon Component
-const GCPIcon: React.FC<{ icon?: string; className?: string }> = ({
-  icon,
-  className,
-}) => {
+const GCPIcon: React.FC<{
+  icon?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}> = ({ icon, className, style }) => {
   if (!icon) return null;
 
   return (
-    <img src={`/svg/${icon}.svg`} alt="" className={cn("w-5 h-5", className)} />
+    <img
+      src={`/svg/${icon}.svg`}
+      alt=""
+      className={cn("w-5 h-5", className)}
+      style={style}
+    />
   );
 };
 

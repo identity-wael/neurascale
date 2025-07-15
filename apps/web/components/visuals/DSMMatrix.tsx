@@ -187,19 +187,37 @@ const DSMMatrix = () => {
       ],
 
       // Additional bidirectional relationships
+      // These will be merged with existing arrays
+    };
+
+    // Additional dependencies to merge
+    const additionalDependencies = {
       'Cloud Infrastructure': ['Neural Management Systems'],
       'Database Management System': ['Cloud Infrastructure'],
       'Operating System': ['Cloud Infrastructure'],
     };
 
     // Create component index mapping
-    const componentIndex = {};
+    const componentIndex: Record<string, number> = {};
     components.forEach((name, idx) => {
       componentIndex[name] = idx;
     });
 
     // Fill in the dependencies
     for (const [source, targets] of Object.entries(dependencies)) {
+      const sourceIdx = componentIndex[source];
+      if (sourceIdx !== undefined) {
+        targets.forEach((target) => {
+          const targetIdx = componentIndex[target];
+          if (targetIdx !== undefined) {
+            matrix[sourceIdx][targetIdx] = 1;
+          }
+        });
+      }
+    }
+
+    // Fill in additional dependencies
+    for (const [source, targets] of Object.entries(additionalDependencies)) {
       const sourceIdx = componentIndex[source];
       if (sourceIdx !== undefined) {
         targets.forEach((target) => {

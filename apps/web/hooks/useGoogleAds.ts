@@ -10,7 +10,6 @@ import {
   trackConversion,
   trackFormSubmission,
   setUserData,
-  CONVERSION_EVENTS,
 } from '@/lib/google-ads';
 
 export function useGoogleAds() {

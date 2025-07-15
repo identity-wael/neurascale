@@ -12,12 +12,6 @@ const DataUniverse3D = dynamic(() => import('@/components/visuals/DataUniverse3D
   loading: () => <div className="absolute inset-0 bg-black/50" />,
 });
 
-// Simple test for debugging
-const SimpleTest3D = dynamic(() => import('@/components/visuals/SimpleTest3D'), {
-  ssr: false,
-  loading: () => <div className="absolute inset-0 bg-red-500/20">Loading 3D...</div>,
-});
-
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({

@@ -77,15 +77,6 @@ const ManualIcon = () => (
   </svg>
 );
 
-const ResearchIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="15" r="8" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8" />
-    <path d="M26 21 L32 27" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-    <circle cx="20" cy="15" r="4" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
-    <path d="M28 29 L32 33" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
-  </svg>
-);
-
 export default function Resources() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({

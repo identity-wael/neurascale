@@ -52,18 +52,18 @@ export default function SignInPage() {
           <div className="flex items-center gap-4">
             {/* NeuraScale Logo */}
             <span
-              className="font-extrabold text-2xl tracking-wider"
+              className="font-extrabold text-3xl tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
 
-            <div className="w-px h-6 bg-gray-300" />
+            <div className="w-px h-8 bg-gray-300" />
 
             {/* MIT Logo */}
             <svg
-              className="h-8 w-auto"
+              className="h-10 w-auto"
               viewBox="0 0 536.229 536.229"
               fill="black"
               fillOpacity="0.8"
@@ -104,16 +104,16 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-8 text-center text-3xl font-bold text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-3 text-center text-sm text-gray-600">
           Access your Application Cloud Console
         </p>
       </div>
 
-      <div className="mt-8 w-full max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-10 w-full max-w-md">
+        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           <div className="space-y-6">
             {/* Google Sign In Button */}
             <Button
@@ -168,12 +168,12 @@ export default function SignInPage() {
         </div>
 
         {/* Back to main site */}
-        <div className="mt-6">
+        <div className="mt-8">
           <a
             href="https://neurascale.io"
-            className="flex items-center justify-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center justify-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-1" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back to NeuraScale
           </a>
         </div>

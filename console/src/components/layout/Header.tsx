@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Menu, HelpCircle, User, Moon, Sun } from "lucide-react";
+import {
+  Search,
+  Menu,
+  HelpCircle,
+  User,
+  Moon,
+  Sun,
+  ChevronRight,
+  Sparkles,
+  Terminal,
+  Bell,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -57,12 +68,12 @@ export default function Header({
   };
 
   return (
-    <header className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border)] bg-[var(--card-bg)] px-4 py-2 h-14">
+    <header className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border)] bg-[var(--card-bg)] h-[60px]">
       {/* Left section */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center">
         <button
           onClick={onMenuClick}
-          className="p-1.5 rounded-md transition-colors"
+          className="flex items-center justify-center w-12 h-12 ml-2 rounded-full transition-colors"
           style={{
             color: "var(--foreground)",
           }}
@@ -74,7 +85,7 @@ export default function Header({
           }}
         >
           <svg
-            className="h-5 w-5"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -88,72 +99,50 @@ export default function Header({
           </svg>
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-3">
           <div className="flex items-center">
-            <span className="font-extrabold text-lg tracking-wider">
+            <span className="font-medium text-[18px]">
               <span style={{ color: "var(--foreground)" }}>NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </div>
-          <div
-            className="w-px h-6"
-            style={{ backgroundColor: "var(--foreground)", opacity: 0.3 }}
-          />
-          <div className="flex items-center">
-            {/* MIT Logo */}
-            <svg
-              className="h-5 w-auto"
-              viewBox="0 0 536.229 536.229"
-              fill="currentColor"
-              fillOpacity="1"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ color: "var(--foreground)" }}
-            >
-              <g>
-                <g>
-                  <rect y="130.031" width="58.206" height="276.168" />
-                  <rect
-                    x="95.356"
-                    y="130.031"
-                    width="58.206"
-                    height="190.712"
-                  />
-                  <rect
-                    x="190.712"
-                    y="130.031"
-                    width="58.206"
-                    height="276.168"
-                  />
-                  <rect
-                    x="381.425"
-                    y="217.956"
-                    width="58.212"
-                    height="188.236"
-                  />
-                  <rect
-                    x="381.425"
-                    y="130.031"
-                    width="154.805"
-                    height="58.206"
-                  />
-                  <rect x="286.074" y="217.956" width="58.2" height="188.236" />
-                  <rect x="286.074" y="130.031" width="58.2" height="58.206" />
-                </g>
-              </g>
+
+          {/* Project Selector */}
+          <button
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-sm"
+            style={{
+              backgroundColor: "transparent",
+              color: "var(--foreground)",
+              border: "1px solid var(--border)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--card-hover)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3z" />
             </svg>
-          </div>
+            <span className="font-medium">neurascale-console</span>
+            <ChevronRight
+              className="h-4 w-4"
+              style={{ transform: "rotate(90deg)" }}
+            />
+          </button>
         </div>
       </div>
 
       {/* Center - Search */}
-      <div className="flex-1 max-w-3xl mx-8">
+      <div className="flex-1 max-w-2xl mx-4">
         <div className="relative">
           <input
             type="text"
-            placeholder="Search (/)"
+            placeholder="Search (/) for resources, docs, products, and more"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-10 pr-4 py-1.5 rounded-md focus:outline-none transition-all duration-200 text-sm"
+            className="w-full pl-12 pr-4 py-2 rounded-md focus:outline-none transition-all duration-200 text-sm"
             style={{
               backgroundColor: "var(--card-bg)",
               border: "1px solid var(--border)",
@@ -167,16 +156,16 @@ export default function Header({
             }}
           />
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5"
             style={{ color: "var(--foreground)", opacity: 0.5 }}
           />
         </div>
       </div>
 
       {/* Right section */}
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-1 mr-2">
         <button
-          className="p-2 rounded-full transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
           style={{ color: "var(--foreground)" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
@@ -184,14 +173,13 @@ export default function Header({
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
           }}
+          title="Gemini AI Assistant"
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H5c-.55 0-1-.45-1-1v-3h4v4zm0-6H4v-4h4v4zm0-6H4V5c0-.55.45-1 1-1h3v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-3c-.55 0-1-.45-1-1v-3h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h3c.55 0 1 .45 1 1v3z" />
-          </svg>
+          <Sparkles className="h-5 w-5" />
         </button>
 
         <button
-          className="p-2 rounded-full transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
           style={{ color: "var(--foreground)" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
@@ -199,24 +187,42 @@ export default function Header({
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
           }}
+          title="Cloud Shell"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <Terminal className="h-5 w-5" />
         </button>
 
         <button
-          className="p-2 rounded-full transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors relative"
+          style={{ color: "var(--foreground)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          title="Notifications"
+        >
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+        </button>
+
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
+          style={{ color: "var(--foreground)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          title="Help"
+        >
+          <HelpCircle className="h-5 w-5" />
+        </button>
+
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
           style={{ color: "var(--foreground)" }}
           onClick={toggleDarkMode}
           onMouseEnter={(e) => {
@@ -235,7 +241,7 @@ export default function Header({
         </button>
 
         <button
-          className="p-2 rounded-full transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
           style={{ color: "var(--foreground)" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
@@ -250,8 +256,8 @@ export default function Header({
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="ml-2 rounded-full focus:outline-none">
-                <Avatar className="h-8 w-8">
+              <button className="ml-3 rounded-full focus:outline-none">
+                <Avatar className="h-10 w-10">
                   <AvatarImage
                     src={user.photoURL || ""}
                     alt={user.displayName || ""}

@@ -35,7 +35,6 @@ if (hasValidConfig && !getApps().length) {
   app = {} as FirebaseApp;
 }
 
-// eslint-disable-next-line prefer-const
 auth = hasValidConfig ? getAuth(app) : ({} as Auth);
 
 export const googleProvider = hasValidConfig

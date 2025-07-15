@@ -68,7 +68,7 @@ export default function Header({
   };
 
   return (
-    <header className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border)] bg-[var(--card-bg)] h-[60px]">
+    <header className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border)] bg-[var(--card-bg)] h-[48px]">
       {/* Left section */}
       <div className="flex items-center">
         <button
@@ -143,11 +143,12 @@ export default function Header({
               placeholder="Search (/) for resources, docs, products, and more"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="w-full pl-4 pr-10 h-9 rounded-l-md focus:outline-none transition-all duration-200 text-sm"
+              className="w-full pl-4 pr-10 h-[38px] rounded-l focus:outline-none transition-all duration-200 text-[14px] leading-[20px] placeholder:text-[#9aa0a6]"
               style={{
                 backgroundColor: "rgba(32, 33, 36, 1)",
                 border: "1px solid rgba(95, 99, 104, 1)",
                 borderRight: "none",
+                borderRadius: "4px 0 0 4px",
                 color: "rgba(232, 234, 237, 1)",
               }}
               onFocus={(e) => {
@@ -161,11 +162,12 @@ export default function Header({
             />
           </div>
           <button
-            className="px-5 h-9 rounded-r-md font-medium text-sm transition-colors flex items-center justify-center gap-1.5"
+            className="px-3 h-[38px] rounded-r font-medium text-[14px] transition-colors flex items-center justify-center gap-1"
             style={{
               backgroundColor: "rgba(48, 49, 52, 1)",
               border: "1px solid rgba(95, 99, 104, 1)",
               borderLeft: "none",
+              borderRadius: "0 4px 4px 0",
               color: "rgba(138, 180, 248, 1)",
             }}
             onMouseEnter={(e) => {
@@ -176,8 +178,8 @@ export default function Header({
             }}
             title="Search"
           >
-            <Search className="h-4 w-4" />
-            <span>Search</span>
+            <Search className="h-[18px] w-[18px]" />
+            <span className="sr-only">Search</span>
           </button>
         </div>
       </div>
@@ -195,7 +197,7 @@ export default function Header({
           }}
           title="Gemini AI Assistant"
         >
-          <Sparkles className="h-5 w-5" />
+          <Sparkles className="h-[18px] w-[18px]" />
         </button>
 
         <button
@@ -209,7 +211,7 @@ export default function Header({
           }}
           title="Cloud Shell"
         >
-          <Terminal className="h-5 w-5" />
+          <Terminal className="h-[18px] w-[18px]" />
         </button>
 
         <button
@@ -223,7 +225,7 @@ export default function Header({
           }}
           title="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-[18px] w-[18px]" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
 
@@ -238,7 +240,7 @@ export default function Header({
           }}
           title="Help"
         >
-          <HelpCircle className="h-5 w-5" />
+          <HelpCircle className="h-[18px] w-[18px]" />
         </button>
 
         <button
@@ -254,9 +256,9 @@ export default function Header({
           title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDarkMode ? (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-[18px] w-[18px]" />
           ) : (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-[18px] w-[18px]" />
           )}
         </button>
 
@@ -270,14 +272,14 @@ export default function Header({
             e.currentTarget.style.backgroundColor = "transparent";
           }}
         >
-          <SettingsIcon className="h-5 w-5" />
+          <SettingsIcon className="h-[18px] w-[18px]" />
         </button>
 
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="ml-3 rounded-full focus:outline-none">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-8 w-8">
                   <AvatarImage
                     src={user.photoURL || ""}
                     alt={user.displayName || ""}

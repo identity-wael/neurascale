@@ -22,7 +22,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-[var(--background)]">
       {/* Header */}
       <Header
         onMenuClick={handleMenuClick}
@@ -43,7 +43,7 @@ export default function Layout({ children }: LayoutProps) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)]">
           <div className="h-full">{children}</div>
         </main>
       </div>

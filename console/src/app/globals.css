@@ -225,5 +225,5 @@ p {
 
 /* Search input placeholder styling */
 input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(154, 160, 166, 1);
 }

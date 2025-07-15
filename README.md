@@ -233,9 +233,6 @@ When ready to implement the full monorepo:
 
 ### Leadership & Engineering Excellence
 
-**Rob Franklin** - _SVP, Brain Computer Interface_
-Blackrock Neurotech
-
 **Wael El Ghazzawi** - _CTO, Financial Technology_
 Brain Finance
 

@@ -60,10 +60,19 @@ export default function Header({
       <div className="flex items-center space-x-3">
         <button
           onClick={onMenuClick}
-          className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-1.5 rounded-md transition-colors"
+          style={{
+            color: "var(--foreground)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
         >
           <svg
-            className="h-5 w-5 text-gray-700"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -80,19 +89,23 @@ export default function Header({
         <div className="flex items-center gap-3">
           <div className="flex items-center">
             <span className="font-extrabold text-lg tracking-wider">
-              <span className="text-black">NEURA</span>
+              <span style={{ color: "var(--foreground)" }}>NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </div>
-          <div className="w-px h-6 bg-gray-300" />
+          <div
+            className="w-px h-6"
+            style={{ backgroundColor: "var(--foreground)", opacity: 0.3 }}
+          />
           <div className="flex items-center">
             {/* MIT Logo */}
             <svg
               className="h-5 w-auto"
               viewBox="0 0 536.229 536.229"
-              fill="black"
+              fill="currentColor"
               fillOpacity="1"
               xmlns="http://www.w3.org/2000/svg"
+              style={{ color: "var(--foreground)" }}
             >
               <g>
                 <g>
@@ -138,27 +151,55 @@ export default function Header({
             placeholder="Search (/)"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-10 pr-4 py-1.5 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:bg-white focus:border-gray-400 transition-all duration-200 placeholder:text-gray-500 text-sm"
+            className="w-full pl-10 pr-4 py-1.5 rounded-md focus:outline-none transition-all duration-200 text-sm"
+            style={{
+              backgroundColor: "var(--card-bg)",
+              border: "1px solid var(--border)",
+              color: "var(--foreground)",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--primary)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--border)";
+            }}
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+            style={{ color: "var(--foreground)", opacity: 0.5 }}
+          />
         </div>
       </div>
 
       {/* Right section */}
       <div className="flex items-center space-x-1">
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <svg
-            className="h-5 w-5 text-gray-600"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
+        <button
+          className="p-2 rounded-full transition-colors"
+          style={{ color: "var(--foreground)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H5c-.55 0-1-.45-1-1v-3h4v4zm0-6H4v-4h4v4zm0-6H4V5c0-.55.45-1 1-1h3v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-3c-.55 0-1-.45-1-1v-3h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h3c.55 0 1 .45 1 1v3z" />
           </svg>
         </button>
 
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button
+          className="p-2 rounded-full transition-colors"
+          style={{ color: "var(--foreground)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
           <svg
-            className="h-5 w-5 text-gray-600"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -172,8 +213,17 @@ export default function Header({
           </svg>
         </button>
 
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <SettingsIcon className="h-5 w-5 text-gray-600" />
+        <button
+          className="p-2 rounded-full transition-colors"
+          style={{ color: "var(--foreground)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
+          <SettingsIcon className="h-5 w-5" />
         </button>
 
         {user ? (

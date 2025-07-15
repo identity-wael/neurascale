@@ -63,19 +63,20 @@ export default function SignInPage() {
               className="font-extrabold text-2xl tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
-              <span className="text-black">NEURA</span>
+              <span style={{ color: "var(--foreground)" }}>NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
             <div
               className="w-px h-6"
-              style={{ backgroundColor: "var(--border)" }}
+              style={{ backgroundColor: "var(--foreground)", opacity: 0.3 }}
             />
             <svg
               className="h-8 w-auto"
               viewBox="0 0 536.229 536.229"
-              fill="black"
+              fill="currentColor"
               fillOpacity="0.8"
               xmlns="http://www.w3.org/2000/svg"
+              style={{ color: "var(--foreground)" }}
             >
               <g>
                 <g>

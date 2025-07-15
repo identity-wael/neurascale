@@ -88,7 +88,7 @@ This document outlines the suggested user-facing content pages for the NeuraScal
 **Content:**
 
 - **Founders/Core Contributors:**
-  - Brief bios and roles: Rob Franklin, Wael El Ghazzawi, Ron Lehman, Donald Woodruff, Jason Franklin, Vincent Liu.
+  - Brief bios and roles: Wael El Ghazzawi, Ron Lehman, Donald Woodruff, Jason Franklin, Vincent Liu.
   - Highlight relevant experience in AI, neural interfaces, data science, scalable cloud infrastructure, and specific domains like XR, Neural-Prosthetics, etc.
 - **Mission/Values:**
   - A short statement about the team's shared passion for unlocking human potential and bridging technology gaps.

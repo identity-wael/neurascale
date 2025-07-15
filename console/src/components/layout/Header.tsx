@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Menu, Settings, HelpCircle, User } from "lucide-react";
+import { Search, Menu, HelpCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,12 +13,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { SettingsIcon } from "@/components/icons/GCPIcons";
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onHideSidebar?: () => void;
+  isSidebarHidden?: boolean;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({
+  onMenuClick,
+  onHideSidebar,
+  isSidebarHidden,
+}: HeaderProps) {
   const { user, signInWithGoogle, logout } = useAuth();
   const [searchValue, setSearchValue] = useState("");
 
@@ -48,29 +55,40 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="relative z-40 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-3 h-16 shadow-sm">
+    <header className="flex-shrink-0 flex items-center justify-between border-b border-gray-300 bg-white px-4 py-2 h-14">
       {/* Left section */}
-      <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon" onClick={onMenuClick}>
-          <Menu className="h-5 w-5" />
-        </Button>
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={onMenuClick}
+          className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+        >
+          <svg
+            className="h-5 w-5 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
 
-        <div className="flex items-center gap-4">
-          <a className="flex items-center justify-center" href="#">
-            <span className="sr-only">NEURASCALE</span>
-            <span
-              className="font-extrabold text-base sm:text-lg tracking-wider"
-              style={{ fontFamily: "Proxima Nova, sans-serif" }}
-            >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center">
+            <span className="font-extrabold text-lg tracking-wider">
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
-          </a>
-          <div className="w-px h-6 bg-gray-200" />
+          </div>
+          <div className="w-px h-6 bg-gray-300" />
           <div className="flex items-center">
             {/* MIT Logo */}
             <svg
-              className="h-5 lg:h-6 w-auto"
+              className="h-5 w-auto"
               viewBox="0 0 536.229 536.229"
               fill="black"
               fillOpacity="1"
@@ -113,42 +131,55 @@ export default function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       {/* Center - Search */}
-      <div className="flex-1 max-w-md mx-4">
-        <div className="relative group">
+      <div className="flex-1 max-w-3xl mx-8">
+        <div className="relative">
           <input
             type="text"
-            placeholder="Search services and resources"
+            placeholder="Search (/)"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 placeholder:text-gray-400 text-sm"
-            aria-label="Search NeuraScale services and resources"
-            role="searchbox"
-            aria-describedby="search-help"
+            className="w-full pl-10 pr-4 py-1.5 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:bg-white focus:border-gray-400 transition-all duration-200 placeholder:text-gray-500 text-sm"
           />
-          <Search
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors"
-            aria-hidden="true"
-          />
-          <span id="search-help" className="sr-only">
-            Search for neural services, resources, and documentation
-          </span>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         </div>
       </div>
 
       {/* Right section */}
-      <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="icon">
-          <HelpCircle className="h-5 w-5" />
-        </Button>
+      <div className="flex items-center space-x-1">
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <svg
+            className="h-5 w-5 text-gray-600"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H5c-.55 0-1-.45-1-1v-3h4v4zm0-6H4v-4h4v4zm0-6H4V5c0-.55.45-1 1-1h3v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-3c-.55 0-1-.45-1-1v-3h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h3c.55 0 1 .45 1 1v3z" />
+          </svg>
+        </button>
 
-        <Button variant="ghost" size="icon">
-          <Settings className="h-5 w-5" />
-        </Button>
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <svg
+            className="h-5 w-5 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </button>
+
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <SettingsIcon className="h-5 w-5 text-gray-600" />
+        </button>
 
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
+              <button className="ml-2 rounded-full focus:outline-none">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
                     src={user.photoURL || ""}
@@ -158,7 +189,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     {getUserInitials(user.displayName || user.email || "U")}
                   </AvatarFallback>
                 </Avatar>
-              </Button>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-normal">
@@ -177,7 +208,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <span>Profile</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
+                <SettingsIcon className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -187,9 +218,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={handleSignIn} variant="outline" size="sm">
+          <button
+            onClick={handleSignIn}
+            className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+          >
             Sign in
-          </Button>
+          </button>
         )}
       </div>
     </header>

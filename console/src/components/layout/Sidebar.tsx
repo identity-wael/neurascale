@@ -149,13 +149,15 @@ function NavItemComponent({
       <button
         onClick={hasChildren ? onToggle : undefined}
         className={cn(
-          "w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+          "w-full flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-xl transition-all duration-200 group",
           hasChildren && "cursor-pointer",
         )}
       >
         <div className="flex items-center space-x-3">
-          <Icon className="h-5 w-5" />
-          <span>{item.name}</span>
+          <Icon className="h-5 w-5 text-gray-500 group-hover:text-blue-600 transition-colors" />
+          <span className="font-medium group-hover:text-gray-900 transition-colors">
+            {item.name}
+          </span>
         </div>
         {hasChildren && (
           <ChevronRight
@@ -174,10 +176,12 @@ function NavItemComponent({
             return (
               <button
                 key={child.href}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
               >
-                <ChildIcon className="h-4 w-4" />
-                <span>{child.name}</span>
+                <ChildIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                <span className="group-hover:text-gray-800 transition-colors">
+                  {child.name}
+                </span>
               </button>
             );
           })}
@@ -211,12 +215,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto",
+          "fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/90 backdrop-blur-sm border-r border-gray-100 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto shadow-lg",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0 lg:static lg:transform-none",
+          "lg:translate-x-0 lg:static lg:transform-none lg:shadow-none",
         )}
       >
-        <nav className="p-4 space-y-2">
+        <nav className="p-6 space-y-2">
           {navItems.map((item) => (
             <NavItemComponent
               key={item.name}

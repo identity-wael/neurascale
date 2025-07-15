@@ -1,10 +1,9 @@
 import React from "react";
-import { LucideIcon } from "lucide-react";
 
 interface ServiceCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   status?: "Active" | "Inactive" | "Beta";
   onClick?: () => void;
 }

@@ -141,7 +141,7 @@ export default function Resources() {
     {
       title: 'Demonstration of a portable intracortical brain-computer interface',
       authors:
-        'J.D. Collinger, R.A. Gaunt, J.E. Downey, S.M. Flesher, J.L. Weiss, J.L. Foldes, E.C. Tyler-Kabara, A.B. Wodlinger, M.L. Boninger, D.J. Weber, R. Franklin, et al.',
+        'J.D. Collinger, R.A. Gaunt, J.E. Downey, S.M. Flesher, J.L. Weiss, J.L. Foldes, E.C. Tyler-Kabara, A.B. Wodlinger, M.L. Boninger, D.J. Weber, et al.',
       summary:
         'Development and testing of a self-contained, portable intracortical BCI weighing 1.5 kg, enabling users with paralysis to perform computer tasks outside laboratory settings.',
       category: 'BCI / Computing',
@@ -151,7 +151,7 @@ export default function Resources() {
     },
     {
       title: 'Behavioral Demonstration of a Somatosensory Neuroprosthesis',
-      authors: 'S.J. Bensmaia, L.E. Miller, R. Franklin, et al.',
+      authors: 'S.J. Bensmaia, L.E. Miller, et al.',
       summary:
         'Implementation of a somatosensory prosthesis using intracortical microstimulation to provide graded tactile feedback for prosthetic limb control in Rhesus macaques.',
       category: 'Neuroprosthetics / BCI',
@@ -161,7 +161,7 @@ export default function Resources() {
     },
     {
       title: 'A Comparison of Fabrication Methods for Iridium Oxide Reference Electrodes',
-      authors: 'R. Franklin, et al.',
+      authors: 'Multiple contributors',
       summary:
         'Characterization of SIROF and AIROF fabrication methods for IrOx films used as reference electrodes in neurochemical recordings, establishing AIROF superiority.',
       category: 'Neural Electrodes',
@@ -173,7 +173,7 @@ export default function Resources() {
       title:
         'Implantable microelectrode arrays for simultaneous electrophysiological and neurochemical recordings',
       authors:
-        'P.E. Takmakov, K. Zachek, R.B. Keithley, E.A. Bucher, G.S. McCarty, R.M. Wightman, R. Franklin, et al.',
+        'P.E. Takmakov, K. Zachek, R.B. Keithley, E.A. Bucher, G.S. McCarty, R.M. Wightman, et al.',
       summary:
         'Multi-modal neural recording arrays enabling simultaneous measurement of spikes, field potentials, and dopamine overflow at matching spatiotemporal scales.',
       category: 'Neural Recording',
@@ -184,7 +184,7 @@ export default function Resources() {
     {
       title: 'A wireless transmission neural interface system for unconstrained non-human primates',
       authors:
-        'D.A. Schwarz, M.A. Lebedev, T.L. Hanson, D.F. Dimitrov, G. Lehew, J. Meloy, S. Rajangam, V. Subramanian, P.J. Ifft, Z. Li, A. Ramakrishnan, A. Tate, K.Z. Zhuang, M.A.L. Nicolelis, R. Franklin, et al.',
+        'D.A. Schwarz, M.A. Lebedev, T.L. Hanson, D.F. Dimitrov, G. Lehew, J. Meloy, S. Rajangam, V. Subramanian, P.J. Ifft, Z. Li, A. Ramakrishnan, A. Tate, K.Z. Zhuang, M.A.L. Nicolelis, et al.',
       summary:
         'High-fidelity 96-channel wireless system for recording neural activity in freely moving primates, revealing behavioral-state dependent neural dynamics.',
       category: 'Wireless BCI',
@@ -194,7 +194,7 @@ export default function Resources() {
     },
     {
       title: 'High channel-count neural interfaces for multiple degree-of-freedom neuroprosthetics',
-      authors: 'R. Franklin, et al.',
+      authors: 'Multiple contributors',
       summary:
         'Advanced neural interface integrating Utah Electrode Arrays with custom ASIC for 200-channel recordings to control 17-DoF prosthetic devices.',
       category: 'Neural Interfaces',
@@ -205,13 +205,88 @@ export default function Resources() {
     {
       title:
         'Analog Circuit Design Methodologies to Improve Negative-Bias Temperature Instability Degradation',
-      authors: 'R. Franklin, et al.',
+      authors: 'Multiple contributors',
       summary:
         'Novel techniques for mitigating NBTI effects in PMOS devices through input switching and body-bias modulation in differential pairs.',
       category: 'Circuit Design',
       pages: '6 pages',
       date: '2010',
       url: 'https://www.researchgate.net/publication/221295849_Analog_Circuit_Design_Methodologies_to_Improve_Negative-Bias_Temperature_Instability_Degradation',
+    },
+    {
+      title: 'A neural speech decoding framework leveraging deep learning and speech synthesis',
+      authors: 'X. Chen, R. Wang, A. Khalilian-Gourtani, L. Yu, P. Dugan, D. Friedman, et al.',
+      summary:
+        'Deep learning framework for decoding speech from neural signals, achieving high accuracy in reconstructing spoken words from brain activity.',
+      category: 'Speech Decoding',
+      pages: '14 pages',
+      date: '2024',
+      url: 'https://www.nature.com/articles/s42256-024-00824-8',
+    },
+    {
+      title: 'An accurate and rapidly calibrating speech neuroprosthesis',
+      authors:
+        'N.S. Card, M. Wairagkar, C. Iacobacci, X. Hou, T. Singer-Clark, F.R. Willett, et al.',
+      summary:
+        'Development of a speech neuroprosthesis that achieves rapid calibration and high accuracy for communication in paralyzed individuals.',
+      category: 'Speech BCI',
+      pages: '10 pages',
+      date: '2024',
+      url: 'https://www.nejm.org/doi/abs/10.1056/NEJMoa2314132',
+    },
+    {
+      title: 'An instantaneous voice-synthesis neuroprosthesis',
+      authors:
+        'M. Wairagkar, N.S. Card, T. Singer-Clark, X. Hou, C. Iacobacci, L.M. Miller, et al.',
+      summary:
+        'Revolutionary voice synthesis system that translates neural signals to speech in real-time, enabling natural conversation for paralyzed patients.',
+      category: 'Voice Synthesis',
+      pages: '8 pages',
+      date: '2025',
+      url: 'https://www.nature.com/articles/s41586-025-09127-3',
+    },
+    {
+      title:
+        'Highly generalizable spelling using a silent-speech BCI in a person with severe anarthria',
+      authors:
+        'S.L. Metzger, J.R. Liu, D.A. Moses, M.E. Dougherty, M.P. Seaton, K.T. Littlejohn, et al.',
+      summary:
+        'Silent-speech BCI system enabling spelling through attempted speech, achieving high accuracy for individuals with severe speech impairments.',
+      category: 'Silent Speech BCI',
+      pages: '8 pages',
+      date: '2024',
+      url: 'https://link.springer.com/chapter/10.1007/978-3-031-49457-4_3',
+    },
+    {
+      title: 'A high-performance neuroprosthesis for speech decoding and avatar control',
+      authors:
+        'S.L. Metzger, K.T. Littlejohn, A.B. Silva, D.A. Moses, M.P. Seaton, R. Wang, et al.',
+      summary:
+        'Advanced neuroprosthesis combining speech decoding with facial avatar control, enabling more natural communication for paralyzed individuals.',
+      category: 'Multimodal BCI',
+      pages: '10 pages',
+      date: '2023',
+      url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10826467/',
+    },
+    {
+      title: 'High-performance brain-to-text communication via handwriting',
+      authors: 'F.R. Willett, D.T. Avansino, L.R. Hochberg, J.M. Henderson, K.V. Shenoy',
+      summary:
+        'Breakthrough BCI system that decodes attempted handwriting movements to generate text at speeds comparable to smartphone typing.',
+      category: 'Handwriting BCI',
+      pages: '6 pages',
+      date: '2021',
+      url: 'https://www.nature.com/articles/s41586-021-03506-2',
+    },
+    {
+      title: 'Cortical control of arm movements: a dynamical systems perspective',
+      authors: 'K.V. Shenoy, M. Sahani, M.M. Churchland',
+      summary:
+        'Comprehensive review of cortical control mechanisms for arm movements from a dynamical systems perspective, foundational for modern BCI development.',
+      category: 'Motor Control',
+      pages: '23 pages',
+      date: '2013',
+      url: 'https://www.sciencedirect.com/science/article/pii/S0896627319304283',
     },
   ];
 

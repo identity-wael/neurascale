@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 interface NavItem {
@@ -134,12 +136,14 @@ interface NavItemComponentProps {
   item: NavItem;
   isExpanded: boolean;
   onToggle: () => void;
+  isCollapsed: boolean;
 }
 
 function NavItemComponent({
   item,
   isExpanded,
   onToggle,
+  isCollapsed,
 }: NavItemComponentProps) {
   const Icon = item.icon;
   const hasChildren = item.children && item.children.length > 0;
@@ -149,17 +153,26 @@ function NavItemComponent({
       <button
         onClick={hasChildren ? onToggle : undefined}
         className={cn(
-          "w-full flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-xl transition-all duration-200 group",
+          "w-full flex items-center justify-between text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-xl transition-all duration-200 group",
           hasChildren && "cursor-pointer",
+          isCollapsed ? "px-2 py-3" : "px-4 py-3",
         )}
+        title={isCollapsed ? item.name : undefined}
       >
-        <div className="flex items-center space-x-3">
-          <Icon className="h-5 w-5 text-gray-500 group-hover:text-blue-600 transition-colors" />
-          <span className="font-medium group-hover:text-gray-900 transition-colors">
-            {item.name}
-          </span>
+        <div
+          className={cn(
+            "flex items-center",
+            isCollapsed ? "justify-center" : "space-x-3",
+          )}
+        >
+          <Icon className="h-5 w-5 text-gray-500 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+          {!isCollapsed && (
+            <span className="font-medium group-hover:text-gray-900 transition-colors">
+              {item.name}
+            </span>
+          )}
         </div>
-        {hasChildren && (
+        {hasChildren && !isCollapsed && (
           <ChevronRight
             className={cn(
               "h-4 w-4 transition-transform",
@@ -169,7 +182,7 @@ function NavItemComponent({
         )}
       </button>
 
-      {hasChildren && isExpanded && (
+      {hasChildren && isExpanded && !isCollapsed && (
         <div className="ml-6 mt-1 space-y-1">
           {item.children!.map((child) => {
             const ChildIcon = child.icon;
@@ -191,7 +204,12 @@ function NavItemComponent({
   );
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({
+  isOpen,
+  onClose,
+  isCollapsed = false,
+  onToggleCollapse,
+}: SidebarProps) {
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
 
   const toggleItem = (itemName: string) => {
@@ -215,18 +233,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white/90 backdrop-blur-sm border-r border-gray-100 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto shadow-lg",
+          "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/90 backdrop-blur-sm border-r border-gray-100 transform transition-all duration-300 ease-in-out z-50 overflow-y-auto shadow-lg",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0 lg:static lg:transform-none lg:shadow-none",
+          isCollapsed ? "w-16" : "w-64",
         )}
       >
-        <nav className="p-6 space-y-2">
+        <nav className={cn("space-y-2", isCollapsed ? "p-2" : "p-6")}>
           {navItems.map((item) => (
             <NavItemComponent
               key={item.name}
               item={item}
               isExpanded={expandedItems.includes(item.name)}
               onToggle={() => toggleItem(item.name)}
+              isCollapsed={isCollapsed}
             />
           ))}
         </nav>

@@ -148,13 +148,14 @@ export default function SignInPage() {
           <Button
             onClick={handleSignIn}
             disabled={isSigningIn}
-            className="w-full flex justify-center items-center px-4 py-3 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            style={{
-              borderColor: "var(--border)",
-              backgroundColor: "var(--card-bg)",
-              color: "var(--foreground)",
-              "--tw-ring-color": "var(--primary)",
-            }}
+            className="w-full flex justify-center items-center px-4 py-3 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors custom-focus-ring"
+            style={
+              {
+                borderColor: "var(--border)",
+                backgroundColor: "var(--card-bg)",
+                color: "var(--foreground)",
+              } as React.CSSProperties
+            }
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "var(--card-hover)";
             }}

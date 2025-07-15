@@ -222,3 +222,8 @@ p {
 .custom-focus-ring:focus {
   --tw-ring-color: var(--primary);
 }
+
+/* Search input placeholder styling */
+input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}

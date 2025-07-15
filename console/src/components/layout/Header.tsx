@@ -70,10 +70,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="flex items-center">
             {/* MIT Logo */}
             <svg
-              className="h-4 lg:h-5 w-auto"
+              className="h-5 lg:h-6 w-auto"
               viewBox="0 0 536.229 536.229"
               fill="black"
-              fillOpacity="0.8"
+              fillOpacity="1"
               xmlns="http://www.w3.org/2000/svg"
             >
               <g>

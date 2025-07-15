@@ -55,22 +55,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <a className="flex items-center justify-center" href="#">
             <span className="sr-only">NEURASCALE</span>
             <span
-              className="font-extrabold text-xl sm:text-2xl tracking-wider"
+              className="font-extrabold text-base sm:text-lg tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
               <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </a>
-          <div className="w-px h-8 bg-gray-200" />
+          <div className="w-px h-6 bg-gray-200" />
           <div className="flex items-center">
             {/* MIT Logo */}
             <svg
-              className="h-6 lg:h-8 w-auto"
+              className="h-4 lg:h-5 w-auto"
               viewBox="0 0 536.229 536.229"
               fill="black"
               fillOpacity="0.8"

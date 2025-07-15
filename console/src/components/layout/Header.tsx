@@ -143,7 +143,7 @@ export default function Header({
               placeholder="Search (/) for resources, docs, products, and more"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="w-full pl-5 pr-10 h-12 rounded-l-md focus:outline-none transition-all duration-200 text-base"
+              className="w-full pl-4 pr-10 h-9 rounded-l-md focus:outline-none transition-all duration-200 text-sm"
               style={{
                 backgroundColor: "rgba(32, 33, 36, 1)",
                 border: "1px solid rgba(95, 99, 104, 1)",
@@ -161,7 +161,7 @@ export default function Header({
             />
           </div>
           <button
-            className="px-6 h-12 rounded-r-md font-medium text-base transition-colors flex items-center justify-center gap-2"
+            className="px-5 h-9 rounded-r-md font-medium text-sm transition-colors flex items-center justify-center gap-1.5"
             style={{
               backgroundColor: "rgba(48, 49, 52, 1)",
               border: "1px solid rgba(95, 99, 104, 1)",
@@ -176,7 +176,7 @@ export default function Header({
             }}
             title="Search"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-4 w-4" />
             <span>Search</span>
           </button>
         </div>

@@ -208,7 +208,7 @@ export default function Sidebar({
   isOpen,
   onClose,
   isCollapsed = false,
-  onToggleCollapse,
+  onToggleCollapse: _onToggleCollapse, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: SidebarProps) {
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
 

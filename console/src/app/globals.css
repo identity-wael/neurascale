@@ -170,6 +170,15 @@
   background-color: #202124 !important;
 }
 
+/* Tab navigation background */
+.gcp-tabs-nav {
+  background-color: #ffffff !important;
+}
+
+.dark .gcp-tabs-nav {
+  background-color: #292a2d !important;
+}
+
 .app-text {
   color: #1f2937;
   transition: color 0.2s ease;

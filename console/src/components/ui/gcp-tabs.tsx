@@ -36,7 +36,7 @@ export function GCPTabs({
   return (
     <div className={cn("w-full", className)}>
       {/* Tab Navigation */}
-      <div className="bg-[var(--card-bg)] border-b border-[var(--border)]">
+      <div className="gcp-tabs-nav border-b border-[var(--border)]">
         <div
           className="flex items-center h-12 pr-6 gap-8"
           style={{ paddingLeft: `${sidebarWidth + 32}px` }}

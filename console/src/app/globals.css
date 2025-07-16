@@ -326,6 +326,33 @@
   fill: #60a5fa;
 }
 
+.app-card-border {
+  border-color: #e5e7eb;
+  transition: border-color 0.2s ease;
+}
+
+.dark .app-card-border {
+  border-color: #4b5563;
+}
+
+.app-text-secondary {
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.dark .app-text-secondary {
+  color: #d1d5db;
+}
+
+.app-text-tertiary {
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.dark .app-text-tertiary {
+  color: #6b7280;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

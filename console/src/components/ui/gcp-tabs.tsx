@@ -35,18 +35,17 @@ export function GCPTabs({
     <div className={cn("w-full", className)}>
       {/* Tab Navigation */}
       <div className="bg-[var(--card-bg)] border-b border-[var(--border)]">
-        <div className="flex items-center h-12">
+        <div className="flex items-center h-12 px-6 gap-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={cn(
-                "relative px-6 h-full flex items-center text-sm font-medium uppercase tracking-[0.25px] transition-colors duration-150",
+                "relative h-full flex items-center text-sm font-medium uppercase tracking-[0.25px] transition-colors duration-150",
                 "font-['Google_Sans',_'Roboto',_Arial,_sans-serif]",
-                "hover:bg-[rgba(60,64,67,0.04)]",
                 activeTab === tab.id
                   ? "text-[var(--primary)]"
-                  : "text-[var(--text-tertiary)]",
+                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]",
               )}
               role="tab"
               aria-selected={activeTab === tab.id}

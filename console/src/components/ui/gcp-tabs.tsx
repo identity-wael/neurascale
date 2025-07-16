@@ -49,7 +49,7 @@ export function GCPTabs({
                 "relative h-full flex items-center text-sm font-medium uppercase tracking-[0.25px] transition-colors duration-150",
                 "font-['Google_Sans',_'Roboto',_Arial,_sans-serif]",
                 activeTab === tab.id
-                  ? "text-blue-600"
+                  ? "text-gray-900"
                   : "app-text-tertiary hover:app-text-secondary",
               )}
               role="tab"
@@ -57,7 +57,7 @@ export function GCPTabs({
             >
               {tab.label}
               {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600" />
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900" />
               )}
             </button>
           ))}

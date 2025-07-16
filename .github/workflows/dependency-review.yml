@@ -20,5 +20,3 @@ jobs:
         with:
           fail-on-severity: moderate
           allow-licenses: MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause, ISC
-          # Ignore scorecard warnings for transitive dependencies
-          warn-on-openssf-scorecard-level: 3

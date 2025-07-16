@@ -462,7 +462,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)] overflow-x-hidden">
       {/* Tabs */}
       <GCPTabs tabs={tabs} defaultTab="dashboard" />
     </div>

@@ -180,7 +180,7 @@ export default function Dashboard() {
               <div className="text-sm app-text-tertiary mb-2">
                 Requests (requests/sec)
               </div>
-              <div className="h-[200px] bg-gray-50 dark:bg-[#292a2d] rounded flex items-center justify-center app-text-tertiary">
+              <div className="h-[200px] bg-gray-50 dark:bg-[#202124] rounded flex items-center justify-center app-text-tertiary">
                 {/* Chart placeholder */}
                 <span className="text-xs">API usage chart</span>
               </div>
@@ -208,7 +208,7 @@ export default function Dashboard() {
           onOptionsClick={() => console.log("Status options")}
         >
           <GCPCardContent spacing="loose">
-            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-[#292a2d] rounded">
+            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-[#202124] rounded">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm font-medium app-text">
                 All services normal

@@ -60,7 +60,7 @@ export function GCPTabs({
       </div>
 
       {/* Tab Content */}
-      <div className="px-6 pt-12 pb-8 bg-[var(--background)]">
+      <div className="px-6 pt-20 pb-8 bg-[var(--background)]">
         {activeTabContent}
       </div>
     </div>

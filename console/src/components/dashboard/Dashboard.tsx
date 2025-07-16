@@ -28,7 +28,7 @@ export default function Dashboard() {
   const DashboardContent = () => (
     <div className="max-w-[1440px] mx-auto">
       {/* Welcome Section */}
-      <div className="mb-6">
+      <div className="mb-6 mt-4">
         <h1 className="text-2xl font-normal text-[var(--text-primary)]">
           Welcome
           {user

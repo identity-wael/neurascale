@@ -462,9 +462,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--background)] overflow-x-hidden">
-      {/* Tabs */}
-      <GCPTabs tabs={tabs} defaultTab="dashboard" />
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Position tabs to start from the edge, accounting for sidebar */}
+      <div className="-ml-8">
+        <GCPTabs tabs={tabs} defaultTab="dashboard" />
+      </div>
     </div>
   );
 }

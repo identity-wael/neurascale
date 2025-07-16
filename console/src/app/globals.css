@@ -205,6 +205,33 @@
   border-bottom-color: #4b5563;
 }
 
+.app-header-button {
+  color: #1f2937;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.app-header-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.dark .app-header-button {
+  color: #f9fafb;
+}
+
+.dark .app-header-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-header-text {
+  color: #1f2937;
+  transition: color 0.2s ease;
+}
+
+.dark .app-header-text {
+  color: #f9fafb;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

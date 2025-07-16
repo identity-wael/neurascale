@@ -79,27 +79,10 @@ export default function Header({
       <div className="flex items-center">
         <button
           onClick={onMenuClick}
-          className="flex items-center justify-center w-10 h-10 rounded transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded app-header-button"
           style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
             marginLeft: "4px",
             borderRadius: "4px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
           }}
         >
           <svg
@@ -124,8 +107,8 @@ export default function Header({
             style={{ marginLeft: "8px", marginRight: "16px" }}
           >
             <span className="font-medium text-[18px]">
-              <span style={{ color: "var(--header-text)" }}>NEURA</span>
-              <span style={{ color: "var(--primary)" }}>SCALE</span>
+              <span className="app-header-text">NEURA</span>
+              <span className="text-blue-600">SCALE</span>
             </span>
           </div>
 
@@ -289,78 +272,21 @@ export default function Header({
       {/* Right section */}
       <div className="flex items-center" style={{ gap: "4px" }}>
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Gemini AI Assistant (✨ Sparkles icon)"
         >
           <Sparkles className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Cloud Shell (🖥️ Terminal icon)"
         >
           <Terminal className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 relative"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button relative"
           title="Notifications (🔔 Bell icon)"
         >
           <Bell className="h-5 w-5" />
@@ -376,53 +302,15 @@ export default function Header({
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Help (❓ Question circle icon)"
         >
           <HelpCircle className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           onClick={toggleDarkMode}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
           title={
             isDarkMode
               ? "Switch to light mode (☀️ Sun icon)"
@@ -437,26 +325,7 @@ export default function Header({
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "var(--header-text)",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-active)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "var(--header-button-hover)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Settings (⚙️ Gear icon)"
         >
           <SettingsIcon className="h-5 w-5" />

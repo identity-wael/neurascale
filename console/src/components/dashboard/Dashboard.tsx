@@ -130,7 +130,7 @@ export default function Dashboard() {
           <GCPCardContent spacing="tight">
             <GCPCardItem
               href="#"
-              icon={<Play className="w-5 h-5 text-blue-700" />}
+              icon={<Play className="w-5 h-5 text-gray-900" />}
             >
               <span className="text-sm app-text">
                 Deploy your first neural model
@@ -138,25 +138,25 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Database className="w-5 h-5 text-blue-700" />}
+              icon={<Database className="w-5 h-5 text-gray-900" />}
             >
               <span className="text-sm app-text">Create a neural database</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cpu className="w-5 h-5 text-blue-700" />}
+              icon={<Cpu className="w-5 h-5 text-gray-900" />}
             >
               <span className="text-sm app-text">Configure BCI parameters</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Zap className="w-5 h-5 text-blue-700" />}
+              icon={<Zap className="w-5 h-5 text-gray-900" />}
             >
               <span className="text-sm app-text">Set up neural monitoring</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cloud className="w-5 h-5 text-blue-700" />}
+              icon={<Cloud className="w-5 h-5 text-gray-900" />}
             >
               <span className="text-sm app-text">Install NeuraScale SDK</span>
             </GCPCardItem>

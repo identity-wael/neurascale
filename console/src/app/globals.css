@@ -162,12 +162,12 @@
 
 /* Simple theme classes - no CSS variables */
 .app-bg {
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   transition: background-color 0.2s ease;
 }
 
 .dark .app-bg {
-  background-color: #1a1a1a;
+  background-color: #1a1a1a !important;
 }
 
 .app-text {
@@ -351,6 +351,14 @@
 
 .dark .app-text-tertiary {
   color: #6b7280;
+}
+
+.hover\:app-text-secondary:hover {
+  color: #6b7280;
+}
+
+.dark .hover\:app-text-secondary:hover {
+  color: #d1d5db;
 }
 
 * {

@@ -130,50 +130,40 @@ export default function Dashboard() {
           <GCPCardContent spacing="tight">
             <GCPCardItem
               href="#"
-              icon={<Play className="w-5 h-5 text-[var(--text-tertiary)]" />}
+              icon={<Play className="w-5 h-5 text-blue-700" />}
             >
-              <span className="text-sm text-[var(--text-primary)]">
+              <span className="text-sm app-text">
                 Deploy your first neural model
               </span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={
-                <Database className="w-5 h-5 text-[var(--text-tertiary)]" />
-              }
+              icon={<Database className="w-5 h-5 text-blue-700" />}
             >
-              <span className="text-sm text-[var(--text-primary)]">
-                Create a neural database
-              </span>
+              <span className="text-sm app-text">Create a neural database</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cpu className="w-5 h-5 text-[var(--text-tertiary)]" />}
+              icon={<Cpu className="w-5 h-5 text-blue-700" />}
             >
-              <span className="text-sm text-[var(--text-primary)]">
-                Configure BCI parameters
-              </span>
+              <span className="text-sm app-text">Configure BCI parameters</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Zap className="w-5 h-5 text-[var(--text-tertiary)]" />}
+              icon={<Zap className="w-5 h-5 text-blue-700" />}
             >
-              <span className="text-sm text-[var(--text-primary)]">
-                Set up neural monitoring
-              </span>
+              <span className="text-sm app-text">Set up neural monitoring</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cloud className="w-5 h-5 text-[var(--text-tertiary)]" />}
+              icon={<Cloud className="w-5 h-5 text-blue-700" />}
             >
-              <span className="text-sm text-[var(--text-primary)]">
-                Install NeuraScale SDK
-              </span>
+              <span className="text-sm app-text">Install NeuraScale SDK</span>
             </GCPCardItem>
-            <div className="mt-4 pt-4 border-t border-[var(--border-light)]">
+            <div className="mt-4 pt-4 border-t app-card-border">
               <a
                 href="#"
-                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
+                className="flex items-center gap-2 text-sm text-blue-700 hover:underline"
               >
                 <ArrowRight className="w-4 h-4" />
                 Explore all tutorials

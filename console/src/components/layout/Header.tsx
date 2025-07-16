@@ -311,7 +311,7 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title="Gemini AI Assistant"
+          title="Gemini AI Assistant (✨ Sparkles icon)"
         >
           <Sparkles className="h-5 w-5" />
         </button>
@@ -337,7 +337,7 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title="Cloud Shell"
+          title="Cloud Shell (🖥️ Terminal icon)"
         >
           <Terminal className="h-5 w-5" />
         </button>
@@ -363,7 +363,7 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title="Notifications"
+          title="Notifications (🔔 Bell icon)"
         >
           <Bell className="h-5 w-5" />
           <span
@@ -398,7 +398,7 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title="Help"
+          title="Help (❓ Question circle icon)"
         >
           <HelpCircle className="h-5 w-5" />
         </button>
@@ -409,7 +409,10 @@ export default function Header({
             color: "var(--header-text)",
             backgroundColor: "transparent",
           }}
-          onClick={toggleDarkMode}
+          onClick={() => {
+            console.log("Header: Dark mode button clicked!");
+            toggleDarkMode();
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
@@ -425,7 +428,11 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          title={
+            isDarkMode
+              ? "Switch to light mode (☀️ Sun icon)"
+              : "Switch to dark mode (🌙 Moon icon)"
+          }
         >
           {isDarkMode ? (
             <Sun className="h-5 w-5" />
@@ -455,7 +462,7 @@ export default function Header({
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";
           }}
-          title="Settings"
+          title="Settings (⚙️ Gear icon)"
         >
           <SettingsIcon className="h-5 w-5" />
         </button>

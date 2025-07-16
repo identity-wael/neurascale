@@ -16,7 +16,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--background)]">
+    <div className="h-screen flex flex-col theme-bg">
       {/* Header */}
       <Header onMenuClick={handleMenuClick} />
 
@@ -30,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Main Content */}
         <main
-          className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)] transition-all duration-200"
+          className="flex-1 overflow-x-hidden overflow-y-auto theme-bg transition-all duration-200"
           style={{ marginLeft: sidebarCollapsed ? "64px" : "280px" }}
         >
           <div className="h-full">{children}</div>

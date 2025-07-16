@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import {
   GCPCard,
   GCPCardGrid,
@@ -29,19 +28,11 @@ import {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { isDarkMode } = useTheme();
   const [sidebarWidth] = React.useState(64); // Collapsed sidebar width
 
   // Dashboard Tab Content
   const DashboardContent = () => (
     <div className="max-w-[1440px] mx-auto">
-      {/* Theme Debug Info */}
-      <div className="mb-4 p-4 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 rounded">
-        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-          Theme Debug: {isDarkMode ? "Dark Mode" : "Light Mode"}
-        </p>
-      </div>
-
       {/* Welcome Section */}
       <div className="mb-6 mt-4">
         <h1 className="text-2xl font-normal text-[var(--text-primary)]">

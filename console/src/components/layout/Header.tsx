@@ -3,18 +3,14 @@
 import React, { useState } from "react";
 import {
   Search,
-  Menu,
   HelpCircle,
   User,
   Moon,
   Sun,
-  ChevronRight,
-  ChevronDown,
   Sparkles,
   Terminal,
   Bell,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,

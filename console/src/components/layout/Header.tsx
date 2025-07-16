@@ -70,10 +70,8 @@ export default function Header({
 
   return (
     <header
-      className="flex-shrink-0 flex items-center justify-between h-[48px] px-2"
+      className="flex-shrink-0 flex items-center justify-between h-[48px] px-2 app-header"
       style={{
-        backgroundColor: "#303134",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
         padding: "0 8px",
       }}
     >
@@ -81,24 +79,10 @@ export default function Header({
       <div className="flex items-center">
         <button
           onClick={onMenuClick}
-          className="flex items-center justify-center w-10 h-10 rounded transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded transition-colors app-header-button"
           style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
             marginLeft: "4px",
             borderRadius: "4px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
           }}
         >
           <svg
@@ -130,11 +114,8 @@ export default function Header({
 
           {/* Project Selector */}
           <button
-            className="flex items-center rounded h-10"
+            className="flex items-center rounded h-10 app-project-selector"
             style={{
-              backgroundColor: "#202124",
-              color: "#E8EAED",
-              border: "1px solid #5F6368",
               maxWidth: "280px",
               fontFamily: '"Google Sans Text", Roboto, Arial, sans-serif',
               fontSize: "14px",
@@ -149,33 +130,10 @@ export default function Header({
               transition: "all 150ms cubic-bezier(0.4, 0, 0.2, 1)",
               cursor: "pointer",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#2A2B2D";
-              e.currentTarget.style.borderColor = "#8AB4F8";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#202124";
-              e.currentTarget.style.borderColor = "#5F6368";
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#8AB4F8";
-              e.currentTarget.style.boxShadow = "0 0 0 1px #8AB4F8";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#5F6368";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.backgroundColor = "#25262A";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.backgroundColor = "#2A2B2D";
-            }}
             aria-label="Select a project"
           >
             <svg
-              className="h-4 w-4 flex-shrink-0"
-              fill="#8AB4F8"
+              className="h-4 w-4 flex-shrink-0 app-project-icon"
               viewBox="0 0 24 24"
               style={{ width: "16px", height: "16px" }}
             >
@@ -194,36 +152,24 @@ export default function Header({
         style={{ margin: "0 16px" }}
       >
         <div
-          className="w-full max-w-[720px] h-10 flex items-center rounded"
+          className="w-full max-w-[720px] h-10 flex items-center rounded app-search-bar"
           style={{
-            backgroundColor: "#202124",
-            border: "1px solid #5F6368",
             borderRadius: "4px",
           }}
         >
-          <Search className="h-5 w-5 mx-3" style={{ color: "#9AA0A6" }} />
+          <Search className="h-5 w-5 mx-3 app-search-icon" />
           <input
             type="text"
             placeholder="Search resources, docs, and products"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-sm"
+            className="flex-1 bg-transparent border-none outline-none text-sm app-text"
             style={{
-              color: "#E8EAED",
               fontFamily: "Roboto, Arial, sans-serif",
               fontSize: "14px",
               lineHeight: "20px",
               paddingTop: "0",
               paddingBottom: "0",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.parentElement!.style.borderColor = "#8AB4F8";
-              e.currentTarget.parentElement!.style.boxShadow =
-                "0 0 0 1px #8AB4F8";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.parentElement!.style.borderColor = "#5F6368";
-              e.currentTarget.parentElement!.style.boxShadow = "none";
             }}
             onKeyPress={(e) => {
               if (e.key === "Enter") {
@@ -232,35 +178,18 @@ export default function Header({
             }}
           />
           <button
-            className="h-10 flex items-center justify-center transition-all duration-200"
+            className="h-10 flex items-center justify-center transition-all duration-200 app-search-button"
             style={{
-              backgroundColor: "transparent",
-              color: "#8AB4F8",
               fontFamily: '"Google Sans", Roboto, Arial, sans-serif',
               fontSize: "14px",
               fontWeight: "500",
               letterSpacing: "0.25px",
               border: "none",
-              borderLeft: "1px solid #5F6368",
               borderTopRightRadius: "4px",
               borderBottomRightRadius: "4px",
               minWidth: "100px",
               cursor: "pointer",
               padding: "0 20px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(138, 180, 248, 0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.outline = "2px solid #8AB4F8";
-              e.currentTarget.style.outlineOffset = "-2px";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.outline = "none";
             }}
             onClick={() => {
               console.log("Search clicked:", searchValue);
@@ -268,10 +197,7 @@ export default function Header({
             aria-label="Search"
           >
             <div className="flex items-center gap-2">
-              <Search
-                className="h-[18px] w-[18px]"
-                style={{ color: "#8AB4F8" }}
-              />
+              <Search className="h-[18px] w-[18px]" />
               <span>Search</span>
             </div>
           </button>
@@ -281,69 +207,21 @@ export default function Header({
       {/* Right section */}
       <div className="flex items-center" style={{ gap: "4px" }}>
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           title="Gemini AI Assistant"
         >
           <Sparkles className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           title="Cloud Shell"
         >
           <Terminal className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 relative"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 relative app-header-button"
           title="Notifications"
         >
           <Bell className="h-5 w-5" />
@@ -359,47 +237,15 @@ export default function Header({
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           title="Help"
         >
           <HelpCircle className="h-5 w-5" />
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           onClick={toggleDarkMode}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
           title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDarkMode ? (
@@ -410,23 +256,7 @@ export default function Header({
         </button>
 
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-          style={{
-            color: "#E8EAED",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           title="Settings"
         >
           <SettingsIcon className="h-5 w-5" />

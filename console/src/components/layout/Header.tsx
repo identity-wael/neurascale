@@ -86,7 +86,7 @@ export default function Header({
           }}
         >
           <svg
-            className="h-5 w-5"
+            className="h-5 w-5 app-header-button"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -209,21 +209,21 @@ export default function Header({
           className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Gemini AI Assistant (✨ Sparkles icon)"
         >
-          <Sparkles className="h-5 w-5" />
+          <Sparkles className="h-5 w-5 app-header-button" />
         </button>
 
         <button
           className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Cloud Shell (🖥️ Terminal icon)"
         >
-          <Terminal className="h-5 w-5" />
+          <Terminal className="h-5 w-5 app-header-button" />
         </button>
 
         <button
           className="flex items-center justify-center w-10 h-10 rounded-full app-header-button relative"
           title="Notifications (🔔 Bell icon)"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 app-header-button" />
           <span
             className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-lg flex items-center justify-center text-[11px] font-medium"
             style={{
@@ -239,7 +239,7 @@ export default function Header({
           className="flex items-center justify-center w-10 h-10 rounded-full app-header-button"
           title="Help (❓ Question circle icon)"
         >
-          <HelpCircle className="h-5 w-5" />
+          <HelpCircle className="h-5 w-5 app-header-button" />
         </button>
 
         <button
@@ -252,9 +252,9 @@ export default function Header({
           }
         >
           {isDarkMode ? (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-5 w-5 app-header-button" />
           ) : (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-5 w-5 app-header-button" />
           )}
         </button>
 

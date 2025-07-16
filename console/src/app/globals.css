@@ -206,9 +206,15 @@
 }
 
 .app-header-button {
-  color: #1f2937;
+  color: #000000 !important;
   background-color: transparent;
   transition: all 0.2s ease;
+}
+
+.app-header-button svg {
+  color: inherit !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }
 
 .app-header-button:hover {
@@ -216,7 +222,13 @@
 }
 
 .dark .app-header-button {
-  color: #f9fafb;
+  color: #f9fafb !important;
+}
+
+.dark .app-header-button svg {
+  color: inherit !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }
 
 .dark .app-header-button:hover {
@@ -224,7 +236,7 @@
 }
 
 .app-header-text {
-  color: #1f2937;
+  color: #000000;
   transition: color 0.2s ease;
 }
 
@@ -587,6 +599,20 @@ small {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
+}
+
+/* SVG icon filters for dark mode */
+.dark img[src*="/svg/"] {
+  filter: brightness(0) saturate(100%) invert(70%) sepia(9%) saturate(469%)
+    hue-rotate(185deg) brightness(95%) contrast(87%);
+  opacity: 1 !important;
+}
+
+/* Specific filter for Getting Started icons to make them darker */
+.dark .app-card img[src*="/svg/"] {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(10%) saturate(200%)
+    hue-rotate(185deg) brightness(90%) contrast(85%);
+  opacity: 1 !important;
 }
 
 .hover-lift {

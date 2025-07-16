@@ -49,7 +49,7 @@ export function GCPTabs({
                 "relative h-full flex items-center text-sm font-medium uppercase tracking-[0.25px] transition-colors duration-150",
                 "font-['Google_Sans',_'Roboto',_Arial,_sans-serif]",
                 activeTab === tab.id
-                  ? "text-gray-900"
+                  ? "app-text"
                   : "app-text-tertiary hover:app-text-secondary",
               )}
               role="tab"

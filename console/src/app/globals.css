@@ -181,7 +181,7 @@
 
 .app-card {
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #dadce0;
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease;
@@ -189,7 +189,7 @@
 
 .dark .app-card {
   background-color: #292a2d;
-  border-color: #4b5563;
+  border-color: #5f6368;
 }
 
 .app-header {
@@ -327,12 +327,12 @@
 }
 
 .app-card-border {
-  border-color: #e5e7eb;
+  border-color: #e8eaed;
   transition: border-color 0.2s ease;
 }
 
 .dark .app-card-border {
-  border-color: #4b5563;
+  border-color: #3c4043;
 }
 
 .app-text-secondary {

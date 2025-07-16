@@ -64,7 +64,7 @@ const GCPIcon: React.FC<{
     <img
       src={`/svg/${icon}.svg`}
       alt=""
-      className={cn("w-6 h-6", className)}
+      className={cn("w-5 h-5", className)}
       style={style}
     />
   );
@@ -102,7 +102,7 @@ function NavItemComponent({
           color: "#E8EAED",
           padding: level === 0 ? "0" : "0 8px 0 0",
           paddingRight: !isCollapsed ? "12px" : "0",
-          minHeight: "32px",
+          minHeight: "40px",
           backgroundColor: isHovered
             ? "rgba(232, 234, 237, 0.08)"
             : "transparent",
@@ -115,14 +115,14 @@ function NavItemComponent({
           <div
             className="flex items-center justify-center flex-shrink-0"
             style={{
-              width: "48px",
-              height: "32px",
-              marginLeft: "4px",
+              width: "40px",
+              height: "40px",
+              marginLeft: "12px",
             }}
           >
             <GCPIcon
               icon={item.icon}
-              className="w-6 h-6"
+              className="w-5 h-5"
               style={{ opacity: 0.7 }}
             />
           </div>
@@ -171,9 +171,9 @@ function NavItemComponent({
               <div
                 className="flex items-center justify-center flex-shrink-0"
                 style={{
-                  width: "48px",
+                  width: "40px",
                   height: "28px",
-                  marginLeft: "4px",
+                  marginLeft: "12px",
                 }}
               >
                 {child.icon && (
@@ -229,7 +229,7 @@ export default function Sidebar({
           "fixed left-0 z-50 h-screen",
           isCollapsed ? "top-[48px] h-[calc(100vh-48px)]" : "top-0",
           "translate-x-0",
-          isCollapsed ? "w-[56px]" : "w-[280px]",
+          isCollapsed ? "w-[64px]" : "w-[280px]",
         )}
         style={{
           backgroundColor: "#1F1F1F",

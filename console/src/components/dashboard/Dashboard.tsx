@@ -8,22 +8,16 @@ import {
   GCPCardContent,
   GCPCardItem,
 } from "@/components/ui/gcp-card";
-import { GCPTabs, GCPTabPanel } from "@/components/ui/gcp-tabs";
+import { GCPTabs } from "@/components/ui/gcp-tabs";
 import {
   ArrowRight,
   Settings,
-  Activity,
-  Users,
   Database,
   Cpu,
-  HardDrive,
   Zap,
   Cloud,
   Play,
-  AlertCircle,
   CheckCircle,
-  Clock,
-  MoreHorizontal,
 } from "lucide-react";
 
 export default function Dashboard() {

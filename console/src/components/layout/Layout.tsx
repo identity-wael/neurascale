@@ -33,7 +33,7 @@ export default function Layout({ children }: LayoutProps) {
           className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)] transition-all duration-200"
           style={{ marginLeft: sidebarCollapsed ? "64px" : "280px" }}
         >
-          <div className="h-full">{children}</div>
+          <div className="h-full pl-6">{children}</div>
         </main>
       </div>
     </div>

@@ -9,41 +9,30 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const handleMenuClick = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setSidebarOpen(!sidebarOpen);
-    } else {
-      setSidebarCollapsed(!sidebarCollapsed);
-    }
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   return (
     <div className="h-screen flex flex-col bg-[var(--background)]">
       {/* Header */}
-      <Header
-        onMenuClick={handleMenuClick}
-        onHideSidebar={() => setSidebarHidden(!sidebarHidden)}
-        isSidebarHidden={sidebarHidden}
-      />
+      <Header onMenuClick={handleMenuClick} />
 
       {/* Body */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        {!sidebarHidden && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            isCollapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-          />
-        )}
+        <Sidebar
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)]">
+        <main
+          className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)] transition-all duration-200"
+          style={{ marginLeft: sidebarCollapsed ? "56px" : "280px" }}
+        >
           <div className="h-full">{children}</div>
         </main>
       </div>

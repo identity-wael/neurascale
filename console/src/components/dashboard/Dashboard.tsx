@@ -23,6 +23,7 @@ import {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [sidebarWidth] = React.useState(64); // Collapsed sidebar width
 
   // Dashboard Tab Content
   const DashboardContent = () => (
@@ -463,9 +464,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      {/* Position tabs to start from the edge, accounting for sidebar */}
-      <div className="-ml-8">
-        <GCPTabs tabs={tabs} defaultTab="dashboard" />
+      {/* Negative margin to extend tabs to the viewport edge */}
+      <div
+        style={{
+          marginLeft: `-${sidebarWidth}px`,
+          marginRight: `-${sidebarWidth}px`,
+        }}
+      >
+        <GCPTabs
+          tabs={tabs}
+          defaultTab="dashboard"
+          sidebarWidth={sidebarWidth}
+        />
       </div>
     </div>
   );

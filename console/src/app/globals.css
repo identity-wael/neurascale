@@ -213,7 +213,7 @@
 
 .app-header-button svg {
   color: inherit !important;
-  fill: currentColor !important;
+  fill: none !important;
   stroke: currentColor !important;
 }
 
@@ -227,7 +227,7 @@
 
 .dark .app-header-button svg {
   color: inherit !important;
-  fill: currentColor !important;
+  fill: none !important;
   stroke: currentColor !important;
 }
 

@@ -13,9 +13,10 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (user) {
-      router.push("/");
+      // Force reload to trigger middleware with new cookie
+      window.location.href = "/";
     }
-  }, [user, router]);
+  }, [user]);
 
   const handleSignIn = async () => {
     console.log("Sign in button clicked");

@@ -180,7 +180,7 @@ export default function Dashboard() {
               <div className="text-sm app-text-tertiary mb-2">
                 Requests (requests/sec)
               </div>
-              <div className="h-[200px] bg-gray-50 dark:bg-[#202124] rounded flex items-center justify-center app-text-tertiary">
+              <div className="h-[200px] bg-gray-50 dark:bg-[#202124] rounded flex items-center justify-center text-white dark:text-[var(--text-tertiary)]">
                 {/* Chart placeholder */}
                 <span className="text-xs">API usage chart</span>
               </div>
@@ -210,7 +210,7 @@ export default function Dashboard() {
           <GCPCardContent spacing="loose">
             <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-[#202124] rounded">
               <CheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-sm font-medium app-text">
+              <span className="text-sm font-medium text-white dark:text-[var(--text-primary)]">
                 All services normal
               </span>
             </div>
@@ -385,9 +385,10 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen app-bg">
+    <div className="min-h-screen bg-white dark:bg-[#202124]">
       {/* Negative margin to extend tabs to the viewport edge */}
       <div
+        className="bg-white dark:bg-transparent"
         style={{
           marginLeft: `-${sidebarWidth}px`,
           marginRight: `-${sidebarWidth}px`,

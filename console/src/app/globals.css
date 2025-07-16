@@ -23,6 +23,17 @@
   --text-secondary: #3c4043;
   --text-tertiary: #5f6368;
 
+  /* Header Colors */
+  --header-bg: #ffffff;
+  --header-border: #dadce0;
+  --header-text: #202124;
+  --header-text-secondary: #5f6368;
+  --header-button-hover: rgba(60, 64, 67, 0.08);
+  --header-button-active: rgba(60, 64, 67, 0.12);
+  --header-input-bg: #f8f9fa;
+  --header-input-border: #dadce0;
+  --header-input-focus: #1a73e8;
+
   /* Shadows */
   --shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
     0 1px 3px 1px rgba(60, 64, 67, 0.15);
@@ -83,6 +94,17 @@
     --text-primary: #e8eaed;
     --text-secondary: #bdc1c6;
     --text-tertiary: #9aa0a6;
+
+    /* Header Colors - Dark Mode */
+    --header-bg: #303134;
+    --header-border: rgba(255, 255, 255, 0.08);
+    --header-text: #e8eaed;
+    --header-text-secondary: #9aa0a6;
+    --header-button-hover: rgba(255, 255, 255, 0.08);
+    --header-button-active: rgba(255, 255, 255, 0.12);
+    --header-input-bg: #202124;
+    --header-input-border: #5f6368;
+    --header-input-focus: #8ab4f8;
   }
 }
 
@@ -104,6 +126,251 @@
   --text-primary: #e8eaed;
   --text-secondary: #bdc1c6;
   --text-tertiary: #9aa0a6;
+
+  /* Header Colors - Dark Mode */
+  --header-bg: #303134;
+  --header-border: rgba(255, 255, 255, 0.08);
+  --header-text: #e8eaed;
+  --header-text-secondary: #9aa0a6;
+  --header-button-hover: rgba(255, 255, 255, 0.08);
+  --header-button-active: rgba(255, 255, 255, 0.12);
+  --header-input-bg: #202124;
+  --header-input-border: #5f6368;
+  --header-input-focus: #8ab4f8;
+}
+
+/* Force dark mode Tailwind classes to work with class strategy */
+.dark .bg-yellow-100 {
+  background-color: #451a03 !important;
+}
+
+.dark .bg-yellow-900 {
+  background-color: #451a03 !important;
+}
+
+.dark .text-yellow-800 {
+  color: #fbbf24 !important;
+}
+
+.dark .text-yellow-200 {
+  color: #fbbf24 !important;
+}
+
+.dark .border-yellow-400 {
+  border-color: #d97706 !important;
+}
+
+/* Simple theme classes - no CSS variables */
+.app-bg {
+  background-color: #ffffff !important;
+  transition: background-color 0.2s ease;
+}
+
+.dark .app-bg {
+  background-color: #1a1a1a !important;
+}
+
+.app-text {
+  color: #1f2937;
+  transition: color 0.2s ease;
+}
+
+.dark .app-text {
+  color: #f9fafb;
+}
+
+.app-card {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.dark .app-card {
+  background-color: #292a2d;
+  border-color: #5f6368;
+}
+
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.dark .app-header {
+  background-color: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.app-header-button {
+  color: #000000 !important;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.app-header-button svg {
+  color: inherit !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.app-header-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.dark .app-header-button {
+  color: #f9fafb !important;
+}
+
+.dark .app-header-button svg {
+  color: inherit !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.dark .app-header-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-header-text {
+  color: #000000;
+  transition: color 0.2s ease;
+}
+
+.dark .app-header-text {
+  color: #f9fafb;
+}
+
+.app-search-bar {
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.app-search-bar:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.dark .app-search-bar {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .app-search-bar:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px #60a5fa;
+}
+
+.app-search-icon {
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.dark .app-search-icon {
+  color: #9ca3af;
+}
+
+.app-search-button {
+  background-color: transparent;
+  border-left: 1px solid #d1d5db;
+  color: #1d4ed8;
+  transition: all 0.2s ease;
+}
+
+.app-search-button:hover {
+  background-color: rgba(29, 78, 216, 0.08);
+}
+
+.dark .app-search-button {
+  border-left-color: #4b5563;
+  color: #60a5fa;
+}
+
+.dark .app-search-button:hover {
+  background-color: rgba(96, 165, 250, 0.08);
+}
+
+.app-project-selector {
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.app-project-selector:hover {
+  background-color: #f3f4f6;
+  border-color: #1d4ed8;
+}
+
+.app-project-selector:focus {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 1px #1d4ed8;
+}
+
+.dark .app-project-selector {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .app-project-selector:hover {
+  background-color: #4b5563;
+  border-color: #60a5fa;
+}
+
+.dark .app-project-selector:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px #60a5fa;
+}
+
+.app-project-icon {
+  fill: #1d4ed8;
+  transition: fill 0.2s ease;
+}
+
+.dark .app-project-icon {
+  fill: #60a5fa;
+}
+
+.app-card-border {
+  border-color: #e8eaed;
+  transition: border-color 0.2s ease;
+}
+
+.dark .app-card-border {
+  border-color: #3c4043;
+}
+
+.app-text-secondary {
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.dark .app-text-secondary {
+  color: #d1d5db;
+}
+
+.app-text-tertiary {
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.dark .app-text-tertiary {
+  color: #6b7280;
+}
+
+.hover\:app-text-secondary:hover {
+  color: #6b7280;
+}
+
+.dark .hover\:app-text-secondary:hover {
+  color: #d1d5db;
 }
 
 * {
@@ -332,6 +599,20 @@ small {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
+}
+
+/* SVG icon filters for dark mode */
+.dark img[src*="/svg/"] {
+  filter: brightness(0) saturate(100%) invert(70%) sepia(9%) saturate(469%)
+    hue-rotate(185deg) brightness(95%) contrast(87%);
+  opacity: 1 !important;
+}
+
+/* Specific filter for Getting Started icons to make them darker */
+.dark .app-card img[src*="/svg/"] {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(10%) saturate(200%)
+    hue-rotate(185deg) brightness(90%) contrast(85%);
+  opacity: 1 !important;
 }
 
 .hover-lift {

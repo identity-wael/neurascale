@@ -64,7 +64,7 @@ export default function SignInPage() {
               className="font-extrabold text-2xl tracking-wider"
               style={{ fontFamily: "Proxima Nova, sans-serif" }}
             >
-              <span style={{ color: "var(--foreground)" }}>NEURA</span>
+              <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
             <div

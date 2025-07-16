@@ -103,7 +103,7 @@ export default function Header({
             style={{ marginLeft: "8px", marginRight: "16px" }}
           >
             <span className="font-medium text-[18px]">
-              <span className="text-black dark:text-[#E8EAED]">NEURA</span>
+              <span className="text-black">NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </div>

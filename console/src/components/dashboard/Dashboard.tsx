@@ -216,10 +216,7 @@ export default function Dashboard() {
           <GCPCardContent spacing="loose">
             <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded">
               <CheckCircle className="w-5 h-5 text-gray-600" />
-              <span
-                className="text-sm font-medium"
-                style={{ color: "#ffffff !important" }}
-              >
+              <span className="text-sm font-medium app-text">
                 All services normal
               </span>
             </div>

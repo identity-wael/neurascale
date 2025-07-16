@@ -13,47 +13,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check if user has a saved preference
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === "dark");
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      setIsDarkMode(prefersDark);
-    }
+    // Start with light mode by default
+    setIsDarkMode(false);
   }, []);
 
   useEffect(() => {
     // Apply or remove dark class on document element
-    console.log(
-      "ThemeContext: Setting theme to",
-      isDarkMode ? "dark" : "light",
-    );
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
-      console.log("ThemeContext: Added dark class to HTML");
     } else {
       document.documentElement.classList.remove("dark");
-      console.log("ThemeContext: Removed dark class from HTML");
     }
-    console.log(
-      "ThemeContext: HTML classes are now:",
-      document.documentElement.className,
-    );
     // Save preference
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
-    console.log(
-      "ThemeContext: Toggle clicked! Current:",
-      isDarkMode,
-      "-> New:",
-      !isDarkMode,
-    );
     setIsDarkMode(!isDarkMode);
   };
 

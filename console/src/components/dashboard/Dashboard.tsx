@@ -438,7 +438,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen theme-bg">
+    <div className="min-h-screen app-bg">
       {/* Negative margin to extend tabs to the viewport edge */}
       <div
         style={{

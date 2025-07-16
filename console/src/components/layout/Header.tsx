@@ -70,10 +70,8 @@ export default function Header({
 
   return (
     <header
-      className="flex-shrink-0 flex items-center justify-between h-[48px] px-2"
+      className="flex-shrink-0 flex items-center justify-between h-[48px] px-2 app-header"
       style={{
-        backgroundColor: "var(--header-bg)",
-        borderBottom: `1px solid var(--header-border)`,
         padding: "0 8px",
       }}
     >
@@ -409,10 +407,7 @@ export default function Header({
             color: "var(--header-text)",
             backgroundColor: "transparent",
           }}
-          onClick={() => {
-            console.log("Header: Dark mode button clicked!");
-            toggleDarkMode();
-          }}
+          onClick={toggleDarkMode}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor =
               "var(--header-button-hover)";

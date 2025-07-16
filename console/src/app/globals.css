@@ -160,23 +160,49 @@
   border-color: #d97706 !important;
 }
 
-/* Theme-aware utility classes */
-.theme-bg {
-  background-color: var(--background);
+/* Simple theme classes - no CSS variables */
+.app-bg {
+  background-color: #ffffff;
   transition: background-color 0.2s ease;
 }
 
-.theme-text {
-  color: var(--text-primary);
+.dark .app-bg {
+  background-color: #1a1a1a;
+}
+
+.app-text {
+  color: #1f2937;
   transition: color 0.2s ease;
 }
 
-.theme-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border);
+.dark .app-text {
+  color: #f9fafb;
+}
+
+.app-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease;
+}
+
+.dark .app-card {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.dark .app-header {
+  background-color: #374151;
+  border-bottom-color: #4b5563;
 }
 
 * {

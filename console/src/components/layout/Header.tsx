@@ -114,11 +114,8 @@ export default function Header({
 
           {/* Project Selector */}
           <button
-            className="flex items-center rounded h-10"
+            className="flex items-center rounded h-10 app-project-selector"
             style={{
-              backgroundColor: "var(--header-input-bg)",
-              color: "var(--header-text)",
-              border: `1px solid var(--header-input-border)`,
               maxWidth: "280px",
               fontFamily: '"Google Sans Text", Roboto, Arial, sans-serif',
               fontSize: "14px",
@@ -130,39 +127,12 @@ export default function Header({
               padding: "5px 8px",
               gap: "8px",
               marginLeft: "16px",
-              transition: "all 150ms cubic-bezier(0.4, 0, 0.2, 1)",
               cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--header-button-hover)";
-              e.currentTarget.style.borderColor = "var(--header-input-focus)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "var(--header-input-bg)";
-              e.currentTarget.style.borderColor = "var(--header-input-border)";
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--header-input-focus)";
-              e.currentTarget.style.boxShadow = `0 0 0 1px var(--header-input-focus)`;
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--header-input-border)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--header-button-active)";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--header-button-hover)";
             }}
             aria-label="Select a project"
           >
             <svg
-              className="h-4 w-4 flex-shrink-0"
-              fill="var(--primary)"
+              className="h-4 w-4 flex-shrink-0 app-project-icon"
               viewBox="0 0 24 24"
               style={{ width: "16px", height: "16px" }}
             >
@@ -181,17 +151,12 @@ export default function Header({
         style={{ margin: "0 16px" }}
       >
         <div
-          className="w-full max-w-[720px] h-10 flex items-center rounded"
+          className="w-full max-w-[720px] h-10 flex items-center rounded app-search-bar"
           style={{
-            backgroundColor: "var(--header-input-bg)",
-            border: `1px solid var(--header-input-border)`,
             borderRadius: "4px",
           }}
         >
-          <Search
-            className="h-5 w-5 mx-3"
-            style={{ color: "var(--header-text-secondary)" }}
-          />
+          <Search className="h-5 w-5 mx-3 app-search-icon" />
           <input
             type="text"
             placeholder="Search resources, docs, and products"
@@ -199,22 +164,11 @@ export default function Header({
             onChange={(e) => setSearchValue(e.target.value)}
             className="flex-1 bg-transparent border-none outline-none text-sm"
             style={{
-              color: "var(--header-text)",
               fontFamily: "Roboto, Arial, sans-serif",
               fontSize: "14px",
               lineHeight: "20px",
               paddingTop: "0",
               paddingBottom: "0",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.parentElement!.style.borderColor =
-                "var(--header-input-focus)";
-              e.currentTarget.parentElement!.style.boxShadow = `0 0 0 1px var(--header-input-focus)`;
-            }}
-            onBlur={(e) => {
-              e.currentTarget.parentElement!.style.borderColor =
-                "var(--header-input-border)";
-              e.currentTarget.parentElement!.style.boxShadow = "none";
             }}
             onKeyPress={(e) => {
               if (e.key === "Enter") {
@@ -223,35 +177,18 @@ export default function Header({
             }}
           />
           <button
-            className="h-10 flex items-center justify-center transition-all duration-200"
+            className="h-10 flex items-center justify-center app-search-button"
             style={{
-              backgroundColor: "transparent",
-              color: "var(--header-input-focus)",
               fontFamily: '"Google Sans", Roboto, Arial, sans-serif',
               fontSize: "14px",
               fontWeight: "500",
               letterSpacing: "0.25px",
               border: "none",
-              borderLeft: `1px solid var(--header-input-border)`,
               borderTopRightRadius: "4px",
               borderBottomRightRadius: "4px",
               minWidth: "100px",
               cursor: "pointer",
               padding: "0 20px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--header-button-hover)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.outline = `2px solid var(--header-input-focus)`;
-              e.currentTarget.style.outlineOffset = "-2px";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.outline = "none";
             }}
             onClick={() => {
               console.log("Search clicked:", searchValue);
@@ -259,10 +196,7 @@ export default function Header({
             aria-label="Search"
           >
             <div className="flex items-center gap-2">
-              <Search
-                className="h-[18px] w-[18px]"
-                style={{ color: "var(--header-input-focus)" }}
-              />
+              <Search className="h-[18px] w-[18px]" />
               <span>Search</span>
             </div>
           </button>

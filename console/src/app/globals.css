@@ -139,6 +139,27 @@
   --header-input-focus: #8ab4f8;
 }
 
+/* Force dark mode Tailwind classes to work with class strategy */
+.dark .bg-yellow-100 {
+  background-color: #451a03 !important;
+}
+
+.dark .bg-yellow-900 {
+  background-color: #451a03 !important;
+}
+
+.dark .text-yellow-800 {
+  color: #fbbf24 !important;
+}
+
+.dark .text-yellow-200 {
+  color: #fbbf24 !important;
+}
+
+.dark .border-yellow-400 {
+  border-color: #d97706 !important;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

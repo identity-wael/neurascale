@@ -28,6 +28,7 @@ export function GCPCard({
       className={cn(
         "app-card rounded-lg transition-all duration-150",
         "hover:opacity-95",
+        "bg-white dark:bg-[#292a2d]",
         className,
       )}
     >

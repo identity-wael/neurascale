@@ -66,7 +66,7 @@ export function GCPTabs({
 
       {/* Tab Content */}
       <div
-        className="pt-20 pb-8 bg-[var(--background)]"
+        className="pt-20 pb-8 gcp-tabs-content"
         style={{
           paddingLeft: `${sidebarWidth + 32}px`,
           paddingRight: `${sidebarWidth + 32}px`,

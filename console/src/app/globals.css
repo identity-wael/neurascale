@@ -7,15 +7,15 @@
   --background: #f8f9fa;
   --foreground: #202124;
   --card-bg: #ffffff;
-  --card-hover: rgba(26, 115, 232, 0.08);
+  --card-hover: rgba(65, 133, 244, 0.08);
   --border: #dadce0;
   --border-light: #e8eaed;
-  --primary: #1a73e8;
+  --primary: #4185f4;
   --primary-hover: #1765cc;
   --success: #188038;
   --warning: #f9ab00;
   --error: #d93025;
-  --info: #1a73e8;
+  --info: #4185f4;
   --neutral: #5f6368;
 
   /* Text Colors */
@@ -176,7 +176,7 @@
 }
 
 .dark .app-text {
-  color: #f9fafb;
+  color: #e8eaed;
 }
 
 .app-card {
@@ -349,7 +349,7 @@
 }
 
 .dark .app-card-border {
-  border-color: #5f6368;
+  border-color: #3c4043;
 }
 
 .app-text-secondary {
@@ -367,7 +367,7 @@
 }
 
 .dark .app-text-tertiary {
-  color: #6b7280;
+  color: #9aa0a6;
 }
 
 .hover\:app-text-secondary:hover {
@@ -686,18 +686,14 @@ small {
   border: 1px solid var(--border);
 }
 
-/* SVG icon filters for dark mode */
-.dark img[src*="/svg/"] {
-  filter: brightness(0) saturate(100%) invert(70%) sepia(9%) saturate(469%)
-    hue-rotate(185deg) brightness(95%) contrast(87%);
-  opacity: 1 !important;
+/* SVG icon styling for proper theme support */
+img[src*="/svg/"] {
+  transition: filter 0.2s ease;
+  color: #4185f4;
 }
 
-/* Specific filter for Getting Started icons to make them darker */
-.dark .app-card img[src*="/svg/"] {
-  filter: brightness(0) saturate(100%) invert(40%) sepia(10%) saturate(200%)
-    hue-rotate(185deg) brightness(90%) contrast(85%);
-  opacity: 1 !important;
+.dark img[src*="/svg/"] {
+  color: #8ab4f8;
 }
 
 .hover-lift {

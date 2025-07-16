@@ -9,6 +9,7 @@ import {
   Moon,
   Sun,
   ChevronRight,
+  ChevronDown,
   Sparkles,
   Terminal,
   Bell,
@@ -129,61 +130,60 @@ export default function Header({
 
           {/* Project Selector */}
           <button
-            className="flex items-center gap-2 h-9 px-3 rounded transition-all duration-200"
+            className="flex items-center rounded h-10"
             style={{
-              backgroundColor: "transparent",
+              backgroundColor: "#202124",
               color: "#E8EAED",
-              border: "1px solid transparent",
-              minWidth: "200px",
+              border: "1px solid #5F6368",
               maxWidth: "280px",
-              fontFamily: '"Google Sans", Roboto, Arial, sans-serif',
+              fontFamily: '"Google Sans Text", Roboto, Arial, sans-serif',
               fontSize: "14px",
               fontWeight: "400",
               lineHeight: "20px",
+              letterSpacing: "0.2px",
               borderRadius: "4px",
-              height: "36px",
+              height: "40px",
+              padding: "5px 8px",
+              gap: "8px",
+              marginLeft: "16px",
+              transition: "all 150ms cubic-bezier(0.4, 0, 0.2, 1)",
+              cursor: "pointer",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.08)";
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)";
+              e.currentTarget.style.backgroundColor = "#2A2B2D";
+              e.currentTarget.style.borderColor = "#8AB4F8";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderColor = "transparent";
+              e.currentTarget.style.backgroundColor = "#202124";
+              e.currentTarget.style.borderColor = "#5F6368";
             }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = "#8AB4F8";
-              e.currentTarget.style.outline = "none";
+              e.currentTarget.style.boxShadow = "0 0 0 1px #8AB4F8";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "transparent";
+              e.currentTarget.style.borderColor = "#5F6368";
+              e.currentTarget.style.boxShadow = "none";
             }}
             onMouseDown={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.12)";
+              e.currentTarget.style.backgroundColor = "#25262A";
             }}
             onMouseUp={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.08)";
+              e.currentTarget.style.backgroundColor = "#2A2B2D";
             }}
+            aria-label="Select a project"
           >
             <svg
-              className="h-4 w-4"
+              className="h-4 w-4 flex-shrink-0"
               fill="#8AB4F8"
               viewBox="0 0 24 24"
               style={{ width: "16px", height: "16px" }}
             >
               <path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3z" />
             </svg>
-            <span>neurascale-console</span>
-            <ChevronRight
-              className="h-5 w-5 ml-auto"
-              style={{
-                transform: "rotate(90deg)",
-                color: "#9AA0A6",
-              }}
-            />
+            <span className="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
+              neurascale-console
+            </span>
           </button>
         </div>
       </div>
@@ -198,6 +198,7 @@ export default function Header({
           style={{
             backgroundColor: "#202124",
             border: "1px solid #5F6368",
+            borderRadius: "4px",
           }}
         >
           <Search className="h-5 w-5 mx-3" style={{ color: "#9AA0A6" }} />
@@ -212,6 +213,8 @@ export default function Header({
               fontFamily: "Roboto, Arial, sans-serif",
               fontSize: "14px",
               lineHeight: "20px",
+              paddingTop: "0",
+              paddingBottom: "0",
             }}
             onFocus={(e) => {
               e.currentTarget.parentElement!.style.borderColor = "#8AB4F8";
@@ -222,34 +225,55 @@ export default function Header({
               e.currentTarget.parentElement!.style.borderColor = "#5F6368";
               e.currentTarget.parentElement!.style.boxShadow = "none";
             }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                console.log("Search triggered:", searchValue);
+              }
+            }}
           />
           <button
-            className="px-6 mr-1 rounded font-medium transition-all duration-200"
+            className="h-10 flex items-center justify-center transition-all duration-200"
             style={{
-              backgroundColor: "#1A73E8",
-              color: "#FFFFFF",
+              backgroundColor: "transparent",
+              color: "#8AB4F8",
               fontFamily: '"Google Sans", Roboto, Arial, sans-serif',
               fontSize: "14px",
               fontWeight: "500",
               letterSpacing: "0.25px",
               border: "none",
-              height: "32px",
-              borderRadius: "4px",
+              borderLeft: "1px solid #5F6368",
+              borderTopRightRadius: "4px",
+              borderBottomRightRadius: "4px",
+              minWidth: "100px",
+              cursor: "pointer",
+              padding: "0 20px",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#1765CC";
-              e.currentTarget.style.boxShadow =
-                "0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)";
+              e.currentTarget.style.backgroundColor =
+                "rgba(138, 180, 248, 0.08)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#1A73E8";
-              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.outline = "2px solid #8AB4F8";
+              e.currentTarget.style.outlineOffset = "-2px";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.outline = "none";
             }}
             onClick={() => {
               console.log("Search clicked:", searchValue);
             }}
+            aria-label="Search"
           >
-            Search
+            <div className="flex items-center gap-2">
+              <Search
+                className="h-[18px] w-[18px]"
+                style={{ color: "#8AB4F8" }}
+              />
+              <span>Search</span>
+            </div>
           </button>
         </div>
       </div>

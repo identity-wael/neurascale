@@ -11,6 +11,7 @@ interface GCPCardProps {
   className?: string;
   actions?: React.ReactNode;
   onOptionsClick?: () => void;
+  noPadding?: boolean;
 }
 
 export function GCPCard({
@@ -20,53 +21,134 @@ export function GCPCard({
   className,
   actions,
   onOptionsClick,
+  noPadding = false,
 }: GCPCardProps) {
   return (
     <div
       className={cn(
-        "bg-[var(--card-bg)] border border-[var(--border)] rounded-lg p-6 transition-all duration-150",
+        "bg-[var(--card-bg)] border border-[var(--border)] rounded-lg transition-all duration-150",
         "hover:bg-[var(--card-hover)]",
         className,
       )}
     >
       {(title || icon || actions || onOptionsClick) && (
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            {icon && (
-              <div className="flex items-center justify-center">
-                {typeof icon === "string" ? (
-                  <img
-                    src={`/svg/${icon}.svg`}
-                    alt=""
-                    className="w-6 h-6 opacity-60"
-                  />
-                ) : (
-                  icon
-                )}
-              </div>
-            )}
-            {title && (
-              <h2 className="text-base font-medium leading-6 text-[var(--text-primary)] tracking-[0.1px] font-['Google_Sans',_'Roboto',_Arial,_sans-serif]">
-                {title}
-              </h2>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {actions}
-            {onOptionsClick && (
-              <button
-                onClick={onOptionsClick}
-                className="w-6 h-6 flex items-center justify-center rounded-full transition-colors duration-150 hover:bg-[rgba(60,64,67,0.08)] text-[var(--text-tertiary)]"
-                aria-label="More options"
-              >
-                <MoreVertical className="w-5 h-5" />
-              </button>
-            )}
+        <div className="px-6 py-4 border-b border-[var(--border-light)]">
+          <div className="flex items-center justify-between mx-8 md:mx-12 my-4">
+            <div className="flex items-center gap-3">
+              {icon && (
+                <div className="flex items-center justify-center">
+                  {typeof icon === "string" ? (
+                    <img
+                      src={`/svg/${icon}.svg`}
+                      alt=""
+                      className="w-5 h-5 md:w-6 md:h-6 opacity-60"
+                    />
+                  ) : (
+                    icon
+                  )}
+                </div>
+              )}
+              {title && (
+                <h2 className="text-sm md:text-base font-medium leading-6 text-[var(--text-primary)] tracking-[0.1px] font-['Google_Sans',_'Roboto',_Arial,_sans-serif]">
+                  {title}
+                </h2>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {actions}
+              {onOptionsClick && (
+                <button
+                  onClick={onOptionsClick}
+                  className="w-6 h-6 flex items-center justify-center rounded-full transition-colors duration-150 hover:bg-[rgba(60,64,67,0.08)] text-[var(--text-tertiary)]"
+                  aria-label="More options"
+                >
+                  <MoreVertical className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
-      <div className="text-[var(--text-secondary)]">{children}</div>
+      <div
+        className={cn(
+          "text-[var(--text-secondary)]",
+          !noPadding && "px-6 py-4",
+        )}
+      >
+        <div className="mx-8 md:mx-12 my-4">{children}</div>
+      </div>
     </div>
+  );
+}
+
+// Card content wrapper for consistent spacing
+interface GCPCardContentProps {
+  children: React.ReactNode;
+  className?: string;
+  spacing?: "tight" | "normal" | "loose";
+}
+
+export function GCPCardContent({
+  children,
+  className,
+  spacing = "normal",
+}: GCPCardContentProps) {
+  const spacingClasses = {
+    tight: "space-y-2",
+    normal: "space-y-3",
+    loose: "space-y-4",
+  };
+
+  return (
+    <div className={cn(spacingClasses[spacing], className)}>{children}</div>
+  );
+}
+
+// Card item for consistent list items
+interface GCPCardItemProps {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  href?: string;
+  icon?: React.ReactNode | string;
+}
+
+export function GCPCardItem({
+  children,
+  className,
+  onClick,
+  href,
+  icon,
+}: GCPCardItemProps) {
+  const Component = href ? "a" : onClick ? "button" : "div";
+
+  return (
+    <Component
+      href={href}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-0 py-3",
+        "rounded-md transition-colors duration-150",
+        (href || onClick) && "hover:bg-[var(--card-hover)] cursor-pointer",
+        onClick && "w-full text-left",
+        className,
+      )}
+    >
+      {icon && (
+        <div className="flex-shrink-0">
+          {typeof icon === "string" ? (
+            <img
+              src={`/svg/${icon}.svg`}
+              alt=""
+              className="w-5 h-5 opacity-70"
+            />
+          ) : (
+            icon
+          )}
+        </div>
+      )}
+      <div className="flex-1 min-w-0">{children}</div>
+    </Component>
   );
 }
 

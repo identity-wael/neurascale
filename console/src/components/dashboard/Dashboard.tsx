@@ -2,7 +2,12 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { GCPCard, GCPCardGrid } from "@/components/ui/gcp-card";
+import {
+  GCPCard,
+  GCPCardGrid,
+  GCPCardContent,
+  GCPCardItem,
+} from "@/components/ui/gcp-card";
 import { GCPTabs, GCPTabPanel } from "@/components/ui/gcp-tabs";
 import {
   ArrowRight,
@@ -46,7 +51,7 @@ export default function Dashboard() {
           icon="Project"
           onOptionsClick={() => console.log("Project options")}
         >
-          <div className="space-y-3">
+          <GCPCardContent>
             <div className="flex justify-between items-center py-3 border-b border-[var(--border-light)]">
               <span className="text-sm text-[var(--text-tertiary)]">
                 Project name
@@ -81,7 +86,7 @@ export default function Dashboard() {
               <Settings className="w-4 h-4" />
               Go to project settings
             </a>
-          </div>
+          </GCPCardContent>
         </GCPCard>
 
         {/* Resources Card */}
@@ -90,82 +95,48 @@ export default function Dashboard() {
           icon="Compute-Engine"
           onOptionsClick={() => console.log("Resources options")}
         >
-          <div className="space-y-2">
-            <a
-              href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <img src="/svg/AI-Platform.svg" alt="" className="w-5 h-5" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  Neural Management
-                </div>
-                <div className="text-xs text-[var(--text-tertiary)]">
-                  AI-powered neural systems
-                </div>
+          <GCPCardContent spacing="tight">
+            <GCPCardItem href="#" icon="AI-Platform">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                Neural Management
               </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <img
-                src="/svg/Healthcare-NLP-API.svg"
-                alt=""
-                className="w-5 h-5"
-              />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  NeuroProsthetics
-                </div>
-                <div className="text-xs text-[var(--text-tertiary)]">
-                  Advanced prosthetic control
-                </div>
+              <div className="text-xs text-[var(--text-tertiary)]">
+                AI-powered neural systems
               </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <img src="/svg/Iot-Core.svg" alt="" className="w-5 h-5" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  BCI
-                </div>
-                <div className="text-xs text-[var(--text-tertiary)]">
-                  Brain-Computer Interface
-                </div>
+            </GCPCardItem>
+            <GCPCardItem href="#" icon="Healthcare-NLP-API">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                NeuroProsthetics
               </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <img src="/svg/Game-Servers.svg" alt="" className="w-5 h-5" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  Full-Dive VR
-                </div>
-                <div className="text-xs text-[var(--text-tertiary)]">
-                  Immersive virtual reality
-                </div>
+              <div className="text-xs text-[var(--text-tertiary)]">
+                Advanced prosthetic control
               </div>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <img src="/svg/Vertex-AI.svg" alt="" className="w-5 h-5" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  Augmented XR
-                </div>
-                <div className="text-xs text-[var(--text-tertiary)]">
-                  Extended reality platform
-                </div>
+            </GCPCardItem>
+            <GCPCardItem href="#" icon="Iot-Core">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                BCI
               </div>
-            </a>
-          </div>
+              <div className="text-xs text-[var(--text-tertiary)]">
+                Brain-Computer Interface
+              </div>
+            </GCPCardItem>
+            <GCPCardItem href="#" icon="Game-Servers">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                Full-Dive VR
+              </div>
+              <div className="text-xs text-[var(--text-tertiary)]">
+                Immersive virtual reality
+              </div>
+            </GCPCardItem>
+            <GCPCardItem href="#" icon="Vertex-AI">
+              <div className="text-sm font-medium text-[var(--text-primary)]">
+                Augmented XR
+              </div>
+              <div className="text-xs text-[var(--text-tertiary)]">
+                Extended reality platform
+              </div>
+            </GCPCardItem>
+          </GCPCardContent>
         </GCPCard>
 
         {/* Getting Started Card */}
@@ -174,52 +145,49 @@ export default function Dashboard() {
           icon="Launcher"
           onOptionsClick={() => console.log("Getting started options")}
         >
-          <div className="space-y-2">
-            <a
+          <GCPCardContent spacing="tight">
+            <GCPCardItem
               href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+              icon={<Play className="w-5 h-5 text-[var(--text-tertiary)]" />}
             >
-              <Play className="w-5 h-5 text-[var(--text-tertiary)]" />
               <span className="text-sm text-[var(--text-primary)]">
                 Deploy your first neural model
               </span>
-            </a>
-            <a
+            </GCPCardItem>
+            <GCPCardItem
               href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+              icon={
+                <Database className="w-5 h-5 text-[var(--text-tertiary)]" />
+              }
             >
-              <Database className="w-5 h-5 text-[var(--text-tertiary)]" />
               <span className="text-sm text-[var(--text-primary)]">
                 Create a neural database
               </span>
-            </a>
-            <a
+            </GCPCardItem>
+            <GCPCardItem
               href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+              icon={<Cpu className="w-5 h-5 text-[var(--text-tertiary)]" />}
             >
-              <Cpu className="w-5 h-5 text-[var(--text-tertiary)]" />
               <span className="text-sm text-[var(--text-primary)]">
                 Configure BCI parameters
               </span>
-            </a>
-            <a
+            </GCPCardItem>
+            <GCPCardItem
               href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+              icon={<Zap className="w-5 h-5 text-[var(--text-tertiary)]" />}
             >
-              <Zap className="w-5 h-5 text-[var(--text-tertiary)]" />
               <span className="text-sm text-[var(--text-primary)]">
                 Set up neural monitoring
               </span>
-            </a>
-            <a
+            </GCPCardItem>
+            <GCPCardItem
               href="#"
-              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+              icon={<Cloud className="w-5 h-5 text-[var(--text-tertiary)]" />}
             >
-              <Cloud className="w-5 h-5 text-[var(--text-tertiary)]" />
               <span className="text-sm text-[var(--text-primary)]">
                 Install NeuraScale SDK
               </span>
-            </a>
+            </GCPCardItem>
             <div className="mt-4 pt-4 border-t border-[var(--border-light)]">
               <a
                 href="#"
@@ -229,7 +197,7 @@ export default function Dashboard() {
                 Explore all tutorials
               </a>
             </div>
-          </div>
+          </GCPCardContent>
         </GCPCard>
       </GCPCardGrid>
 
@@ -241,7 +209,7 @@ export default function Dashboard() {
           icon="API"
           onOptionsClick={() => console.log("APIs options")}
         >
-          <div className="space-y-4">
+          <GCPCardContent spacing="loose">
             <div>
               <div className="text-sm text-[var(--text-tertiary)] mb-2">
                 Requests (requests/sec)
@@ -268,7 +236,7 @@ export default function Dashboard() {
                 Go to APIs overview
               </a>
             </div>
-          </div>
+          </GCPCardContent>
         </GCPCard>
 
         {/* Platform Status Card */}
@@ -277,7 +245,7 @@ export default function Dashboard() {
           icon="Security-Command-Center"
           onOptionsClick={() => console.log("Status options")}
         >
-          <div className="space-y-4">
+          <GCPCardContent spacing="loose">
             <div className="flex items-center gap-3 p-4 bg-[var(--background)] rounded">
               <CheckCircle className="w-5 h-5 text-[var(--success)]" />
               <span className="text-sm font-medium text-[var(--text-primary)]">
@@ -324,7 +292,7 @@ export default function Dashboard() {
                 Go to Cloud status dashboard
               </a>
             </div>
-          </div>
+          </GCPCardContent>
         </GCPCard>
       </GCPCardGrid>
 
@@ -336,47 +304,53 @@ export default function Dashboard() {
           icon="Activity"
           onOptionsClick={() => console.log("Activity options")}
         >
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
-              <div className="w-8 h-8 rounded-full bg-[var(--success)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-[var(--success)] rounded-full"></div>
+          <GCPCardContent>
+            <GCPCardItem>
+              <div className="flex items-start gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-[var(--success)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 bg-[var(--success)] rounded-full"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[var(--text-primary)]">
+                    Neural instance "cortex-01" deployed successfully
+                  </p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                    2 minutes ago
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-[var(--text-primary)]">
-                  Neural instance "cortex-01" deployed successfully
-                </p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1">
-                  2 minutes ago
-                </p>
+            </GCPCardItem>
+            <GCPCardItem>
+              <div className="flex items-start gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-[var(--info)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 bg-[var(--info)] rounded-full"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[var(--text-primary)]">
+                    BCI configuration updated
+                  </p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                    15 minutes ago
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
-              <div className="w-8 h-8 rounded-full bg-[var(--info)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-[var(--info)] rounded-full"></div>
+            </GCPCardItem>
+            <GCPCardItem>
+              <div className="flex items-start gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-[var(--warning)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 bg-[var(--warning)] rounded-full"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[var(--text-primary)]">
+                    Neural database backup completed
+                  </p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                    1 hour ago
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-[var(--text-primary)]">
-                  BCI configuration updated
-                </p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1">
-                  15 minutes ago
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
-              <div className="w-8 h-8 rounded-full bg-[var(--warning)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-[var(--warning)] rounded-full"></div>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-[var(--text-primary)]">
-                  Neural database backup completed
-                </p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1">
-                  1 hour ago
-                </p>
-              </div>
-            </div>
-          </div>
+            </GCPCardItem>
+          </GCPCardContent>
         </GCPCard>
 
         {/* News & Updates */}
@@ -385,36 +359,34 @@ export default function Dashboard() {
           icon="Release-Notes"
           onOptionsClick={() => console.log("News options")}
         >
-          <div className="space-y-3">
-            <a
-              href="#"
-              className="block p-3 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
-                NeuraScale 2.0 Released
-              </h4>
-              <p className="text-xs text-[var(--text-tertiary)]">
-                Major update includes improved BCI latency and new VR
-                capabilities
-              </p>
-              <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
-                2 days ago
-              </span>
-            </a>
-            <a
-              href="#"
-              className="block p-3 rounded hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
-                New Neural Training Models Available
-              </h4>
-              <p className="text-xs text-[var(--text-tertiary)]">
-                Pre-trained models for faster deployment of neural interfaces
-              </p>
-              <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
-                1 week ago
-              </span>
-            </a>
+          <GCPCardContent>
+            <GCPCardItem href="#">
+              <div>
+                <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                  NeuraScale 2.0 Released
+                </h4>
+                <p className="text-xs text-[var(--text-tertiary)]">
+                  Major update includes improved BCI latency and new VR
+                  capabilities
+                </p>
+                <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
+                  2 days ago
+                </span>
+              </div>
+            </GCPCardItem>
+            <GCPCardItem href="#">
+              <div>
+                <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                  New Neural Training Models Available
+                </h4>
+                <p className="text-xs text-[var(--text-tertiary)]">
+                  Pre-trained models for faster deployment of neural interfaces
+                </p>
+                <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
+                  1 week ago
+                </span>
+              </div>
+            </GCPCardItem>
             <div className="pt-4 border-t border-[var(--border-light)]">
               <a
                 href="#"
@@ -424,7 +396,7 @@ export default function Dashboard() {
                 Read all news
               </a>
             </div>
-          </div>
+          </GCPCardContent>
         </GCPCard>
       </GCPCardGrid>
     </div>

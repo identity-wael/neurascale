@@ -34,7 +34,7 @@ export function GCPTabs({
   const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full bg-white dark:bg-transparent", className)}>
       {/* Tab Navigation */}
       <div className="gcp-tabs-nav border-b border-[var(--border)]">
         <div
@@ -66,8 +66,9 @@ export function GCPTabs({
 
       {/* Tab Content */}
       <div
-        className="pt-20 pb-8 gcp-tabs-content"
+        className="pb-8 gcp-tabs-content bg-white dark:bg-[#202124]"
         style={{
+          paddingTop: "32px",
           paddingLeft: `${sidebarWidth + 32}px`,
           paddingRight: `${sidebarWidth + 32}px`,
         }}

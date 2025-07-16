@@ -30,8 +30,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+
+      // Set or clear session cookie
+      if (user) {
+        // Set a session cookie when user is authenticated
+        document.cookie = `__session=${user.uid}; path=/; max-age=604800; SameSite=Lax`;
+      } else {
+        // Clear the session cookie when user is not authenticated
+        document.cookie =
+          "__session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      }
+
       setLoading(false);
     });
 
@@ -61,6 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     try {
       await signOut(auth);
+      // Clear the session cookie
+      document.cookie =
+        "__session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      // Force reload to trigger middleware
+      window.location.href = "/auth/signin";
     } catch (error) {
       console.error("Error signing out:", error);
       throw error;

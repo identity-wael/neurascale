@@ -301,15 +301,13 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <GCPCard
           title="Recent Activity"
-          icon="Activity"
+          icon="Cloud-Logging"
           onOptionsClick={() => console.log("Activity options")}
         >
           <GCPCardContent>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-[var(--success)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-[var(--success)] rounded-full"></div>
-                </div>
+                <div className="w-2 h-2 bg-[var(--success)] rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm text-[var(--text-primary)]">
                     Neural instance "cortex-01" deployed successfully
@@ -322,9 +320,7 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-[var(--info)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-[var(--info)] rounded-full"></div>
-                </div>
+                <div className="w-2 h-2 bg-[var(--info)] rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm text-[var(--text-primary)]">
                     BCI configuration updated
@@ -337,9 +333,7 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-[var(--warning)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-[var(--warning)] rounded-full"></div>
-                </div>
+                <div className="w-2 h-2 bg-[var(--warning)] rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm text-[var(--text-primary)]">
                     Neural database backup completed

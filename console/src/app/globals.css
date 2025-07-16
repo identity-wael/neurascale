@@ -23,6 +23,17 @@
   --text-secondary: #3c4043;
   --text-tertiary: #5f6368;
 
+  /* Header Colors */
+  --header-bg: #ffffff;
+  --header-border: #dadce0;
+  --header-text: #202124;
+  --header-text-secondary: #5f6368;
+  --header-button-hover: rgba(60, 64, 67, 0.08);
+  --header-button-active: rgba(60, 64, 67, 0.12);
+  --header-input-bg: #f8f9fa;
+  --header-input-border: #dadce0;
+  --header-input-focus: #1a73e8;
+
   /* Shadows */
   --shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
     0 1px 3px 1px rgba(60, 64, 67, 0.15);
@@ -83,6 +94,17 @@
     --text-primary: #e8eaed;
     --text-secondary: #bdc1c6;
     --text-tertiary: #9aa0a6;
+
+    /* Header Colors - Dark Mode */
+    --header-bg: #303134;
+    --header-border: rgba(255, 255, 255, 0.08);
+    --header-text: #e8eaed;
+    --header-text-secondary: #9aa0a6;
+    --header-button-hover: rgba(255, 255, 255, 0.08);
+    --header-button-active: rgba(255, 255, 255, 0.12);
+    --header-input-bg: #202124;
+    --header-input-border: #5f6368;
+    --header-input-focus: #8ab4f8;
   }
 }
 
@@ -104,6 +126,17 @@
   --text-primary: #e8eaed;
   --text-secondary: #bdc1c6;
   --text-tertiary: #9aa0a6;
+
+  /* Header Colors - Dark Mode */
+  --header-bg: #303134;
+  --header-border: rgba(255, 255, 255, 0.08);
+  --header-text: #e8eaed;
+  --header-text-secondary: #9aa0a6;
+  --header-button-hover: rgba(255, 255, 255, 0.08);
+  --header-button-active: rgba(255, 255, 255, 0.12);
+  --header-input-bg: #202124;
+  --header-input-border: #5f6368;
+  --header-input-focus: #8ab4f8;
 }
 
 * {

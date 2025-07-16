@@ -97,18 +97,12 @@ function NavItemComponent({
     <div>
       <button
         onClick={hasChildren ? onToggle : undefined}
-        className="w-full flex items-center justify-between text-sm rounded-sm transition-all group relative"
+        className="w-full flex items-center justify-between text-sm rounded-sm transition-all group relative app-sidebar-item"
         style={{
-          color: "#E8EAED",
           padding: level === 0 ? "0" : "0 8px 0 0",
           paddingRight: !isCollapsed ? "12px" : "0",
           minHeight: "40px",
-          backgroundColor: isHovered
-            ? "rgba(232, 234, 237, 0.08)"
-            : "transparent",
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         title={isCollapsed ? item.name : undefined}
       >
         <div className="flex items-center">
@@ -138,10 +132,9 @@ function NavItemComponent({
         {!isCollapsed && hasChildren && (
           <ChevronRight
             className={cn(
-              "h-4 w-4 transition-transform",
+              "h-4 w-4 transition-transform app-sidebar-chevron",
               isExpanded && "rotate-90",
             )}
-            style={{ color: "#9AA0A6" }}
           />
         )}
       </button>
@@ -151,20 +144,16 @@ function NavItemComponent({
           {item.children!.map((child) => (
             <button
               key={child.href}
-              className="w-full flex items-center gap-3 text-sm rounded-sm transition-all"
+              className="w-full flex items-center gap-3 text-sm rounded-sm transition-all app-sidebar-item"
               style={{
-                color: "#E8EAED",
                 padding: "0 12px 0 0",
                 minHeight: "28px",
                 opacity: 0.8,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "rgba(232, 234, 237, 0.08)";
                 e.currentTarget.style.opacity = "1";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
                 e.currentTarget.style.opacity = "0.8";
               }}
             >
@@ -231,36 +220,29 @@ export default function Sidebar({
           "translate-x-0",
           isCollapsed ? "w-[64px]" : "w-[280px]",
         )}
-        style={{
-          backgroundColor: "#1F1F1F",
-          borderRight: "1px solid rgba(255, 255, 255, 0.08)",
-        }}
+        className={cn(
+          "app-sidebar",
+          "overflow-y-auto transition-all duration-200 flex-shrink-0",
+          "fixed left-0 z-50 h-screen",
+          isCollapsed ? "top-[48px] h-[calc(100vh-48px)]" : "top-0",
+          "translate-x-0",
+          isCollapsed ? "w-[64px]" : "w-[280px]",
+        )}
       >
         {/* Header with X button and logo when expanded */}
         {!isCollapsed && (
           <div
-            className="flex items-center h-[48px]"
+            className="flex items-center h-[48px] app-sidebar-header"
             style={{
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
               padding: "0 8px",
-              backgroundColor: "#303134",
             }}
           >
             <button
               onClick={onToggleCollapse}
-              className="flex items-center justify-center w-10 h-10 rounded transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded transition-colors app-sidebar-close-button"
               style={{
-                color: "#E8EAED",
-                backgroundColor: "transparent",
                 marginLeft: "4px",
                 borderRadius: "4px",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "rgba(255, 255, 255, 0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
               }}
               title="Close menu"
             >
@@ -285,7 +267,7 @@ export default function Sidebar({
         )}
 
         {/* Navigation */}
-        <nav className="py-2" style={{ backgroundColor: "#1F1F1F" }}>
+        <nav className="py-2 app-sidebar-nav">
           {navItems.map((item) => (
             <NavItemComponent
               key={item.name}

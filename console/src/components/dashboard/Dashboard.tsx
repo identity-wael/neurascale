@@ -63,9 +63,9 @@ export default function Dashboard() {
             </button>
             <a
               href="#"
-              className="flex items-center gap-2 mt-2 text-sm text-gray-700 hover:underline"
+              className="flex items-center gap-2 mt-2 text-sm text-[var(--primary)] hover:underline"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 text-[var(--primary)]" />
               Go to project settings
             </a>
           </GCPCardContent>
@@ -124,7 +124,7 @@ export default function Dashboard() {
           <GCPCardContent spacing="tight">
             <GCPCardItem
               href="#"
-              icon={<Play className="w-5 h-5 text-gray-900" />}
+              icon={<Play className="w-5 h-5 text-[var(--primary)]" />}
             >
               <span className="text-sm app-text">
                 Deploy your first neural model
@@ -132,34 +132,34 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Database className="w-5 h-5 text-gray-900" />}
+              icon={<Database className="w-5 h-5 text-[var(--primary)]" />}
             >
               <span className="text-sm app-text">Create a neural database</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cpu className="w-5 h-5 text-gray-900" />}
+              icon={<Cpu className="w-5 h-5 text-[var(--primary)]" />}
             >
               <span className="text-sm app-text">Configure BCI parameters</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Zap className="w-5 h-5 text-gray-900" />}
+              icon={<Zap className="w-5 h-5 text-[var(--primary)]" />}
             >
               <span className="text-sm app-text">Set up neural monitoring</span>
             </GCPCardItem>
             <GCPCardItem
               href="#"
-              icon={<Cloud className="w-5 h-5 text-gray-900" />}
+              icon={<Cloud className="w-5 h-5 text-[var(--primary)]" />}
             >
               <span className="text-sm app-text">Install NeuraScale SDK</span>
             </GCPCardItem>
             <div className="mt-4 pt-4 border-t app-card-border">
               <a
                 href="#"
-                className="flex items-center gap-2 text-sm text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[var(--primary)]" />
                 Explore all tutorials
               </a>
             </div>
@@ -180,7 +180,7 @@ export default function Dashboard() {
               <div className="text-sm app-text-tertiary mb-2">
                 Requests (requests/sec)
               </div>
-              <div className="h-[200px] bg-gray-50 dark:bg-gray-800 rounded flex items-center justify-center app-text-tertiary">
+              <div className="h-[200px] bg-gray-50 dark:bg-[#292a2d] rounded flex items-center justify-center app-text-tertiary">
                 {/* Chart placeholder */}
                 <span className="text-xs">API usage chart</span>
               </div>
@@ -192,9 +192,9 @@ export default function Dashboard() {
               </div>
               <a
                 href="#"
-                className="flex items-center gap-2 text-sm text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[var(--primary)]" />
                 Go to APIs overview
               </a>
             </div>
@@ -208,8 +208,8 @@ export default function Dashboard() {
           onOptionsClick={() => console.log("Status options")}
         >
           <GCPCardContent spacing="loose">
-            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded">
-              <CheckCircle className="w-5 h-5 text-gray-600" />
+            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-[#292a2d] rounded">
+              <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm font-medium app-text">
                 All services normal
               </span>
@@ -221,15 +221,15 @@ export default function Dashboard() {
                   Neural Management
                 </span>
                 <span className="flex items-center gap-2 text-sm">
-                  <span className="w-2 h-2 bg-gray-600 rounded-full"></span>
-                  <span className="text-gray-600">Operational</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span className="text-green-500">Operational</span>
                 </span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm app-text-secondary">BCI Services</span>
                 <span className="flex items-center gap-2 text-sm">
-                  <span className="w-2 h-2 bg-gray-600 rounded-full"></span>
-                  <span className="text-gray-600">Operational</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span className="text-green-500">Operational</span>
                 </span>
               </div>
               <div className="flex items-center justify-between py-2">
@@ -237,8 +237,8 @@ export default function Dashboard() {
                   VR/XR Platform
                 </span>
                 <span className="flex items-center gap-2 text-sm">
-                  <span className="w-2 h-2 bg-gray-600 rounded-full"></span>
-                  <span className="text-gray-600">Operational</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span className="text-green-500">Operational</span>
                 </span>
               </div>
             </div>
@@ -246,9 +246,9 @@ export default function Dashboard() {
             <div className="pt-4 border-t app-card-border">
               <a
                 href="#"
-                className="flex items-center gap-2 text-sm text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[var(--primary)]" />
                 Go to Cloud status dashboard
               </a>
             </div>
@@ -267,7 +267,7 @@ export default function Dashboard() {
           <GCPCardContent>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-2 h-2 bg-gray-600 rounded-full flex-shrink-0 mt-2"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm app-text">
                     Neural instance "cortex-01" deployed successfully
@@ -280,7 +280,7 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-2 h-2 bg-gray-600 rounded-full flex-shrink-0 mt-2"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm app-text">BCI configuration updated</p>
                   <p className="text-xs app-text-tertiary mt-1">
@@ -291,7 +291,7 @@ export default function Dashboard() {
             </GCPCardItem>
             <GCPCardItem>
               <div className="flex items-start gap-3 w-full">
-                <div className="w-2 h-2 bg-gray-600 rounded-full flex-shrink-0 mt-2"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm app-text">
                     Neural database backup completed
@@ -340,9 +340,9 @@ export default function Dashboard() {
             <div className="pt-4 border-t app-card-border">
               <a
                 href="#"
-                className="flex items-center gap-2 text-sm text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[var(--primary)]" />
                 Read all news
               </a>
             </div>

@@ -31,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Main Content */}
         <main
           className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)] transition-all duration-200"
-          style={{ marginLeft: sidebarCollapsed ? "56px" : "280px" }}
+          style={{ marginLeft: sidebarCollapsed ? "64px" : "280px" }}
         >
           <div className="h-full">{children}</div>
         </main>

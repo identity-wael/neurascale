@@ -35,7 +35,7 @@ export function GCPTabs({
     <div className={cn("w-full", className)}>
       {/* Tab Navigation */}
       <div className="bg-[var(--card-bg)] border-b border-[var(--border)]">
-        <div className="flex items-center h-12 pl-12 pr-6 gap-8">
+        <div className="flex items-center h-12 pl-8 pr-6 gap-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -60,7 +60,7 @@ export function GCPTabs({
       </div>
 
       {/* Tab Content */}
-      <div className="pl-12 pr-6 pt-20 pb-8 bg-[var(--background)]">
+      <div className="px-8 pt-20 pb-8 bg-[var(--background)]">
         {activeTabContent}
       </div>
     </div>

@@ -47,7 +47,7 @@ export default function Dashboard() {
       <GCPCardGrid columns={3} className="mb-4">
         {/* Project Info Card */}
         <GCPCard
-          title="Project information"
+          title="Project info"
           icon="Project"
           onOptionsClick={() => console.log("Project options")}
         >

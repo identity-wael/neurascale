@@ -2,403 +2,469 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface ServiceCard {
-  id: string;
-  title: string;
-  description: string;
-  icon?: string;
-  status?: "Active" | "Beta" | "Coming Soon";
-  category?: string;
-}
-
-const neuralServices: ServiceCard[] = [
-  {
-    id: "neural-management",
-    title: "Neural Management Systems",
-    description:
-      "Manage and monitor neural network architectures and brain-computer interfaces",
-    icon: "AI-Platform-Unified",
-    status: "Active",
-    category: "Neural",
-  },
-  {
-    id: "neuroprosthetics",
-    title: "Neuroprosthetics Platform",
-    description:
-      "Control and configure advanced neuroprosthetic devices and interfaces",
-    icon: "Healthcare-NLP-API",
-    status: "Active",
-    category: "Neural",
-  },
-  {
-    id: "brain-robot",
-    title: "Brain-Robot Swarm Interface",
-    description:
-      "Connect consciousness to robotic swarms for distributed control systems",
-    icon: "Iot-Core",
-    status: "Beta",
-    category: "Neural",
-  },
-  {
-    id: "full-dive-vr",
-    title: "Full-Dive Virtual Reality",
-    description:
-      "Immersive neural interface for complete virtual world experiences",
-    icon: "Cloud-Vision-API",
-    status: "Beta",
-    category: "Neural",
-  },
-];
-
-const infrastructureServices: ServiceCard[] = [
-  {
-    id: "cloud-infrastructure",
-    title: "Cloud Infrastructure",
-    description:
-      "Scalable compute, storage, and networking resources for neural processing",
-    icon: "Compute-Engine",
-    status: "Active",
-    category: "Infrastructure",
-  },
-  {
-    id: "neural-databases",
-    title: "Neural Databases",
-    description:
-      "Specialized databases optimized for neural pattern storage and retrieval",
-    icon: "Cloud-Spanner",
-    status: "Active",
-    category: "Infrastructure",
-  },
-  {
-    id: "ai-ml-platform",
-    title: "AI & ML Platform",
-    description:
-      "Machine learning tools for neural pattern analysis and enhancement",
-    icon: "Vertex-AI",
-    status: "Active",
-    category: "AI/ML",
-  },
-  {
-    id: "neural-networking",
-    title: "Neural Networking",
-    description:
-      "High-speed networking infrastructure for neural data transmission",
-    icon: "Network-Connectivity-Center",
-    status: "Active",
-    category: "Infrastructure",
-  },
-];
-
-const securityServices: ServiceCard[] = [
-  {
-    id: "neuro-security",
-    title: "Neuro-Security Suite",
-    description:
-      "Advanced security protocols for protecting neural interfaces and data",
-    icon: "Security-Command-Center",
-    status: "Active",
-    category: "Security",
-  },
-  {
-    id: "neural-analytics",
-    title: "Neural Analytics",
-    description:
-      "Real-time monitoring and analysis of neural system performance",
-    icon: "Cloud-Monitoring",
-    status: "Active",
-    category: "Analytics",
-  },
-];
-
-const quickActions = [
-  {
-    title: "Deploy Neural Instance",
-    description: "Launch a new neural compute instance",
-    icon: "Compute-Engine",
-    gradient: "from-blue-500 to-purple-600",
-  },
-  {
-    title: "Create Neural Database",
-    description: "Set up a specialized neural database",
-    icon: "Cloud-Spanner",
-    gradient: "from-emerald-500 to-teal-600",
-  },
-  {
-    title: "Configure Interface",
-    description: "Set up brain-computer interface parameters",
-    icon: "Configuration-Management",
-    gradient: "from-orange-500 to-red-600",
-  },
-];
+import { GCPCard, GCPCardGrid } from "@/components/ui/gcp-card";
+import { GCPTabs, GCPTabPanel } from "@/components/ui/gcp-tabs";
+import {
+  ArrowRight,
+  Settings,
+  Activity,
+  Users,
+  Database,
+  Cpu,
+  HardDrive,
+  Zap,
+  Cloud,
+  Play,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  MoreHorizontal,
+} from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useAuth();
 
-  const getStatusStyles = (status?: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "Beta":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "Coming Soon":
-        return "bg-gray-50 text-gray-600 border-gray-200";
-      default:
-        return "bg-gray-50 text-gray-600 border-gray-200";
-    }
-  };
+  // Dashboard Tab Content
+  const DashboardContent = () => (
+    <div className="max-w-[1440px] mx-auto">
+      {/* Welcome Section */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-normal text-[var(--text-primary)]">
+          Welcome
+          {user
+            ? `, ${user.displayName || user.email}`
+            : " to NeuraScale Console"}
+        </h1>
+      </div>
+
+      {/* Project Info and Quick Stats Grid */}
+      <GCPCardGrid columns={3} className="mb-4">
+        {/* Project Info Card */}
+        <GCPCard
+          title="Project info"
+          icon="Project"
+          onOptionsClick={() => console.log("Project options")}
+        >
+          <div className="space-y-3">
+            <div className="flex justify-between items-center py-3 border-b border-[var(--border-light)]">
+              <span className="text-sm text-[var(--text-tertiary)]">
+                Project name
+              </span>
+              <span className="text-sm text-[var(--text-primary)]">
+                neurascale-console
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-[var(--border-light)]">
+              <span className="text-sm text-[var(--text-tertiary)]">
+                Project ID
+              </span>
+              <span className="text-sm text-[var(--text-primary)]">
+                neurascale-console
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-[var(--border-light)]">
+              <span className="text-sm text-[var(--text-tertiary)]">
+                Project number
+              </span>
+              <span className="text-sm text-[var(--text-primary)]">
+                742047715565
+              </span>
+            </div>
+            <button className="w-full mt-4 gcp-button-primary">
+              ADD PEOPLE TO THIS PROJECT
+            </button>
+            <a
+              href="#"
+              className="flex items-center gap-2 mt-2 text-sm text-[var(--primary)] hover:underline"
+            >
+              <Settings className="w-4 h-4" />
+              Go to project settings
+            </a>
+          </div>
+        </GCPCard>
+
+        {/* Resources Card */}
+        <GCPCard
+          title="Resources"
+          icon="Compute-Engine"
+          onOptionsClick={() => console.log("Resources options")}
+        >
+          <div className="space-y-2">
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <img src="/svg/AI-Platform.svg" alt="" className="w-5 h-5" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  Neural Management
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)]">
+                  AI-powered neural systems
+                </div>
+              </div>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <img
+                src="/svg/Healthcare-NLP-API.svg"
+                alt=""
+                className="w-5 h-5"
+              />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  NeuroProsthetics
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)]">
+                  Advanced prosthetic control
+                </div>
+              </div>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <img src="/svg/Iot-Core.svg" alt="" className="w-5 h-5" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  BCI
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)]">
+                  Brain-Computer Interface
+                </div>
+              </div>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <img src="/svg/Game-Servers.svg" alt="" className="w-5 h-5" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  Full-Dive VR
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)]">
+                  Immersive virtual reality
+                </div>
+              </div>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <img src="/svg/Vertex-AI.svg" alt="" className="w-5 h-5" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  Augmented XR
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)]">
+                  Extended reality platform
+                </div>
+              </div>
+            </a>
+          </div>
+        </GCPCard>
+
+        {/* Getting Started Card */}
+        <GCPCard
+          title="Getting Started"
+          icon="Launcher"
+          onOptionsClick={() => console.log("Getting started options")}
+        >
+          <div className="space-y-2">
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <Play className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm text-[var(--text-primary)]">
+                Deploy your first neural model
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <Database className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm text-[var(--text-primary)]">
+                Create a neural database
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <Cpu className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm text-[var(--text-primary)]">
+                Configure BCI parameters
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <Zap className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm text-[var(--text-primary)]">
+                Set up neural monitoring
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 p-2 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <Cloud className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm text-[var(--text-primary)]">
+                Install NeuraScale SDK
+              </span>
+            </a>
+            <div className="mt-4 pt-4 border-t border-[var(--border-light)]">
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Explore all tutorials
+              </a>
+            </div>
+          </div>
+        </GCPCard>
+      </GCPCardGrid>
+
+      {/* Second Row - Monitoring Cards */}
+      <GCPCardGrid columns={2} className="mb-4">
+        {/* APIs Card */}
+        <GCPCard
+          title="APIs"
+          icon="API"
+          onOptionsClick={() => console.log("APIs options")}
+        >
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-[var(--text-tertiary)] mb-2">
+                Requests (requests/sec)
+              </div>
+              <div className="h-[200px] bg-[var(--background)] rounded flex items-center justify-center text-[var(--text-tertiary)]">
+                {/* Chart placeholder */}
+                <span className="text-xs">API usage chart</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border-light)]">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[var(--text-tertiary)]">
+                  Requests:
+                </span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">
+                  0.002/s
+                </span>
+              </div>
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Go to APIs overview
+              </a>
+            </div>
+          </div>
+        </GCPCard>
+
+        {/* Platform Status Card */}
+        <GCPCard
+          title="NeuraScale Platform Status"
+          icon="Security-Command-Center"
+          onOptionsClick={() => console.log("Status options")}
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-[var(--background)] rounded">
+              <CheckCircle className="w-5 h-5 text-[var(--success)]" />
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                All services normal
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-[var(--text-secondary)]">
+                  Neural Management
+                </span>
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 bg-[var(--success)] rounded-full"></span>
+                  <span className="text-[var(--success)]">Operational</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-[var(--text-secondary)]">
+                  BCI Services
+                </span>
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 bg-[var(--success)] rounded-full"></span>
+                  <span className="text-[var(--success)]">Operational</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-[var(--text-secondary)]">
+                  VR/XR Platform
+                </span>
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="w-2 h-2 bg-[var(--success)] rounded-full"></span>
+                  <span className="text-[var(--success)]">Operational</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-[var(--border-light)]">
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Go to Cloud status dashboard
+              </a>
+            </div>
+          </div>
+        </GCPCard>
+      </GCPCardGrid>
+
+      {/* Third Row - Activity and News */}
+      <GCPCardGrid columns={2}>
+        {/* Recent Activity */}
+        <GCPCard
+          title="Recent Activity"
+          icon="Activity"
+          onOptionsClick={() => console.log("Activity options")}
+        >
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[var(--success)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-[var(--success)] rounded-full"></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-[var(--text-primary)]">
+                  Neural instance "cortex-01" deployed successfully
+                </p>
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                  2 minutes ago
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[var(--info)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-[var(--info)] rounded-full"></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-[var(--text-primary)]">
+                  BCI configuration updated
+                </p>
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                  15 minutes ago
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded hover:bg-[var(--card-hover)] transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[var(--warning)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-[var(--warning)] rounded-full"></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-[var(--text-primary)]">
+                  Neural database backup completed
+                </p>
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                  1 hour ago
+                </p>
+              </div>
+            </div>
+          </div>
+        </GCPCard>
+
+        {/* News & Updates */}
+        <GCPCard
+          title="News & Updates"
+          icon="Release-Notes"
+          onOptionsClick={() => console.log("News options")}
+        >
+          <div className="space-y-3">
+            <a
+              href="#"
+              className="block p-3 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                NeuraScale 2.0 Released
+              </h4>
+              <p className="text-xs text-[var(--text-tertiary)]">
+                Major update includes improved BCI latency and new VR
+                capabilities
+              </p>
+              <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
+                2 days ago
+              </span>
+            </a>
+            <a
+              href="#"
+              className="block p-3 rounded hover:bg-[var(--card-hover)] transition-colors"
+            >
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                New Neural Training Models Available
+              </h4>
+              <p className="text-xs text-[var(--text-tertiary)]">
+                Pre-trained models for faster deployment of neural interfaces
+              </p>
+              <span className="text-xs text-[var(--text-tertiary)] mt-1 block">
+                1 week ago
+              </span>
+            </a>
+            <div className="pt-4 border-t border-[var(--border-light)]">
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-[var(--primary)] hover:underline"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Read all news
+              </a>
+            </div>
+          </div>
+        </GCPCard>
+      </GCPCardGrid>
+    </div>
+  );
+
+  // Activity Tab Content
+  const ActivityContent = () => (
+    <div className="max-w-[1440px] mx-auto">
+      <GCPCard title="System Activity Log">
+        <div className="text-center py-12 text-[var(--text-tertiary)]">
+          Activity log will be displayed here
+        </div>
+      </GCPCard>
+    </div>
+  );
+
+  // Recommendations Tab Content
+  const RecommendationsContent = () => (
+    <div className="max-w-[1440px] mx-auto">
+      <GCPCard title="Personalized Recommendations">
+        <div className="text-center py-12 text-[var(--text-tertiary)]">
+          Recommendations based on your usage will appear here
+        </div>
+      </GCPCard>
+    </div>
+  );
+
+  const tabs = [
+    { id: "dashboard", label: "Dashboard", content: <DashboardContent /> },
+    { id: "activity", label: "Activity", content: <ActivityContent /> },
+    {
+      id: "recommendations",
+      label: "Recommendations",
+      content: <RecommendationsContent />,
+    },
+  ];
 
   return (
-    <div className="p-6 lg:p-8 xl:p-12 bg-[var(--background)] min-h-screen">
-      <div className="max-w-screen-2xl mx-auto">
-        {/* Welcome Section */}
-        <section className="mb-12">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-              <img
-                src="/svg/AI-Platform-Unified.svg"
-                alt=""
-                className="w-8 h-8 filter brightness-0 invert"
-              />
-            </div>
-            <h1 className="text-4xl font-bold text-[var(--foreground)]">
-              Welcome to NeuraScale Console
-            </h1>
-          </div>
-
-          <div className="glass-card rounded-2xl shadow-xl p-8 lg:p-10 border border-[var(--border)]">
-            <h2 className="text-2xl font-semibold text-[var(--foreground)] mb-4">
-              {user
-                ? `Hello, ${user.displayName || user.email}`
-                : "Manage your neural computing infrastructure"}
-            </h2>
-            <p className="text-base text-[var(--foreground)] opacity-70 leading-relaxed max-w-3xl">
-              Access and control your neural interfaces, brain-computer systems,
-              and advanced computing resources from a unified platform.
-            </p>
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quickActions.map((action) => (
-              <button
-                key={action.title}
-                className="group relative bg-[var(--card-bg)] rounded-2xl shadow-lg p-6 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-left overflow-hidden border border-[var(--border)]"
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300 ${action.gradient}`}
-                ></div>
-                <div className="relative z-10 flex items-start gap-4">
-                  <div
-                    className={`p-3 bg-gradient-to-br ${action.gradient} rounded-xl shadow-md group-hover:shadow-lg transition-shadow duration-300`}
-                  >
-                    <img
-                      src={`/svg/${action.icon}.svg`}
-                      alt=""
-                      className="w-6 h-6 filter brightness-0 invert"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-[var(--foreground)] mb-1">
-                      {action.title}
-                    </h3>
-                    <p className="text-sm text-[var(--foreground)] opacity-70">
-                      {action.description}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Neural Services */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">
-            Neural Services
-          </h2>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {neuralServices.map((service) => (
-              <div
-                key={service.id}
-                className="gradient-border bg-[var(--card-bg)] rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover-lift border border-[var(--border)]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl group-hover:from-purple-500/20 group-hover:to-blue-500/20 transition-colors duration-300">
-                    <img
-                      src={`/svg/${service.icon}.svg`}
-                      alt=""
-                      className="w-8 h-8"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="text-lg font-semibold text-[var(--foreground)] group-hover:opacity-90">
-                        {service.title}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyles(
-                          service.status,
-                        )}`}
-                      >
-                        {service.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[var(--foreground)] opacity-70 leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Infrastructure & Platform Services */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">
-            Infrastructure & Platform Services
-          </h2>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {infrastructureServices.map((service) => (
-              <div
-                key={service.id}
-                className="gradient-border bg-[var(--card-bg)] rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover-lift border border-[var(--border)]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl group-hover:from-emerald-500/20 group-hover:to-teal-500/20 transition-colors duration-300">
-                    <img
-                      src={`/svg/${service.icon}.svg`}
-                      alt=""
-                      className="w-8 h-8"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="text-lg font-semibold text-[var(--foreground)] group-hover:opacity-90">
-                        {service.title}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyles(
-                          service.status,
-                        )}`}
-                      >
-                        {service.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[var(--foreground)] opacity-70 leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Security & Analytics */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">
-            Security & Analytics
-          </h2>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {securityServices.map((service) => (
-              <div
-                key={service.id}
-                className="gradient-border bg-[var(--card-bg)] rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover-lift border border-[var(--border)]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl group-hover:from-amber-500/20 group-hover:to-orange-500/20 transition-colors duration-300">
-                    <img
-                      src={`/svg/${service.icon}.svg`}
-                      alt=""
-                      className="w-8 h-8"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="text-lg font-semibold text-[var(--foreground)] group-hover:opacity-90">
-                        {service.title}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyles(
-                          service.status,
-                        )}`}
-                      >
-                        {service.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[var(--foreground)] opacity-70 leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Recent Activity */}
-        <section className="mb-12">
-          <div className="glass-card rounded-2xl shadow-xl p-8 lg:p-10 border border-[var(--border)]">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Recent Activity
-              </h2>
-              <div className="flex items-center gap-2 text-sm text-[var(--foreground)] opacity-60">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span className="font-medium">Live</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="group flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--card-hover)] transition-all duration-200 border-l-4 border-emerald-500">
-                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 transition-colors">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[var(--foreground)] mb-1">
-                    Neural instance "cortex-01" deployed successfully
-                  </p>
-                  <p className="text-xs text-[var(--foreground)] opacity-50">
-                    2 minutes ago
-                  </p>
-                </div>
-              </div>
-              <div className="group flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--card-hover)] transition-all duration-200 border-l-4 border-blue-500">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[var(--foreground)] mb-1">
-                    Brain-Robot interface configuration updated
-                  </p>
-                  <p className="text-xs text-[var(--foreground)] opacity-50">
-                    15 minutes ago
-                  </p>
-                </div>
-              </div>
-              <div className="group flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--card-hover)] transition-all duration-200 border-l-4 border-amber-500">
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 transition-colors">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[var(--foreground)] mb-1">
-                    Neural database backup completed
-                  </p>
-                  <p className="text-xs text-[var(--foreground)] opacity-50">
-                    1 hour ago
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Tabs */}
+      <GCPTabs tabs={tabs} defaultTab="dashboard" />
     </div>
   );
 }

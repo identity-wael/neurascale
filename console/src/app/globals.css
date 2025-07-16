@@ -162,12 +162,12 @@
 
 /* Simple theme classes - no CSS variables */
 .app-bg {
-  background-color: #ffffff !important;
+  background-color: #f8f9fa !important;
   transition: background-color 0.2s ease;
 }
 
 .dark .app-bg {
-  background-color: #1a1a1a !important;
+  background-color: #202124 !important;
 }
 
 .app-text {

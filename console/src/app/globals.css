@@ -179,6 +179,15 @@
   background-color: #292a2d !important;
 }
 
+/* Tab content background */
+.gcp-tabs-content {
+  background-color: #ffffff !important;
+}
+
+.dark .gcp-tabs-content {
+  background-color: #202124 !important;
+}
+
 .app-text {
   color: #1f2937;
   transition: color 0.2s ease;
@@ -189,7 +198,7 @@
 }
 
 .app-card {
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   border: 1px solid #dadce0;
   transition:
     background-color 0.2s ease,
@@ -197,7 +206,7 @@
 }
 
 .dark .app-card {
-  background-color: #292a2d;
+  background-color: #292a2d !important;
   border-color: #5f6368;
 }
 

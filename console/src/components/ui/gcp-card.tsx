@@ -26,13 +26,13 @@ export function GCPCard({
   return (
     <div
       className={cn(
-        "bg-[var(--card-bg)] border border-[var(--border)] rounded-lg transition-all duration-150",
-        "hover:bg-[var(--card-hover)]",
+        "app-card rounded-lg transition-all duration-150",
+        "hover:opacity-95",
         className,
       )}
     >
       {(title || icon || actions || onOptionsClick) && (
-        <div className="px-6 py-4 border-b border-[var(--border-light)]">
+        <div className="px-6 py-4 border-b app-card-border">
           <div className="flex items-center justify-between mx-8 md:mx-12 my-4">
             <div className="flex items-center gap-3">
               {icon && (
@@ -49,7 +49,7 @@ export function GCPCard({
                 </div>
               )}
               {title && (
-                <h2 className="text-sm md:text-base font-medium leading-6 text-[var(--text-primary)] tracking-[0.1px] font-['Google_Sans',_'Roboto',_Arial,_sans-serif]">
+                <h2 className="text-sm md:text-base font-medium leading-6 app-text tracking-[0.1px] font-['Google_Sans',_'Roboto',_Arial,_sans-serif]">
                   {title}
                 </h2>
               )}
@@ -59,7 +59,7 @@ export function GCPCard({
               {onOptionsClick && (
                 <button
                   onClick={onOptionsClick}
-                  className="w-6 h-6 flex items-center justify-center rounded-full transition-colors duration-150 hover:bg-[rgba(60,64,67,0.08)] text-[var(--text-tertiary)]"
+                  className="w-6 h-6 flex items-center justify-center rounded-full transition-colors duration-150 hover:bg-[rgba(60,64,67,0.08)] app-text-tertiary"
                   aria-label="More options"
                 >
                   <MoreVertical className="w-4 h-4 md:w-5 md:h-5" />
@@ -69,12 +69,7 @@ export function GCPCard({
           </div>
         </div>
       )}
-      <div
-        className={cn(
-          "text-[var(--text-secondary)]",
-          !noPadding && "px-6 py-4",
-        )}
-      >
+      <div className={cn("app-text-secondary", !noPadding && "px-6 py-4")}>
         <div className="mx-8 md:mx-12 my-4">{children}</div>
       </div>
     </div>
@@ -129,7 +124,8 @@ export function GCPCardItem({
       className={cn(
         "flex items-center gap-3 px-0 py-3",
         "rounded-md transition-colors duration-150",
-        (href || onClick) && "hover:bg-[var(--card-hover)] cursor-pointer",
+        (href || onClick) &&
+          "hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer",
         onClick && "w-full text-left",
         className,
       )}

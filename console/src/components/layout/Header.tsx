@@ -73,16 +73,19 @@ export default function Header({
       style={{
         backgroundColor: "#303134",
         borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+        padding: "0 8px",
       }}
     >
       {/* Left section */}
       <div className="flex items-center">
         <button
           onClick={onMenuClick}
-          className="flex items-center justify-center w-10 h-10 ml-1 rounded transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded transition-colors"
           style={{
             color: "#E8EAED",
             backgroundColor: "transparent",
+            marginLeft: "4px",
+            borderRadius: "4px",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
@@ -102,6 +105,7 @@ export default function Header({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            style={{ width: "20px", height: "20px" }}
           >
             <path
               strokeLinecap="round"
@@ -112,8 +116,11 @@ export default function Header({
           </svg>
         </button>
 
-        <div className="flex items-center gap-4 ml-2">
-          <div className="flex items-center">
+        <div className="flex items-center ml-2">
+          <div
+            className="flex items-center"
+            style={{ marginLeft: "8px", marginRight: "16px" }}
+          >
             <span className="font-medium text-[18px]">
               <span style={{ color: "var(--foreground)" }}>NEURA</span>
               <span className="text-[#4185f4]">SCALE</span>
@@ -133,6 +140,8 @@ export default function Header({
               fontSize: "14px",
               fontWeight: "400",
               lineHeight: "20px",
+              borderRadius: "4px",
+              height: "36px",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor =
@@ -150,8 +159,21 @@ export default function Header({
             onBlur={(e) => {
               e.currentTarget.style.borderColor = "transparent";
             }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.12)";
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.08)";
+            }}
           >
-            <svg className="h-4 w-4" fill="#8AB4F8" viewBox="0 0 24 24">
+            <svg
+              className="h-4 w-4"
+              fill="#8AB4F8"
+              viewBox="0 0 24 24"
+              style={{ width: "16px", height: "16px" }}
+            >
               <path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3z" />
             </svg>
             <span>neurascale-console</span>
@@ -167,7 +189,10 @@ export default function Header({
       </div>
 
       {/* Center - Search */}
-      <div className="flex-1 flex items-center justify-center mx-4">
+      <div
+        className="flex-1 flex items-center justify-center"
+        style={{ margin: "0 16px" }}
+      >
         <div
           className="w-full max-w-[720px] h-10 flex items-center rounded"
           style={{
@@ -199,7 +224,7 @@ export default function Header({
             }}
           />
           <button
-            className="h-8 px-6 mr-1 rounded font-medium transition-all duration-200"
+            className="px-6 mr-1 rounded font-medium transition-all duration-200"
             style={{
               backgroundColor: "#1A73E8",
               color: "#FFFFFF",
@@ -208,6 +233,8 @@ export default function Header({
               fontWeight: "500",
               letterSpacing: "0.25px",
               border: "none",
+              height: "32px",
+              borderRadius: "4px",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#1765CC";
@@ -228,7 +255,7 @@ export default function Header({
       </div>
 
       {/* Right section */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center" style={{ gap: "4px" }}>
         <button
           className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
           style={{
@@ -384,7 +411,10 @@ export default function Header({
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="ml-2 rounded-full focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8AB4F8]">
+              <button
+                className="rounded-full focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8AB4F8]"
+                style={{ marginLeft: "8px" }}
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage
                     src={user.photoURL || ""}

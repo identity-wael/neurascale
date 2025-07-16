@@ -214,13 +214,6 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "overflow-y-auto transition-all duration-200 flex-shrink-0",
-          "fixed left-0 z-50 h-screen",
-          isCollapsed ? "top-[48px] h-[calc(100vh-48px)]" : "top-0",
-          "translate-x-0",
-          isCollapsed ? "w-[64px]" : "w-[280px]",
-        )}
-        className={cn(
           "app-sidebar",
           "overflow-y-auto transition-all duration-200 flex-shrink-0",
           "fixed left-0 z-50 h-screen",

@@ -6,7 +6,8 @@ const { execFileSync } = require("child_process");
 const NEON_PROJECT_ID = process.env.NEON_PROJECT_ID;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
-const DAYS_TO_KEEP = parseInt(process.env.DAYS_TO_KEEP || "7", 10);
+// No longer keeping branches after merge - delete immediately
+// const DAYS_TO_KEEP = parseInt(process.env.DAYS_TO_KEEP || "7", 10);
 
 // Helper function to execute commands safely
 function exec(command, args = []) {
@@ -47,10 +48,9 @@ async function isPRMerged(prNumber) {
 }
 
 async function main() {
-  console.log(
-    `Starting cleanup of Neon branches older than ${DAYS_TO_KEEP} days...`,
-  );
+  console.log(`Starting cleanup of merged Neon branches...`);
   console.log(`Project ID: ${NEON_PROJECT_ID}`);
+  console.log(`Policy: Delete immediately after PR merge`);
 
   // Get all branches
   const branchesJson = exec("neonctl", [
@@ -68,11 +68,6 @@ async function main() {
 
   const branches = JSON.parse(branchesJson);
   console.log(`Found ${branches.length} total branches`);
-
-  // Calculate cutoff date
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - DAYS_TO_KEEP);
-  console.log(`Cutoff date: ${cutoffDate.toISOString()}`);
 
   let deletedCount = 0;
   let keptCount = 0;
@@ -112,17 +107,8 @@ async function main() {
       continue;
     }
 
-    // Check if branch is old enough to delete
-    if (branchDate >= cutoffDate) {
-      console.log(
-        `  ✅ PR #${prNumber} was merged but branch is recent, keeping for now`,
-      );
-      keptCount++;
-      continue;
-    }
-
-    // Delete the branch
-    console.log(`  🗑️  Deleting old merged PR branch...`);
+    // Delete the branch immediately since PR is merged
+    console.log(`  🗑️  PR #${prNumber} was merged, deleting branch...`);
     const deleteResult = exec("neonctl", [
       "branches",
       "delete",

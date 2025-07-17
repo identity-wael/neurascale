@@ -120,7 +120,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error.message },
+      { 
+        error: "Internal server error", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      },
       { status: 500 },
     );
   }
@@ -163,7 +166,10 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("Error updating profile:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error.message },
+      { 
+        error: "Internal server error", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      },
       { status: 500 },
     );
   }

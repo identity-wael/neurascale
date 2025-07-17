@@ -11,6 +11,7 @@ export const PLANS = {
     name: "Free",
     description: "Perfect for trying out NeuraScale",
     price: 0,
+    priceId: undefined,
     features: [
       "1 Neural Processor",
       "10 GB Storage",

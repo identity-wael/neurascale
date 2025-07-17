@@ -225,12 +225,12 @@ export default function PricingPage() {
                           </span>
                         </div>
                       )}
-                      <div className="flex flex-col h-full px-6 pb-6 pt-2">
-                        <p className="text-sm app-text-secondary mb-4 min-h-[3rem]">
+                      <GCPCardContent className="h-full flex flex-col">
+                        <p className="text-sm app-text-secondary h-12">
                           {plan.description}
                         </p>
 
-                        <div className="mb-6">
+                        <div className="h-16 flex items-center mb-4">
                           {plan.price !== null ? (
                             <div>
                               <span className="text-3xl font-semibold app-text">
@@ -247,7 +247,7 @@ export default function PricingPage() {
                           )}
                         </div>
 
-                        <ul className="space-y-2 flex-grow">
+                        <ul className="space-y-2 flex-grow min-h-[200px]">
                           {plan.features.map((feature, index) => (
                             <li
                               key={index}
@@ -276,7 +276,7 @@ export default function PricingPage() {
                         <button
                           onClick={() => handleSubscribe(key)}
                           disabled={loading !== null || isCurrentPlan}
-                          className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors mt-6 ${
+                          className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors mt-4 ${
                             isCurrentPlan
                               ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
                               : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
@@ -290,7 +290,7 @@ export default function PricingPage() {
                                 ? "Contact Sales"
                                 : "Subscribe"}
                         </button>
-                      </div>
+                      </GCPCardContent>
                     </GCPCard>
                   </div>
                 );

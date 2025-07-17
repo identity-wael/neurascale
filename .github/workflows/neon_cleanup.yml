@@ -1,20 +1,14 @@
-name: Cleanup Old Neon Branches
+name: Cleanup Merged Neon Branches
 
 on:
   schedule:
     # Run every Sunday at 2 AM UTC
     - cron: '0 2 * * 0'
   workflow_dispatch:
-    inputs:
-      days_to_keep:
-        description: 'Number of days to keep merged PR branches'
-        required: false
-        default: '7'
-        type: number
 
 jobs:
-  cleanup_old_branches:
-    name: Cleanup Old Merged PR Branches
+  cleanup_merged_branches:
+    name: Cleanup Merged PR Branches
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,11 +22,10 @@ jobs:
       - name: Install neonctl
         run: npm install -g neonctl
 
-      - name: Cleanup old branches
+      - name: Cleanup merged branches
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DAYS_TO_KEEP: ${{ inputs.days_to_keep || 7 }}
         run: node .github/scripts/cleanup-neon-branches.js

@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "firebase-admin/auth";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { initAdmin, auth } from "@/lib/firebase-admin";
 import { db } from "@/lib/db";
 
-// Initialize Firebase Admin if not already initialized
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-  });
-}
+// Initialize Firebase Admin
+initAdmin();
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     // Verify the Firebase token
     const token = authHeader.substring(7);
-    const decodedToken = await getAuth().verifyIdToken(token);
+    const decodedToken = await auth().verifyIdToken(token);
     const firebaseUid = decodedToken.uid;
 
     // Get user with subscription and invoices

@@ -209,23 +209,14 @@ export default function PricingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 items-stretch">
               {Object.entries(PLANS).map(([key, plan]) => {
                 const isCurrentPlan = currentSubscription?.plan === key;
-                const isProfessional = key === "PROFESSIONAL";
 
                 return (
                   <div key={key} className="h-full flex flex-col">
                     <GCPCard
                       title={plan.name}
                       icon="Cloud-SQL"
-                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg flex-grow flex flex-col relative overflow-hidden"
+                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg flex-grow flex flex-col overflow-hidden"
                     >
-                      {isProfessional && (
-                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                          <span className="bg-[#1a73e8] text-white text-xs font-medium px-3 py-1 rounded-full">
-                            RECOMMENDED
-                          </span>
-                        </div>
-                      )}
-
                       <GCPCardContent className="flex-grow flex flex-col pb-0">
                         <p className="text-sm app-text-secondary mb-4">
                           {plan.description}

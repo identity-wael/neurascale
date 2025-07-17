@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 
 // Configuration
 const NEON_PROJECT_ID = process.env.NEON_PROJECT_ID;
@@ -8,12 +8,13 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 const DAYS_TO_KEEP = parseInt(process.env.DAYS_TO_KEEP || "7", 10);
 
-// Helper function to execute commands
-function exec(command) {
+// Helper function to execute commands safely
+function exec(command, args = []) {
   try {
-    return execSync(command, { encoding: "utf8" });
+    // Use execFileSync instead of execSync to prevent command injection
+    return execFileSync(command, args, { encoding: "utf8", shell: false });
   } catch (error) {
-    console.error(`Command failed: ${command}`);
+    console.error(`Command failed: ${command} ${args.join(" ")}`);
     console.error(error.message);
     return null;
   }
@@ -52,9 +53,14 @@ async function main() {
   console.log(`Project ID: ${NEON_PROJECT_ID}`);
 
   // Get all branches
-  const branchesJson = exec(
-    `neonctl branches list --project-id ${NEON_PROJECT_ID} -o json`,
-  );
+  const branchesJson = exec("neonctl", [
+    "branches",
+    "list",
+    "--project-id",
+    NEON_PROJECT_ID,
+    "-o",
+    "json",
+  ]);
   if (!branchesJson) {
     console.error("Failed to list branches");
     process.exit(1);
@@ -117,9 +123,13 @@ async function main() {
 
     // Delete the branch
     console.log(`  🗑️  Deleting old merged PR branch...`);
-    const deleteResult = exec(
-      `neonctl branches delete ${id} --project-id ${NEON_PROJECT_ID}`,
-    );
+    const deleteResult = exec("neonctl", [
+      "branches",
+      "delete",
+      id,
+      "--project-id",
+      NEON_PROJECT_ID,
+    ]);
 
     if (deleteResult) {
       console.log(`  ✅ Successfully deleted: ${name}`);

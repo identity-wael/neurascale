@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
 
 async function verifyAuth(request: NextRequest) {
@@ -120,9 +120,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { 
-        error: "Internal server error", 
-        details: error instanceof Error ? error.message : "Unknown error" 
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -166,9 +166,9 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("Error updating profile:", error);
     return NextResponse.json(
-      { 
-        error: "Internal server error", 
-        details: error instanceof Error ? error.message : "Unknown error" 
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );

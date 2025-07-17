@@ -107,7 +107,6 @@ function NavItemComponent({
   level = 0,
 }: NavItemComponentProps) {
   const hasChildren = item.children && item.children.length > 0;
-  const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
 
   return (

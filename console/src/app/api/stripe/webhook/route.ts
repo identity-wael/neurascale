@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         }
 
         case "customer.subscription.updated": {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object as any;
 
           // Update subscription status
           await db.subscription.update({
@@ -68,10 +68,12 @@ export async function POST(request: NextRequest) {
             data: {
               status: subscription.status.toUpperCase() as any,
               currentPeriodStart: new Date(
-                subscription.currentPeriodStart * 1000,
+                subscription.current_period_start * 1000,
               ),
-              currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000),
-              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+              currentPeriodEnd: new Date(
+                subscription.current_period_end * 1000,
+              ),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
             },
           });
           break;
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
         }
 
         case "invoice.payment_succeeded": {
-          const invoice = event.data.object as Stripe.Invoice;
+          const invoice = event.data.object as any;
 
           // Record the invoice
           const user = await db.user.findFirst({
@@ -108,17 +110,17 @@ export async function POST(request: NextRequest) {
               data: {
                 stripeInvoiceId: invoice.id,
                 userId: user.id,
-                amountPaid: invoice.amountPaid || 0,
-                amountDue: invoice.amountDue || 0,
+                amountPaid: invoice.amount_paid || 0,
+                amountDue: invoice.amount_due || 0,
                 currency: invoice.currency,
                 status: invoice.status || "paid",
-                hostedInvoiceUrl: invoice.hostedInvoiceUrl || null,
-                invoicePdf: invoice.invoicePdf || null,
-                periodStart: invoice.periodStart
-                  ? new Date(invoice.periodStart * 1000)
+                hostedInvoiceUrl: invoice.hosted_invoice_url || null,
+                invoicePdf: invoice.invoice_pdf || null,
+                periodStart: invoice.period_start
+                  ? new Date(invoice.period_start * 1000)
                   : new Date(),
-                periodEnd: invoice.periodEnd
-                  ? new Date(invoice.periodEnd * 1000)
+                periodEnd: invoice.period_end
+                  ? new Date(invoice.period_end * 1000)
                   : new Date(),
               },
             });

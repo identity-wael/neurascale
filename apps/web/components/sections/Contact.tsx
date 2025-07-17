@@ -4,8 +4,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { useGoogleAds } from '@/hooks/useGoogleAds';
-import { useContent } from '@/src/contexts/ContentContext';
-
 // SVG Icons for contact channels
 const ChatIcon = () => (
   <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -205,7 +203,6 @@ const mapOptions = {
 };
 
 export default function Contact() {
-  const { contact } = useContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,

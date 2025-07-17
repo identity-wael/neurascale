@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignInPage() {
   const { user, signInWithGoogle, loading } = useAuth();
-  const router = useRouter();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {

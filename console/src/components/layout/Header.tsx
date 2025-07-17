@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import {
   Search,
   HelpCircle,
-  User,
   Moon,
   Sun,
   Sparkles,
@@ -15,7 +14,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";

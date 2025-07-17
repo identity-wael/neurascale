@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 
 const relevantEvents = new Set([
   "checkout.session.completed",
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
           if (userId && planKey) {
             // Update the subscription
-            await prisma.subscription.update({
+            await db.subscription.update({
               where: { userId },
               data: {
                 stripeSubscriptionId: checkoutSession.subscription as string,
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
           const subscription = event.data.object as Stripe.Subscription;
 
           // Update subscription status
-          await prisma.subscription.update({
+          await db.subscription.update({
             where: { stripeSubscriptionId: subscription.id },
             data: {
               status: subscription.status.toUpperCase() as any,
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           const subscription = event.data.object as Stripe.Subscription;
 
           // Update subscription to canceled
-          await prisma.subscription.update({
+          await db.subscription.update({
             where: { stripeSubscriptionId: subscription.id },
             data: {
               status: "CANCELED",
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
           const invoice = event.data.object as Stripe.Invoice;
 
           // Record the invoice
-          const user = await prisma.user.findFirst({
+          const user = await db.user.findFirst({
             where: {
               subscription: {
                 stripeCustomerId: invoice.customer as string,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
           });
 
           if (user) {
-            await prisma.invoice.create({
+            await db.invoice.create({
               data: {
                 stripeInvoiceId: invoice.id,
                 userId: user.id,
@@ -127,12 +127,12 @@ export async function POST(request: NextRequest) {
           const invoice = event.data.object as Stripe.Invoice;
 
           // Update subscription status if payment fails
-          const subscription = await prisma.subscription.findFirst({
+          const subscription = await db.subscription.findFirst({
             where: { stripeCustomerId: invoice.customer as string },
           });
 
           if (subscription) {
-            await prisma.subscription.update({
+            await db.subscription.update({
               where: { id: subscription.id },
               data: { status: "PAST_DUE" },
             });

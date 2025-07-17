@@ -9,6 +9,7 @@ import {
   Sparkles,
   Terminal,
   Bell,
+  BookOpen,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -236,7 +237,18 @@ export default function Header({
 
         <button
           className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
+          title="Documentation"
+          onClick={() => window.open("https://docs.neurascale.io", "_blank")}
+        >
+          <BookOpen className="h-5 w-5" />
+        </button>
+
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 app-header-button"
           title="Help"
+          onClick={() =>
+            window.open("https://docs.neurascale.io/help", "_blank")
+          }
         >
           <HelpCircle className="h-5 w-5" />
         </button>
@@ -346,7 +358,11 @@ export default function Header({
                   />
                   <span>Help</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    window.open("https://docs.neurascale.io", "_blank")
+                  }
+                >
                   <img
                     src="/svg/Developer-Portal.svg"
                     alt=""

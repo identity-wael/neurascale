@@ -1,16 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PLANS } from "@/lib/stripe";
-import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
+import {
+  GCPCard,
+  GCPCardGrid,
+  GCPCardContent,
+  GCPCardItem,
+} from "@/components/ui/gcp-card";
+
+interface Subscription {
+  plan: string;
+  status: string;
+}
 
 export default function PricingPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [currentSubscription, setCurrentSubscription] =
+    useState<Subscription | null>(null);
+  const [fetchingBilling, setFetchingBilling] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/auth/signin");
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBillingInfo();
+    }
+  }, [user]);
+
+  const fetchBillingInfo = async () => {
+    try {
+      const token = await user?.getIdToken();
+      if (!token) return;
+
+      const response = await fetch("/api/stripe/billing-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentSubscription(data.subscription);
+      }
+    } catch (error) {
+      console.error("Error fetching billing info:", error);
+    } finally {
+      setFetchingBilling(false);
+    }
+  };
 
   const handleSubscribe = async (planKey: string) => {
     if (!user) {
@@ -54,107 +101,214 @@ export default function PricingPage() {
     }
   };
 
+  const handleManageBilling = async () => {
+    try {
+      setLoading("manage");
+      const token = await user?.getIdToken();
+
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error("Error creating portal session:", error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  if (authLoading || fetchingBilling) {
+    return (
+      <Layout>
+        <div className="min-h-screen app-bg flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Plan
-            </h1>
-            <p className="text-xl text-gray-600">
-              Scale your neural computing needs with our flexible pricing
-            </p>
-          </div>
+      <div className="min-h-screen app-bg">
+        {/* Match dashboard tab content padding */}
+        <div
+          style={{
+            paddingTop: "32px",
+            paddingLeft: "96px",
+            paddingRight: "96px",
+            paddingBottom: "32px",
+          }}
+        >
+          <div className="max-w-[1440px] mx-auto">
+            {/* Page Header */}
+            <div className="mb-6 mt-4">
+              <h1 className="text-2xl font-normal app-text">
+                Billing & Subscriptions
+              </h1>
+              <p className="text-sm app-text-secondary mt-2">
+                Manage your subscription and billing details
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {Object.entries(PLANS).map(([key, plan]) => (
-              <div
-                key={key}
-                className={`rounded-lg border-2 p-6 ${
-                  key === "PROFESSIONAL"
-                    ? "border-blue-600 shadow-xl scale-105"
-                    : "border-gray-200"
-                }`}
+            {/* Current Plan Card */}
+            {currentSubscription && (
+              <GCPCard
+                title="Current Plan"
+                icon="Billing"
+                className="mb-6"
+                actions={
+                  currentSubscription.plan !== "FREE" && (
+                    <button
+                      onClick={handleManageBilling}
+                      disabled={loading === "manage"}
+                      className="px-3 py-1 text-sm font-medium text-[#1a73e8] hover:bg-[#e8f0fe] dark:hover:bg-[#394457] rounded transition-colors"
+                    >
+                      {loading === "manage" ? "Loading..." : "Manage Billing"}
+                    </button>
+                  )
+                }
               >
-                {key === "PROFESSIONAL" && (
-                  <div className="bg-blue-600 text-white text-center py-1 px-4 rounded-full text-sm font-medium mb-4 -mt-10 mx-auto w-fit">
-                    Most Popular
-                  </div>
-                )}
-
-                <h2 className="text-2xl font-bold mb-2">{plan.name}</h2>
-                <p className="text-gray-600 mb-4">{plan.description}</p>
-
-                <div className="mb-6">
-                  {plan.price !== null ? (
-                    <div>
-                      <span className="text-4xl font-bold">${plan.price}</span>
-                      <span className="text-gray-600">/month</span>
+                <GCPCardContent>
+                  <GCPCardItem>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-lg font-medium app-text">
+                          {PLANS[currentSubscription.plan as keyof typeof PLANS]
+                            ?.name || "Free Plan"}
+                        </p>
+                        <p className="text-sm app-text-secondary mt-1">
+                          Status:{" "}
+                          <span className="capitalize">
+                            {currentSubscription.status}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-semibold app-text">
+                          $
+                          {PLANS[currentSubscription.plan as keyof typeof PLANS]
+                            ?.price || 0}
+                        </p>
+                        <p className="text-sm app-text-secondary">per month</p>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="text-2xl font-bold">Custom Pricing</div>
-                  )}
-                </div>
+                  </GCPCardItem>
+                </GCPCardContent>
+              </GCPCard>
+            )}
 
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg
-                        className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+            {/* Available Plans */}
+            <div className="mb-6">
+              <h2 className="text-lg font-medium app-text mb-4">
+                Available Plans
+              </h2>
+            </div>
+
+            <GCPCardGrid columns={4} className="mb-4">
+              {Object.entries(PLANS).map(([key, plan]) => {
+                const isCurrentPlan = currentSubscription?.plan === key;
+                const isProfessional = key === "PROFESSIONAL";
+
+                return (
+                  <GCPCard
+                    key={key}
+                    title={plan.name}
+                    icon="Cloud-SQL"
+                    className={isProfessional ? "ring-2 ring-[#1a73e8]" : ""}
+                    badge={isProfessional ? "RECOMMENDED" : undefined}
+                  >
+                    <GCPCardContent>
+                      <div className="mb-4">
+                        <p className="text-sm app-text-secondary mb-4">
+                          {plan.description}
+                        </p>
+
+                        <div className="mb-6">
+                          {plan.price !== null ? (
+                            <div>
+                              <span className="text-3xl font-semibold app-text">
+                                ${plan.price}
+                              </span>
+                              <span className="text-sm app-text-secondary">
+                                /month
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="text-2xl font-semibold app-text">
+                              Custom Pricing
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <ul className="space-y-2 mb-6">
+                        {plan.features.map((feature, index) => (
+                          <li key={index} className="flex items-start text-sm">
+                            <svg
+                              className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <span className="app-text-secondary">
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <button
+                        onClick={() => handleSubscribe(key)}
+                        disabled={loading !== null || isCurrentPlan}
+                        className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors ${
+                          isCurrentPlan
+                            ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
+                            : isProfessional
+                              ? "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
+                              : "bg-[#f8f9fa] text-[#1a73e8] hover:bg-[#e8f0fe] dark:bg-[#303134] dark:hover:bg-[#394457]"
+                        }`}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                        {loading === key
+                          ? "Processing..."
+                          : isCurrentPlan
+                            ? "Current Plan"
+                            : key === "ENTERPRISE"
+                              ? "Contact Sales"
+                              : "Subscribe"}
+                      </button>
+                    </GCPCardContent>
+                  </GCPCard>
+                );
+              })}
+            </GCPCardGrid>
 
-                <Button
-                  onClick={() => handleSubscribe(key)}
-                  disabled={loading !== null}
-                  className={`w-full ${
-                    key === "PROFESSIONAL"
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : key === "FREE"
-                        ? "bg-gray-600 hover:bg-gray-700"
-                        : "bg-gray-900 hover:bg-gray-800"
-                  }`}
+            {/* Additional Information */}
+            <div className="mt-8 p-4 rounded-lg app-card-bg border app-card-border">
+              <p className="text-sm app-text-secondary text-center">
+                All plans include SSL certificates, 99.9% uptime SLA, and 24/7
+                monitoring. Need a custom solution?{" "}
+                <a
+                  href="mailto:sales@neurascale.io"
+                  className="text-[#1a73e8] hover:underline"
                 >
-                  {loading === key
-                    ? "Processing..."
-                    : key === "ENTERPRISE"
-                      ? "Contact Sales"
-                      : key === "FREE"
-                        ? "Current Plan"
-                        : "Subscribe"}
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center text-gray-600">
-            <p>
-              All plans include SSL certificates, 99.9% uptime SLA, and 24/7
-              monitoring.
-            </p>
-            <p className="mt-2">
-              Need a custom solution?{" "}
-              <a
-                href="mailto:sales@neurascale.io"
-                className="text-blue-600 hover:underline"
-              >
-                Contact our sales team
-              </a>
-            </p>
+                  Contact our sales team
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

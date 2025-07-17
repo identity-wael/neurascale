@@ -2,232 +2,227 @@
 
 [![CodeQL](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml)
+[![Neon Database](https://img.shields.io/badge/Database-Neon-00E599)](https://neon.tech)
+[![Sanity CMS](https://img.shields.io/badge/CMS-Sanity-F03E2F)](https://sanity.io)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An open-source infrastructure for processing petabytes of brain data, enabling applications that restore mobility, unlock robotic control, and create immersive realities.
 
-## 📁 Project Structure
-
-```
-neurascale/
-├── apps/                       # Monorepo root
-│   ├── web/                    # Next.js web application (Vercel deploys from here)
-│   │   ├── app/
-│   │   ├── components/
-│   │   ├── public/
-│   │   └── package.json
-│   ├── packages/               # Shared packages
-│   │   ├── ui/                 # Shared UI components
-│   │   ├── config-typescript/  # TypeScript configs
-│   │   └── config-tailwind/    # Tailwind configs
-│   ├── package.json            # Workspace root (future)
-│   ├── turbo.json              # Turborepo config (future)
-│   └── pnpm-workspace.yaml     # PNPM workspaces (future)
-├── console/                    # NeuraScale Console (console.neurascale.io)
-│   ├── src/                    # Next.js 15 app with Firebase auth
-│   ├── public/
-│   └── package.json
-├── backend/                    # Future backend services
-├── docs/                       # Documentation
-│   ├── GOOGLE_ANALYTICS_SETUP.md
-│   └── fix-google-maps.md
-├── infrastructure/             # Future IaC
-├── scripts/                    # Utility scripts
-│   └── google/                 # Google services utilities
-│       ├── google_analytics_setup.py
-│       ├── google_ads_setup.py
-│       └── google-ads.yaml
-└── README.md                   # This file
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm or pnpm
-
-### Installation & Development
+## 🚀 Quick Start
 
 ```bash
+# Clone the repository
+git clone https://github.com/identity-wael/neurascale.git
+cd neurascale
+
 # Navigate to the web app
 cd apps/web
 
 # Install dependencies
 npm install
 
+# Copy environment variables
+cp .env.example .env.local
+
 # Start development server
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`
+Visit `http://localhost:3000` to see the application.
 
-### Environment Variables Configuration
+## 📁 Project Structure
 
-The application requires the following environment variables:
-
-- `EMAIL_USER` - Email address for sending contact form messages
-- `EMAIL_PASS` - Email password/app password
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - Google Maps API key
-- `NEXT_PUBLIC_GA4_MEASUREMENT_ID` - Google Analytics 4 measurement ID
-- `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID` - Google Ads conversion tracking ID (optional)
-
-#### Option 1: Vercel Environment Variables (Recommended for Production)
-
-**Best for:** Production deployment, easier management, automatic integration
-
-1. Go to your [Vercel Dashboard](https://vercel.com/dashboard)
-2. Select your project
-3. Navigate to Settings → Environment Variables
-4. Add the following variables:
-   ```
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-app-password
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
-   ```
-5. Choose the environments (Production, Preview, Development)
-6. Save and redeploy
-
-**Advantages:**
-
-- Automatic injection into your app during build/runtime
-- Secure storage with encryption
-- Easy to update without code changes
-- Different values for different environments
-- No risk of accidentally committing secrets
-
-#### Option 2: GitHub Secrets (For CI/CD)
-
-**Best for:** GitHub Actions, automated testing, build processes
-
-1. Go to your GitHub repository
-2. Navigate to Settings → Secrets and variables → Actions
-3. Add new repository secrets:
-   ```
-   EMAIL_USER
-   EMAIL_PASS
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-   ```
-4. Update your Vercel deployment to use GitHub secrets:
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to Vercel
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
-        run: |
-          npm i -g vercel
-          vercel --prod --token=$VERCEL_TOKEN
 ```
-
-#### Option 3: Local Development
-
-For local development, create `.env.local`:
-
-```bash
-cp apps/web/.env.local.example apps/web/.env.local
+neurascale/
+├── apps/                       # Monorepo root
+│   ├── web/                    # Next.js web application
+│   │   ├── app/               # App router pages
+│   │   ├── components/        # React components
+│   │   ├── src/               # Source code
+│   │   │   ├── lib/          # Utilities and clients
+│   │   │   ├── sanity/       # Sanity schemas
+│   │   │   └── contexts/     # React contexts
+│   │   ├── scripts/          # Migration and utility scripts
+│   │   └── package.json
+│   └── packages/              # Shared packages (future)
+├── console/                   # NeuraScale Console
+├── .github/                   # GitHub workflows
+│   ├── workflows/            # CI/CD pipelines
+│   └── scripts/              # Workflow scripts
+├── docs/                      # Documentation
+└── README.md                  # This file
 ```
-
-Then add your credentials to `.env.local`.
-
-### Recommended Approach
-
-**Use Vercel Environment Variables** for the following reasons:
-
-1. **Seamless Integration** - Vercel automatically injects env vars during build
-2. **Security** - Values are encrypted and never exposed in logs
-3. **Easy Management** - Update values without code changes
-4. **Environment-specific** - Different values for production/preview/development
-5. **No Additional Setup** - Works out of the box with your existing Vercel deployment
-
-### Setting Up Email Credentials
-
-For Gmail users:
-
-1. Enable 2-factor authentication
-2. Generate an App Password at: https://myaccount.google.com/apppasswords
-3. Use the app password (not your regular password) as `EMAIL_PASS`
-
-### Setting Up Google Maps
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable "Maps JavaScript API"
-4. Create credentials (API Key)
-5. Restrict the key to your domains:
-   - `localhost:3000` for development
-   - `your-domain.vercel.app` for production
-   - Your custom domain if applicable
-
-**Note**: Both the contact form and map will work in development mode with warnings if credentials are not configured.
-
-## 🔧 Google Services Integration
-
-### Google Analytics 4
-
-1. See `docs/GOOGLE_ANALYTICS_SETUP.md` for complete setup guide
-2. Use the setup script to test your configuration:
-   ```bash
-   python3 scripts/google/google_analytics_setup.py
-   ```
-
-### Google Maps
-
-- If you see "For development purposes only" watermark, see `docs/fix-google-maps.md`
-- Ensure billing is enabled on your Google Cloud project
-
-### Google Ads
-
-- Configuration template available at `scripts/google/google-ads.yaml`
-- Setup script: `scripts/google/google_ads_setup.py`
-
-## 🎨 Features
-
-- **3D Visualizations**: Neural ID Galaxy visualization using Three.js
-- **Smooth Animations**: Framer Motion for fluid transitions
-- **Loading Screen**: Professional loading experience
-- **Responsive Design**: Works on all devices
-- **Type Safety**: Full TypeScript support
-
-## 🚢 Deployment
-
-### Vercel Configuration
-
-- **Root Directory**: `apps/web`
-- **Framework Preset**: Next.js
-- **Build & Output**: Auto-detected
 
 ## 🛠️ Technology Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS
-- **3D Graphics**: Three.js, React Three Fiber
-- **Animations**: Framer Motion, Lenis
-- **Language**: TypeScript
-- **Deployment**: Vercel
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Database**: [Neon](https://neon.tech) (Serverless Postgres)
+- **CMS**: [Sanity](https://sanity.io) (Headless CMS)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **3D Graphics**: [Three.js](https://threejs.org/), React Three Fiber
+- **Animations**: [Framer Motion](https://www.framer.com/motion/), Lenis
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Deployment**: [Vercel](https://vercel.com)
 
-## 📦 Future Monorepo Setup
+## 🔧 Configuration
 
-When ready to implement the full monorepo:
+### Environment Variables
 
-1. Add workspace configuration files to `apps/`
-2. Move shared code to `apps/packages/`
-3. Update imports to use workspace packages
-4. Change Vercel root directory to `apps/`
+Create a `.env.local` file in `apps/web/` with:
+
+```bash
+# Sanity Configuration (Required)
+NEXT_PUBLIC_SANITY_PROJECT_ID=vvsy01fb
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
+
+# Sanity API Token (Optional - for write operations)
+SANITY_API_TOKEN=your-token-here
+
+# Google Services (Optional)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-api-key
+NEXT_PUBLIC_GA4_MEASUREMENT_ID=your-measurement-id
+
+# Email Configuration (Optional)
+EMAIL_USER=your-email@gmail.com
+# EMAIL_PASS - See documentation for app-specific password setup
+```
+
+### Vercel Deployment
+
+1. **Import Project**: Connect your GitHub repository to Vercel
+2. **Configure Build**:
+   - Root Directory: `apps/web`
+   - Framework Preset: Next.js
+   - Build Command: Auto-detected
+3. **Environment Variables**: Add all required variables in Vercel project settings
+
+## 📊 Content Management (Sanity CMS)
+
+### Accessing Sanity Studio
+
+- **Local**: `http://localhost:3000/studio`
+- **Production**: `https://your-domain.vercel.app/studio`
+
+### Content Structure
+
+- **Hero**: Landing page hero section
+- **Vision**: Mission and vision content
+- **Problem**: Problem statement and solutions
+- **Roadmap**: Development timeline
+- **Team**: Team member profiles
+- **Resources**: Documentation and resources
+- **Contact**: Contact information
+
+### Managing Content
+
+1. Access Studio at `/studio`
+2. Log in with your Sanity account
+3. Edit content in real-time
+4. Changes reflect immediately
+
+## 🗄️ Database Management (Neon)
+
+### Branch Strategy
+
+- **Production**: Main database branch
+- **Preview**: Automatic branches for PRs
+- **Development**: Local development branch
+
+### Automatic PR Branches
+
+When you create a PR:
+
+1. Neon automatically creates a database branch
+2. Branch name: `preview/pr-{number}-{branch-name}`
+3. Isolated testing environment
+4. Deleted when PR is closed (not merged)
+
+### Database Migrations
+
+```bash
+# Run migrations
+npm run db:migrate
+
+# Create new migration
+npm run db:migrate:create
+```
+
+## 🚢 Deployment Pipeline
+
+### GitHub Actions Workflows
+
+1. **CodeQL Analysis**: Security scanning
+2. **Dependency Review**: Vulnerability checks
+3. **Neon Branch Management**:
+   - Creates branches for PRs
+   - Cleans up old branches weekly
+4. **Vercel Deployment**: Automatic deployments
+
+### Manual Deployment
+
+```bash
+# Deploy to production
+vercel --prod
+
+# Deploy preview
+vercel
+```
+
+## 📖 Documentation
+
+- [Sanity Integration Guide](docs/SANITY_INTEGRATION.md)
+- [Neon Database Setup](docs/NEON_DATABASE.md)
+- [Google Analytics Setup](docs/GOOGLE_ANALYTICS_SETUP.md)
+- [Environment Variables](docs/ENVIRONMENT_VARIABLES.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+
+## 🧪 Development
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Type checking
+npm run type-check
+```
+
+### Code Quality
+
+```bash
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Type check
+npm run type-check
+```
+
+### Pre-commit Hooks
+
+The project uses pre-commit hooks for:
+
+- Code formatting (Prettier)
+- Linting (ESLint)
+- Type checking
+- Security scanning
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 👥 Team
 
@@ -248,8 +243,17 @@ American Furniture Warehouse
 **Vincent Liu** - _VP Engineering, HealthCare_
 CuraeSoft Inc
 
-Our world-class team brings together expertise from brain-computer interfaces, financial technology, cloud infrastructure, retail systems, and healthcare engineering to create the future of neural-prosthetics applications.
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- [Website](https://neurascale.com)
+- [Documentation](https://docs.neurascale.com)
+- [Sanity Studio](https://neurascale.com/studio)
+- [GitHub](https://github.com/identity-wael/neurascale)
+
+---
+
+Built with ❤️ by the NeuraScale team

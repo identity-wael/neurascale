@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Home
+permalink: /
 ---
 
 # NeuraScale Documentation
@@ -85,7 +86,7 @@ Get started with NeuraScale in minutes:
 
 Stay informed about the latest changes:
 
-- Check our [GitHub repository](https://github.com/neurascale/neurascale)
+- Check our [GitHub repository](https://github.com/identity-wael/neurascale)
 - Follow release notes
 - Subscribe to updates
 

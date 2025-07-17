@@ -1,0 +1,10 @@
+{
+  "hero": {
+    "_id": "hero-main",
+    "_type": "hero",
+    "title": "Neural-Prosthetics Application Cloud",
+    "subtitle": "An open-source project designed to process petabytes of complex brain data, blurring the boundaries between the human mind and the real world.",
+    "ctaText": "Get Started",
+    "ctaLink": "#contact"
+  }
+}

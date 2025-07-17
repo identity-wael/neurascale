@@ -212,18 +212,21 @@ export default function PricingPage() {
                 const isProfessional = key === "PROFESSIONAL";
 
                 return (
-                  <GCPCard
-                    key={key}
-                    title={plan.name}
-                    icon="Cloud-SQL"
-                    className={`transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg ${
-                      isProfessional ? "ring-2 ring-[#1a73e8]" : ""
-                    }`}
-                    badge={isProfessional ? "RECOMMENDED" : undefined}
-                  >
-                    <GCPCardContent className="flex flex-col h-full">
-                      <div className="flex-grow">
-                        <p className="text-sm app-text-secondary mb-4">
+                  <div key={key} className="flex flex-col h-full">
+                    <GCPCard
+                      title={plan.name}
+                      icon="Cloud-SQL"
+                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg h-full flex flex-col relative"
+                    >
+                      {isProfessional && (
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <span className="bg-[#1a73e8] text-white text-xs font-medium px-3 py-1 rounded-full">
+                            RECOMMENDED
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex flex-col h-full px-6 pb-6 pt-2">
+                        <p className="text-sm app-text-secondary mb-4 min-h-[3rem]">
                           {plan.description}
                         </p>
 
@@ -244,7 +247,7 @@ export default function PricingPage() {
                           )}
                         </div>
 
-                        <ul className="space-y-2 mb-6">
+                        <ul className="space-y-2 flex-grow">
                           {plan.features.map((feature, index) => (
                             <li
                               key={index}
@@ -269,27 +272,27 @@ export default function PricingPage() {
                             </li>
                           ))}
                         </ul>
-                      </div>
 
-                      <button
-                        onClick={() => handleSubscribe(key)}
-                        disabled={loading !== null || isCurrentPlan}
-                        className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors ${
-                          isCurrentPlan
-                            ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
-                            : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
-                        }`}
-                      >
-                        {loading === key
-                          ? "Processing..."
-                          : isCurrentPlan
-                            ? "Current Plan"
-                            : key === "ENTERPRISE"
-                              ? "Contact Sales"
-                              : "Subscribe"}
-                      </button>
-                    </GCPCardContent>
-                  </GCPCard>
+                        <button
+                          onClick={() => handleSubscribe(key)}
+                          disabled={loading !== null || isCurrentPlan}
+                          className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors mt-6 ${
+                            isCurrentPlan
+                              ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
+                              : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
+                          }`}
+                        >
+                          {loading === key
+                            ? "Processing..."
+                            : isCurrentPlan
+                              ? "Current Plan"
+                              : key === "ENTERPRISE"
+                                ? "Contact Sales"
+                                : "Subscribe"}
+                        </button>
+                      </div>
+                    </GCPCard>
+                  </div>
                 );
               })}
             </div>

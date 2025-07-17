@@ -265,7 +265,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - [Website](https://neurascale.com)
-- [Documentation](https://docs.neurascale.com)
+- [Documentation](https://docs.neurascale.io)
 - [Sanity Studio](https://neurascale.com/studio)
 - [GitHub](https://github.com/identity-wael/neurascale)
 

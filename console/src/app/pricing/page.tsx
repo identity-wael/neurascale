@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PLANS } from "@/lib/stripe";
 import Layout from "@/components/layout/Layout";
-import { GCPCard, GCPCardItem } from "@/components/ui/gcp-card";
+import { GCPCard, GCPCardContent, GCPCardItem } from "@/components/ui/gcp-card";
 
 interface Subscription {
   plan: string;

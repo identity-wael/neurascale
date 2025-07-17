@@ -322,7 +322,7 @@ export default function Header({
                   />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/pricing")}>
                   <img
                     src="/svg/Billing.svg"
                     alt=""

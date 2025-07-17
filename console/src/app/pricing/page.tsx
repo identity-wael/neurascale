@@ -276,26 +276,24 @@ export default function PricingPage() {
                         </ul>
                       </div>
 
-                      {/* Button Footer - Similar to Card Header */}
-                      <div className="px-6 py-4 border-t app-card-border">
-                        <button
-                          onClick={() => handleSubscribe(key)}
-                          disabled={loading !== null || isCurrentPlan}
-                          className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors ${
-                            isCurrentPlan
-                              ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
-                              : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
-                          }`}
-                        >
-                          {loading === key
-                            ? "Processing..."
-                            : isCurrentPlan
-                              ? "Current Plan"
-                              : key === "ENTERPRISE"
-                                ? "Contact Sales"
-                                : "Subscribe"}
-                        </button>
-                      </div>
+                      {/* Button Footer - Inverse of Card Header */}
+                      <button
+                        onClick={() => handleSubscribe(key)}
+                        disabled={loading !== null || isCurrentPlan}
+                        className={`w-full border-t app-card-border px-6 py-4 text-sm font-medium transition-colors rounded-b-lg ${
+                          isCurrentPlan
+                            ? "bg-[#f8f9fa] text-[#5f6368] cursor-not-allowed dark:bg-[#303134] dark:text-[#9aa0a6]"
+                            : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
+                        }`}
+                      >
+                        {loading === key
+                          ? "Processing..."
+                          : isCurrentPlan
+                            ? "Current Plan"
+                            : key === "ENTERPRISE"
+                              ? "Contact Sales"
+                              : "Subscribe"}
+                      </button>
                     </GCPCard>
                   </div>
                 );

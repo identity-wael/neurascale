@@ -6,8 +6,15 @@ import {
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
+let initialized = false;
+
 export function initAdmin() {
-  if (getApps().length > 0) {
+  if (initialized || getApps().length > 0) {
+    return;
+  }
+
+  // Skip initialization during build time
+  if (!process.env.STRIPE_SECRET_KEY && process.env.NODE_ENV === "production") {
     return;
   }
 
@@ -16,8 +23,15 @@ export function initAdmin() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.error("Missing Firebase Admin environment variables");
-    throw new Error("Firebase Admin SDK not properly configured");
+    // Only throw error at runtime, not build time
+    if (
+      process.env.NODE_ENV !== "production" ||
+      process.env.STRIPE_SECRET_KEY
+    ) {
+      console.error("Missing Firebase Admin environment variables");
+      throw new Error("Firebase Admin SDK not properly configured");
+    }
+    return;
   }
 
   const serviceAccount: ServiceAccount = {
@@ -29,6 +43,8 @@ export function initAdmin() {
   initializeApp({
     credential: cert(serviceAccount),
   });
+
+  initialized = true;
 }
 
 export { getAuth as auth };

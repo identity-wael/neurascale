@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "firebase-admin/auth";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Initialize Firebase Admin if not already initialized
 if (!getApps().length) {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const firebaseUid = decodedToken.uid;
 
     // Get user with subscription
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { firebaseUid },
       include: { subscription: true },
     });

@@ -171,11 +171,26 @@ vercel
 
 ## 📖 Documentation
 
-- [Sanity Integration Guide](docs/SANITY_INTEGRATION.md)
-- [Neon Database Setup](docs/NEON_DATABASE.md)
-- [Google Analytics Setup](docs/GOOGLE_ANALYTICS_SETUP.md)
-- [Environment Variables](docs/ENVIRONMENT_VARIABLES.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
+### Core Documentation
+
+- [Sanity Integration Guide](docs/SANITY_INTEGRATION.md) - Headless CMS setup and content management
+- [Neon Database Setup](docs/NEON_DATABASE.md) - Database branching and management
+- [Environment Variables](docs/ENVIRONMENT_VARIABLES.md) - Complete configuration reference
+- [Deployment Guide](docs/DEPLOYMENT.md) - Vercel deployment and optimization
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
+- [Security Policy](SECURITY.md) - Security practices and vulnerability reporting
+
+### Google Services Integration
+
+- [Google Analytics Setup](docs/GOOGLE_ANALYTICS_SETUP.md) - GA4 configuration and tracking
+- [Google Ads Setup](docs/GOOGLE_ADS_SETUP.md) - Ads API integration and campaign management
+- [Google Maps Fix](docs/fix-google-maps.md) - Troubleshooting Maps API issues
+
+### Console Application
+
+- [Console README](console/README.md) - NeuraScale Console documentation
+- [Firebase Setup](console/FIREBASE_SETUP.md) - Firebase authentication guide
+- [Infrastructure Guide](console/infrastructure/README.md) - Terraform and GCP setup
 
 ## 🧪 Development
 

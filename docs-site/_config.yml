@@ -1,0 +1,102 @@
+# Jekyll configuration for NeuraScale Documentation
+title: NeuraScale Documentation
+description: Comprehensive documentation for NeuraScale - Open-source neuromorphic computing platform
+baseurl: "/neurascale" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+
+# Theme settings
+theme: jekyll-theme-minimal
+# Alternative themes that work well for documentation:
+# theme: jekyll-theme-cayman
+# theme: jekyll-theme-slate
+# theme: jekyll-theme-dinky
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    block:
+      line_numbers: true
+
+# Collections for organizing documentation
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+  console:
+    output: true
+    permalink: /:collection/:path/
+
+# Default layouts
+defaults:
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "doc"
+  - scope:
+      path: ""
+      type: "console"
+    values:
+      layout: "doc"
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Navigation menu
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    sublinks:
+      - title: Overview
+        url: /docs/
+      - title: Environment Variables
+        url: /docs/environment-variables/
+      - title: Deployment Guide
+        url: /docs/deployment/
+  - title: Core Integrations
+    sublinks:
+      - title: Sanity CMS
+        url: /docs/sanity-integration/
+      - title: Neon Database
+        url: /docs/neon-database/
+  - title: Google Services
+    sublinks:
+      - title: Analytics Setup
+        url: /docs/google-analytics-setup/
+      - title: Ads Setup
+        url: /docs/google-ads-setup/
+      - title: Maps Troubleshooting
+        url: /docs/fix-google-maps/
+  - title: Console Application
+    sublinks:
+      - title: Console Overview
+        url: /console/
+      - title: Firebase Setup
+        url: /console/firebase-setup/
+      - title: Infrastructure
+        url: /console/infrastructure/
+  - title: Contributing
+    url: /contributing/
+  - title: Security
+    url: /security/
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .gitignore

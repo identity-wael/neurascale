@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PLANS } from "@/lib/stripe";
 import Layout from "@/components/layout/Layout";
-import { GCPCard, GCPCardContent, GCPCardItem } from "@/components/ui/gcp-card";
+import { GCPCard, GCPCardItem } from "@/components/ui/gcp-card";
 
 interface Subscription {
   plan: string;
@@ -211,80 +211,97 @@ export default function PricingPage() {
                 const isCurrentPlan = currentSubscription?.plan === key;
 
                 return (
-                  <div key={key} className="h-full flex flex-col">
-                    <GCPCard
-                      title={plan.name}
-                      icon="Cloud-SQL"
-                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg flex-grow flex flex-col overflow-hidden"
-                    >
-                      <GCPCardContent className="flex-grow flex flex-col pb-0">
-                        <p className="text-sm app-text-secondary mb-4">
-                          {plan.description}
-                        </p>
-
-                        <div className="mb-6">
-                          {plan.price !== null ? (
-                            <div>
-                              <span className="text-3xl font-semibold app-text">
-                                ${plan.price}
-                              </span>
-                              <span className="text-sm app-text-secondary">
-                                /month
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="text-2xl font-semibold app-text">
-                              Custom Pricing
-                            </div>
-                          )}
+                  <div key={key} className="h-full">
+                    <div className="h-full flex flex-col app-card rounded-lg transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg bg-white dark:bg-[#292a2d]">
+                      {/* Card Header - Like GCPCard */}
+                      <div className="px-6 py-4 border-b app-card-border">
+                        <div className="flex items-center justify-between mx-8 md:mx-12 my-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src="/svg/Cloud-SQL.svg"
+                              alt=""
+                              className="w-5 h-5 md:w-6 md:h-6 opacity-60"
+                            />
+                            <h2 className="text-sm md:text-base font-medium leading-6 app-text tracking-[0.1px] font-['Google_Sans',_'Roboto',_Arial,_sans-serif]">
+                              {plan.name}
+                            </h2>
+                          </div>
                         </div>
+                      </div>
 
-                        <ul className="space-y-2 flex-grow">
-                          {plan.features.map((feature, index) => (
-                            <li
-                              key={index}
-                              className="flex items-start text-sm"
-                            >
-                              <svg
-                                className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                      {/* Card Content */}
+                      <div className="flex-grow">
+                        <div className="mx-8 md:mx-12 my-4">
+                          <p className="text-sm app-text-secondary mb-4">
+                            {plan.description}
+                          </p>
+
+                          <div className="mb-6">
+                            {plan.price !== null ? (
+                              <div>
+                                <span className="text-3xl font-semibold app-text">
+                                  ${plan.price}
+                                </span>
+                                <span className="text-sm app-text-secondary">
+                                  /month
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="text-2xl font-semibold app-text">
+                                Custom Pricing
+                              </div>
+                            )}
+                          </div>
+
+                          <ul className="space-y-2">
+                            {plan.features.map((feature, index) => (
+                              <li
+                                key={index}
+                                className="flex items-start text-sm"
                               >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                              <span className="app-text-secondary">
-                                {feature}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </GCPCardContent>
+                                <svg
+                                  className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                <span className="app-text-secondary">
+                                  {feature}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
 
-                      {/* Button Footer - Full width section */}
-                      <button
-                        onClick={() => handleSubscribe(key)}
-                        disabled={loading !== null || isCurrentPlan}
-                        className={`w-full border-t app-card-border px-6 py-4 text-sm font-medium transition-colors rounded-b-lg -mx-[1px] -mb-[1px] ${
-                          isCurrentPlan
-                            ? "bg-[#f8f9fa] text-[#5f6368] cursor-not-allowed dark:bg-[#303134] dark:text-[#9aa0a6]"
-                            : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
-                        }`}
-                      >
-                        {loading === key
-                          ? "Processing..."
-                          : isCurrentPlan
-                            ? "Current Plan"
-                            : key === "ENTERPRISE"
-                              ? "Contact Sales"
-                              : "Subscribe"}
-                      </button>
-                    </GCPCard>
+                      {/* Button Footer - Separate section like header */}
+                      <div className="border-t app-card-border">
+                        <button
+                          onClick={() => handleSubscribe(key)}
+                          disabled={loading !== null || isCurrentPlan}
+                          className={`w-full px-6 py-4 text-sm font-medium transition-colors rounded-b-lg ${
+                            isCurrentPlan
+                              ? "bg-[#f8f9fa] text-[#5f6368] cursor-not-allowed dark:bg-[#303134] dark:text-[#9aa0a6]"
+                              : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
+                          }`}
+                        >
+                          {loading === key
+                            ? "Processing..."
+                            : isCurrentPlan
+                              ? "Current Plan"
+                              : key === "ENTERPRISE"
+                                ? "Contact Sales"
+                                : "Subscribe"}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 );
               })}

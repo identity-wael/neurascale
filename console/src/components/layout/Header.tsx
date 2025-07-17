@@ -322,7 +322,13 @@ export default function Header({
                   />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/pricing")}>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    console.log("Billing clicked");
+                    router.push("/pricing");
+                  }}
+                >
                   <img
                     src="/svg/Billing.svg"
                     alt=""

@@ -6,7 +6,7 @@ const NextStudio = dynamic(() => import('next-sanity/studio').then((mod) => mod.
   ssr: false,
 });
 
-import config from '../../sanity.config';
+import config from '../../../sanity.config';
 
 export default function StudioPage() {
   return <NextStudio config={config} />;

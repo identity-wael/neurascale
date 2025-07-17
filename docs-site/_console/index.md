@@ -1,6 +1,7 @@
 ---
 layout: doc
 title: Console Documentation
+permalink: /console/
 ---
 
 # NeuraScale Console

@@ -30,6 +30,9 @@ model User {
   // Relationships
   projects      Project[]
   activityLogs  ActivityLog[]
+  subscription  Subscription?
+  invoices      Invoice[]
+  usageRecords  UsageRecord[]
 
   @@map("users")
 }
@@ -115,4 +118,89 @@ enum ResourceStatus {
   STOPPED
   ERROR
   DELETING
+}
+
+// Billing models
+model Subscription {
+  id                   String    @id @default(cuid())
+  stripeCustomerId     String    @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  stripePriceId        String?   @map("stripe_price_id")
+
+  status               SubscriptionStatus @default(INCOMPLETE)
+  plan                 SubscriptionPlan   @default(FREE)
+
+  currentPeriodStart   DateTime? @map("current_period_start")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // User relationship
+  userId               String    @unique @map("user_id")
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id                String    @id @default(cuid())
+  stripeInvoiceId   String    @unique @map("stripe_invoice_id")
+
+  amountPaid        Int       @map("amount_paid") // in cents
+  amountDue         Int       @map("amount_due") // in cents
+  currency          String    @default("usd")
+  status            String
+
+  hostedInvoiceUrl  String?   @map("hosted_invoice_url")
+  invoicePdf        String?   @map("invoice_pdf")
+
+  periodStart       DateTime  @map("period_start")
+  periodEnd         DateTime  @map("period_end")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // User relationship
+  userId            String    @map("user_id")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model UsageRecord {
+  id                String    @id @default(cuid())
+
+  resourceType      ResourceType @map("resource_type")
+  quantity          Int
+  unitPrice         Int       @map("unit_price") // in cents
+  totalPrice        Int       @map("total_price") // in cents
+
+  periodStart       DateTime  @map("period_start")
+  periodEnd         DateTime  @map("period_end")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // User relationship
+  userId            String    @map("user_id")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
 }

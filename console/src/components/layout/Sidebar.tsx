@@ -51,6 +51,21 @@ const navItems: NavItem[] = [
     icon: "Vertex-AI",
     href: "/augmented-xr",
   },
+  {
+    name: "Billing",
+    icon: "Billing",
+    href: "/billing",
+    children: [
+      {
+        name: "Overview",
+        href: "/billing",
+      },
+      {
+        name: "Pricing",
+        href: "/pricing",
+      },
+    ],
+  },
 ];
 
 // Google Cloud Icon Component

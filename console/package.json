@@ -17,6 +17,7 @@
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@stripe/stripe-js": "^7.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "firebase": "^11.10.0",
@@ -27,6 +28,7 @@
     "prisma": "^6.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "stripe": "^18.3.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

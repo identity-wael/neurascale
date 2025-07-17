@@ -1,0 +1,153 @@
+import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
+import Stripe from "stripe";
+import { stripe } from "@/lib/stripe";
+import { prisma } from "@/lib/db";
+
+const relevantEvents = new Set([
+  "checkout.session.completed",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "invoice.payment_succeeded",
+  "invoice.payment_failed",
+]);
+
+export async function POST(request: NextRequest) {
+  const body = await request.text();
+  const sig = headers().get("stripe-signature") as string;
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!,
+    );
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return NextResponse.json(
+      { error: "Webhook signature verification failed" },
+      { status: 400 },
+    );
+  }
+
+  if (relevantEvents.has(event.type)) {
+    try {
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const checkoutSession = event.data.object as Stripe.Checkout.Session;
+
+          // Get the user and plan information
+          const userId = checkoutSession.metadata?.userId;
+          const planKey = checkoutSession.metadata?.planKey;
+
+          if (userId && planKey) {
+            // Update the subscription
+            await prisma.subscription.update({
+              where: { userId },
+              data: {
+                stripeSubscriptionId: checkoutSession.subscription as string,
+                stripePriceId: checkoutSession.metadata?.priceId,
+                plan: planKey as any,
+                status: "ACTIVE",
+              },
+            });
+          }
+          break;
+        }
+
+        case "customer.subscription.updated": {
+          const subscription = event.data.object as Stripe.Subscription;
+
+          // Update subscription status
+          await prisma.subscription.update({
+            where: { stripeSubscriptionId: subscription.id },
+            data: {
+              status: subscription.status.toUpperCase() as any,
+              currentPeriodStart: new Date(
+                subscription.current_period_start * 1000,
+              ),
+              currentPeriodEnd: new Date(
+                subscription.current_period_end * 1000,
+              ),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            },
+          });
+          break;
+        }
+
+        case "customer.subscription.deleted": {
+          const subscription = event.data.object as Stripe.Subscription;
+
+          // Update subscription to canceled
+          await prisma.subscription.update({
+            where: { stripeSubscriptionId: subscription.id },
+            data: {
+              status: "CANCELED",
+              plan: "FREE",
+            },
+          });
+          break;
+        }
+
+        case "invoice.payment_succeeded": {
+          const invoice = event.data.object as Stripe.Invoice;
+
+          // Record the invoice
+          const user = await prisma.user.findFirst({
+            where: {
+              subscription: {
+                stripeCustomerId: invoice.customer as string,
+              },
+            },
+          });
+
+          if (user) {
+            await prisma.invoice.create({
+              data: {
+                stripeInvoiceId: invoice.id,
+                userId: user.id,
+                amountPaid: invoice.amount_paid,
+                amountDue: invoice.amount_due,
+                currency: invoice.currency,
+                status: invoice.status || "paid",
+                hostedInvoiceUrl: invoice.hosted_invoice_url,
+                invoicePdf: invoice.invoice_pdf,
+                periodStart: new Date(invoice.period_start * 1000),
+                periodEnd: new Date(invoice.period_end * 1000),
+              },
+            });
+          }
+          break;
+        }
+
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as Stripe.Invoice;
+
+          // Update subscription status if payment fails
+          const subscription = await prisma.subscription.findFirst({
+            where: { stripeCustomerId: invoice.customer as string },
+          });
+
+          if (subscription) {
+            await prisma.subscription.update({
+              where: { id: subscription.id },
+              data: { status: "PAST_DUE" },
+            });
+          }
+          break;
+        }
+      }
+    } catch (error) {
+      console.error("Error processing webhook:", error);
+      return NextResponse.json(
+        { error: "Webhook processing failed" },
+        { status: 500 },
+      );
+    }
+  }
+
+  return NextResponse.json({ received: true });
+}

@@ -216,8 +216,7 @@ export default function PricingPage() {
                     <GCPCard
                       title={plan.name}
                       icon="Cloud-SQL"
-                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg flex-grow flex flex-col relative"
-                      noPadding={true}
+                      className="transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg flex-grow flex flex-col relative overflow-hidden"
                     >
                       {isProfessional && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
@@ -227,7 +226,7 @@ export default function PricingPage() {
                         </div>
                       )}
 
-                      <div className="flex-grow px-6 py-4">
+                      <GCPCardContent className="flex-grow flex flex-col pb-0">
                         <p className="text-sm app-text-secondary mb-4">
                           {plan.description}
                         </p>
@@ -249,7 +248,7 @@ export default function PricingPage() {
                           )}
                         </div>
 
-                        <ul className="space-y-2">
+                        <ul className="space-y-2 flex-grow">
                           {plan.features.map((feature, index) => (
                             <li
                               key={index}
@@ -274,13 +273,13 @@ export default function PricingPage() {
                             </li>
                           ))}
                         </ul>
-                      </div>
+                      </GCPCardContent>
 
-                      {/* Button Footer - Inverse of Card Header */}
+                      {/* Button Footer - Full width section */}
                       <button
                         onClick={() => handleSubscribe(key)}
                         disabled={loading !== null || isCurrentPlan}
-                        className={`w-full border-t app-card-border px-6 py-4 text-sm font-medium transition-colors rounded-b-lg ${
+                        className={`w-full border-t app-card-border px-6 py-4 text-sm font-medium transition-colors rounded-b-lg -mx-[1px] -mb-[1px] ${
                           isCurrentPlan
                             ? "bg-[#f8f9fa] text-[#5f6368] cursor-not-allowed dark:bg-[#303134] dark:text-[#9aa0a6]"
                             : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"

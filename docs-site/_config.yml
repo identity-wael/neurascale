@@ -1,8 +1,8 @@
 # Jekyll configuration for NeuraScale Documentation
 title: NeuraScale Documentation
 description: Comprehensive documentation for NeuraScale - Open-source neuromorphic computing platform
-baseurl: "/neurascale" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://neurascale.io" # the base hostname & protocol for your site
 
 # Theme settings
 theme: jekyll-theme-minimal

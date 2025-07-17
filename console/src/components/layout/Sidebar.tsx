@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface NavItem {
   name: string;
@@ -92,11 +93,12 @@ function NavItemComponent({
 }: NavItemComponentProps) {
   const hasChildren = item.children && item.children.length > 0;
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   return (
     <div>
       <button
-        onClick={hasChildren ? onToggle : undefined}
+        onClick={hasChildren ? onToggle : () => router.push(item.href)}
         className="w-full flex items-center justify-between text-sm rounded-sm transition-all group relative app-sidebar-item"
         style={{
           padding: level === 0 ? "0" : "0 8px 0 0",
@@ -144,6 +146,7 @@ function NavItemComponent({
           {item.children!.map((child) => (
             <button
               key={child.href}
+              onClick={() => router.push(child.href)}
               className="w-full flex items-center gap-3 text-sm rounded-sm transition-all app-sidebar-item"
               style={{
                 padding: "0 12px 0 0",
@@ -251,7 +254,7 @@ export default function Sidebar({
                 style={{ marginLeft: "8px", marginRight: "16px" }}
               >
                 <span className="font-medium text-[18px]">
-                  <span className="text-black dark:text-[#E8EAED]">NEURA</span>
+                  <span className="text-black dark:text-white">NEURA</span>
                   <span className="text-[#4185f4]">SCALE</span>
                 </span>
               </div>

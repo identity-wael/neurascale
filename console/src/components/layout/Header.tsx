@@ -23,6 +23,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsIcon } from "@/components/icons/GCPIcons";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -38,6 +39,7 @@ export default function Header({
   const { user, signInWithGoogle, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [searchValue, setSearchValue] = useState("");
+  const router = useRouter();
 
   const handleSignIn = async () => {
     try {
@@ -103,7 +105,9 @@ export default function Header({
             style={{ marginLeft: "8px", marginRight: "16px" }}
           >
             <span className="font-medium text-[18px]">
-              <span className="text-black">NEURA</span>
+              <span style={{ color: isDarkMode ? "#ffffff" : "#000000" }}>
+                NEURA
+              </span>
               <span className="text-[#4185f4]">SCALE</span>
             </span>
           </div>
@@ -276,30 +280,82 @@ export default function Header({
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {user.displayName}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
+            <DropdownMenuContent align="end" className="w-[360px]">
+              <div className="px-4 py-4 border-b border-[#e0e0e0] dark:border-[#5f6368]">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage
+                      src={user.photoURL || ""}
+                      alt={user.displayName || ""}
+                    />
+                    <AvatarFallback className="bg-[#1A73E8] text-white text-sm font-medium">
+                      {getUserInitials(user.displayName || user.email || "U")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <p className="text-[16px] font-medium text-[#202124] dark:text-[#e8eaed] truncate">
+                      {user.displayName || "User"}
+                    </p>
+                    <p className="text-[14px] text-[#5f6368] dark:text-[#9aa0a6] truncate">
+                      {user.email}
+                    </p>
+                    <button className="mt-2 px-4 py-1.5 text-[14px] font-medium text-[#1a73e8] border border-[#dadce0] dark:border-[#5f6368] rounded-full hover:bg-[#f8f9fa] dark:hover:bg-[#3c4043] transition-colors self-start">
+                      Manage your Google Account
+                    </button>
+                  </div>
                 </div>
-              </DropdownMenuLabel>
+              </div>
+              <div className="py-2">
+                <DropdownMenuItem onClick={() => router.push("/profile")}>
+                  <img
+                    src="/svg/User-Preferences.svg"
+                    alt=""
+                    className="mr-3 h-5 w-5 opacity-60"
+                  />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <img
+                    src="/svg/Administration.svg"
+                    alt=""
+                    className="mr-3 h-5 w-5 opacity-60"
+                  />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <img
+                    src="/svg/Billing.svg"
+                    alt=""
+                    className="mr-3 h-5 w-5 opacity-60"
+                  />
+                  <span>Billing</span>
+                </DropdownMenuItem>
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <SettingsIcon className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
+              <div className="py-2">
+                <DropdownMenuItem>
+                  <img
+                    src="/svg/Support.svg"
+                    alt=""
+                    className="mr-3 h-5 w-5 opacity-60"
+                  />
+                  <span>Help</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <img
+                    src="/svg/Developer-Portal.svg"
+                    alt=""
+                    className="mr-3 h-5 w-5 opacity-60"
+                  />
+                  <span>Documentation</span>
+                </DropdownMenuItem>
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <span>Sign out</span>
-              </DropdownMenuItem>
+              <div className="py-2">
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <span className="ml-8">Sign out</span>
+                </DropdownMenuItem>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (

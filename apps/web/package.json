@@ -51,6 +51,7 @@
   },
   "overrides": {
     "nanoid": "^5.0.0",
-    "cross-spawn": "^7.0.6"
+    "cross-spawn": "^7.0.6",
+    "prismjs": "^1.30.0"
   }
 }

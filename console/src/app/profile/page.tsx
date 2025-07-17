@@ -24,6 +24,20 @@ interface UserProfile {
   lastLoginAt: string | null;
 }
 
+// Helper component for label-value pairs
+function ProfileField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <GCPCardItem>
+      <div className="flex items-center justify-between w-full">
+        <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[120px]">{label}</span>
+        <div className="flex-1 text-right">
+          {children}
+        </div>
+      </div>
+    </GCPCardItem>
+  );
+}
+
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -222,7 +236,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Profile Fields */}
-                  <GCPCardItem label="Name">
+                  <ProfileField label="Name">
                     {isEditing ? (
                       <input
                         type="text"
@@ -237,24 +251,24 @@ export default function ProfilePage() {
                         {profile.name || "Not set"}
                       </span>
                     )}
-                  </GCPCardItem>
+                  </ProfileField>
 
-                  <GCPCardItem label="Email">
+                  <ProfileField label="Email">
                     <span className="app-text">{profile.email}</span>
-                  </GCPCardItem>
+                  </ProfileField>
 
-                  <GCPCardItem label="Role">
+                  <ProfileField label="Role">
                     <span className="app-text capitalize">
                       {profile.role.toLowerCase()}
                     </span>
-                  </GCPCardItem>
+                  </ProfileField>
                 </GCPCardContent>
               </GCPCard>
 
               {/* Organization Information Card */}
               <GCPCard title="Organization" icon="Administration">
                 <GCPCardContent>
-                  <GCPCardItem label="Organization">
+                  <ProfileField label="Organization">
                     {isEditing ? (
                       <input
                         type="text"
@@ -272,9 +286,9 @@ export default function ProfilePage() {
                         {profile.organization || "Not set"}
                       </span>
                     )}
-                  </GCPCardItem>
+                  </ProfileField>
 
-                  <GCPCardItem label="Department">
+                  <ProfileField label="Department">
                     {isEditing ? (
                       <input
                         type="text"
@@ -292,14 +306,14 @@ export default function ProfilePage() {
                         {profile.department || "Not set"}
                       </span>
                     )}
-                  </GCPCardItem>
+                  </ProfileField>
                 </GCPCardContent>
               </GCPCard>
 
               {/* Account Activity Card */}
               <GCPCard title="Account Activity" icon="Cloud-Logging">
                 <GCPCardContent>
-                  <GCPCardItem label="Member since">
+                  <ProfileField label="Member since">
                     <span className="app-text">
                       {new Date(profile.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
@@ -307,10 +321,10 @@ export default function ProfilePage() {
                         day: "numeric",
                       })}
                     </span>
-                  </GCPCardItem>
+                  </ProfileField>
 
                   {profile.lastLoginAt && (
-                    <GCPCardItem label="Last login">
+                    <ProfileField label="Last login">
                       <span className="app-text">
                         {new Date(profile.lastLoginAt).toLocaleString("en-US", {
                           year: "numeric",
@@ -320,14 +334,14 @@ export default function ProfilePage() {
                           minute: "2-digit",
                         })}
                       </span>
-                    </GCPCardItem>
+                    </ProfileField>
                   )}
 
-                  <GCPCardItem label="Account status">
+                  <ProfileField label="Account status">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                       Active
                     </span>
-                  </GCPCardItem>
+                  </ProfileField>
                 </GCPCardContent>
               </GCPCard>
             </GCPCardGrid>

@@ -47,6 +47,28 @@ For analytics and maps:
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API key   | `AIza...`    | ❌ No    |
 | `NEXT_PUBLIC_GA4_MEASUREMENT_ID`  | Google Analytics 4 ID | `G-XXXXXXXX` | ❌ No    |
 
+### 💳 Stripe Billing (Console App)
+
+For payment processing in the console app:
+
+| Variable                             | Description                     | Example       | Required |
+| ------------------------------------ | ------------------------------- | ------------- | -------- |
+| `STRIPE_SECRET_KEY`                  | Stripe secret API key           | `sk_test_...` | ✅ Yes   |
+| `STRIPE_WEBHOOK_SECRET`              | Webhook endpoint signing secret | `whsec_...`   | ✅ Yes   |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Public Stripe key               | `pk_test_...` | ✅ Yes   |
+| `STRIPE_PRICE_STARTER_MONTHLY`       | Starter plan price ID           | `price_...`   | ✅ Yes   |
+| `STRIPE_PRICE_PROFESSIONAL_MONTHLY`  | Professional plan price ID      | `price_...`   | ✅ Yes   |
+| `STRIPE_PRICE_ENTERPRISE_MONTHLY`    | Enterprise plan price ID        | `price_...`   | ❌ No    |
+
+### 🔐 Firebase Admin (Console App)
+
+For server-side Firebase operations:
+
+| Variable                | Description                 | Example                 | Required |
+| ----------------------- | --------------------------- | ----------------------- | -------- |
+| `FIREBASE_CLIENT_EMAIL` | Service account email       | `firebase-adminsdk@...` | ✅ Yes   |
+| `FIREBASE_PRIVATE_KEY`  | Service account private key | `(see documentation)`   | ✅ Yes   |
+
 ### 🚀 Deployment (Platform-specific)
 
 For Vercel deployments:

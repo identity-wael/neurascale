@@ -65,7 +65,7 @@ async function migrateContent() {
   try {
     // Test permissions first
     console.log('\nTesting API permissions...');
-    const testQuery = await client.fetch('*[_type == "hero"][0]');
+    await client.fetch('*[_type == "hero"][0]');
     console.log('✅ Read permission confirmed');
 
     // Create or update Hero content

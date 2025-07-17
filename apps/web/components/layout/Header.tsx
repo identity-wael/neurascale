@@ -136,6 +136,25 @@ export default function Header() {
               </svg>
             </a>
 
+            {/* Documentation link */}
+            <a
+              href="https://docs.neurascale.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/70 hover:text-white transition-colors"
+              title="Documentation"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M19 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h13v16zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z" />
+              </svg>
+            </a>
+
             {/* Console Button */}
             <a
               href="https://console.neurascale.io"
@@ -227,6 +246,29 @@ export default function Header() {
                 GitHub Repository
               </motion.a>
 
+              {/* Documentation link in mobile menu */}
+              <motion.a
+                href="https://docs.neurascale.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: (menuItems.length + 1) * 0.05 }}
+                className="px-6 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2 text-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M19 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h13v16zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z" />
+                </svg>
+                Documentation
+              </motion.a>
+
               {/* Console Button in mobile menu */}
               <motion.a
                 href="https://console.neurascale.io"
@@ -234,7 +276,7 @@ export default function Header() {
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: (menuItems.length + 1) * 0.05 }}
+                transition={{ delay: (menuItems.length + 2) * 0.05 }}
                 className="mx-6 my-3 px-3 py-2 border border-white/20 hover:border-white/40 text-white/70 hover:text-white text-sm transition-colors uppercase tracking-wider text-center rounded"
                 onClick={() => setMobileMenuOpen(false)}
               >

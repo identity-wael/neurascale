@@ -2,6 +2,7 @@
 layout: doc
 title: Documentation Overview
 description: Complete technical documentation for NeuraScale
+permalink: /docs/
 ---
 
 # NeuraScale Documentation

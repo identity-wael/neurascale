@@ -10,6 +10,8 @@ Advanced neural computing platform console inspired by Google Cloud Platform's d
 - **Neural Services**: Interface for managing neural computing resources
 - **Real-time Dashboard**: Monitor and control neural infrastructure
 - **Terraform Infrastructure**: Infrastructure as Code for GCP resources
+- **Stripe Billing Integration**: Complete subscription management with multiple pricing tiers
+- **Customer Portal**: Self-service billing management for users
 
 ## Prerequisites
 
@@ -33,15 +35,22 @@ Advanced neural computing platform console inspired by Google Cloud Platform's d
    cp .env.example .env.local
    ```
 
-   Fill in your Firebase and database configuration:
+   Fill in your Firebase, database, and Stripe configuration:
 
    ```env
+   # Firebase Configuration
    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
    # ... other Firebase config
 
+   # Database
    DATABASE_URL=postgresql://username:password@host:5432/database_name
+
+   # Stripe Billing
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
    ```
 
 3. **Deploy Infrastructure** (Optional):
@@ -99,6 +108,9 @@ neurascale-console/
 - **Projects**: User-owned projects containing resources
 - **Resources**: Neural computing resources (instances, databases, etc.)
 - **ActivityLog**: Audit trail of user actions
+- **Subscription**: User billing plans and status
+- **Invoice**: Payment history and receipts
+- **UsageRecord**: Resource usage tracking for billing
 
 ### Services
 

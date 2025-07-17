@@ -68,12 +68,10 @@ export async function POST(request: NextRequest) {
             data: {
               status: subscription.status.toUpperCase() as any,
               currentPeriodStart: new Date(
-                subscription.current_period_start * 1000,
+                subscription.currentPeriodStart * 1000,
               ),
-              currentPeriodEnd: new Date(
-                subscription.current_period_end * 1000,
-              ),
-              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000),
+              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
             },
           });
           break;
@@ -110,14 +108,18 @@ export async function POST(request: NextRequest) {
               data: {
                 stripeInvoiceId: invoice.id,
                 userId: user.id,
-                amountPaid: invoice.amount_paid,
-                amountDue: invoice.amount_due,
+                amountPaid: invoice.amountPaid || 0,
+                amountDue: invoice.amountDue || 0,
                 currency: invoice.currency,
                 status: invoice.status || "paid",
-                hostedInvoiceUrl: invoice.hosted_invoice_url,
-                invoicePdf: invoice.invoice_pdf,
-                periodStart: new Date(invoice.period_start * 1000),
-                periodEnd: new Date(invoice.period_end * 1000),
+                hostedInvoiceUrl: invoice.hostedInvoiceUrl || null,
+                invoicePdf: invoice.invoicePdf || null,
+                periodStart: invoice.periodStart
+                  ? new Date(invoice.periodStart * 1000)
+                  : new Date(),
+                periodEnd: invoice.periodEnd
+                  ? new Date(invoice.periodEnd * 1000)
+                  : new Date(),
               },
             });
           }

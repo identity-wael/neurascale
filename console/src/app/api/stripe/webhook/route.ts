@@ -15,7 +15,8 @@ const relevantEvents = new Set([
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
-  const sig = headers().get("stripe-signature") as string;
+  const headersList = await headers();
+  const sig = headersList.get("stripe-signature") as string;
 
   let event: Stripe.Event;
 

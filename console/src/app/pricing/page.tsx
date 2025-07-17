@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PLANS } from "@/lib/stripe";
 import Layout from "@/components/layout/Layout";
-import {
-  GCPCard,
-  GCPCardGrid,
-  GCPCardContent,
-  GCPCardItem,
-} from "@/components/ui/gcp-card";
+import { GCPCard, GCPCardContent, GCPCardItem } from "@/components/ui/gcp-card";
 
 interface Subscription {
   plan: string;
@@ -211,7 +206,7 @@ export default function PricingPage() {
               </h2>
             </div>
 
-            <GCPCardGrid columns={4} className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               {Object.entries(PLANS).map(([key, plan]) => {
                 const isCurrentPlan = currentSubscription?.plan === key;
                 const isProfessional = key === "PROFESSIONAL";
@@ -294,7 +289,7 @@ export default function PricingPage() {
                   </GCPCard>
                 );
               })}
-            </GCPCardGrid>
+            </div>
 
             {/* Additional Information */}
             <div className="mt-8 p-4 rounded-lg app-card-bg border app-card-border">

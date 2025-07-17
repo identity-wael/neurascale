@@ -5,7 +5,6 @@ import { useRef, Suspense } from 'react';
 import AnimatedText from '@/components/ui/AnimatedText';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import dynamic from 'next/dynamic';
-import { useContent } from '@/src/contexts/ContentContext';
 
 // Dynamic import for 3D component to avoid SSR issues
 const DataUniverse3D = dynamic(() => import('@/components/visuals/DataUniverse3D'), {
@@ -13,8 +12,14 @@ const DataUniverse3D = dynamic(() => import('@/components/visuals/DataUniverse3D
   loading: () => <div className="absolute inset-0 bg-black/50" />,
 });
 
-export default function Hero() {
-  const { hero } = useContent();
+interface HeroClientProps {
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+export default function HeroClient({ title, subtitle, ctaText, ctaLink }: HeroClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -24,12 +29,6 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
-
-  // Use Sanity content if available, otherwise use defaults
-  const title = hero?.title || 'Neural-Prosthetics Application Cloud';
-  const subtitle =
-    hero?.subtitle ||
-    'An open-source project designed to process petabytes of complex brain data, blurring the boundaries between the human mind and the real world.';
 
   return (
     <section

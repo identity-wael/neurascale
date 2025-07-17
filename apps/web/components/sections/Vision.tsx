@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useContent } from '@/src/contexts/ContentContext';
 
 // Video Strip Component
 const VideoStrip = ({
@@ -114,6 +115,7 @@ const VideoStrip = ({
 };
 
 export default function Vision() {
+  const { vision } = useContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -203,7 +205,7 @@ export default function Vision() {
           >
             <span className="text-white/40 text-sm font-mono mr-4 mt-1">≡</span>
             <span className="text-white/40 text-sm uppercase tracking-[0.2em] font-light">
-              VISION
+              {vision?.sectionHeader || 'VISION'}
             </span>
           </motion.div>
 
@@ -217,7 +219,7 @@ export default function Vision() {
               className="mb-12"
             >
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-light leading-tight mb-8 text-white/95">
-                Bridging minds and reality
+                {vision?.title || 'Bridging minds and reality'}
               </h2>
 
               <div className="h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent mb-12"></div>
@@ -233,25 +235,31 @@ export default function Vision() {
               {/* Left column - Statistics */}
               <div className="space-y-8">
                 <div className="p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-                  <div className="text-5xl md:text-6xl font-light text-blue-400 mb-4">20M</div>
+                  <div className="text-5xl md:text-6xl font-light text-blue-400 mb-4">
+                    {vision?.mainStat || '20M'}
+                  </div>
                   <p className="text-xl md:text-2xl leading-relaxed text-white/80">
-                    people worldwide live with paralysis from spinal cord injury and stroke—their
-                    minds fully capable but physically separated from the world.
+                    {vision?.mainStatDescription ||
+                      'people worldwide live with paralysis from spinal cord injury and stroke—their minds fully capable but physically separated from the world.'}
                   </p>
                 </div>
 
                 {/* Key statistics */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-center">
-                    <div className="text-2xl font-light text-blue-300 mb-1">5.4M</div>
+                    <div className="text-2xl font-light text-blue-300 mb-1">
+                      {vision?.stat1Value || '5.4M'}
+                    </div>
                     <div className="text-xs text-white/60 uppercase tracking-wide">
-                      New injuries annually
+                      {vision?.stat1Label || 'New injuries annually'}
                     </div>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-center">
-                    <div className="text-2xl font-light text-white/90 mb-1">100%</div>
+                    <div className="text-2xl font-light text-white/90 mb-1">
+                      {vision?.stat2Value || '100%'}
+                    </div>
                     <div className="text-xs text-white/60 uppercase tracking-wide">
-                      Mental capacity intact
+                      {vision?.stat2Label || 'Mental capacity intact'}
                     </div>
                   </div>
                 </div>
@@ -261,39 +269,65 @@ export default function Vision() {
               <div className="space-y-6">
                 <div className="p-8 rounded-2xl border border-blue-400/20 bg-blue-400/5 backdrop-blur-md">
                   <h3 className="text-2xl md:text-3xl font-light text-white/95 mb-6">
-                    NEURASCALE breaks down these barriers
+                    {vision?.solutionTitle || 'NEURASCALE breaks down these barriers'}
                   </h3>
 
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                      <span className="text-lg text-white/80">
-                        <span className="text-blue-400 font-medium">Restored mobility</span> through
-                        neural prosthetics
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-blue-300"></div>
-                      <span className="text-lg text-white/80">
-                        <span className="text-blue-300 font-medium">Advanced robotics control</span>{' '}
-                        with thought
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-blue-200"></div>
-                      <span className="text-lg text-white/80">
-                        <span className="text-blue-200 font-medium">
-                          Immersive reality experiences
-                        </span>{' '}
-                        beyond physical limits
-                      </span>
-                    </div>
+                    {vision?.solutionPoints && vision.solutionPoints.length > 0 ? (
+                      vision.solutionPoints.map((point, index) => {
+                        const colors = ['bg-blue-400', 'bg-blue-300', 'bg-blue-200'];
+                        const textColors = ['text-blue-400', 'text-blue-300', 'text-blue-200'];
+                        return (
+                          <div key={point._key} className="flex items-center space-x-3">
+                            <div
+                              className={`w-2 h-2 rounded-full ${colors[index % colors.length]}`}
+                            ></div>
+                            <span className="text-lg text-white/80">
+                              <span
+                                className={`${textColors[index % textColors.length]} font-medium`}
+                              >
+                                {point.highlight}
+                              </span>{' '}
+                              {point.text.replace(point.highlight, '').trim()}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                          <span className="text-lg text-white/80">
+                            <span className="text-blue-400 font-medium">Restored mobility</span>{' '}
+                            through neural prosthetics
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 rounded-full bg-blue-300"></div>
+                          <span className="text-lg text-white/80">
+                            <span className="text-blue-300 font-medium">
+                              Advanced robotics control
+                            </span>{' '}
+                            with thought
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 rounded-full bg-blue-200"></div>
+                          <span className="text-lg text-white/80">
+                            <span className="text-blue-200 font-medium">
+                              Immersive reality experiences
+                            </span>{' '}
+                            beyond physical limits
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="mt-8 pt-6 border-t border-white/10">
                     <p className="text-white/60 text-sm leading-relaxed">
-                      Through real-time neural signal processing at unprecedented scale and
-                      precision
+                      {vision?.solutionDescription ||
+                        'Through real-time neural signal processing at unprecedented scale and precision'}
                     </p>
                   </div>
                 </div>

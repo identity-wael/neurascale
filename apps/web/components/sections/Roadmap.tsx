@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import AnimatedText from '@/components/ui/AnimatedText';
 import dynamic from 'next/dynamic';
+import { useContent } from '@/src/contexts/ContentContext';
 
 // Dynamic import for DSM Periodic Table to avoid SSR issues
 const DSMPeriodicTable = dynamic(() => import('@/components/visuals/DSMPeriodicTable'), {
@@ -26,6 +27,7 @@ const DSMMatrix = dynamic(() => import('@/components/visuals/DSMMatrix'), {
 });
 
 export default function Roadmap() {
+  const { roadmap } = useContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,

@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import AnimatedText from '@/components/ui/AnimatedText';
 import dynamic from 'next/dynamic';
+import { useContent } from '@/src/contexts/ContentContext';
 
 const AttractorParticles3D = dynamic(() => import('@/components/visuals/AttractorParticles3D'), {
   ssr: false,
@@ -11,6 +12,7 @@ const AttractorParticles3D = dynamic(() => import('@/components/visuals/Attracto
 });
 
 export default function Problem() {
+  const { problem } = useContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,

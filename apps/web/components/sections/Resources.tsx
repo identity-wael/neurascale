@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import AnimatedText from '@/components/ui/AnimatedText';
+import { useContent } from '@/src/contexts/ContentContext';
 
 // SVG Icons for resources
 const RocketIcon = () => (
@@ -78,6 +79,7 @@ const ManualIcon = () => (
 );
 
 export default function Resources() {
+  const { resources } = useContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,

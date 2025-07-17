@@ -206,7 +206,7 @@ export default function PricingPage() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 items-stretch">
               {Object.entries(PLANS).map(([key, plan]) => {
                 const isCurrentPlan = currentSubscription?.plan === key;
                 const isProfessional = key === "PROFESSIONAL";
@@ -216,11 +216,13 @@ export default function PricingPage() {
                     key={key}
                     title={plan.name}
                     icon="Cloud-SQL"
-                    className={isProfessional ? "ring-2 ring-[#1a73e8]" : ""}
+                    className={`transition-all duration-200 hover:ring-2 hover:ring-[#1a73e8] hover:shadow-lg ${
+                      isProfessional ? "ring-2 ring-[#1a73e8]" : ""
+                    }`}
                     badge={isProfessional ? "RECOMMENDED" : undefined}
                   >
-                    <GCPCardContent>
-                      <div className="mb-4">
+                    <GCPCardContent className="flex flex-col h-full">
+                      <div className="flex-grow">
                         <p className="text-sm app-text-secondary mb-4">
                           {plan.description}
                         </p>
@@ -241,30 +243,33 @@ export default function PricingPage() {
                             </div>
                           )}
                         </div>
-                      </div>
 
-                      <ul className="space-y-2 mb-6">
-                        {plan.features.map((feature, index) => (
-                          <li key={index} className="flex items-start text-sm">
-                            <svg
-                              className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
+                        <ul className="space-y-2 mb-6">
+                          {plan.features.map((feature, index) => (
+                            <li
+                              key={index}
+                              className="flex items-start text-sm"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                            <span className="app-text-secondary">
-                              {feature}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                              <svg
+                                className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              <span className="app-text-secondary">
+                                {feature}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
 
                       <button
                         onClick={() => handleSubscribe(key)}
@@ -272,9 +277,7 @@ export default function PricingPage() {
                         className={`w-full px-4 py-2 text-sm font-medium rounded transition-colors ${
                           isCurrentPlan
                             ? "bg-[#e8f0fe] text-[#5f6368] cursor-not-allowed dark:bg-[#394457] dark:text-[#9aa0a6]"
-                            : isProfessional
-                              ? "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
-                              : "bg-[#f8f9fa] text-[#1a73e8] hover:bg-[#e8f0fe] dark:bg-[#303134] dark:hover:bg-[#394457]"
+                            : "bg-[#1a73e8] text-white hover:bg-[#1967d2]"
                         }`}
                       >
                         {loading === key

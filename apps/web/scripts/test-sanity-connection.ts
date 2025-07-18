@@ -49,7 +49,7 @@ async function testSanityConnection() {
 
     // Test 4: Create and delete a test document
     console.log('\n4. Testing CREATE/DELETE operations...');
-    const testDoc = await client.create({
+    await client.create({
       _type: 'hero',
       _id: 'test-doc-temporary',
       title: 'Test Document',

@@ -42,7 +42,7 @@
     "autoprefixer": "^10.4.21",
     "dotenv": "^17.2.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.4.1",
+    "eslint-config-next": "^15.4.2",
     "firebase-admin": "^13.4.0",
     "next-auth": "^4.24.11",
     "postcss": "^8.5.6",

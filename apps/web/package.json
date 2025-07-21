@@ -32,7 +32,7 @@
     "react-is": "^19.1.0",
     "sanity": "^3.99.0",
     "stripe": "^18.3.0",
-    "three": "^0.160.1"
+    "three": "^0.178.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.8",

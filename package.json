@@ -1,0 +1,9 @@
+{
+  "name": "neurascale-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "cd apps && pnpm run build",
+    "dev": "cd apps && pnpm run dev"
+  },
+  "packageManager": "pnpm@9.15.4"
+}

@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "installCommand": "pnpm install",
+  "installCommand": "cd ../.. && pnpm install && cd apps/web",
   "buildCommand": "pnpm run build",
   "headers": [
     {

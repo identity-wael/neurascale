@@ -259,7 +259,7 @@ const DSMVisualization = () => {
   const dsmMatrix = useMemo(() => generateDSMMatrix(), []);
 
   // Category colors based on component types and NeuraScale layers
-  const getCategoryColor = (name) => {
+  const getCategoryColor = (name: string) => {
     // Neural and Brain interfaces - Cyan (NIIL Layer)
     if (
       name.includes('Neural') ||

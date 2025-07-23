@@ -1,4 +1,8 @@
 {
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "outputDirectory": ".next",
   "headers": [
     {
       "source": "/(.*)",

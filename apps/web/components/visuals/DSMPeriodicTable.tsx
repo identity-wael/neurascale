@@ -147,8 +147,13 @@ const DSMPeriodicTable = () => {
       cameraRef.current = camera;
       rendererRef.current = renderer;
 
-      const objects = [];
-      const targets = { table: [], sphere: [], helix: [], grid: [] };
+      const objects: THREE.Object3D[] = [];
+      const targets: {
+        table: THREE.Object3D[];
+        sphere: THREE.Object3D[];
+        helix: THREE.Object3D[];
+        grid: THREE.Object3D[];
+      } = { table: [], sphere: [], helix: [], grid: [] };
 
       // Create HTML elements container
       const elementsContainer = document.createElement('div');
@@ -187,7 +192,7 @@ const DSMPeriodicTable = () => {
           rgba(0,100,200,0.6) 50%,
           rgba(0,50,150,0.8) 100%)`;
         elementDiv.style.backdropFilter = 'blur(5px)';
-        elementDiv.style.webkitBackdropFilter = 'blur(5px)';
+        (elementDiv.style as any).webkitBackdropFilter = 'blur(5px)';
 
         const number = document.createElement('div');
         number.className = 'number';
@@ -249,7 +254,7 @@ const DSMPeriodicTable = () => {
 
         // Create 3D object wrapper
         const object = new THREE.Object3D();
-        object.element = elementDiv;
+        (object as any).element = elementDiv;
         object.position.x = Math.random() * 4000 - 2000;
         object.position.y = Math.random() * 4000 - 2000;
         object.position.z = Math.random() * 4000 - 2000;
@@ -296,7 +301,7 @@ const DSMPeriodicTable = () => {
       // CSS3D-like rendering
       const render = () => {
         objects.forEach((object) => {
-          const element = object.element;
+          const element = (object as any).element;
 
           // Get world position
           const vector = new THREE.Vector3();
@@ -308,6 +313,7 @@ const DSMPeriodicTable = () => {
 
           // Calculate screen position
           const container = containerRef.current;
+          if (!container) return;
           const width = container.clientWidth;
           const height = container.clientHeight;
           const x = projectedVector.x * width * 0.5 + width * 0.5;

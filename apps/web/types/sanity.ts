@@ -18,6 +18,12 @@ export interface VisionContent {
   title?: string;
   description?: string;
   sectionHeader?: string;
+  solutionTitle?: string;
+  solutionPoints?: Array<{
+    _key: string;
+    highlight: string;
+    description: string;
+  }>;
   mainStat?: string;
   mainStatDescription?: string;
   stat1Value?: string;

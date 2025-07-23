@@ -725,7 +725,7 @@ const DSMVisualization = () => {
       <div className="relative w-full h-full">
         {viewMode === '3d' && <div ref={mountRef} className="w-full h-full" />}
         {viewMode === 'matrix' && <MatrixView />}
-        {viewMode === 'force' && <ForceGraphView />}
+        {/* {viewMode === 'force' && <ForceGraphView />} */}
 
         {/* Info Panel */}
         {selectedNode && (

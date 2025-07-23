@@ -351,7 +351,7 @@ const DSMPeriodicTable = () => {
       let targetRotationYOnMouseDown = 0;
       let autoRotate = true;
 
-      const onMouseDown = (event) => {
+      const onMouseDown = (event: MouseEvent) => {
         event.preventDefault();
         isMouseDown = true;
         mouseXOnMouseDown = event.clientX;
@@ -361,7 +361,7 @@ const DSMPeriodicTable = () => {
         autoRotate = false; // Stop auto-rotation when user interacts
       };
 
-      const onMouseMove = (event) => {
+      const onMouseMove = (event: MouseEvent) => {
         if (!isMouseDown) return;
 
         mouseX = event.clientX - mouseXOnMouseDown;
@@ -376,7 +376,7 @@ const DSMPeriodicTable = () => {
       };
 
       // Toggle auto-rotation
-      window.toggleAutoRotate = () => {
+      (window as any).toggleAutoRotate = () => {
         autoRotate = !autoRotate;
         return autoRotate;
       };
@@ -438,7 +438,7 @@ const DSMPeriodicTable = () => {
       };
     };
 
-    const transform = (targets, duration) => {
+    const transform = (targets: THREE.Object3D[], duration: number) => {
       // Cancel existing tweens
       tweensRef.current.forEach((tween) => {
         if (tween.stop) tween.stop();
@@ -461,6 +461,8 @@ const DSMPeriodicTable = () => {
       }
 
       // Animate camera position
+      const camera = cameraRef.current;
+      if (!camera) return;
       const cameraStartZ = camera.position.z;
       const cameraStartTime = Date.now();
 

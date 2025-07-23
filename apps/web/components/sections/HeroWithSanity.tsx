@@ -5,7 +5,9 @@ import HeroClient from './HeroClient';
 const HERO_QUERY = `*[_type == "hero" && _id == "hero-main"][0]`;
 
 export default async function HeroWithSanity() {
-  const content = await sanityFetch<HeroContent>(HERO_QUERY);
+  const content = await sanityFetch<HeroContent>({
+    query: HERO_QUERY,
+  });
 
   if (!content) {
     // Fallback content in case Sanity is not available
@@ -21,10 +23,13 @@ export default async function HeroWithSanity() {
 
   return (
     <HeroClient
-      title={content.title}
-      subtitle={content.subtitle}
-      ctaText={content.ctaText}
-      ctaLink={content.ctaLink}
+      title={content.title || 'Neural-Prosthetics Application Cloud'}
+      subtitle={
+        content.subtitle ||
+        'An open-source project designed to process petabytes of complex brain data, blurring the boundaries between the human mind and the real world.'
+      }
+      ctaText={content.cta?.text || 'Get Started'}
+      ctaLink={content.cta?.href || '#contact'}
     />
   );
 }

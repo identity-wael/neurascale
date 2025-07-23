@@ -48,7 +48,7 @@ export default function HeroWithContent({ content }: HeroWithContentProps) {
 
       <motion.div style={{ opacity, scale, y }} className="max-w-6xl relative z-10">
         <AnimatedText
-          text={content.title}
+          text={content.title || 'Welcome to NeuraScale'}
           className="text-5xl md:text-7xl lg:text-8xl font-light mb-8"
           delay={0.5}
           stagger={0.02}
@@ -60,7 +60,7 @@ export default function HeroWithContent({ content }: HeroWithContentProps) {
           transition={{ duration: 1, delay: 1 }}
           className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-white/80 max-w-4xl"
         >
-          {content.subtitle}
+          {content.subtitle || 'Transforming the future of digital infrastructure'}
         </motion.p>
       </motion.div>
       <ScrollIndicator />

@@ -1,18 +1,19 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { trackEvent } from '../../lib/google-analytics';
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 export default function TestAnalyticsPage() {
-  const { trackCustomEvent } = useGoogleAnalytics();
+  const { track } = useGoogleAnalytics();
 
   useEffect(() => {
     // Track page view (automatic with hook)
     console.log('GA4 Test Page Loaded');
 
     // Check if gtag is available
-    if (typeof window !== 'undefined' && window.gtag) {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
       console.log('✅ Google Analytics is loaded!');
       console.log('GA4 Measurement ID:', process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID);
     } else {
@@ -26,7 +27,7 @@ export default function TestAnalyticsPage() {
       label: 'GA4 Test Button',
       value: 1,
     });
-    trackCustomEvent('test_custom_event', {
+    track('test_custom_event', {
       test_parameter: 'Hello GA4!',
     });
     console.log('Test events sent to GA4');
@@ -66,16 +67,18 @@ export default function TestAnalyticsPage() {
           <ol className="list-decimal list-inside space-y-2">
             <li>Open browser Developer Tools (F12)</li>
             <li>Check Console tab for GA4 loading messages</li>
-            <li>Go to Network tab and filter by "google-analytics" or "gtag"</li>
+            <li>
+              Go to Network tab and filter by &quot;google-analytics&quot; or &quot;gtag&quot;
+            </li>
             <li>Visit GA4 Real-time reports in Google Analytics dashboard</li>
             <li>You should see yourself as an active user</li>
           </ol>
         </div>
 
         <div className="mt-8">
-          <a href="/" className="text-blue-400 hover:underline">
+          <Link href="/" className="text-blue-400 hover:underline">
             ← Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

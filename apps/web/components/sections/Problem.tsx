@@ -53,7 +53,7 @@ export default function Problem() {
               Unlocking Human Potential Through Advanced Neural Processing
             </h3>
             <p className="text-lg leading-relaxed text-white/70 mb-8">
-              NeuraScale's Neural-Prosthetics Application Cloud represents a paradigm shift in
+              NeuraScale&apos;s Neural-Prosthetics Application Cloud represents a paradigm shift in
               brain-computer interface technology, designed to process petabytes of real-time neural
               data and bridge the gap between the human mind and the physical world.
             </p>

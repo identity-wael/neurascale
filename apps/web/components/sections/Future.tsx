@@ -64,8 +64,8 @@ export default function Future() {
             <h3 className="text-2xl text-white mb-3">Advanced Human-Machine Interaction</h3>
             <p>
               Enable sophisticated control over robotic systems, from prosthetic limbs to swarms of
-              robots, and facilitate "Full-Dive" VR experiences seamlessly integrated with neural
-              intent.
+              robots, and facilitate &quot;Full-Dive&quot; VR experiences seamlessly integrated with
+              neural intent.
             </p>
           </motion.div>
 
@@ -77,8 +77,8 @@ export default function Future() {
           >
             <h3 className="text-2xl text-white mb-3">Next-Generation Security</h3>
             <p>
-              Introducing passwordless "Neural ID" authentication using unique brain patterns,
-              providing unprecedented security for the digital age.
+              Introducing passwordless &quot;Neural ID&quot; authentication using unique brain
+              patterns, providing unprecedented security for the digital age.
             </p>
           </motion.div>
         </div>

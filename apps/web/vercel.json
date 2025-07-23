@@ -1,6 +1,6 @@
 {
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm run build",
+  "installCommand": "cd ../.. && cd apps && pnpm install",
+  "buildCommand": "cd ../.. && cd apps && pnpm run build --filter=@neurascale/web",
   "devCommand": "pnpm run dev",
   "outputDirectory": ".next",
   "headers": [

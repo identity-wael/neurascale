@@ -461,7 +461,6 @@ const DSMPeriodicTable = () => {
       }
 
       // Animate camera position
-      const camera = cameraRef.current;
       if (!camera) return;
       const cameraStartZ = camera.position.z;
       const cameraStartTime = Date.now();
@@ -521,10 +520,10 @@ const DSMPeriodicTable = () => {
     const cleanup = init();
 
     // Button handlers
-    window.transformToTable = () => transform(targetsRef.current.table, 2000);
-    window.transformToSphere = () => transform(targetsRef.current.sphere, 2000);
-    window.transformToHelix = () => transform(targetsRef.current.helix, 2000);
-    window.transformToGrid = () => transform(targetsRef.current.grid, 2000);
+    (window as any).transformToTable = () => transform(targetsRef.current.table, 2000);
+    (window as any).transformToSphere = () => transform(targetsRef.current.sphere, 2000);
+    (window as any).transformToHelix = () => transform(targetsRef.current.helix, 2000);
+    (window as any).transformToGrid = () => transform(targetsRef.current.grid, 2000);
 
     return () => {
       cleanup();

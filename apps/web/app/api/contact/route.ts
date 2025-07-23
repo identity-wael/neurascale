@@ -41,9 +41,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Basic email validation - using a simpler, safer pattern
+    // This avoids ReDoS vulnerability while still validating basic email format
+    const emailParts = email.split('@');
+    if (
+      emailParts.length !== 2 ||
+      emailParts[0].length === 0 ||
+      emailParts[1].length === 0 ||
+      !emailParts[1].includes('.') ||
+      email.includes(' ')
+    ) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 

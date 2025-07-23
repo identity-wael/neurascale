@@ -2,13 +2,18 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 const DSMPeriodicTable = () => {
-  const containerRef = useRef(null);
-  const sceneRef = useRef(null);
-  const rendererRef = useRef(null);
-  const cameraRef = useRef(null);
-  const objectsRef = useRef([]);
-  const targetsRef = useRef({ table: [], sphere: [], helix: [], grid: [] });
-  const tweensRef = useRef([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const objectsRef = useRef<THREE.Object3D[]>([]);
+  const targetsRef = useRef<{
+    table: THREE.Object3D[];
+    sphere: THREE.Object3D[];
+    helix: THREE.Object3D[];
+    grid: THREE.Object3D[];
+  }>({ table: [], sphere: [], helix: [], grid: [] });
+  const tweensRef = useRef<any[]>([]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -123,9 +128,10 @@ const DSMPeriodicTable = () => {
     ];
 
     const init = () => {
-      const scene = new THREE.Scene();
       const container = containerRef.current;
       if (!container) return;
+
+      const scene = new THREE.Scene();
       const width = container.clientWidth;
       const height = container.clientHeight;
       const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);

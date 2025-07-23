@@ -609,7 +609,7 @@ export default function Community() {
           >
             <h3 className="text-2xl font-light text-white/90 mb-4">Contributor Recognition</h3>
             <p className="text-white/70 leading-relaxed mb-6">
-              We're developing a tokenized reward system to recognize and incentivize valuable
+              We&apos;re developing a tokenized reward system to recognize and incentivize valuable
               contributions to the NEURASCALE ecosystem. Contributors earn tokens for code commits,
               documentation, bug reports, and community support activities.
             </p>

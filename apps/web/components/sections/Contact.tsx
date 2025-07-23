@@ -327,7 +327,7 @@ export default function Contact() {
           viewport={{ once: true }}
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 md:mb-6"
         >
-          Let's Connect
+          Let&apos;s Connect
         </motion.h2>
 
         <motion.p

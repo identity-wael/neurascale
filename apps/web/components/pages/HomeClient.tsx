@@ -14,14 +14,7 @@ import LoadingScreen from '@/components/ui/LoadingScreen';
 import SmoothScroll from '@/components/layout/SmoothScroll';
 import { AnimatePresence } from 'framer-motion';
 
-// Import new Sanity-enabled components
-import HeroWithContent from '@/components/sections/HeroWithContent';
-import VisionWithContent from '@/components/sections/VisionWithContent';
-import ProblemWithContent from '@/components/sections/ProblemWithContent';
-import RoadmapWithContent from '@/components/sections/RoadmapWithContent';
-import TeamWithContent from '@/components/sections/TeamWithContent';
-import ResourcesWithContent from '@/components/sections/ResourcesWithContent';
-import ContactWithContent from '@/components/sections/ContactWithContent';
+// TODO: Import Sanity-enabled components when they are created
 
 interface HomeClientProps {
   content: {
@@ -54,17 +47,14 @@ export default function HomeClient({ content }: HomeClientProps) {
         <SmoothScroll>
           <Header />
           <main className="bg-black text-white relative">
-            {content.hero ? <HeroWithContent content={content.hero} /> : <Hero />}
-            {content.vision ? <VisionWithContent content={content.vision} /> : <Vision />}
-            {content.problem ? <ProblemWithContent content={content.problem} /> : <Problem />}
-            {content.roadmap ? <RoadmapWithContent content={content.roadmap} /> : <Roadmap />}
-            {content.team ? <TeamWithContent content={content.team} /> : <Team />}
-            {content.resources ? (
-              <ResourcesWithContent content={content.resources} />
-            ) : (
-              <Resources />
-            )}
-            {content.contact ? <ContactWithContent content={content.contact} /> : <Contact />}
+            {/* TODO: Use Sanity content when components are ready */}
+            <Hero />
+            <Vision />
+            <Problem />
+            <Roadmap />
+            <Team />
+            <Resources />
+            <Contact />
           </main>
           <Footer />
         </SmoothScroll>

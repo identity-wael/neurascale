@@ -526,7 +526,7 @@ const DSMPeriodicTable = () => {
     (window as any).transformToGrid = () => transform(targetsRef.current.grid, 2000);
 
     return () => {
-      cleanup();
+      if (cleanup) cleanup();
     };
   }, []);
 

@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
 const DSMVisualization = () => {
-  const mountRef = useRef(null);
-  const sceneRef = useRef(null);
-  const rendererRef = useRef(null);
-  const frameRef = useRef(null);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const [selectedNode, setSelectedNode] = useState<{ name: string; dependencies: string[] } | null>(
+    null
+  );
   const [viewMode, setViewMode] = useState('3d'); // '3d', 'matrix', 'force'
-  const [hoveredCell, setHoveredCell] = useState(null);
+  const [hoveredCell, setHoveredCell] = useState<{ i: number; j: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // DSM Data
@@ -342,7 +344,9 @@ const DSMVisualization = () => {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight - 100);
-    mountRef.current.appendChild(renderer.domElement);
+    if (mountRef.current) {
+      mountRef.current.appendChild(renderer.domElement);
+    }
 
     // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);

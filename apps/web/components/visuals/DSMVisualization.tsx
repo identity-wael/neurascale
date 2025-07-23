@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import * as THREE from 'three';
 
 const DSMVisualization = () => {
   const mountRef = useRef(null);

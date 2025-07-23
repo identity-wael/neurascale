@@ -125,6 +125,7 @@ const DSMPeriodicTable = () => {
     const init = () => {
       const scene = new THREE.Scene();
       const container = containerRef.current;
+      if (!container) return;
       const width = container.clientWidth;
       const height = container.clientHeight;
       const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);

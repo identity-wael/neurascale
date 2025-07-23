@@ -381,7 +381,7 @@ const DSMVisualization = () => {
     });
 
     // Create edges
-    const edges = [];
+    const edges: { line: THREE.Line; start: THREE.Mesh; end: THREE.Mesh }[] = [];
     for (let i = 0; i < components.length; i++) {
       for (let j = 0; j < components.length; j++) {
         if (dsmMatrix[i][j] === 1) {
@@ -405,7 +405,7 @@ const DSMVisualization = () => {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    const onMouseMove = (event) => {
+    const onMouseMove = (event: MouseEvent) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 

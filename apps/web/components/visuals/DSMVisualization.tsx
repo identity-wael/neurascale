@@ -6,9 +6,7 @@ const DSMVisualization = () => {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const frameRef = useRef<number | null>(null);
-  const [selectedNode, setSelectedNode] = useState<{ name: string; dependencies: string[] } | null>(
-    null
-  );
+  const [selectedNode, setSelectedNode] = useState<{ from: string; to: string } | null>(null);
   const [viewMode, setViewMode] = useState('3d'); // '3d', 'matrix', 'force'
   const [hoveredCell, setHoveredCell] = useState<{ i: number; j: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -418,9 +416,9 @@ const DSMVisualization = () => {
       });
 
       if (intersects.length > 0) {
-        const intersected = intersects[0].object;
+        const intersected = intersects[0].object as THREE.Mesh;
         intersected.scale.setScalar(1.5);
-        intersected.material.emissiveIntensity = 0.8;
+        (intersected.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.8;
 
         // Highlight connected nodes
         const index = intersected.userData.index;

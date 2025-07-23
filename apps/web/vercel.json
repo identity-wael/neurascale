@@ -1,8 +1,7 @@
 {
-  "installCommand": "cd ../.. && cd apps && pnpm install",
-  "buildCommand": "cd ../.. && cd apps && pnpm run build --filter=@neurascale/web",
-  "devCommand": "pnpm run dev",
-  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run build",
   "headers": [
     {
       "source": "/(.*)",

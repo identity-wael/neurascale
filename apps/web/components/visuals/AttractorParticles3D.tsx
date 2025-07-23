@@ -41,7 +41,10 @@ export default function AttractorParticles3D() {
 
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x000000);
+        // Only WebGLRenderer has setClearColor
+        if ('setClearColor' in renderer) {
+          renderer.setClearColor(0x000000);
+        }
 
         // Setup scene and camera
         const scene = new THREE.Scene();

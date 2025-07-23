@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 
 const DSMMatrix = () => {
-  const [hoveredCell, setHoveredCell] = useState(null);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [hoveredCell, setHoveredCell] = useState<{ i: number; j: number } | null>(null);
+  const [selectedNode, setSelectedNode] = useState<{ from: string; to: string } | null>(null);
 
   // DSM Data
   const components = [

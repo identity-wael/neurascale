@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+  interval: 60 * 1000, // 60 seconds
+  uniqueTokenPerInterval: 500, // Max 500 unique tokens per interval
+});
 
 // Function to escape HTML to prevent XSS attacks
 function escapeHtml(unsafe: string): string {
@@ -13,8 +19,33 @@ function escapeHtml(unsafe: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get IP address for rate limiting
+    const ip =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+
+    // Apply rate limiting (5 requests per minute per IP)
+    try {
+      await limiter.check(new Response(), 5, ip);
+    } catch {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, organization, subject, message } = body;
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+    }
 
     // Log contact form submission (useful for development)
     console.log('Contact form submission:', {

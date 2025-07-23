@@ -431,9 +431,10 @@ export default function Business() {
           >
             <p className="text-white/70 leading-relaxed">
               The brain-computer interface market is expanding rapidly beyond medical applications
-              into consumer electronics, gaming, security, and immersive computing. NEURASCALE's
-              open-source approach positions us to capture significant market share across multiple
-              verticals while fostering innovation through community collaboration.
+              into consumer electronics, gaming, security, and immersive computing.
+              NEURASCALE&apos;s open-source approach positions us to capture significant market
+              share across multiple verticals while fostering innovation through community
+              collaboration.
             </p>
           </motion.div>
         </div>
@@ -534,8 +535,8 @@ export default function Business() {
             Ready to Partner with NEURASCALE?
           </h3>
           <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-            Join us in revolutionizing neural interface technology. Whether you're a healthcare
-            provider, technology company, or research institution, let's explore how we can
+            Join us in revolutionizing neural interface technology. Whether you&apos;re a healthcare
+            provider, technology company, or research institution, let&apos;s explore how we can
             collaborate to unlock human potential.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -113,8 +113,8 @@ export default function Careers() {
             technological capability.
           </p>
           <p>
-            United by our shared passion for unlocking human potential, we're building the future
-            where physical limitations no longer define what's possible.
+            United by our shared passion for unlocking human potential, we&apos;re building the
+            future where physical limitations no longer define what&apos;s possible.
           </p>
         </motion.div>
 
@@ -219,8 +219,8 @@ export default function Careers() {
         >
           <h3 className="text-2xl md:text-3xl font-light mb-8 text-white/90">Join Our Mission</h3>
           <p className="text-lg text-white/70 mb-8 max-w-3xl">
-            If you're excited about shaping the future of brain-computer interfaces and want to help
-            unlock human potential through technology, we'd love to hear from you.
+            If you&apos;re excited about shaping the future of brain-computer interfaces and want to
+            help unlock human potential through technology, we&apos;d love to hear from you.
           </p>
         </motion.div>
 

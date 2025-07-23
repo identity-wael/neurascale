@@ -7,6 +7,7 @@ import React, {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import Image from 'next/image';
 import {
   BrainCircuit,
   Cpu,
@@ -716,9 +717,11 @@ const ProjectCard: FC<ProjectCardProps> = ({
       </div>
     </div>
     <div className="md:w-1/2">
-      <img
+      <Image
         src={`https://placehold.co/600x400/1f2937/38bdf8?text=${title.split(':')[0]}`}
         alt={title}
+        width={600}
+        height={400}
         className="rounded-lg shadow-2xl w-full h-auto"
       />
     </div>

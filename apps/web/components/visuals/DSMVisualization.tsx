@@ -523,6 +523,8 @@ const DSMVisualization = () => {
     </div>
   );
 
+  // Commented out until d3 is properly imported
+  /*
   const ForceGraphView = () => {
     const svgRef = useRef(null);
 
@@ -671,6 +673,7 @@ const DSMVisualization = () => {
       </div>
     );
   };
+  */
 
   return (
     <div className="w-full h-screen bg-gray-900 text-white">

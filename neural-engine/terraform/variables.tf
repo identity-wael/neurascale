@@ -33,3 +33,8 @@ variable "ci_cd_service_account" {
   description = "Service account email for CI/CD"
   default     = "github-actions@neurascale.iam.gserviceaccount.com"
 }
+
+variable "project_id" {
+  type        = string
+  description = "Target project ID for deployment (dynamically set based on environment)"
+}

@@ -87,7 +87,6 @@ roles=(
     "roles/logging.logWriter"
     "roles/cloudtrace.agent"
     "roles/cloudprofiler.agent"
-    "roles/clouddebugger.agent"
 
     # Security services
     "roles/cloudkms.cryptoKeyEncrypterDecrypter"

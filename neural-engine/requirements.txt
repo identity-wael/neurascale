@@ -25,7 +25,7 @@ google-cloud-monitoring==2.15.1  # Cloud Monitoring (replacing wandb for metrics
 google-cloud-logging==3.8.0      # Cloud Logging
 google-cloud-trace==1.11.3       # Distributed tracing
 google-cloud-profiler==4.1.0     # Performance profiling
-google-cloud-debugger==1.9.1     # Debugger for Python 3.11
+# google-cloud-debugger is deprecated as of May 2023
 
 # Google Cloud Services - Security
 google-cloud-kms==2.19.1         # Key Management Service

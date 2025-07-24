@@ -28,6 +28,14 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: northamerica-northeast1
   PYTHON_VERSION: '3.12'  # Stable Python version
+  # M3 Pro optimizations
+  PARALLEL_JOBS: 12
+  MAKEFLAGS: "-j12"
+  CMAKE_BUILD_PARALLEL_LEVEL: 12
+  PYTHONUNBUFFERED: 1
+  PIP_PARALLEL_DOWNLOADS: 10
+  TF_ENABLE_ONEDNN_OPTS: 1
+  NODE_OPTIONS: "--max-old-space-size=8192"
 
 jobs:
   test:
@@ -75,8 +83,11 @@ jobs:
         cd neural-engine
         source venv/bin/activate
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+        # Install with parallelization and use all CPU cores
+        pip install --use-feature=fast-deps --use-deprecated=legacy-resolver -r requirements.txt || pip install -r requirements.txt
+        pip install --use-feature=fast-deps --use-deprecated=legacy-resolver -r requirements-dev.txt || pip install -r requirements-dev.txt
+        # Install parallel testing tools
+        pip install pytest-xdist pytest-parallel
 
     - name: Lint with flake8
       run: |
@@ -92,7 +103,8 @@ jobs:
     - name: Test with pytest
       run: |
         cd neural-engine
-        pytest tests/ -v --cov=. --cov-report=xml
+        # Run tests in parallel using all available CPU cores
+        pytest tests/ -v --cov=. --cov-report=xml -n auto --maxprocesses=12 --dist=loadscope || pytest tests/ -v --cov=. --cov-report=xml
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3

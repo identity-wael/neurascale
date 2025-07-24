@@ -1,0 +1,9 @@
+{
+  "agentId": ,
+  "agentName": "neurascale-local-m3pro",
+  "poolId": ,
+  "poolName": "Default",
+  "serverUrl": "https://github.com/identity-wael/neurascale",
+  "workFolder": "_work",
+  "maxParallelJobs": 4
+}

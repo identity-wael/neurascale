@@ -143,7 +143,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.6.0
+        terraform_version: 1.5.7
         cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
 
     - name: Authenticate to Google Cloud
@@ -154,9 +154,14 @@ jobs:
 
     - name: Setup Terraform Cloud Token
       run: |
-        cat > ~/.terraformrc <<EOF
-        credentials "app.terraform.io" {
-          token = "${{ secrets.TF_CLOUD_TOKEN }}"
+        mkdir -p ~/.terraform.d
+        cat > ~/.terraform.d/credentials.tfrc.json <<EOF
+        {
+          "credentials": {
+            "app.terraform.io": {
+              "token": "${{ secrets.TF_CLOUD_TOKEN }}"
+            }
+          }
         }
         EOF
 
@@ -196,7 +201,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.6.0
+        terraform_version: 1.5.7
         cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
 
     - name: Authenticate to Google Cloud
@@ -208,9 +213,14 @@ jobs:
 
     - name: Setup Terraform Cloud Token
       run: |
-        cat > ~/.terraformrc <<EOF
-        credentials "app.terraform.io" {
-          token = "${{ secrets.TF_CLOUD_TOKEN }}"
+        mkdir -p ~/.terraform.d
+        cat > ~/.terraform.d/credentials.tfrc.json <<EOF
+        {
+          "credentials": {
+            "app.terraform.io": {
+              "token": "${{ secrets.TF_CLOUD_TOKEN }}"
+            }
+          }
         }
         EOF
 

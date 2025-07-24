@@ -3,10 +3,6 @@ terraform {
 
   cloud {
     organization = "neurascale"
-
-    workspaces {
-      tags = ["neural-engine"]
-    }
   }
 
   required_providers {

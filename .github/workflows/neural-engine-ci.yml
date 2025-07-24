@@ -92,8 +92,9 @@ jobs:
     - name: Lint with flake8
       run: |
         cd neural-engine
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Exclude virtual environment and cache directories
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,__pycache__,.pytest_cache,.mypy_cache,*.egg-info
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,__pycache__,.pytest_cache,.mypy_cache,*.egg-info
 
     - name: Type check with mypy
       run: |

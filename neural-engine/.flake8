@@ -1,0 +1,26 @@
+[flake8]
+max-line-length = 127
+max-complexity = 10
+exclude =
+    venv,
+    __pycache__,
+    .pytest_cache,
+    .mypy_cache,
+    *.egg-info,
+    .git,
+    .tox,
+    dist,
+    build,
+    *.pyc,
+    *.pyo,
+    .venv
+ignore =
+    E203,  # whitespace before ':'
+    E266,  # too many leading '#' for block comment
+    E501,  # line too long (handled by black)
+    W503,  # line break before binary operator
+    F401,  # imported but unused
+    F841,  # local variable assigned but never used
+per-file-ignores =
+    __init__.py:F401
+    tests/*:F401,F811

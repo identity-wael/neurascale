@@ -26,4 +26,4 @@ ENV PYTHONUNBUFFERED=1
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/key.json
 
 # Run the processor
-CMD ["python", "-m", "src.processors.main"]
+CMD ["python", "-m", "processors.main"]

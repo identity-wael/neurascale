@@ -14,11 +14,21 @@ cd "$(dirname "$0")"
 
 # Create venv if it doesn't exist
 if [ ! -d "$CACHE_DIR/venv/neural-engine" ]; then
-    # Use Python 3.9 if available, otherwise default python3
-    if command -v python3.9 &> /dev/null; then
-        python3.9 -m venv "$CACHE_DIR/venv/neural-engine"
+    # Use Python 3.11 for best Google Cloud compatibility
+    if command -v python3.11 &> /dev/null; then
+        python3.11 -m venv "$CACHE_DIR/venv/neural-engine"
+    elif command -v python3 &> /dev/null; then
+        # Check if python3 is 3.11
+        PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+        if [[ "$PYTHON_VERSION" == "3.11" ]]; then
+            python3 -m venv "$CACHE_DIR/venv/neural-engine"
+        else
+            echo "Warning: Python 3.11 not found. Using Python $PYTHON_VERSION"
+            python3 -m venv "$CACHE_DIR/venv/neural-engine"
+        fi
     else
-        python3 -m venv "$CACHE_DIR/venv/neural-engine"
+        echo "Error: Python 3 not found"
+        exit 1
     fi
 fi
 

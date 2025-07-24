@@ -1,10 +1,10 @@
 # Neural Signal Processing
 pylsl==1.16.0
 brainflow==5.10.0
-numpy==1.26.4
-scipy==1.13.1
-scikit-learn==1.5.2
-tensorflow==2.17.0
+numpy==1.24.3  # Stable version for Python 3.11
+scipy==1.11.4  # Compatible with numpy 1.24
+scikit-learn==1.3.2  # Stable for Python 3.11
+tensorflow==2.15.0  # Last version with good Python 3.11 support
 
 # Google Cloud Services - Core
 google-cloud-pubsub==2.18.1
@@ -25,7 +25,7 @@ google-cloud-monitoring==2.15.1  # Cloud Monitoring (replacing wandb for metrics
 google-cloud-logging==3.8.0      # Cloud Logging
 google-cloud-trace==1.11.3       # Distributed tracing
 google-cloud-profiler==4.1.0     # Performance profiling
-# google-cloud-debugger          # Package has limited Python version support
+google-cloud-debugger==1.9.1     # Debugger for Python 3.11
 
 # Google Cloud Services - Security
 google-cloud-kms==2.19.1         # Key Management Service
@@ -54,7 +54,7 @@ joblib==1.3.1
 pywavelets==1.4.1
 
 # Development Tools
-black==24.10.0
-flake8==7.1.1
-mypy==1.13.0
-ipython==8.29.0
+black==23.12.1
+flake8==7.0.0
+mypy==1.8.0
+ipython==8.18.1

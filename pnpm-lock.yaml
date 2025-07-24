@@ -4,7 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: ih2yh2xvjbj4tqcvfed2azy4zq
+overrides:
+  prismjs: ^1.30.0
+
+pnpmfileChecksum: 2ke77bmeepumd66abkj3m7a7si
 
 importers:
 

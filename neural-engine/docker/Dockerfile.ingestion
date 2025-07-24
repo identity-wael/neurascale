@@ -23,6 +23,7 @@ COPY examples/ ./examples/
 COPY tests/ ./tests/
 COPY pytest.ini .
 COPY setup.py .
+COPY README.md .
 
 # Install the package in development mode
 RUN pip install -e .

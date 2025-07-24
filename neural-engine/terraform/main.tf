@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   cloud {
-    hostname = "app.terraform.io"
+    hostname     = "app.terraform.io"
     organization = "neurascale"
 
     workspaces {
@@ -126,6 +126,6 @@ resource "google_project_iam_member" "ci_cd_permissions" {
   }
 
   project = each.value
-  role    = "roles/owner"  # Adjust as needed
+  role    = "roles/owner" # Adjust as needed
   member  = "serviceAccount:${var.ci_cd_service_account}"
 }

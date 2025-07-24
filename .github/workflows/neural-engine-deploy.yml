@@ -187,7 +187,7 @@ jobs:
   deploy-infrastructure:
     needs: [build-docker, terraform-plan, determine-environment]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.determine-environment.outputs.environment == 'staging')
     environment: ${{ needs.determine-environment.outputs.environment }}
     defaults:
       run:
@@ -234,7 +234,7 @@ jobs:
   deploy-functions:
     needs: [deploy-infrastructure, determine-environment]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.determine-environment.outputs.environment == 'staging')
     environment: ${{ needs.determine-environment.outputs.environment }}
 
     steps:
@@ -263,7 +263,7 @@ jobs:
   integration-test:
     needs: [deploy-functions, determine-environment]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.determine-environment.outputs.environment == 'staging')
     environment: ${{ needs.determine-environment.outputs.environment }}
 
     steps:

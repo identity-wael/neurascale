@@ -54,7 +54,7 @@ joblib==1.4.2
 pywavelets==1.7.0
 
 # Development Tools
-black==24.11.0
+black==24.10.0
 flake8==7.1.1
-mypy==1.14.0
-ipython==8.31.0
+mypy==1.13.0
+ipython==8.29.0

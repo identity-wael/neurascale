@@ -21,6 +21,10 @@ env:
   ARTIFACT_REGISTRY: northamerica-northeast1-docker.pkg.dev
   REPOSITORY_NAME: neural-engine
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   determine-environment:
     runs-on: ubuntu-latest

@@ -44,7 +44,10 @@ resource "google_project_iam_member" "cloud_build_permissions" {
     "roles/iam.serviceAccountUser",
     "roles/eventarc.developer",
     "roles/run.developer",
-    "roles/storage.objectAdmin"
+    "roles/storage.objectAdmin",
+    "roles/cloudbuild.builds.builder",
+    "roles/compute.admin",
+    "roles/storage.admin"
   ])
 
   project = var.project_id
@@ -57,6 +60,21 @@ resource "google_service_account_iam_member" "cloud_build_act_as" {
   service_account_id = google_service_account.ingestion.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Grant permissions to the default Cloud Functions service account
+# This service account is used by Cloud Functions runtime
+resource "google_project_iam_member" "functions_service_account_permissions" {
+  for_each = toset([
+    "roles/artifactregistry.reader",
+    "roles/logging.logWriter",
+    "roles/pubsub.subscriber",
+    "roles/eventarc.eventReceiver"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
 }
 
 # Data source to get project information

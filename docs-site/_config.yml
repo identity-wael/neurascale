@@ -54,6 +54,8 @@ defaults:
 navigation:
   - title: Home
     url: /
+  - title: Neural Management System
+    url: /neural-management-system/
   - title: Getting Started
     sublinks:
       - title: Overview

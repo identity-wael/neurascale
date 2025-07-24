@@ -35,8 +35,7 @@ class TestNeuralDataIngestion:
             device_id="test_device",
             device_type="OpenBCI",
             channels=[
-                ChannelInfo(i, f"Ch{i + 1}", "microvolts", 256.0)
-                for i in range(8)
+                ChannelInfo(i, f"Ch{i + 1}", "microvolts", 256.0) for i in range(8)
             ],
         )
 
@@ -101,6 +100,7 @@ class TestNeuralDataIngestion:
 
     def test_register_source_handler(self, ingestion):
         """Test registering a source handler."""
+
         def mock_handler(data):
             return NeuralDataPacket(
                 timestamp=datetime.now(timezone.utc),
@@ -130,11 +130,7 @@ class TestNeuralDataIngestion:
         ingestion._stream_worker = mock_stream_worker
 
         # Start stream
-        await ingestion.start_stream(
-            "test_stream",
-            DataSource.LSL,
-            {"port": 12345}
-        )
+        await ingestion.start_stream("test_stream", DataSource.LSL, {"port": 12345})
 
         assert "test_stream" in ingestion._active_streams
 
@@ -186,8 +182,8 @@ class TestNeuralDataIngestion:
     @pytest.mark.asyncio
     async def test_pubsub_integration(self):
         """Test Pub/Sub integration when enabled."""
-        with patch('src.ingestion.neural_data_ingestion.GOOGLE_CLOUD_AVAILABLE', True):
-            with patch('src.ingestion.neural_data_ingestion.pubsub_v1') as mock_pubsub:
+        with patch("src.ingestion.neural_data_ingestion.GOOGLE_CLOUD_AVAILABLE", True):
+            with patch("src.ingestion.neural_data_ingestion.pubsub_v1") as mock_pubsub:
                 # Setup mocks
                 mock_publisher = Mock()
                 mock_future = Mock()
@@ -225,6 +221,7 @@ class TestNeuralDataIngestion:
 
         # Deserialize and check
         import json
+
         data = json.loads(serialized.decode())
 
         assert data["session_id"] == test_packet.session_id

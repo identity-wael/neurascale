@@ -11,6 +11,7 @@ def test_environment_setup():
 def test_python_version():
     """Test Python version is compatible."""
     import sys
+
     assert sys.version_info >= (3, 11)
     assert sys.version_info < (3, 13)
 
@@ -20,6 +21,7 @@ def test_imports():
     # Test neural signal processing imports
     try:
         import pylsl
+
         has_lsl = True
     except RuntimeError as e:
         if "LSL binary library file was not found" in str(e):
@@ -51,6 +53,7 @@ def test_imports():
 @pytest.mark.asyncio
 async def test_async_support():
     """Test that async/await is working."""
+
     async def sample_async_function():
         return "async works"
 

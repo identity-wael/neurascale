@@ -1,4 +1,5 @@
 """Main entry point for the Neural Engine Processor."""
+
 import logging
 import sys
 
@@ -15,6 +16,7 @@ def main():
     # For now, just keep the container running
     try:
         import time
+
         while True:
             time.sleep(60)
             logger.info("Processor heartbeat...")

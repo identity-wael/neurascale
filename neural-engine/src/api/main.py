@@ -1,4 +1,5 @@
 """Main entry point for the Neural Engine API."""
+
 from flask import Flask, jsonify
 import logging
 
@@ -11,11 +12,9 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     """Home endpoint."""
-    return jsonify({
-        "service": "Neural Engine API",
-        "version": "0.1.0",
-        "status": "ready"
-    })
+    return jsonify(
+        {"service": "Neural Engine API", "version": "0.1.0", "status": "ready"}
+    )
 
 
 @app.route("/health")

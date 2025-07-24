@@ -130,14 +130,29 @@ class TestEnums:
 
     def test_neural_signal_types(self):
         """Test all neural signal types are defined."""
-        expected_types = ["eeg", "ecog", "spikes", "lfp", "emg", "accelerometer", "custom"]
+        expected_types = [
+            "eeg",
+            "ecog",
+            "spikes",
+            "lfp",
+            "emg",
+            "accelerometer",
+            "custom",
+        ]
 
         for expected in expected_types:
             assert any(t.value == expected for t in NeuralSignalType)
 
     def test_data_sources(self):
         """Test all data sources are defined."""
-        expected_sources = ["lsl", "openbci", "brainflow", "file_upload", "synthetic", "custom_api"]
+        expected_sources = [
+            "lsl",
+            "openbci",
+            "brainflow",
+            "file_upload",
+            "synthetic",
+            "custom_api",
+        ]
 
         for expected in expected_sources:
             assert any(s.value == expected for s in DataSource)

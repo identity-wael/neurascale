@@ -49,7 +49,7 @@ class TestDataAnonymizer:
                 "age": 35,
                 "location": "New York, NY",
                 "experiment": "motor_imagery",
-            }
+            },
         )
 
     def test_anonymize_subject_id(self, anonymizer, test_packet):
@@ -163,7 +163,7 @@ class TestDataAnonymizer:
                     "address": "123 Main St",
                     "room": "Lab A",
                 },
-            }
+            },
         )
 
         anonymized = anonymizer.anonymize_packet(packet)
@@ -205,7 +205,7 @@ class TestDataAnonymizer:
                 source=DataSource.SYNTHETIC,
                 device_info=DeviceInfo("test", "test"),
                 session_id="test",
-                metadata={"age": age}
+                metadata={"age": age},
             )
 
             anonymized = anonymizer.anonymize_packet(packet)

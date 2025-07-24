@@ -7,6 +7,7 @@ import os
 
 # Add parent directory to path for imports
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.ingestion import NeuralDataIngestion  # noqa: E402

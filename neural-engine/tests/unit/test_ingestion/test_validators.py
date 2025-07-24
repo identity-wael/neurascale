@@ -164,16 +164,24 @@ class TestDataValidator:
         assert result.data_quality_score > 0.5
 
         # Add extreme values that cause warnings
-        valid_packet.data[0, :] = 190 + np.random.randn(256) * 2  # Near max for EEG with small variation
+        valid_packet.data[0, :] = (
+            190 + np.random.randn(256) * 2
+        )  # Near max for EEG with small variation
         result = validator.validate_packet(valid_packet)
         # Should have more warnings which reduce quality score
-        assert result.data_quality_score < 0.9  # Adjusted expectation based on improved validator
+        assert (
+            result.data_quality_score < 0.9
+        )  # Adjusted expectation based on improved validator
 
         # Multiple warnings should reduce score more
         valid_packet.sampling_rate = 999  # Unusual rate
-        valid_packet.data[1, :] = -190 + np.random.randn(256) * 2  # Another channel near limit with variation
+        valid_packet.data[1, :] = (
+            -190 + np.random.randn(256) * 2
+        )  # Another channel near limit with variation
         result = validator.validate_packet(valid_packet)
-        assert result.data_quality_score < 0.8  # Adjusted expectation based on improved validator
+        assert (
+            result.data_quality_score < 0.8
+        )  # Adjusted expectation based on improved validator
 
     def test_validate_accelerometer(self, validator):
         """Test validation of accelerometer data."""

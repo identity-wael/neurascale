@@ -50,14 +50,11 @@ def sample_neural_data():
         "session_id": "test_session_001",
         "data_type": "eeg",
         "sampling_rate": 250,
-        "channels": [
-            {"id": i, "label": f"CH{i}", "unit": "μV"}
-            for i in range(8)
-        ],
+        "channels": [{"id": i, "label": f"CH{i}", "unit": "μV"} for i in range(8)],
         "neural_signals": np.random.randn(8, 1000).tolist(),
         "timestamp": "2024-01-01T00:00:00Z",
         "metadata": {
             "experiment": "motor_imagery",
             "task": "left_hand_movement",
-        }
+        },
     }

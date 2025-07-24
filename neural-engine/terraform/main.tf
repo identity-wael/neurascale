@@ -4,6 +4,10 @@ terraform {
   cloud {
     hostname     = "app.terraform.io"
     organization = "neurascale"
+
+    workspaces {
+      tags = ["neural-engine"]
+    }
   }
 
   required_providers {

@@ -164,9 +164,7 @@ jobs:
 
     - name: Select Terraform Cloud Workspace
       run: |
-        # Terraform Cloud workspaces are managed differently
-        # The workspace is selected based on the tags in the cloud block
-        export TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}
+        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Format Check
       run: terraform fmt -check
@@ -175,6 +173,7 @@ jobs:
       run: |
         terraform plan \
           -var="orchestration_project_id=${{ env.ORCHESTRATION_PROJECT }}" \
+          -var="project_id=${{ needs.determine-environment.outputs.project_id }}" \
           -var="region=${{ env.GCP_REGION }}" \
           -out=tfplan
 
@@ -226,7 +225,7 @@ jobs:
 
     - name: Set Terraform Cloud Workspace
       run: |
-        export TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}
+        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan

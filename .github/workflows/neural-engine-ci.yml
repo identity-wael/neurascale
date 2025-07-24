@@ -13,6 +13,16 @@ on:
       - main
     paths:
       - 'neural-engine/**'
+  workflow_dispatch:
+    inputs:
+      use_self_hosted:
+        description: 'Use self-hosted runner'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -22,7 +32,8 @@ env:
 jobs:
   test:
     name: Test Neural Engine
-    runs-on: ubuntu-latest
+    # Use self-hosted by default for neural-engine branches, GitHub-hosted for others
+    runs-on: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.use_self_hosted == 'false') && 'ubuntu-latest' || contains(github.ref, 'neural') && fromJSON('["self-hosted", "neural-engine"]') || 'ubuntu-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -31,21 +42,38 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+      if: ${{ !contains(runner.name, 'self-hosted') }}
 
-    - name: Cache dependencies
+    - name: Cache dependencies (GitHub-hosted)
       uses: actions/cache@v3
       with:
         path: |
           ~/.cache/pip
           neural-engine/venv
         key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
+      if: ${{ !contains(runner.name, 'self-hosted') }}
+
+    - name: Use cached environment (self-hosted)
+      run: |
+        if [ -f "$HOME/.neural-engine-cache/setup-env.sh" ]; then
+          source "$HOME/.neural-engine-cache/setup-env.sh"
+          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+        fi
+      if: ${{ contains(runner.name, 'self-hosted') }}
 
     - name: Install dependencies
       run: |
         cd neural-engine
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+        if [[ ! "${{ runner.name }}" =~ "self-hosted" ]]; then
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+        else
+          # For self-hosted, just ensure packages are up to date
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade -r requirements-dev.txt
+        fi
 
     - name: Lint with flake8
       run: |

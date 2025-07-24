@@ -24,6 +24,9 @@ locals {
     "iamcredentials.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
+    "eventarc.googleapis.com",           # For Cloud Function triggers
+    "cloudscheduler.googleapis.com",     # For scheduled functions
+    "secretmanager.googleapis.com",      # For secure credential storage
   ]
 }
 
@@ -34,4 +37,11 @@ resource "google_project_service" "apis" {
   service = each.value
 
   disable_on_destroy = false
+}
+
+# Add a time delay to ensure APIs are fully enabled
+resource "time_sleep" "wait_for_apis" {
+  depends_on = [google_project_service.apis]
+
+  create_duration = "30s"
 }

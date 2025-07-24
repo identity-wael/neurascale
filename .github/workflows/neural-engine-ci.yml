@@ -27,7 +27,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: northamerica-northeast1
-  PYTHON_VERSION: '3.13'  # Latest Python version
+  PYTHON_VERSION: '3.12'  # Stable Python version
 
 jobs:
   test:

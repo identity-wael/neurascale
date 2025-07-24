@@ -26,7 +26,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.11,<3.14",
+    python_requires=">=3.11,<3.13",
     install_requires=[
         "pylsl>=1.16.0",
         "brainflow>=5.10.0",

@@ -42,7 +42,7 @@ jobs:
   test:
     name: Test Neural Engine
     # Use self-hosted by default for neural-engine branches, GitHub-hosted for others
-    runs-on: ${{ contains(github.ref, 'neural') && 'self-hosted' || 'ubuntu-latest' }}
+    runs-on: ${{ contains(github.ref, 'neural-') && 'self-hosted' || 'ubuntu-latest' }}
 
     steps:
     - uses: actions/checkout@v4

@@ -1,0 +1,40 @@
+# App Engine configuration for Neural Engine API
+runtime: python312
+service: neural-api
+
+# Montreal region
+env: standard
+instance_class: F4_1G
+
+# Automatic scaling configuration
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.65
+  target_throughput_utilization: 0.65
+  max_concurrent_requests: 80
+
+# Environment variables
+env_variables:
+  NEURAL_ENGINE_ENV: "production"
+  PROJECT_ID: "neurascale"
+
+# Health check
+readiness_check:
+  path: "/health"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
+# Network configuration
+network:
+  session_affinity: true

@@ -14,7 +14,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/identity-wael/neurascale",
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -26,7 +27,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.11,<3.13",
+    python_requires=">=3.12",
     install_requires=[
         "pylsl>=1.16.0",
         "brainflow>=5.10.0",

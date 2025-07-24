@@ -28,4 +28,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Run the API server
-CMD ["gunicorn", "--bind", ":8080", "--workers", "4", "--threads", "8", "--timeout", "0", "src.api.main:app"]
+CMD ["gunicorn", "--bind", ":8080", "--workers", "4", "--threads", "8", "--timeout", "0", "api.main:app"]

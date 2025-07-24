@@ -258,6 +258,15 @@ jobs:
 
     - name: Deploy Stream Ingestion Function
       run: |
+        # Get the environment short name
+        if [[ "${{ needs.determine-environment.outputs.environment }}" == "production" ]]; then
+          ENV_SHORT="prod"
+        elif [[ "${{ needs.determine-environment.outputs.environment }}" == "staging" ]]; then
+          ENV_SHORT="stag"
+        else
+          ENV_SHORT="deve"
+        fi
+
         gcloud functions deploy process-neural-stream-${{ needs.determine-environment.outputs.environment }} \
           --gen2 \
           --runtime=python312 \
@@ -268,6 +277,7 @@ jobs:
           --memory=512MB \
           --timeout=60s \
           --project=${{ needs.determine-environment.outputs.project_id }} \
+          --service-account=neural-ingestion-${ENV_SHORT}@${{ needs.determine-environment.outputs.project_id }}.iam.gserviceaccount.com \
           --set-env-vars="GCP_PROJECT=${{ needs.determine-environment.outputs.project_id }},ENVIRONMENT=${{ needs.determine-environment.outputs.environment }}"
 
   integration-test:

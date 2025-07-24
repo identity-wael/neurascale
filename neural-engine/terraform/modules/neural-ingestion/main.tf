@@ -34,6 +34,36 @@ resource "google_service_account" "ingestion" {
   description  = "Service account for neural data ingestion in ${var.environment}"
 }
 
+# Grant permissions to the Cloud Build service account
+# This is needed for deploying Cloud Functions
+resource "google_project_iam_member" "cloud_build_permissions" {
+  for_each = toset([
+    "roles/artifactregistry.writer",
+    "roles/logging.logWriter",
+    "roles/cloudfunctions.developer",
+    "roles/iam.serviceAccountUser",
+    "roles/eventarc.developer",
+    "roles/run.developer",
+    "roles/storage.objectAdmin"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Grant Cloud Build service account permission to act as the ingestion service account
+resource "google_service_account_iam_member" "cloud_build_act_as" {
+  service_account_id = google_service_account.ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Data source to get project information
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 # Pub/Sub topics for different signal types
 resource "google_pubsub_topic" "neural_data" {
   for_each = toset(["eeg", "ecog", "lfp", "spikes", "emg", "accelerometer"])

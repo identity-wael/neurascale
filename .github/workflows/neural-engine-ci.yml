@@ -41,32 +41,23 @@ env:
 jobs:
   test:
     name: Test Neural Engine
-    # Use self-hosted by default for neural-engine branches, GitHub-hosted for others
-    runs-on: ${{ contains(github.ref, 'neural-') && 'self-hosted' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python (GitHub-hosted)
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      if: "!contains(runner.name, 'neurascale-local')"
 
-    - name: Check Python (self-hosted)
-      run: |
-        python3 --version
-        which python3
-      if: ${{ contains(runner.name, 'neurascale-local') }}
-
-    - name: Cache dependencies (GitHub-hosted)
+    - name: Cache dependencies
       uses: actions/cache@v3
       with:
         path: |
           ~/.cache/pip
           neural-engine/venv
         key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
-      if: "!contains(runner.name, 'neurascale-local')"
 
     - name: Setup Python environment
       run: |

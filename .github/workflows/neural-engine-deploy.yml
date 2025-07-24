@@ -107,7 +107,8 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+        service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
     - name: Configure Docker for Artifact Registry
       run: |
@@ -143,7 +144,8 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+        service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
     - name: Setup Terraform Cloud Token
       run: |
@@ -198,7 +200,8 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+        service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
     - name: Download Terraform Plan
       uses: actions/download-artifact@v4
@@ -236,7 +239,8 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+        service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
     - name: Deploy Stream Ingestion Function
       run: |
@@ -269,7 +273,8 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+        service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
     - name: Install dependencies
       working-directory: neural-engine

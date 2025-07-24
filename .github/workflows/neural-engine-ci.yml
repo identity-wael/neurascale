@@ -51,7 +51,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      if: ${{ !contains(runner.name, 'neurascale-local') }}
+      if: "!contains(runner.name, 'neurascale-local')"
 
     - name: Check Python (self-hosted)
       run: |
@@ -66,7 +66,7 @@ jobs:
           ~/.cache/pip
           neural-engine/venv
         key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
-      if: ${{ !contains(runner.name, 'neurascale-local') }}
+      if: "!contains(runner.name, 'neurascale-local')"
 
     - name: Setup Python environment
       run: |

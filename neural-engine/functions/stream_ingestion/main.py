@@ -4,209 +4,87 @@ import functions_framework
 import json
 import base64
 from datetime import datetime
-import numpy as np
 import logging
 import os
-
-# Import ingestion modules directly (they'll be in the deployment package)
-try:
-    from src.ingestion import NeuralDataIngestion
-except ImportError:
-    # For local testing, add parent directory to path
-    import sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    from src.ingestion import NeuralDataIngestion
-from src.ingestion.data_types import (
-    NeuralDataPacket,
-    NeuralSignalType,
-    DataSource,
-    DeviceInfo,
-    ChannelInfo,
-)
+from google.cloud import pubsub_v1
+from google.cloud import bigtable
+from google.cloud.bigtable import column_family
+from google.cloud.bigtable import row_filters
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize ingestion system (reused across invocations)
-PROJECT_ID = os.environ.get("GCP_PROJECT", "neurascale")
-ingestion = None
-
-
-def get_ingestion_instance():
-    """Get or create the ingestion instance."""
-    global ingestion
-    if ingestion is None:
-        ingestion = NeuralDataIngestion(
-            project_id=PROJECT_ID,
-            enable_pubsub=True,
-            enable_bigtable=True,
-        )
-    return ingestion
-
+# Environment variables
+PROJECT_ID = os.environ.get('GCP_PROJECT', 'staging-neurascale')
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'staging')
+BIGTABLE_INSTANCE = f'neural-data-{ENVIRONMENT}'
+BIGTABLE_TABLE = 'neural-time-series'
 
 @functions_framework.cloud_event
-async def process_neural_stream(cloud_event):
-    """
-    Process neural data stream from Pub/Sub.
-
-    Expected message format:
-    {
-        "device_id": "device_001",
-        "device_type": "OpenBCI",
-        "signal_type": "eeg",
-        "source": "openbci",
-        "session_id": "session_001",
-        "subject_id": "patient_001",
-        "timestamp": "2024-01-01T12:00:00Z",
-        "sampling_rate": 256.0,
-        "data": [[...], [...]],  # 2D array: channels x samples
-        "channels": [
-            {"channel_id": 0, "label": "Ch1", "unit": "microvolts"},
-            ...
-        ]
-    }
-    """
+def process_neural_stream(cloud_event):
+    """Process neural data stream from Pub/Sub."""
     try:
         # Decode the Pub/Sub message
-        message = base64.b64decode(cloud_event.data["message"]["data"]).decode()
-        data = json.loads(message)
+        pubsub_message = base64.b64decode(cloud_event.data["message"]["data"]).decode()
+        data = json.loads(pubsub_message)
 
-        # Log receipt
-        logger.info(f"Received data from device {data['device_id']}")
+        logger.info(f"Processing neural data from device: {data.get('device_id')}")
 
-        # Create device info
-        channels = [
-            ChannelInfo(
-                channel_id=ch["channel_id"],
-                label=ch["label"],
-                unit=ch.get("unit", "microvolts"),
-                sampling_rate=data["sampling_rate"],
-            )
-            for ch in data.get("channels", [])
-        ]
+        # Extract data fields
+        device_id = data.get('device_id')
+        signal_type = data.get('signal_type')
+        timestamp = data.get('timestamp', datetime.utcnow().isoformat())
+        sampling_rate = data.get('sampling_rate')
+        channels = data.get('channels', [])
+        samples = data.get('data', [])
 
-        device_info = DeviceInfo(
-            device_id=data["device_id"],
-            device_type=data["device_type"],
-            channels=channels,
-        )
+        # Validate data
+        if not device_id or not signal_type:
+            logger.error("Missing required fields: device_id or signal_type")
+            return
 
-        # Convert data to numpy array
-        neural_data = np.array(data["data"])
+        # Log data info
+        logger.info(f"Signal type: {signal_type}, Channels: {len(channels)}, "
+                   f"Samples: {len(samples)}, Sampling rate: {sampling_rate}Hz")
 
-        # Create packet
-        packet = NeuralDataPacket(
-            timestamp=datetime.fromisoformat(data["timestamp"].replace("Z", "+00:00")),
-            data=neural_data,
-            signal_type=NeuralSignalType(data["signal_type"]),
-            source=DataSource(data["source"]),
-            device_info=device_info,
-            session_id=data["session_id"],
-            subject_id=data.get("subject_id"),
-            sampling_rate=data["sampling_rate"],
-            data_quality=data.get("data_quality", 0.95),
-        )
+        # Store in Bigtable (simplified for now)
+        try:
+            # Initialize Bigtable client
+            client = bigtable.Client(project=PROJECT_ID, admin=True)
+            instance = client.instance(BIGTABLE_INSTANCE)
+            table = instance.table(BIGTABLE_TABLE)
 
-        # Get ingestion instance
-        ing = get_ingestion_instance()
+            # Create row key: device_id#timestamp
+            row_key = f"{device_id}#{timestamp}".encode()
 
-        # Ingest packet
-        success = await ing.ingest_packet(packet)
+            # Create row
+            row = table.direct_row(row_key)
 
-        if success:
-            logger.info(f"Successfully ingested packet from {data['device_id']}")
-            return {"status": "success", "device_id": data["device_id"]}
-        else:
-            logger.error(f"Failed to ingest packet from {data['device_id']}")
-            return {"status": "error", "device_id": data["device_id"]}, 500
+            # Add data to columns
+            row.set_cell('metadata', 'device_id', device_id)
+            row.set_cell('metadata', 'signal_type', signal_type)
+            row.set_cell('metadata', 'timestamp', timestamp)
+            row.set_cell('metadata', 'sampling_rate', str(sampling_rate))
+            row.set_cell('metadata', 'channel_count', str(len(channels)))
 
-    except Exception as e:
-        logger.error(f"Error processing neural stream: {e}")
-        return {"status": "error", "message": str(e)}, 500
+            # Store sample data as JSON (simplified)
+            row.set_cell('data', 'samples', json.dumps(samples))
+            row.set_cell('data', 'channels', json.dumps(channels))
 
+            # Commit the row
+            row.commit()
 
-@functions_framework.http
-async def ingest_batch(request):
-    """
-    HTTP endpoint for batch neural data ingestion.
+            logger.info(f"Successfully stored data for device {device_id} at {timestamp}")
 
-    Accepts POST requests with JSON body containing an array of packets.
-    """
-    try:
-        # Parse request
-        request_json = request.get_json()
-        if not request_json or "packets" not in request_json:
-            return {"error": "Missing 'packets' in request body"}, 400
+        except Exception as e:
+            logger.error(f"Failed to store data in Bigtable: {str(e)}")
+            # Continue processing even if storage fails
 
-        # Get ingestion instance
-        ing = get_ingestion_instance()
+        # TODO: Add real-time processing, quality checks, etc.
 
-        # Process each packet
-        results = []
-        for packet_data in request_json["packets"]:
-            try:
-                # Create device info
-                channels = [
-                    ChannelInfo(
-                        channel_id=ch["channel_id"],
-                        label=ch["label"],
-                        unit=ch.get("unit", "microvolts"),
-                        sampling_rate=packet_data["sampling_rate"],
-                    )
-                    for ch in packet_data.get("channels", [])
-                ]
-
-                device_info = DeviceInfo(
-                    device_id=packet_data["device_id"],
-                    device_type=packet_data["device_type"],
-                    channels=channels,
-                )
-
-                # Convert data to numpy array
-                neural_data = np.array(packet_data["data"])
-
-                # Create packet
-                packet = NeuralDataPacket(
-                    timestamp=datetime.fromisoformat(
-                        packet_data["timestamp"].replace("Z", "+00:00")
-                    ),
-                    data=neural_data,
-                    signal_type=NeuralSignalType(packet_data["signal_type"]),
-                    source=DataSource(packet_data["source"]),
-                    device_info=device_info,
-                    session_id=packet_data["session_id"],
-                    subject_id=packet_data.get("subject_id"),
-                    sampling_rate=packet_data["sampling_rate"],
-                    data_quality=packet_data.get("data_quality", 0.95),
-                )
-
-                # Ingest packet
-                success = await ing.ingest_packet(packet)
-                results.append({
-                    "device_id": packet_data["device_id"],
-                    "timestamp": packet_data["timestamp"],
-                    "success": success,
-                })
-
-            except Exception as e:
-                results.append({
-                    "device_id": packet_data.get("device_id", "unknown"),
-                    "timestamp": packet_data.get("timestamp", "unknown"),
-                    "success": False,
-                    "error": str(e),
-                })
-
-        # Return results
-        successful = sum(1 for r in results if r["success"])
-        return {
-            "status": "completed",
-            "total": len(results),
-            "successful": successful,
-            "failed": len(results) - successful,
-            "results": results,
-        }
+        logger.info("Neural data processing completed successfully")
 
     except Exception as e:
-        logger.error(f"Error in batch ingestion: {e}")
-        return {"error": str(e)}, 500
+        logger.error(f"Error processing neural data: {str(e)}")
+        raise

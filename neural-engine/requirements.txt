@@ -1,60 +1,60 @@
 # Neural Signal Processing
-pylsl==1.16.0
-brainflow==5.10.0
-numpy==1.24.3  # Stable version for Python 3.11
-scipy==1.11.4  # Compatible with numpy 1.24
-scikit-learn==1.3.2  # Stable for Python 3.11
-tensorflow==2.15.0  # Last version with good Python 3.11 support
+pylsl==1.16.2
+brainflow==5.14.0
+numpy==1.26.4  # Latest stable for Python 3.13
+scipy==1.14.1  # Latest stable
+scikit-learn==1.5.2  # Latest stable
+tensorflow==2.18.0  # Latest TensorFlow
 
 # Google Cloud Services - Core
-google-cloud-pubsub==2.18.1
-google-cloud-firestore==2.11.1
-google-cloud-bigquery==3.11.4
-google-cloud-bigtable==2.19.0
-google-cloud-storage==2.10.0
-apache-beam[gcp]==2.49.0
+google-cloud-pubsub==2.27.1
+google-cloud-firestore==2.19.0
+google-cloud-bigquery==3.27.0
+google-cloud-bigtable==2.27.0
+google-cloud-storage==2.19.0
+apache-beam[gcp]==2.61.0
 
 # Google Cloud Services - AI/ML
-google-cloud-aiplatform==1.70.0  # Vertex AI for ML ops
-google-cloud-translate==3.18.0   # For multi-language support
-google-cloud-speech==2.28.0      # For voice commands
-google-cloud-vision==3.8.1       # For visual processing
+google-cloud-aiplatform==1.78.0  # Vertex AI for ML ops
+google-cloud-translate==3.19.0   # For multi-language support
+google-cloud-speech==2.29.0      # For voice commands
+google-cloud-vision==3.10.0      # For visual processing
 
 # Google Cloud Services - Operations
-google-cloud-monitoring==2.15.1  # Cloud Monitoring (replacing wandb for metrics)
-google-cloud-logging==3.8.0      # Cloud Logging
-google-cloud-trace==1.11.3       # Distributed tracing
+google-cloud-monitoring==2.25.0  # Cloud Monitoring (replacing wandb for metrics)
+google-cloud-logging==3.12.0     # Cloud Logging
+google-cloud-trace==1.14.1       # Distributed tracing
 google-cloud-profiler==4.1.0     # Performance profiling
 # google-cloud-debugger is deprecated as of May 2023
 
 # Google Cloud Services - Security
-google-cloud-kms==2.19.1         # Key Management Service
-google-cloud-secret-manager==2.16.4  # Secrets management
-google-cloud-iam==2.12.1         # IAM for access control
+google-cloud-kms==2.27.0         # Key Management Service
+google-cloud-secret-manager==2.22.0  # Secrets management
+google-cloud-iam==2.16.0         # IAM for access control
 
 # Google Cloud Services - Infrastructure
-google-cloud-functions==1.13.2   # Cloud Functions framework
-google-cloud-run==0.10.0         # Cloud Run integration
-google-cloud-tasks==2.14.2       # Task queues
-google-cloud-scheduler==2.10.1   # Cron jobs
+google-cloud-functions==1.19.0   # Cloud Functions framework
+google-cloud-run==0.10.10        # Cloud Run integration
+google-cloud-tasks==2.17.0       # Task queues
+google-cloud-scheduler==2.16.1   # Cron jobs
 
 # API Framework (Cloud Run compatible)
-flask==2.3.3
-gunicorn==21.2.0
+flask==3.1.0
+gunicorn==23.0.0
 # google-cloud-endpoints         # Deprecated, use Cloud Run/API Gateway instead
 
 # Testing
-pytest==7.4.0
-pytest-asyncio==0.21.1
+pytest==8.3.4
+pytest-asyncio==0.25.1
 
 # Data Processing
-h5py==3.9.0
-matplotlib==3.7.2
-joblib==1.3.1
-pywavelets==1.4.1
+h5py==3.12.1
+matplotlib==3.10.0
+joblib==1.4.2
+pywavelets==1.7.0
 
 # Development Tools
-black==23.12.1
-flake8==7.0.0
-mypy==1.8.0
-ipython==8.18.1
+black==24.11.0
+flake8==7.1.1
+mypy==1.14.0
+ipython==8.31.0

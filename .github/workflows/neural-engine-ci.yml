@@ -27,7 +27,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: northamerica-northeast1
-  PYTHON_VERSION: '3.11'  # Best compatibility with Google Cloud services
+  PYTHON_VERSION: '3.13'  # Latest Python version
 
 jobs:
   test:
@@ -159,7 +159,7 @@ jobs:
       run: |
         cd neural-engine/functions/neural_ingestion
         gcloud functions deploy neural-data-ingestion \
-          --runtime python39 \
+          --runtime python312 \
           --trigger-http \
           --entry-point ingest_neural_data \
           --region $REGION \

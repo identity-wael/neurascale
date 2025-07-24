@@ -1,8 +1,9 @@
 terraform {
   required_version = ">= 1.5.0"
 
-  cloud {
-    organization = "neurascale"
+  backend "gcs" {
+    bucket = "neurascale-terraform-state"
+    prefix = "neural-engine"
   }
 
   required_providers {

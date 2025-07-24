@@ -144,7 +144,6 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.5.7
-        cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -152,28 +151,11 @@ jobs:
         workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
         service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
-    - name: Setup Terraform Cloud Token
-      run: |
-        mkdir -p ~/.terraform.d
-        cat > ~/.terraform.d/credentials.tfrc.json <<EOF
-        {
-          "credentials": {
-            "app.terraform.io": {
-              "token": "${{ secrets.TF_CLOUD_TOKEN }}"
-            }
-          }
-        }
-        EOF
-
-    - name: Set Terraform Workspace
-      run: |
-        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
-
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
-        # When prompted for workspace creation, automatically create it
-        echo "$TF_WORKSPACE" | terraform init -upgrade -input=false || terraform init -upgrade
+        terraform init \
+          -backend-config="bucket=neurascale-terraform-state" \
+          -backend-config="prefix=neural-engine/${{ needs.determine-environment.outputs.environment }}"
 
     - name: Terraform Format Check
       run: terraform fmt -check
@@ -202,7 +184,6 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.5.7
-        cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -210,29 +191,11 @@ jobs:
         workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
         service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
-
-    - name: Setup Terraform Cloud Token
-      run: |
-        mkdir -p ~/.terraform.d
-        cat > ~/.terraform.d/credentials.tfrc.json <<EOF
-        {
-          "credentials": {
-            "app.terraform.io": {
-              "token": "${{ secrets.TF_CLOUD_TOKEN }}"
-            }
-          }
-        }
-        EOF
-
-    - name: Set Terraform Workspace
-      run: |
-        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
-
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
-        # When prompted for workspace creation, automatically create it
-        echo "$TF_WORKSPACE" | terraform init -upgrade -input=false || terraform init -upgrade
+        terraform init \
+          -backend-config="bucket=neurascale-terraform-state" \
+          -backend-config="prefix=neural-engine/${{ needs.determine-environment.outputs.environment }}"
 
     - name: Terraform Apply
       run: |

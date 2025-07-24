@@ -1,0 +1,40 @@
+# Neural Signal Processing
+pylsl==1.16.0
+brainflow==5.10.0
+numpy==1.24.3
+scipy==1.10.1
+scikit-learn==1.3.0
+tensorflow==2.13.0
+
+# Google Cloud Services
+google-cloud-pubsub==2.18.1
+google-cloud-firestore==2.11.1
+google-cloud-bigquery==3.11.4
+google-cloud-bigtable==2.19.0
+google-cloud-storage==2.10.0
+google-cloud-dataflow==2.5.0
+apache-beam[gcp]==2.49.0
+
+# Security
+cryptography==41.0.3
+
+# API Framework
+flask==2.3.3
+gunicorn==21.2.0
+
+# Testing
+pytest==7.4.0
+pytest-asyncio==0.21.1
+
+# Data Processing
+h5py==3.9.0
+matplotlib==3.7.2
+joblib==1.3.1
+wandb==0.15.8
+pywavelets==1.4.1
+
+# Development Tools
+black==23.7.0
+flake8==6.1.0
+mypy==1.5.1
+ipython==8.14.0

@@ -1,0 +1,169 @@
+name: Neural Engine CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/neural-*'
+    paths:
+      - 'neural-engine/**'
+      - '.github/workflows/neural-engine-ci.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'neural-engine/**'
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: northamerica-northeast1
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  test:
+    name: Test Neural Engine
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          neural-engine/venv
+        key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
+
+    - name: Install dependencies
+      run: |
+        cd neural-engine
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Lint with flake8
+      run: |
+        cd neural-engine
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Type check with mypy
+      run: |
+        cd neural-engine
+        mypy . --ignore-missing-imports || true
+
+    - name: Test with pytest
+      run: |
+        cd neural-engine
+        pytest tests/ -v --cov=. --cov-report=xml
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./neural-engine/coverage.xml
+        flags: neural-engine
+
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Configure Docker for GCR
+      run: |
+        gcloud auth configure-docker
+
+    - name: Build and Push Images
+      run: |
+        cd neural-engine
+
+        # Build processor image
+        docker build -t gcr.io/$PROJECT_ID/neural-processor:$GITHUB_SHA \
+                     -t gcr.io/$PROJECT_ID/neural-processor:latest \
+                     -f docker/Dockerfile.processor .
+
+        # Build API image
+        docker build -t gcr.io/$PROJECT_ID/neural-api:$GITHUB_SHA \
+                     -t gcr.io/$PROJECT_ID/neural-api:latest \
+                     -f docker/Dockerfile.api .
+
+        # Push images
+        docker push gcr.io/$PROJECT_ID/neural-processor:$GITHUB_SHA
+        docker push gcr.io/$PROJECT_ID/neural-processor:latest
+        docker push gcr.io/$PROJECT_ID/neural-api:$GITHUB_SHA
+        docker push gcr.io/$PROJECT_ID/neural-api:latest
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Deploy Cloud Functions
+      run: |
+        cd neural-engine/functions/neural_ingestion
+        gcloud functions deploy neural-data-ingestion \
+          --runtime python39 \
+          --trigger-http \
+          --entry-point ingest_neural_data \
+          --region $REGION \
+          --memory 2GB \
+          --timeout 540s \
+          --set-env-vars PROJECT_ID=$PROJECT_ID
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy neural-api-staging \
+          --image gcr.io/$PROJECT_ID/neural-api:$GITHUB_SHA \
+          --platform managed \
+          --region $REGION \
+          --allow-unauthenticated \
+          --memory 2Gi \
+          --cpu 2 \
+          --set-env-vars PROJECT_ID=$PROJECT_ID
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY_PROD }}
+        project_id: ${{ secrets.GCP_PROJECT_ID_PROD }}
+
+    - name: Deploy to Production
+      run: |
+        echo "Production deployment requires manual approval"
+        # Add production deployment steps here

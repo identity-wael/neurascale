@@ -1,10 +1,10 @@
 # Neural Signal Processing
 pylsl==1.16.2
 brainflow==5.14.0
-numpy==1.26.4  # Latest stable for Python 3.13
+numpy==1.26.4  # Latest stable
 scipy==1.14.1  # Latest stable
 scikit-learn==1.5.2  # Latest stable
-tensorflow==2.18.0  # Latest TensorFlow
+tensorflow==2.17.0  # TensorFlow for Python 3.12
 
 # Google Cloud Services - Core
 google-cloud-pubsub==2.27.1
@@ -12,7 +12,7 @@ google-cloud-firestore==2.19.0
 google-cloud-bigquery==3.27.0
 google-cloud-bigtable==2.27.0
 google-cloud-storage==2.19.0
-apache-beam[gcp]==2.61.0
+apache-beam[gcp]==2.60.0
 
 # Google Cloud Services - AI/ML
 google-cloud-aiplatform==1.78.0  # Vertex AI for ML ops
@@ -28,15 +28,15 @@ google-cloud-profiler==4.1.0     # Performance profiling
 # google-cloud-debugger is deprecated as of May 2023
 
 # Google Cloud Services - Security
-google-cloud-kms==2.27.0         # Key Management Service
-google-cloud-secret-manager==2.22.0  # Secrets management
-google-cloud-iam==2.16.0         # IAM for access control
+google-cloud-kms==2.24.2         # Key Management Service
+google-cloud-secret-manager==2.21.0  # Secrets management
+google-cloud-iam==2.15.2         # IAM for access control
 
 # Google Cloud Services - Infrastructure
-google-cloud-functions==1.19.0   # Cloud Functions framework
-google-cloud-run==0.10.10        # Cloud Run integration
-google-cloud-tasks==2.17.0       # Task queues
-google-cloud-scheduler==2.16.1   # Cron jobs
+google-cloud-functions==1.18.0   # Cloud Functions framework
+google-cloud-run==0.10.9         # Cloud Run integration
+google-cloud-tasks==2.16.5       # Task queues
+google-cloud-scheduler==2.16.0   # Cron jobs
 
 # API Framework (Cloud Run compatible)
 flask==3.1.0

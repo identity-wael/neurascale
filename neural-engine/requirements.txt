@@ -12,7 +12,6 @@ google-cloud-firestore==2.11.1
 google-cloud-bigquery==3.11.4
 google-cloud-bigtable==2.19.0
 google-cloud-storage==2.10.0
-google-cloud-dataflow==2.5.0
 apache-beam[gcp]==2.49.0
 
 # Security

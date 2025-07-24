@@ -1,0 +1,258 @@
+# Neural Ingestion Infrastructure Module - Simplified
+# This module creates all resources needed for neural data ingestion
+
+# Input variables
+variable "project_id" {
+  type        = string
+  description = "GCP Project ID"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (development, staging, production)"
+}
+
+variable "env_short" {
+  type        = string
+  description = "Short environment name (dev, stg, prod)"
+}
+
+variable "region" {
+  type        = string
+  description = "GCP Region"
+}
+
+variable "common_labels" {
+  type        = map(string)
+  description = "Common labels to apply to all resources"
+}
+
+variable "ingestion_sa_email" {
+  type        = string
+  description = "Email of the ingestion service account"
+}
+
+# Pub/Sub Topics for neural data streams
+resource "google_pubsub_topic" "neural_data" {
+  for_each = toset(["eeg", "ecog", "lfp", "spikes", "emg", "accelerometer"])
+
+  name = "neural-data-${each.key}-${var.environment}"
+
+  labels = merge(var.common_labels, {
+    signal_type = each.key
+  })
+}
+
+# Dead letter topic for failed messages
+resource "google_pubsub_topic" "dead_letter" {
+  name = "neural-data-dead-letter-${var.environment}"
+
+  labels = merge(var.common_labels, {
+    purpose = "dead-letter"
+  })
+}
+
+# Pub/Sub subscriptions with retry and dead letter policies
+resource "google_pubsub_subscription" "neural_data" {
+  for_each = google_pubsub_topic.neural_data
+
+  name  = "${each.value.name}-sub"
+  topic = each.value.name
+
+  # Dead letter policy
+  dead_letter_policy {
+    dead_letter_topic     = google_pubsub_topic.dead_letter.id
+    max_delivery_attempts = 10
+  }
+
+  # Retry policy
+  retry_policy {
+    minimum_backoff = "10s"
+    maximum_backoff = "600s"
+  }
+
+  # Message retention
+  message_retention_duration = "604800s" # 7 days
+
+  labels = merge(var.common_labels, {
+    signal_type = each.key
+  })
+}
+
+# Bigtable instance for time-series data
+resource "google_bigtable_instance" "neural_data" {
+  name         = "neural-data-${var.env_short}"
+  display_name = "Neural Data Storage - ${var.environment}"
+
+  cluster {
+    cluster_id   = "neural-cluster-${var.env_short}"
+    num_nodes    = var.environment == "production" ? 3 : 1
+    storage_type = "SSD"
+    zone         = "${var.region}-a"
+  }
+
+  deletion_protection = var.environment == "production"
+
+  labels = var.common_labels
+}
+
+# Bigtable tables
+resource "google_bigtable_table" "time_series" {
+  name          = "neural-time-series"
+  instance_name = google_bigtable_instance.neural_data.name
+
+  column_family {
+    family = "data"
+  }
+
+  column_family {
+    family = "metadata"
+  }
+}
+
+resource "google_bigtable_table" "sessions" {
+  name          = "neural-sessions"
+  instance_name = google_bigtable_instance.neural_data.name
+
+  column_family {
+    family = "info"
+  }
+}
+
+resource "google_bigtable_table" "devices" {
+  name          = "neural-devices"
+  instance_name = google_bigtable_instance.neural_data.name
+
+  column_family {
+    family = "info"
+  }
+}
+
+# Storage bucket for Cloud Functions source code
+resource "google_storage_bucket" "functions" {
+  name          = "${var.project_id}-gcf-source"
+  location      = var.region
+  force_destroy = var.environment != "production"
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.common_labels
+}
+
+# Grant the ingestion service account access to the functions bucket
+resource "google_storage_bucket_iam_member" "functions_bucket_access" {
+  bucket = google_storage_bucket.functions.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${var.ingestion_sa_email}"
+}
+
+# Artifact Registry for Docker images
+resource "google_artifact_registry_repository" "neural_engine" {
+  location      = var.region
+  repository_id = "neural-engine"
+  description   = "Neural Engine Docker images"
+  format        = "DOCKER"
+
+  labels = var.common_labels
+}
+
+# Grant the ingestion service account access to pull images
+resource "google_artifact_registry_repository_iam_member" "ingestion_reader" {
+  location   = google_artifact_registry_repository.neural_engine.location
+  repository = google_artifact_registry_repository.neural_engine.repository_id
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${var.ingestion_sa_email}"
+}
+
+# Cloud Function for processing neural data streams
+resource "google_cloudfunctions2_function" "process_neural_stream" {
+  for_each = google_pubsub_topic.neural_data
+
+  name        = "process-neural-${each.key}-${var.env_short}"
+  location    = var.region
+  description = "Process ${each.key} neural data streams"
+
+  build_config {
+    runtime     = "python312"
+    entry_point = "process_neural_stream"
+
+    source {
+      storage_source {
+        bucket = google_storage_bucket.functions.name
+        object = "neural-functions-${var.environment}.zip"
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count    = var.environment == "production" ? 100 : 10
+    min_instance_count    = 0
+    available_memory      = "512M"
+    timeout_seconds       = 60
+    service_account_email = var.ingestion_sa_email
+
+    environment_variables = {
+      GCP_PROJECT     = var.project_id
+      ENVIRONMENT     = var.environment
+      BIGTABLE_INSTANCE = google_bigtable_instance.neural_data.id
+      SIGNAL_TYPE     = each.key
+    }
+  }
+
+  event_trigger {
+    trigger_region = var.region
+    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic   = each.value.id
+    retry_policy   = "RETRY_POLICY_RETRY"
+  }
+
+  labels = merge(var.common_labels, {
+    signal_type = each.key
+  })
+
+  depends_on = [
+    google_storage_bucket.functions,
+    google_bigtable_instance.neural_data,
+    google_bigtable_table.time_series,
+    google_bigtable_table.sessions,
+    google_bigtable_table.devices
+  ]
+}
+
+# Outputs
+output "pubsub_topics" {
+  value = {
+    for k, v in google_pubsub_topic.neural_data : k => v.id
+  }
+}
+
+output "bigtable_instance_id" {
+  value = google_bigtable_instance.neural_data.id
+}
+
+output "functions_bucket" {
+  value = google_storage_bucket.functions.name
+}
+
+output "artifact_registry_url" {
+  value = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.neural_engine.repository_id}"
+}
+
+output "cloud_functions" {
+  value = {
+    for k, v in google_cloudfunctions2_function.process_neural_stream : k => v.name
+  }
+}

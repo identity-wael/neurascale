@@ -15,15 +15,24 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 5.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
 # Determine environment from project_id
 locals {
   environment = endswith(var.project_id, "-neurascale") ? split("-", var.project_id)[0] : "development"
+  env_short = {
+    "production"  = "prod"
+    "staging"     = "stag"
+    "development" = "dev"
+  }[local.environment]
 }
 
-# Provider for the target environment
+# Provider configuration
 provider "google" {
   project = var.project_id
   region  = var.region
@@ -34,33 +43,125 @@ provider "google-beta" {
   region  = var.region
 }
 
-# Provider for orchestration project (for cross-project resources)
-provider "google" {
-  alias   = "orchestration"
-  project = var.orchestration_project_id
-  region  = var.region
+# Enable required APIs first
+resource "google_project_service" "apis" {
+  for_each = toset([
+    "compute.googleapis.com",
+    "storage.googleapis.com",
+    "pubsub.googleapis.com",
+    "bigtable.googleapis.com",
+    "bigtableadmin.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "eventarc.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+  ])
+
+  project = var.project_id
+  service = each.key
+
+  disable_on_destroy = false
 }
 
-# Enable APIs for the target environment
-module "project_apis" {
-  source     = "./modules/project-apis"
-  project_id = var.project_id
+# Wait for APIs to be enabled
+resource "time_sleep" "wait_for_apis" {
+  depends_on = [google_project_service.apis]
+
+  create_duration = "30s"
 }
 
-# Neural ingestion infrastructure for the target environment
+# Create the main service account for neural ingestion
+resource "google_service_account" "neural_ingestion" {
+  account_id   = "neural-ingestion-${local.env_short}"
+  display_name = "Neural Ingestion Service Account"
+  description  = "Service account for neural data ingestion functions and services"
+  project      = var.project_id
+
+  depends_on = [time_sleep.wait_for_apis]
+}
+
+# Grant necessary permissions to the service account
+resource "google_project_iam_member" "neural_ingestion_roles" {
+  for_each = toset([
+    "roles/pubsub.publisher",
+    "roles/pubsub.subscriber",
+    "roles/bigtable.user",
+    "roles/storage.objectViewer",
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+    "roles/eventarc.eventReceiver",
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.neural_ingestion.email}"
+
+  depends_on = [google_service_account.neural_ingestion]
+}
+
+# Grant GitHub Actions service account permission to deploy
+resource "google_project_iam_member" "github_actions_deploy" {
+  for_each = toset([
+    "roles/artifactregistry.writer",
+    "roles/cloudfunctions.admin",
+    "roles/iam.serviceAccountUser",
+    "roles/storage.admin",
+    "roles/pubsub.admin",
+    "roles/bigtable.admin",
+    "roles/serviceusage.serviceUsageConsumer",
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [time_sleep.wait_for_apis]
+}
+
+# Grant GitHub Actions permission to act as the ingestion service account
+resource "google_service_account_iam_member" "github_actions_act_as" {
+  service_account_id = google_service_account.neural_ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [google_service_account.neural_ingestion]
+}
+
+# Deploy the neural ingestion infrastructure
 module "neural_ingestion" {
   source = "./modules/neural-ingestion"
 
-  project_id  = var.project_id
-  environment = local.environment
-  region      = var.region
+  project_id            = var.project_id
+  environment           = local.environment
+  region                = var.region
+  service_account_email = google_service_account.neural_ingestion.email
 
-  depends_on = [module.project_apis]
+  depends_on = [
+    google_project_iam_member.neural_ingestion_roles,
+    google_project_iam_member.github_actions_deploy,
+  ]
 }
 
-# IAM permissions for CI/CD in the target environment
-resource "google_project_iam_member" "ci_cd_permissions" {
-  project = var.project_id
-  role    = "roles/owner" # Adjust as needed
-  member  = "serviceAccount:${var.ci_cd_service_account}"
+# Outputs
+output "environment" {
+  value = local.environment
+}
+
+output "service_account_email" {
+  value = google_service_account.neural_ingestion.email
+}
+
+output "artifact_registry_url" {
+  value = module.neural_ingestion.artifact_registry_url
+}
+
+output "functions_bucket" {
+  value = module.neural_ingestion.functions_bucket
+}
+
+output "function_urls" {
+  value = module.neural_ingestion.function_urls
 }

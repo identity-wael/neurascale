@@ -1,5 +1,6 @@
 # Neural Ingestion Infrastructure Module
 
+# Variables
 variable "project_id" {
   type        = string
   description = "Project ID"
@@ -15,8 +16,13 @@ variable "region" {
   description = "Google Cloud region"
 }
 
+variable "service_account_email" {
+  type        = string
+  description = "Service account email for running the services"
+}
+
 locals {
-  env_short = substr(var.environment, 0, 4) # prod, stag, deve
+  env_short = substr(var.environment, 0, 4) # prod, stag, dev
 }
 
 # Artifact Registry for Docker images
@@ -27,103 +33,21 @@ resource "google_artifact_registry_repository" "neural_engine" {
   format        = "DOCKER"
 }
 
-# Service Account for ingestion services
-resource "google_service_account" "ingestion" {
-  account_id   = "neural-ingestion-${local.env_short}"
-  display_name = "Neural Ingestion Service Account - ${var.environment}"
-  description  = "Service account for neural data ingestion in ${var.environment}"
-}
+# Storage bucket for Cloud Functions source code
+resource "google_storage_bucket" "functions" {
+  name          = "${var.project_id}-functions-${local.env_short}"
+  location      = var.region
+  force_destroy = var.environment != "production"
 
-# Grant permissions to the Cloud Build service account
-# This is needed for deploying Cloud Functions
-resource "google_project_iam_member" "cloud_build_permissions" {
-  for_each = toset([
-    "roles/artifactregistry.writer",
-    "roles/artifactregistry.reader",
-    "roles/logging.logWriter",
-    "roles/cloudfunctions.developer",
-    "roles/iam.serviceAccountUser",
-    "roles/eventarc.developer",
-    "roles/run.developer",
-    "roles/storage.objectAdmin",
-    "roles/cloudbuild.builds.builder",
-    "roles/compute.admin",
-    "roles/storage.admin",
-    "roles/cloudbuild.serviceAgent"
-  ])
+  uniform_bucket_level_access = true
 
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-}
+  versioning {
+    enabled = true
+  }
 
-# Grant Cloud Build service account permission to act as the ingestion service account
-resource "google_service_account_iam_member" "cloud_build_act_as" {
-  service_account_id = google_service_account.ingestion.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-}
-
-# Grant Cloud Build Service Agent permissions
-# This is the service agent used by Cloud Build for Cloud Functions
-resource "google_project_iam_member" "cloud_build_service_agent_permissions" {
-  for_each = toset([
-    "roles/cloudfunctions.developer",
-    "roles/artifactregistry.reader",
-    "roles/storage.objectViewer"
-  ])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# Grant Cloud Build Service Agent permission to act as the ingestion service account
-resource "google_service_account_iam_member" "cloud_build_service_agent_act_as" {
-  service_account_id = google_service_account.ingestion.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# Grant permissions to the default Cloud Functions service account
-# This service account is used by Cloud Functions runtime
-resource "google_project_iam_member" "functions_service_account_permissions" {
-  for_each = toset([
-    "roles/cloudbuild.serviceAgent",
-    "roles/artifactregistry.reader",
-    "roles/storage.objectViewer"
-  ])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# Grant the Cloud Build Service Agent permission to act as the ingestion service account
-resource "google_service_account_iam_member" "cloud_build_service_agent_act_as" {
-  service_account_id = google_service_account.ingestion.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# Grant permissions to the default Cloud Functions service account
-# This service account is used by Cloud Functions runtime
-resource "google_project_iam_member" "functions_service_account_permissions" {
-  for_each = toset([
-    "roles/artifactregistry.reader",
-    "roles/logging.logWriter",
-    "roles/pubsub.subscriber",
-    "roles/eventarc.eventReceiver"
-  ])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
-}
-
-# Data source to get project information
-data "google_project" "project" {
-  project_id = var.project_id
+  labels = {
+    environment = var.environment
+  }
 }
 
 # Pub/Sub topics for different signal types
@@ -220,53 +144,55 @@ resource "google_bigtable_table" "devices" {
   }
 }
 
-# Storage bucket for Cloud Functions
-resource "google_storage_bucket" "functions" {
-  name          = "${var.project_id}-gcf-source-${var.environment}"
-  location      = var.region
-  force_destroy = var.environment != "production"
+# Cloud Functions (Gen2) for processing neural data streams
+resource "google_cloudfunctions2_function" "process_neural_stream" {
+  for_each = google_pubsub_topic.neural_data
 
-  uniform_bucket_level_access = true
+  name        = "process-neural-${each.key}-${var.environment}"
+  location    = var.region
+  description = "Process ${each.key} neural data streams"
 
-  versioning {
-    enabled = true
+  build_config {
+    runtime     = "python312"
+    entry_point = "process_neural_stream"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.functions.name
+        object = "functions-${var.environment}.zip"
+      }
+    }
   }
 
-  labels = {
-    environment = var.environment
+  service_config {
+    max_instance_count               = var.environment == "production" ? 100 : 10
+    min_instance_count               = 0
+    available_memory                 = "512M"
+    timeout_seconds                  = 60
+    service_account_email           = var.service_account_email
+    ingress_settings                = "ALLOW_INTERNAL_ONLY"
+    all_traffic_on_latest_revision  = true
+
+    environment_variables = {
+      GCP_PROJECT  = var.project_id
+      ENVIRONMENT  = var.environment
+      SIGNAL_TYPE  = each.key
+      BIGTABLE_INSTANCE = google_bigtable_instance.neural_data.name
+    }
   }
+
+  event_trigger {
+    trigger_region = var.region
+    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic   = each.value.id
+    retry_policy   = "RETRY_POLICY_RETRY"
+  }
+
+  depends_on = [
+    google_bigtable_table.time_series,
+    google_bigtable_table.sessions,
+    google_bigtable_table.devices,
+  ]
 }
-
-# Grant Cloud Build access to the functions bucket
-resource "google_storage_bucket_iam_member" "cloud_build_functions_bucket" {
-  bucket = google_storage_bucket.functions.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-}
-
-# Grant Cloud Build Service Agent access to the functions bucket
-resource "google_storage_bucket_iam_member" "cloud_build_service_agent_functions_bucket" {
-  bucket = google_storage_bucket.functions.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# IAM permissions
-resource "google_project_iam_member" "ingestion_permissions" {
-  for_each = toset([
-    "roles/pubsub.publisher",
-    "roles/pubsub.subscriber",
-    "roles/bigtable.user",
-    "roles/storage.objectViewer",
-    "roles/monitoring.metricWriter",
-    "roles/logging.logWriter",
-  ])
-
-  project = var.project_id
-  role    = each.key
-  member  = "serviceAccount:${google_service_account.ingestion.email}"
-}
-
 
 # Outputs
 output "artifact_registry_url" {
@@ -283,6 +209,12 @@ output "bigtable_instance_id" {
   value = google_bigtable_instance.neural_data.id
 }
 
-output "service_account_email" {
-  value = google_service_account.ingestion.email
+output "functions_bucket" {
+  value = google_storage_bucket.functions.name
+}
+
+output "function_urls" {
+  value = {
+    for k, v in google_cloudfunctions2_function.process_neural_stream : k => v.service_config[0].uri
+  }
 }

@@ -1,0 +1,268 @@
+name: Neural Engine Deploy (Simplified)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'neural-engine/**'
+      - '.github/workflows/neural-engine-deploy-simplified.yml'
+  pull_request:
+    paths:
+      - 'neural-engine/**'
+      - '.github/workflows/neural-engine-deploy-simplified.yml'
+
+env:
+  PYTHON_VERSION: '3.12'
+  GCP_REGION: 'northamerica-northeast1'
+  TF_VERSION: '1.5.7'
+
+jobs:
+  # Determine target environment based on event
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.determine.outputs.environment }}
+      project_id: ${{ steps.determine.outputs.project_id }}
+    steps:
+      - id: determine
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "project_id=staging-neurascale" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "project_id=production-neurascale" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "project_id=development-neurascale" >> $GITHUB_OUTPUT
+          fi
+
+  # Run tests
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: neural-engine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Run linting
+        working-directory: neural-engine
+        run: |
+          ruff check .
+          black --check .
+
+      - name: Run type checking
+        working-directory: neural-engine
+        run: |
+          mypy src/ --ignore-missing-imports
+
+      - name: Run unit tests
+        working-directory: neural-engine
+        run: |
+          pytest tests/ -v --cov=src --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./neural-engine/coverage.xml
+          fail_ci_if_error: false
+
+  # Build Docker images and Cloud Functions package
+  build:
+    needs: [setup, test]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        service: [api, ingestion, processor]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build and push Docker image
+        working-directory: neural-engine
+        run: |
+          docker build \
+            -f docker/${{ matrix.service }}.Dockerfile \
+            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }} \
+            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest \
+            .
+
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest
+
+  # Package Cloud Functions
+  package-functions:
+    needs: [setup, test]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Package Cloud Functions
+        working-directory: neural-engine/functions/stream_ingestion
+        run: |
+          # Create a requirements.txt with only production dependencies
+          echo "google-cloud-pubsub>=2.18.0" > requirements.txt
+          echo "google-cloud-bigtable>=2.21.0" >> requirements.txt
+          echo "google-cloud-logging>=3.8.0" >> requirements.txt
+          echo "functions-framework>=3.5.0" >> requirements.txt
+
+          # Create deployment package
+          zip -r functions-${{ needs.setup.outputs.environment }}.zip main.py requirements.txt
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Upload functions package to GCS
+        working-directory: neural-engine/functions/stream_ingestion
+        run: |
+          # This bucket will be created by Terraform
+          gsutil cp functions-${{ needs.setup.outputs.environment }}.zip \
+            gs://${{ needs.setup.outputs.project_id }}-functions-${{ needs.setup.outputs.environment == 'production' && 'prod' || needs.setup.outputs.environment == 'staging' && 'stag' || 'dev' }}/
+
+  # Deploy infrastructure and functions together
+  deploy:
+    needs: [setup, build, package-functions]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Terraform Init
+        working-directory: neural-engine/terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=neurascale-terraform-state" \
+            -backend-config="prefix=neural-engine/${{ needs.setup.outputs.environment }}"
+
+      - name: Terraform Plan
+        working-directory: neural-engine/terraform
+        run: |
+          terraform plan \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            -var="region=${{ env.GCP_REGION }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging')
+        working-directory: neural-engine/terraform
+        run: |
+          terraform apply -auto-approve tfplan
+
+  # Verify deployment
+  verify:
+    needs: [setup, deploy]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install test dependencies
+        run: |
+          pip install google-cloud-pubsub google-cloud-bigtable
+
+      - name: Verify infrastructure
+        run: |
+          # Verify Pub/Sub topics exist
+          gcloud pubsub topics list --project=${{ needs.setup.outputs.project_id }} | grep "neural-data-eeg-${{ needs.setup.outputs.environment }}"
+
+          # Verify Cloud Functions are deployed
+          gcloud functions list --project=${{ needs.setup.outputs.project_id }} --region=${{ env.GCP_REGION }} | grep "process-neural-eeg-${{ needs.setup.outputs.environment }}"
+
+          # Verify Bigtable instance exists
+          gcloud bigtable instances list --project=${{ needs.setup.outputs.project_id }} | grep "neural-data-${{ needs.setup.outputs.environment }}"
+
+      - name: Run integration test
+        run: |
+          python -c "
+          import json
+          import time
+          from google.cloud import pubsub_v1
+
+          publisher = pubsub_v1.PublisherClient()
+          topic_path = publisher.topic_path('${{ needs.setup.outputs.project_id }}', 'neural-data-eeg-${{ needs.setup.outputs.environment }}')
+
+          test_message = {
+              'device_id': 'test_device',
+              'timestamp': time.time(),
+              'data': [[0.0] * 256] * 8
+          }
+
+          future = publisher.publish(topic_path, json.dumps(test_message).encode())
+          print(f'Published test message: {future.result()}')
+          "

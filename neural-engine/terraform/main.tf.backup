@@ -1,0 +1,202 @@
+# Neural Engine Infrastructure - Simplified Architecture
+# This configuration uses GCS backend and deploys infrastructure + Cloud Functions together
+
+terraform {
+  required_version = ">= 1.5.0"
+
+  # GCS backend for state management
+  backend "gcs" {
+    bucket = "neurascale-terraform-state"
+    prefix = "neural-engine"
+  }
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# Variables
+variable "project_id" {
+  type        = string
+  description = "GCP Project ID (e.g., development-neurascale, staging-neurascale, production-neurascale)"
+}
+
+variable "region" {
+  type        = string
+  description = "GCP Region"
+  default     = "northamerica-northeast1"
+}
+
+variable "github_actions_service_account" {
+  type        = string
+  description = "Service account email for GitHub Actions"
+  default     = "github-actions@neurascale.iam.gserviceaccount.com"
+}
+
+# Locals for environment detection and naming
+locals {
+  # Extract environment from project_id
+  environment = split("-", var.project_id)[0]
+
+  # Short environment names for resource naming
+  env_short = {
+    development = "dev"
+    staging     = "stg"
+    production  = "prod"
+  }[local.environment]
+
+  # Project labels
+  common_labels = {
+    environment = local.environment
+    managed_by  = "terraform"
+    component   = "neural-engine"
+  }
+}
+
+# Provider configuration
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
+# Data source for project information
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+# Enable required APIs
+resource "google_project_service" "apis" {
+  for_each = toset([
+    "artifactregistry.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "eventarc.googleapis.com",
+    "iam.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "pubsub.googleapis.com",
+    "run.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com",
+    "bigtable.googleapis.com",
+    "bigtableadmin.googleapis.com"
+  ])
+
+  service            = each.value
+  disable_on_destroy = false
+}
+
+# Wait for APIs to be enabled
+resource "time_sleep" "wait_for_apis" {
+  depends_on = [google_project_service.apis]
+  create_duration = "30s"
+}
+
+# Service Account for neural ingestion
+resource "google_service_account" "neural_ingestion" {
+  account_id   = "neural-ingestion-${local.env_short}"
+  display_name = "Neural Ingestion Service Account"
+  description  = "Service account for neural data ingestion functions and services"
+
+  depends_on = [time_sleep.wait_for_apis]
+}
+
+# IAM roles for the ingestion service account
+resource "google_project_iam_member" "ingestion_roles" {
+  for_each = toset([
+    "roles/pubsub.publisher",
+    "roles/pubsub.subscriber",
+    "roles/bigtable.user",
+    "roles/storage.objectViewer",
+    "roles/monitoring.metricWriter",
+    "roles/logging.logWriter",
+    "roles/cloudtrace.agent"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.neural_ingestion.email}"
+
+  depends_on = [google_service_account.neural_ingestion]
+}
+
+# Grant GitHub Actions service account necessary permissions
+resource "google_project_iam_member" "github_actions_permissions" {
+  for_each = toset([
+    "roles/cloudfunctions.admin",
+    "roles/iam.serviceAccountUser",
+    "roles/storage.admin",
+    "roles/pubsub.admin",
+    "roles/bigtable.admin",
+    "roles/artifactregistry.admin",
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/serviceusage.serviceUsageAdmin"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [time_sleep.wait_for_apis]
+}
+
+# Allow GitHub Actions to act as the ingestion service account
+resource "google_service_account_iam_member" "github_actions_act_as_ingestion" {
+  service_account_id = google_service_account.neural_ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [google_service_account.neural_ingestion]
+}
+
+# Neural ingestion module
+module "neural_ingestion" {
+  source = "./modules/neural-ingestion"
+
+  project_id             = var.project_id
+  environment            = local.environment
+  env_short              = local.env_short
+  region                 = var.region
+  common_labels          = local.common_labels
+  ingestion_sa_email     = google_service_account.neural_ingestion.email
+
+  depends_on = [
+    time_sleep.wait_for_apis,
+    google_project_iam_member.ingestion_roles,
+    google_project_iam_member.github_actions_permissions
+  ]
+}
+
+# Outputs
+output "environment" {
+  value = local.environment
+}
+
+output "project_id" {
+  value = var.project_id
+}
+
+output "ingestion_service_account" {
+  value = google_service_account.neural_ingestion.email
+}
+
+output "pubsub_topics" {
+  value = module.neural_ingestion.pubsub_topics
+}
+
+output "bigtable_instance" {
+  value = module.neural_ingestion.bigtable_instance_id
+}
+
+output "cloud_functions_bucket" {
+  value = module.neural_ingestion.functions_bucket
+}
+
+output "artifact_registry_repository" {
+  value = module.neural_ingestion.artifact_registry_url
+}

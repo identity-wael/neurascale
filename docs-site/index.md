@@ -27,6 +27,12 @@ Get started with NeuraScale in minutes:
 
 ## Documentation Sections
 
+### 🧠 Neural Management System
+
+- **[Neural Management System](/neural-management-system/)** - Core infrastructure for brain signal processing
+- **[Implementation Status](/neural-management-system/#implementation-status)** - Current progress and roadmap
+- **[Quick Start Guide](/neural-management-system/#quick-start)** - Get started with development
+
 ### Getting Started
 
 - **[Documentation Overview](/docs/)** - Complete documentation index
@@ -98,6 +104,13 @@ Get started with NeuraScale in minutes:
 
 ## Latest Updates
 
+### July 2025
+
+- ✅ **Neural Management System Phase 1 Complete**: Project structure, CI/CD, and Google Cloud integration
+- 🚧 **Phase 2 In Progress**: Core neural data ingestion implementation
+- 📦 **Docker Images**: Now available in Google Artifact Registry
+- 🔧 **Infrastructure**: Workload Identity Federation configured for secure deployments
+
 Stay informed about the latest changes:
 
 - Check our [GitHub repository](https://github.com/identity-wael/neurascale)
@@ -106,4 +119,4 @@ Stay informed about the latest changes:
 
 ---
 
-_Last updated: January 2025_
+_Last updated: July 24, 2025_

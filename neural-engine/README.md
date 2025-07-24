@@ -147,3 +147,5 @@ Part of the NeuraScale platform. See main repository for license details.
 # Trigger workflow
 
 # Trigger deployment
+
+# Trigger deployment with fixed permissions

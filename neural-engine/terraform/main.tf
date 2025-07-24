@@ -2,7 +2,6 @@ terraform {
   required_version = ">= 1.5.0"
 
   cloud {
-    hostname     = "app.terraform.io"
     organization = "neurascale"
   }
 

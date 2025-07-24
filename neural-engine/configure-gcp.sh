@@ -17,20 +17,42 @@ echo "🔧 Configuring Google Cloud for project: $PROJECT_ID"
 gcloud config set project $PROJECT_ID
 
 echo "📡 Enabling required APIs..."
+# Core services
 gcloud services enable compute.googleapis.com
 gcloud services enable container.googleapis.com
 gcloud services enable cloudfunctions.googleapis.com
+gcloud services enable run.googleapis.com
 gcloud services enable pubsub.googleapis.com
 gcloud services enable firestore.googleapis.com
 gcloud services enable bigquery.googleapis.com
 gcloud services enable bigtable.googleapis.com
 gcloud services enable dataflow.googleapis.com
-gcloud services enable aiplatform.googleapis.com
-gcloud services enable cloudiot.googleapis.com
 gcloud services enable storage.googleapis.com
+
+# AI/ML services
+gcloud services enable aiplatform.googleapis.com
+gcloud services enable translate.googleapis.com
+gcloud services enable speech.googleapis.com
+gcloud services enable vision.googleapis.com
+
+# Operations services
 gcloud services enable monitoring.googleapis.com
 gcloud services enable logging.googleapis.com
+gcloud services enable cloudtrace.googleapis.com
+gcloud services enable cloudprofiler.googleapis.com
+gcloud services enable clouddebugger.googleapis.com
+
+# Security services
+gcloud services enable cloudkms.googleapis.com
+gcloud services enable secretmanager.googleapis.com
+gcloud services enable iam.googleapis.com
+
+# Infrastructure services
 gcloud services enable cloudbuild.googleapis.com
+gcloud services enable cloudscheduler.googleapis.com
+gcloud services enable cloudtasks.googleapis.com
+gcloud services enable endpoints.googleapis.com
+gcloud services enable cloudiot.googleapis.com
 
 echo "🔐 Creating service account..."
 gcloud iam service-accounts create neurascale-dev \
@@ -43,6 +65,7 @@ echo "🔑 Assigning IAM roles..."
 SERVICE_ACCOUNT="neurascale-dev@${PROJECT_ID}.iam.gserviceaccount.com"
 
 roles=(
+    # Core services
     "roles/pubsub.editor"
     "roles/datastore.user"
     "roles/bigquery.dataEditor"
@@ -50,9 +73,30 @@ roles=(
     "roles/storage.admin"
     "roles/dataflow.developer"
     "roles/cloudfunctions.developer"
-    "roles/cloudiot.editor"
+    "roles/run.developer"
+
+    # AI/ML services
+    "roles/aiplatform.user"
+    "roles/ml.developer"
+    "roles/cloudtranslate.user"
+    "roles/cloudspeech.editor"
+    "roles/vision.editor"
+
+    # Operations services
     "roles/monitoring.metricWriter"
     "roles/logging.logWriter"
+    "roles/cloudtrace.agent"
+    "roles/cloudprofiler.agent"
+    "roles/clouddebugger.agent"
+
+    # Security services
+    "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    "roles/secretmanager.secretAccessor"
+
+    # Infrastructure services
+    "roles/cloudscheduler.admin"
+    "roles/cloudtasks.enqueuer"
+    "roles/cloudiot.editor"
 )
 
 for role in "${roles[@]}"; do

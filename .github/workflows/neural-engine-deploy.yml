@@ -125,8 +125,8 @@ jobs:
         file: ./neural-engine/docker/Dockerfile.${{ matrix.service }}
         push: true
         tags: |
-          ${{ env.ARTIFACT_REGISTRY }}/${{ needs.determine-environment.outputs.project_id }}/${{ env.REPOSITORY_NAME }}-${{ needs.determine-environment.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
-          ${{ env.ARTIFACT_REGISTRY }}/${{ needs.determine-environment.outputs.project_id }}/${{ env.REPOSITORY_NAME }}-${{ needs.determine-environment.outputs.environment }}/${{ matrix.service }}:latest
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.ORCHESTRATION_PROJECT }}/${{ env.REPOSITORY_NAME }}/${{ matrix.service }}:${{ github.sha }}
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.ORCHESTRATION_PROJECT }}/${{ env.REPOSITORY_NAME }}/${{ matrix.service }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
 

@@ -1,13 +1,9 @@
 terraform {
   required_version = ">= 1.5.0"
 
-  cloud {
-    hostname     = "app.terraform.io"
-    organization = "neurascale"
-
-    workspaces {
-      tags = ["neural-engine"]
-    }
+  backend "gcs" {
+    bucket = "neurascale-tf-state-555656387124"
+    prefix = "neural-engine"
   }
 
   required_providers {

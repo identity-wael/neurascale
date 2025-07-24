@@ -151,22 +151,10 @@ jobs:
         workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
         service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
-    - name: Setup Terraform Cloud Token
-      run: |
-        cat > ~/.terraformrc <<EOF
-        credentials "app.terraform.io" {
-          token = "${{ secrets.TF_CLOUD_TOKEN }}"
-        }
-        EOF
-
-    - name: Select Terraform Workspace
-      run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
-
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
-        terraform init -upgrade
+        echo "Initializing Terraform with workspace: ${{ needs.determine-environment.outputs.environment }}"
+        terraform init -upgrade -backend-config="prefix=neural-engine/${{ needs.determine-environment.outputs.environment }}"
 
     - name: Terraform Format Check
       run: terraform fmt -check
@@ -203,22 +191,10 @@ jobs:
         service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
 
-    - name: Setup Terraform Cloud Token
-      run: |
-        cat > ~/.terraformrc <<EOF
-        credentials "app.terraform.io" {
-          token = "${{ secrets.TF_CLOUD_TOKEN }}"
-        }
-        EOF
-
-    - name: Select Terraform Workspace
-      run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
-
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
-        terraform init -upgrade
+        echo "Initializing Terraform with workspace: ${{ needs.determine-environment.outputs.environment }}"
+        terraform init -upgrade -backend-config="prefix=neural-engine/${{ needs.determine-environment.outputs.environment }}"
 
     - name: Terraform Apply
       run: |

@@ -56,7 +56,7 @@ jobs:
 
     - name: Run type checking
       run: |
-        python -m mypy src/ --ignore-missing-imports
+        mypy src/ --ignore-missing-imports
 
     - name: Run unit tests
       run: |

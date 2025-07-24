@@ -44,7 +44,43 @@ neural-engine/
 
 ## Getting Started
 
-See [instructions.md](./instructions.md) for detailed setup instructions.
+### Prerequisites
+
+- Python 3.12
+- Google Cloud SDK (`gcloud`)
+- Docker
+- Access to `neurascale` GCP project
+
+### Setup
+
+1. **Clone and install dependencies:**
+
+```bash
+cd neural-engine
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+2. **Set up Google Cloud authentication:**
+
+```bash
+# First authenticate with your Google account
+gcloud auth login
+
+# Then run the setup script
+./scripts/setup-gcp-auth.sh
+
+# Follow the instructions to add the key to GitHub
+```
+
+3. **Run tests:**
+
+```bash
+pytest tests/
+```
+
+For detailed implementation instructions, see [instructions.md](./instructions.md).
 
 ## Documentation
 
@@ -53,7 +89,28 @@ See [instructions.md](./instructions.md) for detailed setup instructions.
 
 ## Implementation Status
 
-Track progress in the [GitHub Project](https://github.com/identity-wael/neurascale/projects/1) or see issue #119 for the implementation roadmap.
+### ✅ Completed
+
+- Project structure created
+- Core dependencies configured (Python 3.12)
+- Basic tests implemented
+- CI/CD pipeline setup (with self-hosted runner support)
+- Docker configurations for processor and API
+- Google Cloud deployment configurations
+- GitHub issues created for all implementation phases (#121-#141)
+
+### 🚧 Current Issues
+
+- GitHub Actions workflow experiencing startup failures
+- Need to configure GCP_SA_KEY secret after running setup script
+
+### 📋 Next Steps
+
+1. Run `gcloud auth login` and `./scripts/setup-gcp-auth.sh`
+2. Add GCP_SA_KEY to GitHub secrets
+3. Continue with Phase 1 implementation
+
+Track progress in the [GitHub Project](https://github.com/identity-wael/neurascale/projects/1) or see issues #121-#141 for detailed implementation tasks.
 
 ## License
 

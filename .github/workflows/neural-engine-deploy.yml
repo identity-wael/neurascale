@@ -159,9 +159,9 @@ jobs:
         }
         EOF
 
-    - name: Select Terraform Workspace
+    - name: Set Terraform Workspace
       run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |
@@ -211,9 +211,9 @@ jobs:
         }
         EOF
 
-    - name: Select Terraform Workspace
+    - name: Set Terraform Workspace
       run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |

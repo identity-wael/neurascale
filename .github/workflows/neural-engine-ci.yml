@@ -41,7 +41,7 @@ jobs:
   test:
     name: Test Neural Engine
     # Use self-hosted by default for neural-engine branches, GitHub-hosted for others
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.use_self_hosted == 'false' && 'ubuntu-latest' || contains(github.ref, 'neural') && 'self-hosted' || 'ubuntu-latest' }}
+    runs-on: ${{ contains(github.ref, 'neural') && 'self-hosted' || 'ubuntu-latest' }}
 
     steps:
     - uses: actions/checkout@v4

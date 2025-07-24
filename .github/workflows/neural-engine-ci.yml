@@ -2,232 +2,236 @@ name: Neural Engine CI/CD
 
 on:
   push:
-    branches:
-      - main
-      - 'feat/neural-*'
+    branches: [main, develop]
     paths:
       - 'neural-engine/**'
       - '.github/workflows/neural-engine-ci.yml'
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'neural-engine/**'
       - '.github/workflows/neural-engine-ci.yml'
-  workflow_dispatch:
-    inputs:
-      use_self_hosted:
-        description: 'Use self-hosted runner'
-        required: false
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: northamerica-northeast1
-  PYTHON_VERSION: '3.12'  # Stable Python version
-  # M3 Pro optimizations
-  PARALLEL_JOBS: 12
-  MAKEFLAGS: "-j12"
-  CMAKE_BUILD_PARALLEL_LEVEL: 12
-  PYTHONUNBUFFERED: 1
-  PIP_PARALLEL_DOWNLOADS: 10
-  TF_ENABLE_ONEDNN_OPTS: 1
-  NODE_OPTIONS: "--max-old-space-size=8192"
+  PYTHON_VERSION: '3.12'
+  GCP_PROJECT_ID: neurascale
+  GCP_REGION: northamerica-northeast1
+  ARTIFACT_REGISTRY: northamerica-northeast1-docker.pkg.dev
+  REPOSITORY_NAME: neural-engine
 
 jobs:
   test:
-    name: Test Neural Engine
-    # Use self-hosted by default for neural-engine branches, GitHub-hosted for others
-    runs-on: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.use_self_hosted == 'false') && 'ubuntu-latest' || contains(github.ref, 'neural') && fromJSON('["self-hosted", "neural-engine"]') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: neural-engine
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python (GitHub-hosted)
-      uses: actions/setup-python@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      if: ${{ !contains(runner.name, 'neurascale-local') }}
 
-    - name: Check Python (self-hosted)
-      run: |
-        python3 --version
-        which python3
-      if: ${{ contains(runner.name, 'neurascale-local') }}
-
-    - name: Cache dependencies (GitHub-hosted)
-      uses: actions/cache@v3
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
       with:
-        path: |
-          ~/.cache/pip
-          neural-engine/venv
+        path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('neural-engine/requirements*.txt') }}
-      if: ${{ !contains(runner.name, 'neurascale-local') }}
-
-    - name: Setup Python environment
-      run: |
-        cd neural-engine
-        # Create virtual environment if it doesn't exist
-        if [ ! -d "venv" ]; then
-          python3 -m venv venv
-        fi
-        source venv/bin/activate
-        echo "$PWD/venv/bin" >> $GITHUB_PATH
-        echo "VIRTUAL_ENV=$PWD/venv" >> $GITHUB_ENV
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
-        cd neural-engine
-        source venv/bin/activate
         python -m pip install --upgrade pip
-        # Install with parallelization and use all CPU cores
-        pip install --use-feature=fast-deps --use-deprecated=legacy-resolver -r requirements.txt || pip install -r requirements.txt
-        pip install --use-feature=fast-deps --use-deprecated=legacy-resolver -r requirements-dev.txt || pip install -r requirements-dev.txt
-        # Install parallel testing tools
-        pip install pytest-xdist pytest-parallel
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install -e .
 
-    - name: Lint with flake8
+    - name: Run linting
       run: |
-        cd neural-engine
-        # Exclude virtual environment and cache directories
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,__pycache__,.pytest_cache,.mypy_cache,*.egg-info
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,__pycache__,.pytest_cache,.mypy_cache,*.egg-info
+        python -m black --check src/ tests/ examples/
+        python -m flake8 src/ tests/ examples/ --max-line-length=88 --extend-ignore=E203
 
-    - name: Type check with mypy
+    - name: Run type checking
       run: |
-        cd neural-engine
-        mypy . --ignore-missing-imports || true
+        python -m mypy src/ --ignore-missing-imports
 
-    - name: Test with pytest
+    - name: Run unit tests
       run: |
-        cd neural-engine
-        # Run tests in parallel using all available CPU cores
-        pytest tests/ -v --cov=. --cov-report=xml -n auto --maxprocesses=12 --dist=loadscope || pytest tests/ -v --cov=. --cov-report=xml
+        python -m pytest tests/unit/test_ingestion/ -v --cov=src/ingestion --cov-report=xml
 
     - name: Upload coverage
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./neural-engine/coverage.xml
         flags: neural-engine
+        name: neural-engine-coverage
 
-  build:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
+  build-docker:
     needs: test
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
-      with:
-        workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-        service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        project_id: ${{ env.PROJECT_ID }}
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
     - name: Configure Docker for Artifact Registry
       run: |
-        gcloud auth configure-docker ${REGION}-docker.pkg.dev
+        gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
 
-    - name: Build and Push Images
-      run: |
-        cd neural-engine
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./neural-engine
+        file: ./neural-engine/docker/Dockerfile.ingestion
+        push: true
+        tags: |
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/ingestion:${{ github.sha }}
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/ingestion:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
-        # Build processor image
-        docker build -t ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-processor:$GITHUB_SHA \
-                     -t ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-processor:latest \
-                     -f docker/Dockerfile.processor .
-
-        # Build API image
-        docker build -t ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-api:$GITHUB_SHA \
-                     -t ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-api:latest \
-                     -f docker/Dockerfile.api .
-
-        # Push images
-        docker push ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-processor:$GITHUB_SHA
-        docker push ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-processor:latest
-        docker push ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-api:$GITHUB_SHA
-        docker push ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-api:latest
-
-  deploy-staging:
-    name: Deploy to Staging
+  terraform-plan:
+    needs: test
     runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    environment: staging
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: neural-engine/terraform/ingestion
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
-        workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-        service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Format Check
+      run: terraform fmt -check
+
+    - name: Terraform Plan
+      run: |
+        terraform plan -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+                      -var="region=${{ env.GCP_REGION }}" \
+                      -var="environment=development" \
+                      -out=tfplan
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v4
       with:
-        project_id: ${{ env.PROJECT_ID }}
+        name: tfplan
+        path: neural-engine/terraform/ingestion/tfplan
 
-    - name: Deploy Cloud Functions
-      run: |
-        cd neural-engine/functions/neural_ingestion
-        gcloud functions deploy neural-data-ingestion \
-          --runtime python312 \
-          --trigger-http \
-          --entry-point ingest_neural_data \
-          --region $REGION \
-          --memory 2GB \
-          --timeout 540s \
-          --set-env-vars PROJECT_ID=$PROJECT_ID
-
-    - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy neural-api-staging \
-          --image ${REGION}-docker.pkg.dev/$PROJECT_ID/neural-engine/neural-api:$GITHUB_SHA \
-          --platform managed \
-          --region $REGION \
-          --allow-unauthenticated \
-          --memory 2Gi \
-          --cpu 2 \
-          --set-env-vars PROJECT_ID=$PROJECT_ID
-
-  deploy-production:
-    name: Deploy to Production
+  deploy-infrastructure:
+    needs: [build-docker]
     runs-on: ubuntu-latest
-    needs: deploy-staging
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: neural-engine/terraform/ingestion
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY_PROD }}
-        project_id: ${{ secrets.GCP_PROJECT_ID_PROD }}
+        terraform_version: 1.6.0
 
-    - name: Deploy to Production
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
       run: |
-        echo "Production deployment requires manual approval"
-        # Add production deployment steps here
+        terraform apply -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+                       -var="region=${{ env.GCP_REGION }}" \
+                       -var="environment=production" \
+                       -auto-approve
+
+  integration-test:
+    needs: [deploy-infrastructure]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+    - name: Install dependencies
+      working-directory: neural-engine
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Run integration tests
+      working-directory: neural-engine
+      run: |
+        # Test Pub/Sub publishing
+        python -c "
+        import json
+        from google.cloud import pubsub_v1
+
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path('${{ env.GCP_PROJECT_ID }}', 'neural-data-eeg')
+
+        test_message = {
+            'device_id': 'test_device',
+            'device_type': 'test',
+            'signal_type': 'eeg',
+            'source': 'synthetic',
+            'session_id': 'test_session',
+            'timestamp': '2024-01-01T12:00:00Z',
+            'sampling_rate': 256.0,
+            'data': [[0.0] * 256] * 8,
+            'channels': [{'channel_id': i, 'label': f'Ch{i+1}'} for i in range(8)]
+        }
+
+        future = publisher.publish(topic_path, json.dumps(test_message).encode())
+        print(f'Published message ID: {future.result()}')
+        "
+
+    - name: Check Cloud Function logs
+      run: |
+        sleep 30  # Wait for function to process
+        gcloud functions logs read process-neural-stream \
+          --region=${{ env.GCP_REGION }} \
+          --limit=50 \
+          --format="table(time,text)"

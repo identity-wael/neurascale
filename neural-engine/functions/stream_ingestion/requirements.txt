@@ -1,0 +1,5 @@
+functions-framework==3.*
+google-cloud-pubsub>=2.27.1
+google-cloud-bigtable>=2.27.0
+numpy>=1.26.4
+pylsl>=1.16.2

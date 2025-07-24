@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  neural-ingestion:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ingestion
+    container_name: neural-ingestion
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account.json
+      - GCP_PROJECT=${GCP_PROJECT:-neurascale}
+    volumes:
+      - ./src:/app/src
+      - ./examples:/app/examples
+      - ./tests:/app/tests
+      - ./credentials:/app/credentials
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8080:8080"
+    command: python examples/ingestion_example.py
+    networks:
+      - neural-network
+
+  # Local Pub/Sub emulator for development
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    container_name: pubsub-emulator
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
+    networks:
+      - neural-network
+
+  # Local Bigtable emulator for development
+  bigtable-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    container_name: bigtable-emulator
+    command: gcloud beta emulators bigtable start --host-port=0.0.0.0:8086
+    ports:
+      - "8086:8086"
+    networks:
+      - neural-network
+
+  # Test runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ingestion
+    container_name: neural-tests
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - BIGTABLE_EMULATOR_HOST=bigtable-emulator:8086
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./pytest.ini:/app/pytest.ini
+    command: python -m pytest tests/unit/test_ingestion/ -v
+    depends_on:
+      - pubsub-emulator
+      - bigtable-emulator
+    networks:
+      - neural-network
+
+networks:
+  neural-network:
+    driver: bridge

@@ -1,0 +1,38 @@
+# Neural Data Ingestion Service
+FROM python:3.12-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+COPY requirements-dev.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+
+# Copy source code
+COPY src/ ./src/
+COPY examples/ ./examples/
+COPY tests/ ./tests/
+COPY pytest.ini .
+COPY setup.py .
+
+# Install the package in development mode
+RUN pip install -e .
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account.json
+
+# Create directories
+RUN mkdir -p /app/data /app/logs /app/credentials
+
+# Default command runs the example
+CMD ["python", "examples/ingestion_example.py"]

@@ -143,3 +143,5 @@ Track progress in the [GitHub Project](https://github.com/identity-wael/neurasca
 ## License
 
 Part of the NeuraScale platform. See main repository for license details.
+
+# Trigger workflow

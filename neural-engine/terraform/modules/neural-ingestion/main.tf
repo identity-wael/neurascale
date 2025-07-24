@@ -39,6 +39,7 @@ resource "google_service_account" "ingestion" {
 resource "google_project_iam_member" "cloud_build_permissions" {
   for_each = toset([
     "roles/artifactregistry.writer",
+    "roles/artifactregistry.reader",
     "roles/logging.logWriter",
     "roles/cloudfunctions.developer",
     "roles/iam.serviceAccountUser",
@@ -47,7 +48,8 @@ resource "google_project_iam_member" "cloud_build_permissions" {
     "roles/storage.objectAdmin",
     "roles/cloudbuild.builds.builder",
     "roles/compute.admin",
-    "roles/storage.admin"
+    "roles/storage.admin",
+    "roles/cloudbuild.serviceAgent"
   ])
 
   project = var.project_id
@@ -60,6 +62,48 @@ resource "google_service_account_iam_member" "cloud_build_act_as" {
   service_account_id = google_service_account.ingestion.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Grant Cloud Build Service Agent permissions
+# This is the service agent used by Cloud Build for Cloud Functions
+resource "google_project_iam_member" "cloud_build_service_agent_permissions" {
+  for_each = toset([
+    "roles/cloudfunctions.developer",
+    "roles/artifactregistry.reader",
+    "roles/storage.objectViewer"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+# Grant Cloud Build Service Agent permission to act as the ingestion service account
+resource "google_service_account_iam_member" "cloud_build_service_agent_act_as" {
+  service_account_id = google_service_account.ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+# Grant permissions to the default Cloud Functions service account
+# This service account is used by Cloud Functions runtime
+resource "google_project_iam_member" "functions_service_account_permissions" {
+  for_each = toset([
+    "roles/cloudbuild.serviceAgent",
+    "roles/artifactregistry.reader",
+    "roles/storage.objectViewer"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+# Grant the Cloud Build Service Agent permission to act as the ingestion service account
+resource "google_service_account_iam_member" "cloud_build_service_agent_act_as" {
+  service_account_id = google_service_account.ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 # Grant permissions to the default Cloud Functions service account
@@ -193,6 +237,20 @@ resource "google_storage_bucket" "functions" {
   }
 }
 
+# Grant Cloud Build access to the functions bucket
+resource "google_storage_bucket_iam_member" "cloud_build_functions_bucket" {
+  bucket = google_storage_bucket.functions.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Grant Cloud Build Service Agent access to the functions bucket
+resource "google_storage_bucket_iam_member" "cloud_build_service_agent_functions_bucket" {
+  bucket = google_storage_bucket.functions.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
 # IAM permissions
 resource "google_project_iam_member" "ingestion_permissions" {
   for_each = toset([
@@ -208,6 +266,7 @@ resource "google_project_iam_member" "ingestion_permissions" {
   role    = each.key
   member  = "serviceAccount:${google_service_account.ingestion.email}"
 }
+
 
 # Outputs
 output "artifact_registry_url" {

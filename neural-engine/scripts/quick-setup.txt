@@ -1,0 +1,43 @@
+# Quick Setup Commands
+
+# After running: gcloud auth login
+
+# 1. Create service account (run as one command):
+gcloud iam service-accounts create neural-engine-ci \
+    --display-name="Neural Engine CI/CD" \
+    --project=neurascale
+
+# 2. Grant permissions (run each line):
+for role in storage.admin run.admin cloudfunctions.admin iam.serviceAccountUser pubsub.admin cloudbuild.builds.editor; do \
+    gcloud projects add-iam-policy-binding neurascale \
+        --member="serviceAccount:neural-engine-ci@neurascale.iam.gserviceaccount.com" \
+        --role="roles/$role" \
+        --project=neurascale; \
+done
+
+# 3. Enable APIs:
+gcloud services enable \
+    cloudbuild.googleapis.com \
+    run.googleapis.com \
+    cloudfunctions.googleapis.com \
+    containerregistry.googleapis.com \
+    pubsub.googleapis.com \
+    secretmanager.googleapis.com \
+    artifactregistry.googleapis.com \
+    --project=neurascale
+
+# 4. Create key:
+gcloud iam service-accounts keys create neural-engine-ci-key.json \
+    --iam-account=neural-engine-ci@neurascale.iam.gserviceaccount.com \
+    --project=neurascale
+
+# 5. Copy to clipboard (macOS):
+cat neural-engine-ci-key.json | pbcopy
+
+# 6. Go to: https://github.com/identity-wael/neurascale/settings/secrets/actions
+# Add two secrets:
+# - GCP_SA_KEY: paste the JSON
+# - GCP_PROJECT_ID: neurascale
+
+# 7. Clean up:
+rm neural-engine-ci-key.json

@@ -15,12 +15,12 @@ exclude =
     *.pyo,
     .venv
 ignore =
-    E203,  # whitespace before ':'
-    E266,  # too many leading '#' for block comment
-    E501,  # line too long (handled by black)
-    W503,  # line break before binary operator
-    F401,  # imported but unused
-    F841,  # local variable assigned but never used
+    E203,
+    E266,
+    E501,
+    W503,
+    F401,
+    F841
 per-file-ignores =
     __init__.py:F401
     tests/*:F401,F811

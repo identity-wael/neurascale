@@ -159,12 +159,14 @@ jobs:
         }
         EOF
 
-    - name: Terraform Init
-      run: terraform init
-
     - name: Select Terraform Cloud Workspace
       run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+
+    - name: Terraform Init
+      run: |
+        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
+        terraform init -upgrade
 
     - name: Terraform Format Check
       run: terraform fmt -check
@@ -174,14 +176,8 @@ jobs:
         terraform plan \
           -var="orchestration_project_id=${{ env.ORCHESTRATION_PROJECT }}" \
           -var="project_id=${{ needs.determine-environment.outputs.project_id }}" \
-          -var="region=${{ env.GCP_REGION }}" \
-          -out=tfplan
+          -var="region=${{ env.GCP_REGION }}"
 
-    - name: Upload Terraform Plan
-      uses: actions/upload-artifact@v4
-      with:
-        name: tfplan-${{ needs.determine-environment.outputs.environment }}
-        path: neural-engine/terraform/tfplan
 
   deploy-infrastructure:
     needs: [build-docker, terraform-plan, determine-environment]
@@ -206,11 +202,6 @@ jobs:
         workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
         service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
-    - name: Download Terraform Plan
-      uses: actions/download-artifact@v4
-      with:
-        name: tfplan-${{ needs.determine-environment.outputs.environment }}
-        path: neural-engine/terraform
 
     - name: Setup Terraform Cloud Token
       run: |
@@ -220,15 +211,21 @@ jobs:
         }
         EOF
 
-    - name: Terraform Init
-      run: terraform init
-
     - name: Set Terraform Cloud Workspace
       run: |
-        echo "TF_WORKSPACE=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+
+    - name: Terraform Init
+      run: |
+        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
+        terraform init -upgrade
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      run: |
+        terraform apply -auto-approve \
+          -var="orchestration_project_id=${{ env.ORCHESTRATION_PROJECT }}" \
+          -var="project_id=${{ needs.determine-environment.outputs.project_id }}" \
+          -var="region=${{ env.GCP_REGION }}"
 
   deploy-functions:
     needs: [deploy-infrastructure, determine-environment]

@@ -6,7 +6,7 @@ terraform {
     organization = "neurascale"
 
     workspaces {
-      tags = ["neural-engine"]
+      prefix = "neural-engine-"
     }
   }
 

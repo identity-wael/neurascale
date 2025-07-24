@@ -14,7 +14,12 @@ cd "$(dirname "$0")"
 
 # Create venv if it doesn't exist
 if [ ! -d "$CACHE_DIR/venv/neural-engine" ]; then
-    python3 -m venv "$CACHE_DIR/venv/neural-engine"
+    # Use Python 3.9 if available, otherwise default python3
+    if command -v python3.9 &> /dev/null; then
+        python3.9 -m venv "$CACHE_DIR/venv/neural-engine"
+    else
+        python3 -m venv "$CACHE_DIR/venv/neural-engine"
+    fi
 fi
 
 # Activate venv

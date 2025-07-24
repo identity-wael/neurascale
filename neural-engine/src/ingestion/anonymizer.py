@@ -148,7 +148,24 @@ class DataAnonymizer:
         if not metadata:
             return metadata
 
-        # List of fields to remove
+        # Create sanitized copy
+        sanitized = metadata.copy()
+
+        # Remove PII fields
+        self._remove_pii_fields(sanitized)
+
+        # Sanitize nested dictionaries
+        for key, value in list(sanitized.items()):
+            if isinstance(value, dict):
+                sanitized[key] = self._sanitize_metadata(value)
+
+        # Convert age to age range if present
+        self._convert_age_to_range(metadata, sanitized)
+
+        return sanitized
+
+    def _remove_pii_fields(self, data: Dict) -> None:
+        """Remove PII fields from dictionary."""
         pii_fields = [
             "name",
             "patient_name",
@@ -167,23 +184,15 @@ class DataAnonymizer:
             "patient_id",  # Medical record numbers
         ]
 
-        # Create sanitized copy
-        sanitized = metadata.copy()
-
-        # Remove PII fields
         for field in pii_fields:
-            sanitized.pop(field, None)
-            sanitized.pop(field.upper(), None)
-            sanitized.pop(field.lower(), None)
+            data.pop(field, None)
+            data.pop(field.upper(), None)
+            data.pop(field.lower(), None)
 
-        # Sanitize nested dictionaries
-        for key, value in list(sanitized.items()):
-            if isinstance(value, dict):
-                sanitized[key] = self._sanitize_metadata(value)
-
-        # Convert specific fields to ranges
-        if "age" in metadata:
-            age = metadata["age"]
+    def _convert_age_to_range(self, original: Dict, sanitized: Dict) -> None:
+        """Convert age to age range."""
+        if "age" in original:
+            age = original["age"]
             if isinstance(age, (int, float)):
                 # Convert to age range
                 if age < 18:
@@ -196,8 +205,6 @@ class DataAnonymizer:
                     sanitized["age_range"] = "50-69"
                 else:
                     sanitized["age_range"] = "70+"
-
-        return sanitized
 
     def _log_anonymization(
         self,

@@ -35,7 +35,7 @@ class TestNeuralDataIngestion:
             device_id="test_device",
             device_type="OpenBCI",
             channels=[
-                ChannelInfo(i, f"Ch{i+1}", "microvolts", 256.0)
+                ChannelInfo(i, f"Ch{i + 1}", "microvolts", 256.0)
                 for i in range(8)
             ],
         )

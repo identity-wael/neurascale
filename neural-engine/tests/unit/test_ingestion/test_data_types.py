@@ -28,7 +28,7 @@ class TestNeuralDataPacket:
         channels = [
             ChannelInfo(
                 channel_id=i,
-                label=f"Ch{i+1}",
+                label=f"Ch{i + 1}",
                 unit="microvolts",
                 sampling_rate=256.0,
             )

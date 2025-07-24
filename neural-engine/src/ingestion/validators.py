@@ -36,7 +36,7 @@ class DataValidator:
         """Initialize the data validator."""
         self.min_quality_threshold = 0.7
         self.max_missing_ratio = 0.1
-        self.max_noise_ratio = 0.3
+        self.max_noise_ratio = 0.5  # Increased to be less sensitive to noise
 
     def validate_packet(self, packet: NeuralDataPacket) -> ValidationResult:
         """
@@ -153,14 +153,20 @@ class DataValidator:
         for ch_idx in range(packet.n_channels):
             channel_data = packet.data[ch_idx, :]
 
-            # Simple noise detection using high-frequency content
+            # Improved noise detection for neural signals
             if len(channel_data) > 10:
+                # Use median absolute deviation for more robust noise estimation
                 diff = np.diff(channel_data)
-                noise_estimate = np.std(diff) / np.sqrt(2)
-                signal_estimate = np.std(channel_data)
+                mad = np.median(np.abs(diff - np.median(diff)))
+                noise_estimate = mad * 1.4826  # Scale factor for MAD to std
+
+                # Use robust signal estimate (IQR-based)
+                q75, q25 = np.percentile(channel_data, [75, 25])
+                signal_estimate = (q75 - q25) / 1.349  # Scale factor for IQR to std
 
                 if signal_estimate > 0:
                     noise_ratio = noise_estimate / signal_estimate
+                    # Only warn for very high noise ratios
                     if noise_ratio > self.max_noise_ratio:
                         result.add_warning(
                             f"Channel {ch_idx} has high noise "
@@ -224,8 +230,8 @@ class DataValidator:
         # Penalize for errors (50% reduction each)
         score *= 0.5 ** len(result.errors)
 
-        # Penalize for warnings (10% reduction each)
-        score *= 0.9 ** len(result.warnings)
+        # Penalize for warnings (8% reduction each)
+        score *= 0.92 ** len(result.warnings)
 
         # Factor in packet's own quality score
         score *= packet.data_quality

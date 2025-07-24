@@ -9,8 +9,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.ingestion import NeuralDataIngestion
-from src.ingestion.data_types import (
+from src.ingestion import NeuralDataIngestion  # noqa: E402
+from src.ingestion.data_types import (  # noqa: E402
     NeuralDataPacket,
     NeuralSignalType,
     DataSource,
@@ -35,7 +35,7 @@ async def main():
     channels = [
         ChannelInfo(
             channel_id=i,
-            label=f"Ch{i+1}",
+            label=f"Ch{i + 1}",
             unit="microvolts",
             sampling_rate=256.0,
         )

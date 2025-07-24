@@ -7,12 +7,15 @@ from datetime import datetime
 import numpy as np
 import logging
 import os
-import sys
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-from src.ingestion import NeuralDataIngestion
+# Import ingestion modules directly (they'll be in the deployment package)
+try:
+    from src.ingestion import NeuralDataIngestion
+except ImportError:
+    # For local testing, add parent directory to path
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from src.ingestion import NeuralDataIngestion
 from src.ingestion.data_types import (
     NeuralDataPacket,
     NeuralSignalType,

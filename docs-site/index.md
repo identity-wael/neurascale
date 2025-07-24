@@ -6,16 +6,16 @@ permalink: /
 
 # NeuraScale Documentation
 
-Welcome to the official documentation for **NeuraScale**, an open-source neuromorphic computing platform that bridges the gap between artificial and biological neural networks.
+Welcome to the official documentation for **NeuraScale**, a specialized neural cloud platform purpose-built for processing petabytes of brain data and enabling next-generation brain-computer interface (BCI) applications.
 
 ## What is NeuraScale?
 
-NeuraScale is designed to:
+NeuraScale is a revolutionary platform that:
 
-- Enable neuromorphic computing research and development
-- Provide cloud-based infrastructure for neural simulations
-- Offer tools for building brain-computer interfaces
-- Support distributed neural network architectures
+- **Processes Neural Data at Scale**: Handle petabytes of brain signals in real-time
+- **Powers BCI Applications**: Enable mind-controlled prosthetics, robot swarms, and immersive VR
+- **Provides Specialized Infrastructure**: Purpose-built for neural data processing, not general computing
+- **Ensures Data Integrity**: HIPAA and GDPR compliant with end-to-end encryption
 
 ## Quick Start
 
@@ -55,25 +55,39 @@ Get started with NeuraScale in minutes:
 - **[Contributing Guidelines](/contributing/)** - How to contribute
 - **[Security Policy](/security/)** - Security best practices
 
-## Key Features
+## Platform Architecture
 
-### Neuromorphic Computing
+### Core Applications
 
-- Spiking neural network simulations
-- Real-time neural processing
-- Hardware-accelerated computations
+#### 🦾 NeuroProsthetics
 
-### Cloud Infrastructure
+- Direct mind control of robotic limbs
+- Real-time kinematic calculations
+- Adaptive learning algorithms
+- FDA approval track (5-year timeline)
 
-- Scalable compute resources
-- Distributed processing capabilities
-- Managed database services
+#### 🤖 Brain-Robot Swarm Interface
 
-### Developer Tools
+- Neural intent to swarm control
+- ROS integration layer
+- Distributed command processing
+- Product release 2028
 
-- RESTful APIs
-- SDKs for multiple languages
-- Comprehensive documentation
+#### 🥽 Full-Dive VR
+
+- Complete sensory immersion
+- Real-time experience encoding/decoding
+- Neural-visual rendering pipeline
+- 10-year development roadmap
+
+### Technology Stack
+
+- **Cloud Infrastructure**: AWS IoT, GreenGrass, RoboRunner
+- **AI/ML Platform**: NVIDIA DGX Cloud, Holoscan, Omniverse
+- **Database**: Neon serverless Postgres with branching
+- **Frontend**: Next.js 15, Three.js, React Three Fiber
+- **CMS**: Sanity headless content management
+- **Analytics**: Real-time neural data processing pipeline
 
 ## Getting Help
 

@@ -1,68 +1,142 @@
-# NEURASCALE - Neural-Prosthetics Application Cloud
+# NEURASCALE - Neural Cloud Platform for Brain-Computer Interfaces
+
+<div align="center">
 
 [![CodeQL](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/dependency-review.yml)
 [![Neon Database](https://img.shields.io/badge/Database-Neon-00E599)](https://neon.tech)
 [![Sanity CMS](https://img.shields.io/badge/CMS-Sanity-F03E2F)](https://sanity.io)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000)](https://vercel.com)
+[![pnpm](https://img.shields.io/badge/Maintained%20with-pnpm-f9ad00)](https://pnpm.io)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An open-source infrastructure for processing petabytes of brain data, enabling applications that restore mobility, unlock robotic control, and create immersive realities.
+</div>
+
+## 🧠 Overview
+
+NeuraScale is a specialized cloud platform purpose-built for processing petabytes of neural data, enabling next-generation brain-computer interface (BCI) applications. Our infrastructure powers three groundbreaking domains:
+
+- **🦾 NeuroProsthetics**: Restoring mobility with mind-controlled robotic limbs
+- **🤖 Brain-Swarm Interface**: Commanding autonomous robot swarms with neural intent
+- **🥽 Full-Dive VR**: Achieving true immersion in virtual realities
+
+Built on AWS and NVIDIA's cutting-edge platforms, NeuraScale provides the computational backbone for real-time neural signal processing, advanced machine learning, and seamless brain-machine integration.
 
 ## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** 18.x or higher
+- **pnpm** 9.x or higher ([install guide](https://pnpm.io/installation))
+- **Git** for version control
+- **Vercel CLI** (optional) for deployment
+
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/identity-wael/neurascale.git
 cd neurascale
 
+# Install dependencies using pnpm
+pnpm install
+
 # Navigate to the web app
 cd apps/web
-
-# Install dependencies
-npm install
 
 # Copy environment variables
 cp .env.example .env.local
 
 # Start development server
-npm run dev
+pnpm dev
 ```
 
-Visit `http://localhost:3000` to see the application.
+Visit `http://localhost:3000` to see the application running.
 
-## 📁 Project Structure
+## 📁 Project Architecture
+
+### Repository Structure
 
 ```
 neurascale/
-├── apps/                       # Monorepo root
-│   ├── web/                    # Next.js web application
-│   │   ├── app/               # App router pages
-│   │   ├── components/        # React components
-│   │   ├── src/               # Source code
-│   │   │   ├── lib/          # Utilities and clients
-│   │   │   ├── sanity/       # Sanity schemas
-│   │   │   └── contexts/     # React contexts
-│   │   ├── scripts/          # Migration and utility scripts
-│   │   └── package.json
-│   └── packages/              # Shared packages (future)
-├── console/                   # NeuraScale Console
-├── .github/                   # GitHub workflows
-│   ├── workflows/            # CI/CD pipelines
-│   └── scripts/              # Workflow scripts
-├── docs/                      # Documentation
-└── README.md                  # This file
+├── apps/                         # Application workspace
+│   ├── web/                      # Main web application (Next.js 15)
+│   │   ├── app/                 # App Router pages & API routes
+│   │   ├── components/          # React components
+│   │   │   ├── layout/         # Layout components (Header, Footer)
+│   │   │   ├── sections/       # Page sections
+│   │   │   ├── ui/            # Reusable UI components
+│   │   │   └── visuals/        # 3D visualizations (Three.js)
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── lib/                # Utilities and configurations
+│   │   ├── public/             # Static assets
+│   │   ├── scripts/            # Build and migration scripts
+│   │   ├── src/                # Additional source code
+│   │   │   ├── contexts/       # React contexts
+│   │   │   ├── lib/           # Core libraries
+│   │   │   ├── sanity/        # Sanity CMS schemas
+│   │   │   └── types/         # TypeScript definitions
+│   │   └── package.json        # App dependencies
+│   └── packages/                # Shared packages workspace
+│       ├── eslint-config/      # Shared ESLint configuration
+│       ├── typescript-config/  # Shared TypeScript config
+│       └── test-utils/         # Testing utilities
+├── console/                     # NeuraScale Console application
+│   ├── app/                    # Console app pages
+│   ├── infrastructure/         # Terraform & GCP configs
+│   └── docs/                   # Console documentation
+├── docs/                        # Project documentation
+├── docs-site/                   # GitHub Pages documentation
+├── .github/                     # GitHub configurations
+│   ├── workflows/              # CI/CD pipelines
+│   └── scripts/                # Automation scripts
+├── .pnpmfile.cjs               # pnpm configuration
+├── package.json                # Root package.json
+├── pnpm-workspace.yaml         # pnpm workspace config
+└── turbo.json                  # Turborepo configuration
 ```
 
 ## 🛠️ Technology Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Database**: [Neon](https://neon.tech) (Serverless Postgres)
-- **CMS**: [Sanity](https://sanity.io) (Headless CMS)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **3D Graphics**: [Three.js](https://threejs.org/), React Three Fiber
-- **Animations**: [Framer Motion](https://www.framer.com/motion/), Lenis
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Deployment**: [Vercel](https://vercel.com)
+### Core Technologies
+
+| Category            | Technology                                    | Purpose                            |
+| ------------------- | --------------------------------------------- | ---------------------------------- |
+| **Framework**       | [Next.js 15](https://nextjs.org/)             | React framework with App Router    |
+| **Language**        | [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript               |
+| **Package Manager** | [pnpm](https://pnpm.io/)                      | Fast, efficient package management |
+| **Monorepo**        | [Turborepo](https://turbo.build/)             | High-performance build system      |
+
+### Backend & Infrastructure
+
+| Category           | Technology                               | Purpose                            |
+| ------------------ | ---------------------------------------- | ---------------------------------- |
+| **Database**       | [Neon](https://neon.tech)                | Serverless Postgres with branching |
+| **CMS**            | [Sanity](https://sanity.io)              | Headless content management        |
+| **Authentication** | [NextAuth.js](https://next-auth.js.org/) | Authentication for Next.js         |
+| **Email**          | [Nodemailer](https://nodemailer.com/)    | Email sending service              |
+| **Payments**       | [Stripe](https://stripe.com)             | Payment processing (Console app)   |
+
+### Frontend & Design
+
+| Category          | Technology                                                  | Purpose                     |
+| ----------------- | ----------------------------------------------------------- | --------------------------- |
+| **Styling**       | [Tailwind CSS](https://tailwindcss.com/)                    | Utility-first CSS framework |
+| **3D Graphics**   | [Three.js](https://threejs.org/)                            | 3D visualizations           |
+| **3D React**      | [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) | React renderer for Three.js |
+| **3D Components** | [@react-three/drei](https://github.com/pmndrs/drei)         | Useful helpers for R3F      |
+| **Animations**    | [Framer Motion](https://www.framer.com/motion/)             | Production-ready animations |
+| **Smooth Scroll** | [Lenis](https://lenis.studiofreight.com/)                   | Smooth scroll library       |
+
+### Cloud & DevOps
+
+| Category      | Technology                                            | Purpose                  |
+| ------------- | ----------------------------------------------------- | ------------------------ |
+| **Hosting**   | [Vercel](https://vercel.com)                          | Edge deployment platform |
+| **Analytics** | [Google Analytics 4](https://analytics.google.com/)   | Web analytics            |
+| **Maps**      | [Google Maps API](https://developers.google.com/maps) | Location services        |
+| **CI/CD**     | [GitHub Actions](https://github.com/features/actions) | Automated workflows      |
+| **Security**  | [CodeQL](https://codeql.github.com/)                  | Code security analysis   |
 
 ## 🔧 Configuration
 
@@ -194,50 +268,114 @@ vercel
 
 ## 🧪 Development
 
-### Running Tests
+### Available Scripts
 
 ```bash
-# Run all tests
-npm test
+# Development
+pnpm dev              # Start development server
+pnpm build            # Build for production
+pnpm start            # Start production server
+pnpm preview          # Preview production build
 
-# Run tests in watch mode
-npm run test:watch
+# Code Quality
+pnpm lint             # Run ESLint
+pnpm lint:fix         # Fix linting issues
+pnpm format           # Format with Prettier
+pnpm typecheck        # TypeScript type checking
 
-# Type checking
-npm run type-check
+# Testing
+pnpm test             # Run tests
+pnpm test:watch       # Run tests in watch mode
+pnpm test:coverage    # Generate coverage report
+
+# Database
+pnpm db:push          # Push schema to database
+pnpm db:studio        # Open Prisma Studio
+pnpm db:generate      # Generate Prisma client
 ```
 
-### Code Quality
+### Code Style Guide
 
-```bash
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Type check
-npm run type-check
-```
+- **TypeScript**: Strict mode enabled with comprehensive type checking
+- **Components**: Functional components with TypeScript interfaces
+- **Styling**: Tailwind CSS with consistent design tokens
+- **File Naming**: PascalCase for components, camelCase for utilities
+- **Imports**: Absolute imports using `@/` prefix
 
 ### Pre-commit Hooks
 
-The project uses pre-commit hooks for:
+We use Husky and lint-staged for code quality:
 
-- Code formatting (Prettier)
-- Linting (ESLint)
-- Type checking
-- Security scanning
+- ✅ Prettier formatting
+- ✅ ESLint validation
+- ✅ TypeScript checking
+- ✅ Build verification
+- ✅ Security scanning
+
+## 🏗️ Architecture Overview
+
+### Platform Layers
+
+1. **Neural Interaction & Immersion Layer (NIIL)**
+
+   - User-facing interfaces and analytics
+   - Neural identity management
+   - Mixed reality experiences
+   - Cognitive biometric authentication
+
+2. **Emulation Layer**
+
+   - Neural signal simulation and translation
+   - Real-time processing pipeline
+   - Machine learning model inference
+   - Data transformation services
+
+3. **Physical Integration & Control Layer (PICL)**
+   - Direct hardware interfaces
+   - Robotic limb control systems
+   - Sensor array management
+   - Device telemetry and monitoring
+
+### Core Components
+
+- **Neural Management System (NMS)**: Central orchestration platform
+- **Neural Ledger**: Blockchain-based data integrity system
+- **Extended Reality Engine**: VR/XR rendering and interaction
+- **Neural Applications**: Domain-specific BCI applications
+
+## 🔐 Security
+
+### Security Features
+
+- **Data Encryption**: End-to-end encryption for neural data
+- **Access Control**: Role-based permissions with biometric auth
+- **Compliance**: HIPAA and GDPR compliant architecture
+- **Audit Logging**: Comprehensive activity tracking
+- **Vulnerability Scanning**: Automated security checks with CodeQL
+
+### Reporting Security Issues
+
+Please see our [Security Policy](SECURITY.md) for reporting vulnerabilities.
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### How to Contribute
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Contribution Guidelines
+
+- Follow the existing code style and conventions
+- Write clear, descriptive commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting PR
 
 ## 👥 Team
 
@@ -258,17 +396,94 @@ American Furniture Warehouse
 **Vincent Liu** - _VP Engineering, HealthCare_
 CuraeSoft Inc
 
+## 🐛 Troubleshooting
+
+### Common Issues
+
+<details>
+<summary><strong>Build fails with module not found errors</strong></summary>
+
+```bash
+# Clear cache and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+</details>
+
+<details>
+<summary><strong>Environment variables not loading</strong></summary>
+
+- Ensure `.env.local` exists in `apps/web/`
+- Check variable names match exactly (case-sensitive)
+- Restart the development server after changes
+</details>
+
+<details>
+<summary><strong>Sanity Studio not accessible</strong></summary>
+
+- Verify Sanity project ID and dataset in `.env.local`
+- Check you're logged in: `pnpm sanity login`
+- Ensure CORS is configured in Sanity dashboard
+</details>
+
+<details>
+<summary><strong>Database connection issues</strong></summary>
+
+- Verify `DATABASE_URL` is set correctly
+- Check Neon dashboard for service status
+- Ensure IP is whitelisted (if applicable)
+</details>
+
+### Getting Help
+
+- 📚 Check our [comprehensive documentation](https://docs.neurascale.io)
+- 💬 Join our [Discord community](https://discord.gg/neurascale)
+- 🐛 Report bugs via [GitHub Issues](https://github.com/identity-wael/neurascale/issues)
+- 📧 Contact support: support@neurascale.io
+
+## 📈 Project Status
+
+- ✅ **Phase 1**: Platform infrastructure (Complete)
+- ✅ **Phase 2**: Core BCI applications (Complete)
+- 🚧 **Phase 3**: ML model integration (In Progress)
+- 📅 **Phase 4**: Hardware partnerships (Q2 2025)
+- 📅 **Phase 5**: Clinical trials (Q4 2025)
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Links
+## 🔗 Resources
 
-- [Website](https://neurascale.com)
-- [Documentation](https://docs.neurascale.io)
-- [Sanity Studio](https://neurascale.com/studio)
-- [GitHub](https://github.com/identity-wael/neurascale)
+### Project Links
+
+- 🌐 [Website](https://neurascale.com)
+- 📖 [Documentation](https://docs.neurascale.io)
+- 🎨 [Sanity Studio](https://neurascale.com/studio)
+- 💻 [GitHub Repository](https://github.com/identity-wael/neurascale)
+- 🚀 [Live Demo](https://neurascale.vercel.app)
+
+### Community
+
+- 💬 [Discord Server](https://discord.gg/neurascale)
+- 🐦 [Twitter/X](https://twitter.com/neurascale)
+- 💼 [LinkedIn](https://linkedin.com/company/neurascale)
+- 📧 [Newsletter](https://neurascale.com/newsletter)
+
+### Technical Resources
+
+- 📚 [API Documentation](https://docs.neurascale.io/api)
+- 🧠 [BCI Research Papers](https://neurascale.com/research)
+- 🎓 [Developer Tutorials](https://neurascale.com/tutorials)
+- 🔧 [Status Page](https://status.neurascale.io)
 
 ---
 
-Built with ❤️ by the NeuraScale team
+<div align="center">
+
+**Built with ❤️ and 🧠 by the NeuraScale Team**
+
+_Bridging Mind and World Through Advanced Neural Cloud Technology_
+
+</div>

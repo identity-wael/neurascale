@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  processor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.processor
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/key.json
+      - PROJECT_ID=${PROJECT_ID}
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+    volumes:
+      - ../credentials:/app/credentials:ro
+    depends_on:
+      - pubsub-emulator
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/key.json
+      - PROJECT_ID=${PROJECT_ID}
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+    volumes:
+      - ../credentials:/app/credentials:ro
+    depends_on:
+      - pubsub-emulator
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"

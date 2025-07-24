@@ -178,7 +178,7 @@ resource "google_bigtable_table" "devices" {
 
 # Storage bucket for Cloud Functions
 resource "google_storage_bucket" "functions" {
-  name          = "${var.project_id}-functions-${var.environment}"
+  name          = "${var.project_id}-gcf-source-${var.environment}"
   location      = var.region
   force_destroy = var.environment != "production"
 

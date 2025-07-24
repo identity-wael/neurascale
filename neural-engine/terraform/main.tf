@@ -22,110 +22,49 @@ terraform {
   }
 }
 
-# Provider for the orchestration project
+# Determine environment from project_id
+locals {
+  environment = endswith(var.project_id, "-neurascale") ? split("-", var.project_id)[0] : "development"
+}
+
+# Provider for the target environment
 provider "google" {
-  project = var.orchestration_project_id
+  project = var.project_id
   region  = var.region
 }
 
 provider "google-beta" {
+  project = var.project_id
+  region  = var.region
+}
+
+# Provider for orchestration project (for cross-project resources)
+provider "google" {
+  alias   = "orchestration"
   project = var.orchestration_project_id
   region  = var.region
 }
 
-# Provider aliases for each environment
-provider "google" {
-  alias   = "production"
-  project = var.production_project_id
-  region  = var.region
+# Enable APIs for the target environment
+module "project_apis" {
+  source     = "./modules/project-apis"
+  project_id = var.project_id
 }
 
-provider "google" {
-  alias   = "staging"
-  project = var.staging_project_id
-  region  = var.region
-}
-
-provider "google" {
-  alias   = "development"
-  project = var.development_project_id
-  region  = var.region
-}
-
-# Enable APIs for each environment
-module "production_apis" {
-  source = "./modules/project-apis"
-  providers = {
-    google = google.production
-  }
-  project_id = var.production_project_id
-}
-
-module "staging_apis" {
-  source = "./modules/project-apis"
-  providers = {
-    google = google.staging
-  }
-  project_id = var.staging_project_id
-}
-
-module "development_apis" {
-  source = "./modules/project-apis"
-  providers = {
-    google = google.development
-  }
-  project_id = var.development_project_id
-}
-
-# Neural ingestion infrastructure for each environment
-module "production_ingestion" {
+# Neural ingestion infrastructure for the target environment
+module "neural_ingestion" {
   source = "./modules/neural-ingestion"
-  providers = {
-    google = google.production
-  }
 
-  project_id  = var.production_project_id
-  environment = "production"
+  project_id  = var.project_id
+  environment = local.environment
   region      = var.region
 
-  depends_on = [module.production_apis]
+  depends_on = [module.project_apis]
 }
 
-module "staging_ingestion" {
-  source = "./modules/neural-ingestion"
-  providers = {
-    google = google.staging
-  }
-
-  project_id  = var.staging_project_id
-  environment = "staging"
-  region      = var.region
-
-  depends_on = [module.staging_apis]
-}
-
-module "development_ingestion" {
-  source = "./modules/neural-ingestion"
-  providers = {
-    google = google.development
-  }
-
-  project_id  = var.development_project_id
-  environment = "development"
-  region      = var.region
-
-  depends_on = [module.development_apis]
-}
-
-# Cross-project IAM permissions for CI/CD
+# IAM permissions for CI/CD in the target environment
 resource "google_project_iam_member" "ci_cd_permissions" {
-  for_each = {
-    production  = var.production_project_id
-    staging     = var.staging_project_id
-    development = var.development_project_id
-  }
-
-  project = each.value
+  project = var.project_id
   role    = "roles/owner" # Adjust as needed
   member  = "serviceAccount:${var.ci_cd_service_account}"
 }

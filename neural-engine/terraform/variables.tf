@@ -4,23 +4,6 @@ variable "orchestration_project_id" {
   default     = "neurascale"
 }
 
-variable "production_project_id" {
-  type        = string
-  description = "Production environment project ID"
-  default     = "production-neurascale"
-}
-
-variable "staging_project_id" {
-  type        = string
-  description = "Staging environment project ID"
-  default     = "staging-neurascale"
-}
-
-variable "development_project_id" {
-  type        = string
-  description = "Development environment project ID"
-  default     = "development-neurascale"
-}
 
 variable "region" {
   type        = string

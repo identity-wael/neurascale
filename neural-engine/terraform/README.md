@@ -12,120 +12,105 @@ This directory contains the Terraform configuration for managing NeuraScale's mu
 
 ## State Management
 
-We use **Terraform Cloud** for state management with **GCS backup**:
+We use **Google Cloud Storage (GCS)** for Terraform state management:
 
-1. **Primary**: Terraform Cloud (app.terraform.io)
-
-   - Organization: `neurascale`
-   - Workspaces: `neural-engine-development`, `neural-engine-staging`, `neural-engine-production`
-
-2. **Backup**: Google Cloud Storage
-   - Bucket: `neurascale-terraform-state`
-   - Automated sync via `scripts/sync-terraform-state.sh`
+- **Bucket**: `neurascale-terraform-state` (in the orchestration project)
+- **State Files**:
+  - Development: `gs://neurascale-terraform-state/neural-engine/development/`
+  - Staging: `gs://neurascale-terraform-state/neural-engine/staging/`
+  - Production: `gs://neurascale-terraform-state/neural-engine/production/`
 
 ## Setup Instructions
 
-### 1. Terraform Cloud Setup
-
-1. Create account at https://app.terraform.io
-2. Create organization named `neurascale`
-3. Generate API token: https://app.terraform.io/app/settings/tokens
-4. Create three workspaces with tag `neural-engine`:
-   - `neural-engine-development`
-   - `neural-engine-staging`
-   - `neural-engine-production`
-
-### 2. Configure Workspaces
-
-For each workspace in Terraform Cloud:
-
-1. Go to workspace settings → Variables
-2. Add environment variables:
-   ```
-   GOOGLE_CREDENTIALS = <service-account-json>
-   TF_VAR_environment = development|staging|production
-   ```
-
-### 3. Local Setup
+### 1. Google Cloud Setup
 
 ```bash
-# Login to Terraform Cloud
-terraform login
+# Authenticate with Google Cloud
+gcloud auth login
+gcloud auth application-default login
 
-# Initialize Terraform
-cd neural-engine/terraform
-./setup-terraform-cloud.sh
+# Set default project
+gcloud config set project neurascale
 
-# Select workspace and plan
-export TF_WORKSPACE=neural-engine-development
-terraform plan
+# Create state bucket (if not exists)
+./setup-gcs-backend.sh
 ```
 
-### 4. CI/CD Setup
+### 2. Local Terraform Setup
 
-Add these secrets to GitHub:
+```bash
+# Initialize Terraform with appropriate backend
+cd neural-engine/terraform
 
-- `TF_CLOUD_TOKEN` - Terraform Cloud API token
+# For staging environment
+terraform init -backend-config=backend-staging.conf
+
+# For production environment
+terraform init -backend-config=backend-production.conf
+
+# For development environment
+terraform init -backend-config=backend-development.conf
+```
+
+### 3. Deploy Infrastructure
+
+```bash
+# Plan changes
+terraform plan \
+  -var="project_id=staging-neurascale" \
+  -var="orchestration_project_id=neurascale" \
+  -var="region=northamerica-northeast1"
+
+# Apply changes
+terraform apply \
+  -var="project_id=staging-neurascale" \
+  -var="orchestration_project_id=neurascale" \
+  -var="region=northamerica-northeast1"
+```
+
+## CI/CD Setup
+
+GitHub Actions automatically deploys:
+
+- **Pull Requests** → Staging environment
+- **Main branch** → Production environment
+- **Develop branch** → Development environment
+
+### Required GitHub Secrets
+
 - `WIF_PROVIDER` - Workload Identity Provider for GCP
 - `WIF_SERVICE_ACCOUNT` - Service account for CI/CD
-
-## Usage
-
-### Deploy to Development
-
-```bash
-export TF_WORKSPACE=neural-engine-development
-terraform plan
-terraform apply
-```
-
-### Deploy to Staging (via PR)
-
-- Create PR to main branch
-- CI/CD automatically deploys to staging
-
-### Deploy to Production
-
-- Merge PR to main branch
-- CI/CD automatically deploys to production
-
-## Backup and Recovery
-
-### Automated Backup
-
-Set up a Cloud Scheduler job to run:
-
-```bash
-export TF_CLOUD_TOKEN=<your-token>
-./scripts/sync-terraform-state.sh
-```
-
-### Manual Recovery
-
-```bash
-# Download state from GCS
-gsutil cp gs://neurascale-terraform-state/backup/production/terraform.tfstate ./
-
-# Import to Terraform Cloud (emergency only)
-terraform state push terraform.tfstate
-```
 
 ## Module Structure
 
 ```
 terraform/
 ├── main.tf                    # Main configuration
-├── variables.tf              # Variable definitions
-├── backend-gcs-backup.tf     # GCS backup configuration
+├── variables.tf               # Variable definitions
+├── backend-*.conf             # Backend configurations per environment
 ├── modules/
-│   ├── project-apis/         # API enablement module
-│   └── neural-ingestion/     # Neural data ingestion infrastructure
-└── environments/             # Environment-specific tfvars (optional)
+│   ├── project-apis/          # API enablement module
+│   └── neural-ingestion/      # Neural data ingestion infrastructure
+└── setup-gcs-backend.sh       # Script to create GCS bucket
 ```
 
 ## Security Notes
 
-1. Service account keys are stored in Terraform Cloud, not in code
-2. State files contain sensitive data - handle with care
-3. GCS backup bucket has versioning enabled
-4. All projects use separate service accounts per environment
+1. State files are stored in GCS with versioning enabled
+2. Access to state bucket is controlled via IAM
+3. Each environment uses separate service accounts
+4. No credentials are stored in code
+
+## Troubleshooting
+
+### State Lock Issues
+
+If you encounter state lock errors:
+
+```bash
+# List locks in GCS
+gsutil ls -r gs://neurascale-terraform-state/neural-engine/
+
+# Remove stale lock (use with caution)
+gsutil rm gs://neurascale-terraform-state/neural-engine/<environment>/default.tflock
+```

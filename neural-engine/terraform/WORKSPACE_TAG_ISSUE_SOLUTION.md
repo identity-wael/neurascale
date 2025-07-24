@@ -1,4 +1,4 @@
-# Terraform Cloud Workspace Tag Issue - Analysis and Solution
+# Terraform Cloud Workspace Configuration - Updated Solution
 
 ## Problem Summary
 

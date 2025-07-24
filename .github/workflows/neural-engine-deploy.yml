@@ -161,11 +161,11 @@ jobs:
 
     - name: Select Terraform Cloud Workspace
       run: |
-        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_CLOUD_WORKSPACE_NAME=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
+        echo "Initializing Terraform with workspace: $TF_CLOUD_WORKSPACE_NAME"
         terraform init -upgrade
 
     - name: Terraform Format Check
@@ -213,11 +213,11 @@ jobs:
 
     - name: Set Terraform Cloud Workspace
       run: |
-        echo "TF_WORKSPACE=${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
+        echo "TF_CLOUD_WORKSPACE_NAME=neural-engine-${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |
-        echo "Initializing Terraform with workspace: $TF_WORKSPACE"
+        echo "Initializing Terraform with workspace: $TF_CLOUD_WORKSPACE_NAME"
         terraform init -upgrade
 
     - name: Terraform Apply

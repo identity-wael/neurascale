@@ -107,7 +107,9 @@ class DeviceDiscoveryService:
         if callback in self._discovery_callbacks:
             self._discovery_callbacks.remove(callback)
 
-    async def start_discovery(self, protocols: Optional[List[DeviceProtocol]] = None)) -> None:
+    async def start_discovery(
+        self, protocols: Optional[List[DeviceProtocol]] = None
+    ) -> None:
         """
         Start device discovery.
 
@@ -165,7 +167,7 @@ class DeviceDiscoveryService:
             self._zeroconf.close()
             self._zeroconf = None
 
-    async def _run_discovery(self, tasks: List[asyncio.Task])) -> None:
+    async def _run_discovery(self, tasks: List[asyncio.Task]) -> None:
         """Run discovery tasks."""
         try:
             await asyncio.gather(*tasks, return_exceptions=True)

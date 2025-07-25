@@ -330,7 +330,7 @@ output "notification_channel_ids" {
 }
 
 output "slo_id" {
-  value       = google_monitoring_slo.api_availability.slo_id
+  value       = var.create_slo && length(google_monitoring_slo.api_availability) > 0 ? google_monitoring_slo.api_availability[0].slo_id : null
   description = "ID of the API availability SLO"
 }
 

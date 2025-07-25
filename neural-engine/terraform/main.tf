@@ -201,10 +201,11 @@ resource "google_service_account_iam_member" "github_actions_act_as" {
 module "neural_ingestion" {
   source = "./modules/neural-ingestion"
 
-  project_id            = var.project_id
-  environment           = local.environment
-  region                = var.region
-  service_account_email = google_service_account.neural_ingestion.email
+  project_id             = var.project_id
+  environment            = local.environment
+  region                 = var.region
+  service_account_email  = google_service_account.neural_ingestion.email
+  enable_cloud_functions = var.enable_cloud_functions
 
   depends_on = [
     google_project_iam_member.neural_ingestion_roles,

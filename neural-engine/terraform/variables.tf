@@ -143,3 +143,9 @@ variable "budget_notification_channels" {
   description = "Notification channels for budget alerts"
   default     = []
 }
+
+variable "enable_cloud_functions" {
+  type        = bool
+  description = "Enable Cloud Functions deployment"
+  default     = false
+}

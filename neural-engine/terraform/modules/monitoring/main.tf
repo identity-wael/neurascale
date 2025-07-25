@@ -28,7 +28,8 @@ resource "google_logging_metric" "neural_data_quality" {
   filter = "resource.type=\"cloud_function\" AND jsonPayload.metric_type=\"data_quality\""
 
   metric_descriptor {
-    metric_kind = "GAUGE"
+    # Changed from GAUGE to DELTA which is supported
+    metric_kind = "DELTA"
     value_type  = "DOUBLE"
     unit        = "1"
 
@@ -44,6 +45,8 @@ resource "google_logging_metric" "neural_data_quality" {
       description = "Device identifier"
     }
   }
+
+  value_extractor = "EXTRACT(jsonPayload.quality_score)"
 
   label_extractors = {
     "signal_type" = "EXTRACT(jsonPayload.signal_type)"
@@ -63,6 +66,15 @@ resource "google_logging_metric" "processing_latency" {
   }
 
   value_extractor = "EXTRACT(jsonPayload.latency_ms)"
+
+  # Required bucket options for DISTRIBUTION metrics
+  bucket_options {
+    exponential_buckets {
+      num_finite_buckets = 64
+      growth_factor      = 2
+      scale              = 1
+    }
+  }
 }
 
 # Model Inference Performance
@@ -72,8 +84,9 @@ resource "google_logging_metric" "model_inference_time" {
 
   metric_descriptor {
     metric_kind = "DELTA"
-    value_type  = "DOUBLE"
-    unit        = "ms"
+    # Changed from DOUBLE to INT64 which is supported for DELTA
+    value_type = "INT64"
+    unit       = "ms"
 
     labels {
       key         = "model_name"
@@ -81,6 +94,8 @@ resource "google_logging_metric" "model_inference_time" {
       description = "Name of the ML model"
     }
   }
+
+  value_extractor = "EXTRACT(jsonPayload.inference_time_ms)"
 
   label_extractors = {
     "model_name" = "EXTRACT(jsonPayload.model_name)"
@@ -93,7 +108,8 @@ resource "google_logging_metric" "device_connection_status" {
   filter = "resource.type=\"cloud_function\" AND jsonPayload.metric_type=\"device_connection\""
 
   metric_descriptor {
-    metric_kind = "GAUGE"
+    # Changed from GAUGE to DELTA which is supported
+    metric_kind = "DELTA"
     value_type  = "INT64"
     unit        = "1"
 
@@ -109,6 +125,8 @@ resource "google_logging_metric" "device_connection_status" {
       description = "Connection status"
     }
   }
+
+  value_extractor = "EXTRACT(jsonPayload.connection_count)"
 
   label_extractors = {
     "device_type" = "EXTRACT(jsonPayload.device_type)"
@@ -140,6 +158,7 @@ resource "google_monitoring_service" "neural_api" {
   basic_service {
     service_type = "CLOUD_RUN"
     service_labels = {
+      location     = "northamerica-northeast1"
       service_name = "neural-api-${var.environment}"
     }
   }
@@ -150,6 +169,9 @@ resource "google_monitoring_alert_policy" "data_quality_alert" {
   display_name = "Low Neural Data Quality - ${var.environment}"
   enabled      = var.enable_monitoring_alerts
   combiner     = "OR"
+
+  # Add dependency to ensure metrics exist first
+  depends_on = [google_logging_metric.neural_data_quality]
 
   documentation {
     content = "Neural data quality has dropped below acceptable threshold. Check device connections and signal processing."
@@ -209,6 +231,9 @@ resource "google_monitoring_alert_policy" "device_disconnection_alert" {
   display_name = "Device Disconnections - ${var.environment}"
   enabled      = var.enable_monitoring_alerts
   combiner     = "OR"
+
+  # Add dependency to ensure metrics exist first
+  depends_on = [google_logging_metric.device_connection_status]
 
   documentation {
     content = "Multiple device disconnections detected. Check network connectivity and device health."

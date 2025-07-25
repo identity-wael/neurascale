@@ -1,6 +1,7 @@
 # Google Ads Setup Guide for NeuraScale
 
 ## Overview
+
 This guide walks you through setting up Google Ads for NeuraScale, including account creation, API access, and integration with your application.
 
 ## Step 1: Create Google Ads Account
@@ -82,20 +83,27 @@ GOOGLE_ADS_LOGIN_CUSTOMER_ID=your_manager_customer_id
 ## Step 8: Integration Points
 
 ### For Conversion Tracking
+
 Add this to your landing pages:
 
 ```html
 <!-- Google Ads Conversion Tracking -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX"></script>
+<script
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX"
+></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-XXXXXXXXX');
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", "AW-XXXXXXXXX");
 </script>
 ```
 
 ### For Remarketing
+
 Add to layout.tsx:
 
 ```typescript
@@ -122,6 +130,7 @@ Add to layout.tsx:
 ## Step 9: Recommended Campaign Structure
 
 ### 1. Brand Campaign
+
 - **Campaign Name**: NeuraScale - Brand
 - **Keywords**:
   - neurascale
@@ -130,6 +139,7 @@ Add to layout.tsx:
   - neurascale neural prosthetics
 
 ### 2. Neural Prosthetics Campaign
+
 - **Campaign Name**: Neural Prosthetics - Search
 - **Keywords**:
   - neural prosthetics platform
@@ -139,6 +149,7 @@ Add to layout.tsx:
   - neural interface development
 
 ### 3. Developer Campaign
+
 - **Campaign Name**: Developers - Search
 - **Keywords**:
   - neural api platform
@@ -147,6 +158,7 @@ Add to layout.tsx:
   - neural computing infrastructure
 
 ### 4. Healthcare Campaign
+
 - **Campaign Name**: Healthcare - Search
 - **Keywords**:
   - medical neural interface
@@ -159,6 +171,7 @@ Add to layout.tsx:
 ### Responsive Search Ads
 
 **Headlines** (15 max, 30 chars each):
+
 1. Neural Prosthetics Cloud
 2. Brain-Computer Interface
 3. NeuraScale Platform
@@ -171,6 +184,7 @@ Add to layout.tsx:
 10. Clinical Grade BCI
 
 **Descriptions** (4 max, 90 chars each):
+
 1. Open-source infrastructure for processing brain data at scale. Start building today.
 2. Enable applications that restore mobility and create immersive neural experiences.
 3. Developer-friendly APIs for neural prosthetics. Free tier available. Get started now.
@@ -179,11 +193,13 @@ Add to layout.tsx:
 ## Budget Recommendations
 
 ### Starting Budget
+
 - **Daily Budget**: $50-100
 - **Bid Strategy**: Maximize Clicks (initially)
 - **Target CPA**: $20-50 per sign-up
 
 ### Budget Allocation
+
 - Brand Campaign: 20%
 - Neural Prosthetics: 30%
 - Developer Campaign: 30%
@@ -192,12 +208,14 @@ Add to layout.tsx:
 ## Tracking Success
 
 ### Key Metrics
+
 1. **Sign-ups**: Track form submissions
 2. **Demo Requests**: Track button clicks
 3. **Documentation Views**: Track time on site
 4. **API Key Generation**: Track as conversion
 
 ### Conversion Actions to Set Up
+
 1. Newsletter Sign-up
 2. Demo Request
 3. Contact Form Submission

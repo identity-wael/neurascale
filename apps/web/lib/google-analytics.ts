@@ -14,30 +14,30 @@ export const GA_EVENTS = {
   SIGN_UP: 'sign_up',
   LOGIN: 'login',
   LOGOUT: 'logout',
-  
+
   // Content interaction
   PAGE_VIEW: 'page_view',
   SCROLL: 'scroll',
   CLICK: 'click',
   VIDEO_PLAY: 'video_play',
   VIDEO_COMPLETE: 'video_complete',
-  
+
   // Form events
   FORM_START: 'form_start',
   FORM_SUBMIT: 'form_submit',
   CONTACT_FORM: 'contact_form',
   DEMO_REQUEST: 'demo_request',
-  
+
   // Conversion events
   GENERATE_LEAD: 'generate_lead',
   DOWNLOAD: 'file_download',
   SHARE: 'share',
-  
+
   // E-commerce (future)
   VIEW_ITEM: 'view_item',
   ADD_TO_CART: 'add_to_cart',
   PURCHASE: 'purchase',
-  
+
   // Custom events
   API_KEY_GENERATED: 'api_key_generated',
   DOCUMENTATION_VIEW: 'documentation_view',
@@ -74,7 +74,7 @@ export function initializeGA() {
   function gtag(...args: any[]) {
     window.dataLayer.push(args);
   }
-  
+
   gtag('js', new Date());
   gtag('config', GA4_CONFIG.MEASUREMENT_ID, {
     page_path: window.location.pathname,
@@ -282,14 +282,16 @@ export function trackViewItem(item: {
   trackEvent('view_item', {
     currency: 'USD',
     value: item.price || 0,
-    items: [{
-      item_id: item.itemId,
-      item_name: item.itemName,
-      item_category: item.itemCategory,
-      item_brand: item.itemBrand,
-      price: item.price,
-      quantity: 1,
-    }],
+    items: [
+      {
+        item_id: item.itemId,
+        item_name: item.itemName,
+        item_category: item.itemCategory,
+        item_brand: item.itemBrand,
+        price: item.price,
+        quantity: 1,
+      },
+    ],
   });
 }
 

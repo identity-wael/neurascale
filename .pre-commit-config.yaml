@@ -37,3 +37,30 @@ repos:
           - eslint@8.56.0
           - eslint-config-next@14.0.4
           - typescript@5.3.3
+
+  # Python code quality tools for neural-engine
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        files: ^neural-engine/.*\.py$
+        language_version: python3.12
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        files: ^neural-engine/.*\.py$
+        args: ['--config=neural-engine/.flake8']
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^neural-engine/.*\.py$
+        args: ['--config-file=neural-engine/mypy.ini', '--namespace-packages']
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - types-protobuf
+          - numpy

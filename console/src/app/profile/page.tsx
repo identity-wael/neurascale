@@ -25,14 +25,20 @@ interface UserProfile {
 }
 
 // Helper component for label-value pairs
-function ProfileField({ label, children }: { label: string; children: React.ReactNode }) {
+function ProfileField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <GCPCardItem>
       <div className="flex items-center justify-between w-full">
-        <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[120px]">{label}</span>
-        <div className="flex-1 text-right">
-          {children}
-        </div>
+        <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[120px]">
+          {label}
+        </span>
+        <div className="flex-1 text-right">{children}</div>
       </div>
     </GCPCardItem>
   );

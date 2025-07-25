@@ -1,3 +1,15 @@
-body { margin: 0; overflow: hidden; }
-canvas { display: block; }
-#info { position: absolute; top: 0; width: 100%; color: white; padding: 10px; font-family: sans-serif; }
+body {
+  margin: 0;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+}
+#info {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  color: white;
+  padding: 10px;
+  font-family: sans-serif;
+}

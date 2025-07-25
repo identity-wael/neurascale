@@ -255,7 +255,7 @@ class NeuralModelTrainingPipeline:
             ],
             replica_count=1,
             machine_type=machine_type,
-            accelerator_type=accelerator_type,
+            accelerator_type=accelerator_type if accelerator_type is not None else "ACCELERATOR_TYPE_UNSPECIFIED",
             accelerator_count=accelerator_count,
         )
 
@@ -369,12 +369,21 @@ class NeuralModelTrainingPipeline:
             score = results["test_metrics"][metric]
 
             # Report measurement using correct API
-            from google.cloud.aiplatform_v1beta1.types import Measurement, Metric
+            from google.cloud.aiplatform_v1beta1 import AddTrialMeasurementRequest
+            from google.cloud.aiplatform_v1beta1.types import Measurement
+            from google.protobuf.struct_pb2 import Value
 
-            measurement = Measurement(metrics=[Metric(metric_id=metric, value=score)])
-            vizier_client.add_trial_measurement(
+            # Create metric value
+            metric_value = Value()
+            metric_value.number_value = score
+
+            measurement = Measurement(step_count=i, metrics={metric: metric_value})
+
+            # Create request
+            request = AddTrialMeasurementRequest(
                 trial_name=trial.name, measurement=measurement
             )
+            vizier_client.add_trial_measurement(request=request)
 
             # Track best
             if score > best_score:

@@ -107,31 +107,46 @@ export function useGoogleAnalytics(options: UseGoogleAnalyticsOptions = {}) {
     trackClick(linkName, 'link', destination);
   }, []);
 
-  const trackFormInteraction = useCallback((formName: string, action: 'start' | 'submit', value?: number) => {
-    if (action === 'start') {
-      trackFormStart(formName);
-    } else {
-      trackFormSubmit(formName, value);
-    }
-  }, []);
+  const trackFormInteraction = useCallback(
+    (formName: string, action: 'start' | 'submit', value?: number) => {
+      if (action === 'start') {
+        trackFormStart(formName);
+      } else {
+        trackFormSubmit(formName, value);
+      }
+    },
+    []
+  );
 
   // Common event tracking
-  const trackSignUp = useCallback((method?: string) => {
-    track(GA_EVENTS.SIGN_UP, { method });
-  }, [track]);
+  const trackSignUp = useCallback(
+    (method?: string) => {
+      track(GA_EVENTS.SIGN_UP, { method });
+    },
+    [track]
+  );
 
-  const trackLogin = useCallback((method?: string) => {
-    track(GA_EVENTS.LOGIN, { method });
-  }, [track]);
+  const trackLogin = useCallback(
+    (method?: string) => {
+      track(GA_EVENTS.LOGIN, { method });
+    },
+    [track]
+  );
 
-  const trackShare = useCallback((method: string, contentType: string) => {
-    track(GA_EVENTS.SHARE, { method, content_type: contentType });
-  }, [track]);
+  const trackShare = useCallback(
+    (method: string, contentType: string) => {
+      track(GA_EVENTS.SHARE, { method, content_type: contentType });
+    },
+    [track]
+  );
 
-  const trackDownload = useCallback((fileName: string) => {
-    const extension = fileName.split('.').pop() || 'unknown';
-    track(GA_EVENTS.DOWNLOAD, { file_name: fileName, file_extension: extension });
-  }, [track]);
+  const trackDownload = useCallback(
+    (fileName: string) => {
+      const extension = fileName.split('.').pop() || 'unknown';
+      track(GA_EVENTS.DOWNLOAD, { file_name: fileName, file_extension: extension });
+    },
+    [track]
+  );
 
   return {
     track,

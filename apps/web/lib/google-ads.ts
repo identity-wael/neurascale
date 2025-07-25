@@ -43,7 +43,7 @@ export function initializeGoogleAds() {
   function gtag(...args: any[]) {
     window.dataLayer.push(args);
   }
-  
+
   gtag('js', new Date());
   gtag('config', GOOGLE_ADS_CONFIG.CONVERSION_ID);
 
@@ -65,7 +65,7 @@ export function trackConversion(
   }
 
   const gtag = (window as any).gtag;
-  
+
   // Track the conversion
   gtag('event', 'conversion', {
     send_to: `${GOOGLE_ADS_CONFIG.CONVERSION_ID}/${eventName}`,
@@ -89,7 +89,7 @@ export function trackPageView(pagePath: string, pageTitle: string) {
   }
 
   const gtag = (window as any).gtag;
-  
+
   gtag('event', 'page_view', {
     page_path: pagePath,
     page_title: pageTitle,
@@ -106,7 +106,7 @@ export function trackFormSubmission(formName: string, formValue?: number) {
   }
 
   const gtag = (window as any).gtag;
-  
+
   gtag('event', 'generate_lead', {
     currency: 'USD',
     value: formValue || 0,
@@ -133,7 +133,7 @@ export function setUserData(userData: {
   }
 
   const gtag = (window as any).gtag;
-  
+
   // Google Ads will automatically hash this data
   gtag('set', 'user_data', {
     email: userData.email,
@@ -162,7 +162,7 @@ export function trackCustomConversion(
   }
 
   const gtag = (window as any).gtag;
-  
+
   gtag('event', 'conversion', {
     send_to: `${GOOGLE_ADS_CONFIG.CONVERSION_ID}/${conversionLabel}`,
     value: conversionValue || 0,

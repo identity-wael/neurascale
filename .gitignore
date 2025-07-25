@@ -51,3 +51,6 @@ scripts/google/ga4-config.json
 
 # Pre-commit
 .pre-commit-venv/
+
+# Project management
+tasks.md

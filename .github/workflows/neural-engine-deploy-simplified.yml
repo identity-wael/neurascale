@@ -269,10 +269,13 @@ jobs:
           echo "Starting Terraform plan for environment: ${{ needs.setup.outputs.environment }}"
           echo "Project ID: ${{ needs.setup.outputs.project_id }}"
 
+          # Try to remove any stale locks first
+          gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null || true
+
           terraform plan \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            -lock-timeout=2m \
+            -lock-timeout=30s \
             -out=tfplan \
             -refresh=false \
             -parallelism=10
@@ -292,6 +295,12 @@ jobs:
             --severity=NOTICE \
             --resource=global \
             --labels=environment=${{ needs.setup.outputs.environment }},version=${{ github.sha }},status=success
+
+      - name: Cleanup Terraform lock on failure
+        if: failure()
+        run: |
+          echo "Cleaning up Terraform state lock after failure..."
+          gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock || true
 
   # Verify deployment after everything is built and deployed
   verify:

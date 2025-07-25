@@ -160,6 +160,10 @@ jobs:
       matrix:
         service: [api, ingestion, processor]
       max-parallel: 3  # Run all builds in parallel
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDKIT_PROGRESS: plain
+      COMPOSE_DOCKER_CLI_BUILD: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -231,6 +235,9 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
             DOCKER_BUILDKIT=1
             BUILDKIT_PARALLELISM=12
+          builder: ${{ steps.buildx.outputs.name }}
+          provenance: false
+          sbom: false
 
       # Move cache after build
       - name: Move cache

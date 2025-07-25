@@ -51,8 +51,8 @@ jobs:
         id: cache-check
         run: |
           # Create a hash of all test-related files
-          CACHE_KEY=$(find neural-engine/src neural-engine/tests neural-engine/requirements*.txt -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
-          echo "cache-key=test-$CACHE_KEY" >> $GITHUB_OUTPUT
+          CACHE_KEY=$(find neural-engine/src neural-engine/tests neural-engine/requirements*.txt .github/workflows/neural-engine-cicd.yml -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
+          echo "cache-key=test-$CACHE_KEY-py3.12.11" >> $GITHUB_OUTPUT
 
       - name: Cache test results
         id: test-cache
@@ -71,30 +71,47 @@ jobs:
         if: steps.test-cache.outputs.cache-hit != 'true'
         run: |
           echo "Setting up Python environment"
-          # Clear any existing venv
-          rm -rf venv
+          # Clear any existing venv and Python cache
+          rm -rf venv ~/.cache/pip
 
-          # Try multiple Python paths
-          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
-            if [[ -x "$PYTHON_PATH" ]]; then
-              echo "Found Python at: $PYTHON_PATH"
-              $PYTHON_PATH --version
-              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
-                echo "Using Python 3.12 from: $PYTHON_PATH"
-                $PYTHON_PATH -m venv venv
-                break
-              fi
+          # FORCE use of Homebrew Python 3.12.11
+          PYTHON_PATH="/opt/homebrew/bin/python3.12"
+
+          # Verify it's the right version
+          if [[ -x "$PYTHON_PATH" ]]; then
+            PYTHON_VERSION=$($PYTHON_PATH --version 2>&1)
+            echo "Found Python: $PYTHON_VERSION"
+
+            if [[ "$PYTHON_VERSION" == *"3.12.11"* ]]; then
+              echo "✅ Using correct Python 3.12.11"
+              $PYTHON_PATH -m venv venv --clear
+            else
+              echo "❌ ERROR: Wrong Python version: $PYTHON_VERSION"
+              echo "Expected: Python 3.12.11"
+
+              # Try to find the right Python
+              echo "Searching for Python 3.12.11..."
+              find /opt/homebrew/Cellar/python@3.12 -name "python3.12" -type f 2>/dev/null | while read -r py; do
+                if $py --version 2>&1 | grep -q "3.12.11"; then
+                  echo "Found correct Python at: $py"
+                  $py -m venv venv --clear
+                  break
+                fi
+              done
             fi
-          done
-
-          if [[ ! -d "venv" ]]; then
-            echo "ERROR: Could not create venv with Python 3.12"
+          else
+            echo "ERROR: Homebrew Python not found at $PYTHON_PATH"
             exit 1
           fi
 
           source venv/bin/activate
           python --version
-          which python
+
+          # Double check we got 3.12.11
+          if ! python --version 2>&1 | grep -q "3.12.11"; then
+            echo "ERROR: venv has wrong Python version: $(python --version)"
+            exit 1
+          fi
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -255,30 +272,47 @@ jobs:
       - name: Set up Python
         run: |
           echo "Setting up Python environment"
-          # Clear any existing venv
-          rm -rf venv
+          # Clear any existing venv and Python cache
+          rm -rf venv ~/.cache/pip
 
-          # Try multiple Python paths
-          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
-            if [[ -x "$PYTHON_PATH" ]]; then
-              echo "Found Python at: $PYTHON_PATH"
-              $PYTHON_PATH --version
-              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
-                echo "Using Python 3.12 from: $PYTHON_PATH"
-                $PYTHON_PATH -m venv venv
-                break
-              fi
+          # FORCE use of Homebrew Python 3.12.11
+          PYTHON_PATH="/opt/homebrew/bin/python3.12"
+
+          # Verify it's the right version
+          if [[ -x "$PYTHON_PATH" ]]; then
+            PYTHON_VERSION=$($PYTHON_PATH --version 2>&1)
+            echo "Found Python: $PYTHON_VERSION"
+
+            if [[ "$PYTHON_VERSION" == *"3.12.11"* ]]; then
+              echo "✅ Using correct Python 3.12.11"
+              $PYTHON_PATH -m venv venv --clear
+            else
+              echo "❌ ERROR: Wrong Python version: $PYTHON_VERSION"
+              echo "Expected: Python 3.12.11"
+
+              # Try to find the right Python
+              echo "Searching for Python 3.12.11..."
+              find /opt/homebrew/Cellar/python@3.12 -name "python3.12" -type f 2>/dev/null | while read -r py; do
+                if $py --version 2>&1 | grep -q "3.12.11"; then
+                  echo "Found correct Python at: $py"
+                  $py -m venv venv --clear
+                  break
+                fi
+              done
             fi
-          done
-
-          if [[ ! -d "venv" ]]; then
-            echo "ERROR: Could not create venv with Python 3.12"
+          else
+            echo "ERROR: Homebrew Python not found at $PYTHON_PATH"
             exit 1
           fi
 
           source venv/bin/activate
           python --version
-          which python
+
+          # Double check we got 3.12.11
+          if ! python --version 2>&1 | grep -q "3.12.11"; then
+            echo "ERROR: venv has wrong Python version: $(python --version)"
+            exit 1
+          fi
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -456,30 +490,47 @@ jobs:
       - name: Set up Python
         run: |
           echo "Setting up Python environment"
-          # Clear any existing venv
-          rm -rf venv
+          # Clear any existing venv and Python cache
+          rm -rf venv ~/.cache/pip
 
-          # Try multiple Python paths
-          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
-            if [[ -x "$PYTHON_PATH" ]]; then
-              echo "Found Python at: $PYTHON_PATH"
-              $PYTHON_PATH --version
-              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
-                echo "Using Python 3.12 from: $PYTHON_PATH"
-                $PYTHON_PATH -m venv venv
-                break
-              fi
+          # FORCE use of Homebrew Python 3.12.11
+          PYTHON_PATH="/opt/homebrew/bin/python3.12"
+
+          # Verify it's the right version
+          if [[ -x "$PYTHON_PATH" ]]; then
+            PYTHON_VERSION=$($PYTHON_PATH --version 2>&1)
+            echo "Found Python: $PYTHON_VERSION"
+
+            if [[ "$PYTHON_VERSION" == *"3.12.11"* ]]; then
+              echo "✅ Using correct Python 3.12.11"
+              $PYTHON_PATH -m venv venv --clear
+            else
+              echo "❌ ERROR: Wrong Python version: $PYTHON_VERSION"
+              echo "Expected: Python 3.12.11"
+
+              # Try to find the right Python
+              echo "Searching for Python 3.12.11..."
+              find /opt/homebrew/Cellar/python@3.12 -name "python3.12" -type f 2>/dev/null | while read -r py; do
+                if $py --version 2>&1 | grep -q "3.12.11"; then
+                  echo "Found correct Python at: $py"
+                  $py -m venv venv --clear
+                  break
+                fi
+              done
             fi
-          done
-
-          if [[ ! -d "venv" ]]; then
-            echo "ERROR: Could not create venv with Python 3.12"
+          else
+            echo "ERROR: Homebrew Python not found at $PYTHON_PATH"
             exit 1
           fi
 
           source venv/bin/activate
           python --version
-          which python
+
+          # Double check we got 3.12.11
+          if ! python --version 2>&1 | grep -q "3.12.11"; then
+            echo "ERROR: venv has wrong Python version: $(python --version)"
+            exit 1
+          fi
 
       # Cache Python dependencies
       - name: Cache Python dependencies

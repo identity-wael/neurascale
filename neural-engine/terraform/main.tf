@@ -70,7 +70,7 @@ resource "google_project_service" "apis" {
 resource "time_sleep" "wait_for_apis" {
   depends_on = [google_project_service.apis]
 
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 # Create the main service account for neural ingestion

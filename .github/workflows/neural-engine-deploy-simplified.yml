@@ -67,19 +67,13 @@ jobs:
       - name: Run linting
         working-directory: neural-engine
         run: |
-          # Skip linting for now to focus on deployment testing
-          # TODO: Fix linting configuration
-          # flake8 .
-          # black --check .
-          echo "Linting skipped temporarily"
+          python -m black --check src/ tests/ examples/
+          python -m flake8 src/ tests/ examples/ --config=.flake8
 
       - name: Run type checking
         working-directory: neural-engine
         run: |
-          # Skip type checking for now to focus on deployment testing
-          # TODO: Fix mypy configuration
-          # mypy src/ --ignore-missing-imports
-          echo "Type checking skipped temporarily"
+          python -m mypy src/ --config-file=mypy.ini --namespace-packages
 
       - name: Run unit tests
         working-directory: neural-engine
@@ -103,8 +97,8 @@ jobs:
     strategy:
       matrix:
         service: [api, ingestion, processor]
-    # Skip Docker builds for now - Artifact Registry will be created by Terraform
-    if: false
+    # Build Docker images only after test passes
+    if: success()
     steps:
       - uses: actions/checkout@v4
 
@@ -117,21 +111,57 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.service }}-
+            ${{ runner.os }}-buildx-
+
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
-      - name: Build and push Docker image
-        working-directory: neural-engine
+      - name: Check if Artifact Registry exists
+        id: check_registry
         run: |
-          docker build \
-            -f docker/${{ matrix.service }}.Dockerfile \
-            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }} \
-            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest \
-            .
+          if gcloud artifacts repositories describe neural-engine-${{ needs.setup.outputs.environment }} \
+             --location=${{ env.GCP_REGION }} \
+             --project=${{ needs.setup.outputs.project_id }} 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Artifact Registry not found. It will be created by Terraform."
+          fi
 
-          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
-          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest
+      - name: Build and push Docker image
+        if: steps.check_registry.outputs.exists == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: neural-engine
+          file: neural-engine/docker/${{ matrix.service }}.Dockerfile
+          push: true
+          tags: |
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          platforms: linux/amd64
+
+      - name: Move cache
+        if: steps.check_registry.outputs.exists == 'true'
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   # Package Cloud Functions
   package-functions:
@@ -214,9 +244,8 @@ jobs:
         working-directory: neural-engine/terraform
         run: |
           terraform plan \
-            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            -var="region=${{ env.GCP_REGION }}" \
             -out=tfplan
 
       - name: Terraform Apply
@@ -224,6 +253,15 @@ jobs:
         working-directory: neural-engine/terraform
         run: |
           terraform apply -auto-approve tfplan
+
+      - name: Mark deployment in monitoring
+        if: success() && (github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging'))
+        run: |
+          gcloud logging write deployments \
+            "Deployment completed for ${{ github.sha }}" \
+            --severity=NOTICE \
+            --resource=global \
+            --labels=environment=${{ needs.setup.outputs.environment }},version=${{ github.sha }},status=success
 
   # Verify deployment
   verify:

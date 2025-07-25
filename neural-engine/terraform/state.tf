@@ -1,66 +1,16 @@
-# State bucket configuration with proper locking
-resource "google_storage_bucket" "terraform_state" {
-  name          = "neurascale-terraform-state"
-  location      = "NORTHAMERICA-NORTHEAST1"
-  force_destroy = false
+# State bucket configuration
+# NOTE: The state bucket must be created manually using bootstrap-state-bucket.sh
+# before running Terraform. This avoids the chicken-and-egg problem of Terraform
+# trying to manage the bucket where it stores its own state.
 
-  versioning {
-    enabled = true
-  }
-
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-    condition {
-      num_newer_versions = 5
-      age                = 30
-    }
-  }
-
-  # Enable uniform bucket-level access for better security
-  uniform_bucket_level_access = true
-
-  # Prevent accidental deletion
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  labels = {
-    purpose     = "terraform-state"
-    environment = "all"
-    managed_by  = "terraform"
-  }
+# Data source to reference the existing state bucket
+data "google_storage_bucket" "terraform_state" {
+  name = "neurascale-terraform-state"
 }
 
-# Enable state bucket encryption
+# Ensure GitHub Actions service account has proper access
 resource "google_storage_bucket_iam_member" "state_admin" {
-  bucket = google_storage_bucket.terraform_state.name
+  bucket = data.google_storage_bucket.terraform_state.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${var.github_actions_service_account}"
-
-  depends_on = [google_storage_bucket.terraform_state]
-}
-
-# Create a separate bucket for state locks (optional but recommended)
-resource "google_storage_bucket" "terraform_locks" {
-  name          = "neurascale-terraform-locks"
-  location      = "NORTHAMERICA-NORTHEAST1"
-  force_destroy = false
-
-  versioning {
-    enabled = true
-  }
-
-  uniform_bucket_level_access = true
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  labels = {
-    purpose     = "terraform-locks"
-    environment = "all"
-    managed_by  = "terraform"
-  }
 }

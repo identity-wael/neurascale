@@ -1,26 +1,22 @@
 [flake8]
-max-line-length = 127
-max-complexity = 10
+max-line-length = 88
+extend-ignore = E203, E266, E501, W503
 exclude =
-    venv,
-    __pycache__,
-    .pytest_cache,
-    .mypy_cache,
-    *.egg-info,
     .git,
-    .tox,
-    dist,
+    __pycache__,
+    .venv,
+    venv,
     build,
-    *.pyc,
-    *.pyo,
-    .venv
-ignore =
-    E203,
-    E266,
-    E501,
-    W503,
-    F401,
-    F841
+    dist,
+    *.egg-info,
+    .pytest_cache,
+    .mypy_cache
+
+# Per-file ignores
 per-file-ignores =
     __init__.py:F401
-    tests/*:F401,F811
+    tests/*:F401,F841
+
+# Compatibility with Black formatter
+max-complexity = 10
+select = B,C,E,F,W,T4,B9

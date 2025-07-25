@@ -9,11 +9,11 @@ data "google_project" "project" {
 resource "google_bigtable_app_profile" "autoscaling" {
   count = var.enable_bigtable_autoscaling && var.environment == "production" ? 1 : 0
 
-  instance       = module.neural_ingestion.bigtable_instance_name
+  instance       = module.neural_ingestion.bigtable_instance_id
   app_profile_id = "autoscaling-profile"
 
   single_cluster_routing {
-    cluster_id                 = "${module.neural_ingestion.bigtable_instance_name}-cluster"
+    cluster_id                 = "${module.neural_ingestion.bigtable_instance_id}-cluster"
     allow_transactional_writes = false
   }
 }
@@ -30,7 +30,7 @@ resource "google_cloud_scheduler_job" "scale_down_dev" {
 
   http_target {
     http_method = "POST"
-    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_name}/clusters/${module.neural_ingestion.bigtable_instance_name}-cluster"
+    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/${module.neural_ingestion.bigtable_instance_id}-cluster"
 
     body = base64encode(jsonencode({
       serveNodes = var.bigtable_min_nodes_dev
@@ -54,7 +54,7 @@ resource "google_cloud_scheduler_job" "scale_up_dev" {
 
   http_target {
     http_method = "POST"
-    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_name}/clusters/${module.neural_ingestion.bigtable_instance_name}-cluster"
+    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/${module.neural_ingestion.bigtable_instance_id}-cluster"
 
     body = base64encode(jsonencode({
       serveNodes = var.bigtable_nodes_dev
@@ -172,7 +172,7 @@ resource "google_monitoring_dashboard" "cost_optimization" {
             dataSets = [{
               timeSeriesQuery = {
                 timeSeriesFilter = {
-                  filter = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" AND resource.label.\"instance\"=\"${module.neural_ingestion.bigtable_instance_name}\""
+                  filter = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" AND resource.label.\"instance\"=\"${module.neural_ingestion.bigtable_instance_id}\""
                   aggregation = {
                     alignmentPeriod  = "60s"
                     perSeriesAligner = "ALIGN_MEAN"
@@ -206,7 +206,7 @@ resource "google_monitoring_dashboard" "cost_optimization" {
             dataSets = [{
               timeSeriesQuery = {
                 timeSeriesFilter = {
-                  filter = "metric.type=\"bigtable.googleapis.com/table/storage_utilization\" AND resource.label.\"instance\"=\"${module.neural_ingestion.bigtable_instance_name}\""
+                  filter = "metric.type=\"bigtable.googleapis.com/table/storage_utilization\" AND resource.label.\"instance\"=\"${module.neural_ingestion.bigtable_instance_id}\""
                   aggregation = {
                     alignmentPeriod  = "3600s"
                     perSeriesAligner = "ALIGN_MEAN"

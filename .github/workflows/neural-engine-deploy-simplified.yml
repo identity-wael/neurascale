@@ -96,9 +96,9 @@ jobs:
           file: ./neural-engine/coverage.xml
           fail_ci_if_error: false
 
-  # Build Docker images and Cloud Functions package
+  # Build Docker images after infrastructure is deployed
   build:
-    needs: [setup, test]
+    needs: [setup, test, deploy]
     runs-on: [self-hosted, neural-engine]
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -154,20 +154,8 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
-      - name: Check if Artifact Registry exists
-        id: check_registry
-        run: |
-          if gcloud artifacts repositories describe neural-engine-${{ needs.setup.outputs.environment }} \
-             --location=${{ env.GCP_REGION }} \
-             --project=${{ needs.setup.outputs.project_id }} 2>/dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Artifact Registry not found. It will be created by Terraform."
-          fi
-
       - name: Build and push Docker image
-        if: steps.check_registry.outputs.exists == 'true' && steps.check_docker.outputs.docker_available == 'true'
+        if: steps.check_docker.outputs.docker_available == 'true'
         uses: docker/build-push-action@v5
         with:
           context: neural-engine
@@ -181,7 +169,7 @@ jobs:
           platforms: linux/amd64
 
       - name: Move cache
-        if: steps.check_registry.outputs.exists == 'true' && steps.check_docker.outputs.docker_available == 'true'
+        if: steps.check_docker.outputs.docker_available == 'true'
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
@@ -246,9 +234,9 @@ jobs:
           name: functions-${{ needs.setup.outputs.environment }}
           path: neural-engine/functions/stream_ingestion/functions-${{ needs.setup.outputs.environment }}.zip
 
-  # Deploy infrastructure and functions together
+  # Deploy infrastructure first
   deploy:
-    needs: [setup, test, package-functions]
+    needs: [setup, test]
     runs-on: [self-hosted, neural-engine]
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -305,9 +293,9 @@ jobs:
             --resource=global \
             --labels=environment=${{ needs.setup.outputs.environment }},version=${{ github.sha }},status=success
 
-  # Verify deployment
+  # Verify deployment after everything is built and deployed
   verify:
-    needs: [setup, deploy]
+    needs: [setup, deploy, build, package-functions]
     runs-on: [self-hosted, neural-engine]
     environment: ${{ needs.setup.outputs.environment }}
     permissions:

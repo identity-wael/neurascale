@@ -178,6 +178,9 @@ resource "google_project_iam_member" "cloud_build_permissions" {
     "roles/cloudfunctions.developer",
     "roles/eventarc.developer",
     "roles/iam.serviceAccountUser",
+    "roles/artifactregistry.admin",
+    "roles/logging.logWriter",
+    "roles/run.admin",
   ])
 
   project = var.project_id

@@ -190,7 +190,7 @@ resource "google_monitoring_dashboard" "cost_optimization" {
             dataSets = [{
               timeSeriesQuery = {
                 timeSeriesFilter = {
-                  filter = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" AND resource.label.\"function_name\"=~\"neural-.*\""
+                  filter = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" AND resource.label.\"function_name\":\"neural-\""
                   aggregation = {
                     alignmentPeriod    = "60s"
                     perSeriesAligner   = "ALIGN_RATE"

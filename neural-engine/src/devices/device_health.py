@@ -184,7 +184,9 @@ class DeviceHealthMonitor:
         self._error_counts.pop(device_id, None)
         self._connection_times.pop(device_id, None)
 
-    def add_health_callback(self, callback: Callable[[str, HealthStatus], None]) -> None:
+    def add_health_callback(
+        self, callback: Callable[[str, HealthStatus], None]
+    ) -> None:
         """Add callback for health status changes."""
         self._health_callbacks.append(callback)
 
@@ -423,7 +425,9 @@ class DeviceHealthMonitor:
             while history and history[0]["timestamp"] < cutoff_time:
                 history.popleft()
 
-    def record_packet(self, device_id: str, timestamp: Optional[datetime] = None) -> None:
+    def record_packet(
+        self, device_id: str, timestamp: Optional[datetime] = None
+    ) -> None:
         """Record packet reception for data rate calculation."""
         if device_id in self._packet_timestamps:
             if timestamp is None:

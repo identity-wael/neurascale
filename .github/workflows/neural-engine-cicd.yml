@@ -251,7 +251,9 @@ jobs:
         run: |
           terraform init \
             -input=false \
-            -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
+            -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl \
+            -upgrade \
+            -lock=false
 
       - name: Terraform Plan
         working-directory: neural-engine/terraform
@@ -271,6 +273,7 @@ jobs:
             -var="environment=${{ needs.setup.outputs.environment }}" \
             -var="project_id=${{ needs.setup.outputs.project_id }}" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            -lock=false \
             -out=tfplan
 
       - name: Terraform Apply

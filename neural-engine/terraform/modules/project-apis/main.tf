@@ -4,9 +4,10 @@ variable "project_id" {
   description = "Project ID to enable APIs for"
 }
 
-# List of APIs to enable
-locals {
-  apis = [
+variable "apis" {
+  type        = list(string)
+  description = "List of APIs to enable"
+  default = [
     "compute.googleapis.com",
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
@@ -31,7 +32,7 @@ locals {
 }
 
 resource "google_project_service" "apis" {
-  for_each = toset(local.apis)
+  for_each = toset(var.apis)
 
   project = var.project_id
   service = each.value

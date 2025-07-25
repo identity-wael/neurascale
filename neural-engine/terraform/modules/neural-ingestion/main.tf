@@ -165,6 +165,57 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# Service account for ingestion (legacy - for state compatibility)
+resource "google_service_account" "ingestion" {
+  account_id   = "neural-ingestion-${local.env_short}"
+  display_name = "Neural Ingestion Service Account"
+  description  = "Service account for neural data ingestion"
+  project      = var.project_id
+}
+
+# IAM permissions for the ingestion service account (legacy - for state compatibility)
+resource "google_project_iam_member" "ingestion_permissions" {
+  for_each = toset([
+    "roles/pubsub.publisher",
+    "roles/pubsub.subscriber",
+    "roles/storage.objectViewer",
+    "roles/monitoring.metricWriter",
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.ingestion.email}"
+}
+
+# Cloud Build permissions (legacy - for state compatibility)
+resource "google_project_iam_member" "cloud_build_permissions" {
+  for_each = toset([
+    "roles/compute.admin",
+    "roles/storage.admin",
+    "roles/storage.objectAdmin",
+    "roles/cloudfunctions.developer",
+    "roles/eventarc.developer",
+    "roles/iam.serviceAccountUser",
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# Functions service account permissions (legacy - for state compatibility)
+resource "google_project_iam_member" "functions_service_account_permissions" {
+  for_each = toset([
+    "roles/eventarc.eventReceiver",
+    "roles/logging.logWriter",
+    "roles/artifactregistry.reader",
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
+}
+
 # Outputs
 output "artifact_registry_url" {
   value = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.neural_engine.repository_id}"

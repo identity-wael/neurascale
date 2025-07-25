@@ -43,34 +43,33 @@ provider "google-beta" {
   region  = var.region
 }
 
-# Enable required APIs first
-resource "google_project_service" "apis" {
-  for_each = toset([
-    "compute.googleapis.com",
-    "storage.googleapis.com",
-    "pubsub.googleapis.com",
+# Enable required APIs using the project_apis module
+module "project_apis" {
+  source = "./modules/project-apis"
+
+  project_id = var.project_id
+  apis = [
+    "artifactregistry.googleapis.com",
     "bigtable.googleapis.com",
     "bigtableadmin.googleapis.com",
-    "cloudfunctions.googleapis.com",
     "cloudbuild.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "run.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudscheduler.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
     "eventarc.googleapis.com",
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
-  ])
-
-  project = var.project_id
-  service = each.key
-
-  disable_on_destroy = false
-}
-
-# Wait for APIs to be enabled
-resource "time_sleep" "wait_for_apis" {
-  depends_on = [google_project_service.apis]
-
-  create_duration = "60s"
+    "pubsub.googleapis.com",
+    "run.googleapis.com",
+    "secretmanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage-api.googleapis.com",
+    "storage-component.googleapis.com",
+  ]
 }
 
 # Create the main service account for neural ingestion
@@ -80,7 +79,7 @@ resource "google_service_account" "neural_ingestion" {
   description  = "Service account for neural data ingestion functions and services"
   project      = var.project_id
 
-  depends_on = [time_sleep.wait_for_apis]
+  depends_on = [module.project_apis]
 }
 
 # Grant necessary permissions to the service account
@@ -102,6 +101,15 @@ resource "google_project_iam_member" "neural_ingestion_roles" {
   depends_on = [google_service_account.neural_ingestion]
 }
 
+# Grant GitHub Actions basic CI/CD permissions (legacy - for state compatibility)
+resource "google_project_iam_member" "ci_cd_permissions" {
+  project = var.project_id
+  role    = "roles/owner"
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [module.project_apis]
+}
+
 # Grant GitHub Actions service account permission to deploy
 resource "google_project_iam_member" "github_actions_deploy" {
   for_each = toset([
@@ -118,7 +126,7 @@ resource "google_project_iam_member" "github_actions_deploy" {
   role    = each.key
   member  = "serviceAccount:${var.github_actions_service_account}"
 
-  depends_on = [time_sleep.wait_for_apis]
+  depends_on = [module.project_apis]
 }
 
 # Grant GitHub Actions permission to act as the ingestion service account

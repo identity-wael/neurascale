@@ -4,7 +4,7 @@ import pytest
 import asyncio
 import numpy as np
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 
 from src.ingestion import NeuralDataIngestion
 from src.ingestion.data_types import (

@@ -217,7 +217,7 @@ class TestDataAnonymizer:
         anonymizer._audit_log.clear()
 
         # Anonymize packet
-        anonymized = anonymizer.anonymize_packet(test_packet)
+        anonymizer.anonymize_packet(test_packet)
 
         # Check audit log
         audit_log = anonymizer.get_audit_log()

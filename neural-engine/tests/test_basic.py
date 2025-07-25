@@ -29,16 +29,16 @@ def test_imports():
         else:
             raise
 
-    import brainflow
+    import brainflow  # noqa: F401
     import numpy
-    import scipy
-    import sklearn
+    import scipy  # noqa: F401
+    import sklearn  # noqa: F401
 
     # Test Google Cloud imports
-    from google.cloud import pubsub_v1
-    from google.cloud import firestore
-    from google.cloud import bigquery
-    from google.cloud import storage
+    from google.cloud import pubsub_v1  # noqa: F401
+    from google.cloud import firestore  # noqa: F401
+    from google.cloud import bigquery  # noqa: F401
+    from google.cloud import storage  # noqa: F401
 
     # Test TensorFlow
     import tensorflow as tf

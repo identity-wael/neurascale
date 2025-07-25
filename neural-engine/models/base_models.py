@@ -239,13 +239,13 @@ class PyTorchBaseModel(BaseNeuralModel):
         """Build PyTorch model - to be implemented by subclasses."""
         raise NotImplementedError
 
-    def train(
+    def train(  # noqa: C901
         self,
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: Optional[np.ndarray] = None,
         y_val: Optional[np.ndarray] = None,
-    ) -> Dict[str, Any]:  # noqa: C901
+    ) -> Dict[str, Any]:
         """Train PyTorch model."""
         if self.model is None:
             self.model = self.build_model().to(self.device)

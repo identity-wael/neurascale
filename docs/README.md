@@ -4,10 +4,20 @@ Welcome to the NeuraScale documentation! This directory contains all technical d
 
 ## 📚 Documentation Structure
 
+### 🎉 Latest Updates
+
+- **[Neural Engine Phase 2 Complete](NEURAL_ENGINE_PHASE2.md)** - Core Neural Data Ingestion System ✅
+
 ### Getting Started
 
 - [Environment Variables](ENVIRONMENT_VARIABLES.md) - Configure your development environment
 - [Deployment Guide](DEPLOYMENT.md) - Deploy to production with Vercel
+
+### Neural Engine
+
+- [Neural Engine Phase 2](NEURAL_ENGINE_PHASE2.md) - Core data ingestion system
+- [Neural Management System](../neural-engine/Neural-Management-System.md) - Complete architecture
+- [Implementation Summary](../neural-engine/IMPLEMENTATION_SUMMARY.md) - Technical details
 
 ### Core Integrations
 

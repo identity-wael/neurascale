@@ -186,15 +186,6 @@ jobs:
             echo "Docker is not running on this runner. Skipping Docker build."
           fi
 
-      # Cache Docker layers locally on the runner
-      - name: Cache Docker layers
-        if: steps.check_docker.outputs.docker_available == 'true'
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles('neural-engine/docker/Dockerfile.${{ matrix.service }}', 'neural-engine/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.service }}-
 
       - name: Set up Docker Buildx
         id: buildx
@@ -227,12 +218,8 @@ jobs:
             ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
             ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest
           platforms: linux/amd64
-          cache-from: |
-            type=local,src=/tmp/.buildx-cache
-            type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache
-          cache-to: |
-            type=local,dest=/tmp/.buildx-cache-new,mode=max
-            type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache
+          cache-to: type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             DOCKER_BUILDKIT=1
@@ -241,12 +228,6 @@ jobs:
           provenance: false
           sbom: false
 
-      # Move cache after build
-      - name: Move cache
-        if: steps.check_docker.outputs.docker_available == 'true'
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   # Package Cloud Functions
   package-functions:

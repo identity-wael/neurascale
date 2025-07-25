@@ -1,0 +1,368 @@
+name: Neural Engine CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'neural-engine/**'
+      - '.github/workflows/neural-engine-cicd.yml'
+  pull_request:
+    paths:
+      - 'neural-engine/**'
+      - '.github/workflows/neural-engine-cicd.yml'
+
+env:
+  PYTHON_VERSION: '3.12'
+  GCP_REGION: 'northamerica-northeast1'
+  TF_VERSION: '1.5.7'
+
+jobs:
+  # Determine target environment based on event
+  setup:
+    runs-on: [self-hosted, neural-engine]
+    outputs:
+      environment: ${{ steps.determine.outputs.environment }}
+      project_id: ${{ steps.determine.outputs.project_id }}
+    steps:
+      - id: determine
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "project_id=staging-neurascale" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "project_id=production-neurascale" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "project_id=development-neurascale" >> $GITHUB_OUTPUT
+          fi
+
+  # Single test job for all scenarios
+  test:
+    runs-on: [self-hosted, neural-engine]
+    outputs:
+      passed: ${{ steps.result.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        run: |
+          echo "Setting up Python environment"
+          # Use Homebrew Python 3.12.11
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          python --version
+
+      - name: Install dependencies
+        working-directory: neural-engine
+        run: |
+          source ../venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Run linting
+        working-directory: neural-engine
+        run: |
+          source ../venv/bin/activate
+          echo "Python version: $(python --version)"
+          # Run Black and Flake8
+          python -m black --check src/ tests/ examples/
+          python -m flake8 src/ tests/ examples/ --config=.flake8
+
+      - name: Run type checking
+        working-directory: neural-engine
+        run: |
+          source ../venv/bin/activate
+          python -m mypy src/ --config-file=mypy.ini --namespace-packages
+
+      - name: Run unit tests
+        working-directory: neural-engine
+        run: |
+          source ../venv/bin/activate
+          pytest tests/ -v --cov=src --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./neural-engine/coverage.xml
+          fail_ci_if_error: false
+
+      - id: result
+        if: success()
+        run: echo "passed=true" >> $GITHUB_OUTPUT
+
+  # Build Docker images only if tests pass
+  build:
+    needs: [setup, test]
+    if: success()
+    runs-on: [self-hosted, neural-engine]
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        service: [api, ingestion, processor]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Check Docker availability
+        id: check_docker
+        run: |
+          if docker info >/dev/null 2>&1; then
+            echo "docker_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "docker_available=false" >> $GITHUB_OUTPUT
+            echo "Docker is not running on this runner. Skipping Docker build."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_docker.outputs.docker_available == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
+      - name: Configure Docker for Artifact Registry
+        if: steps.check_docker.outputs.docker_available == 'true'
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build and push Docker image
+        if: steps.check_docker.outputs.docker_available == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: neural-engine
+          file: docker/Dockerfile.${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:latest
+          platforms: linux/amd64
+
+  # Package Cloud Functions
+  package-functions:
+    needs: [setup, test]
+    if: success()
+    runs-on: [self-hosted, neural-engine]
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        run: |
+          echo "Setting up Python environment"
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          python --version
+
+      - name: Package Cloud Functions
+        working-directory: neural-engine/functions/stream_ingestion
+        run: |
+          # Create a requirements.txt with only production dependencies
+          echo "google-cloud-pubsub>=2.18.0" > requirements.txt
+          echo "google-cloud-bigtable>=2.21.0" >> requirements.txt
+          echo "google-cloud-logging>=3.8.0" >> requirements.txt
+          echo "functions-framework>=3.5.0" >> requirements.txt
+
+          # Create deployment package
+          zip -r functions-${{ needs.setup.outputs.environment }}.zip main.py requirements.txt
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Upload functions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: functions-${{ needs.setup.outputs.environment }}
+          path: neural-engine/functions/stream_ingestion/functions-${{ needs.setup.outputs.environment }}.zip
+
+  # Deploy infrastructure
+  deploy:
+    needs: [setup, test, build, package-functions]
+    if: |
+      success() &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging'))
+    runs-on: [self-hosted, neural-engine]
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Verify Google Cloud Authentication
+        run: |
+          echo "Verifying Google Cloud authentication..."
+          gcloud auth list
+          gcloud config set project ${{ needs.setup.outputs.project_id }}
+
+      - name: Terraform Init
+        working-directory: neural-engine/terraform
+        timeout-minutes: 3
+        run: |
+          terraform init \
+            -input=false \
+            -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
+
+      - name: Terraform Plan
+        working-directory: neural-engine/terraform
+        timeout-minutes: 5
+        run: |
+          # Remove any stale locks first
+          LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
+          if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
+            echo "Found stale lock at $LOCK_PATH, removing..."
+            gcloud storage rm "$LOCK_PATH"
+            sleep 2
+          fi
+
+          terraform plan \
+            -input=false \
+            -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+            -var="environment=${{ needs.setup.outputs.environment }}" \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: neural-engine/terraform
+        timeout-minutes: 20
+        run: |
+          terraform apply -input=false -auto-approve tfplan
+
+      - name: Mark deployment in monitoring
+        if: success()
+        run: |
+          gcloud logging write deployments \
+            "Deployment completed for ${{ github.sha }}" \
+            --severity=NOTICE \
+            --resource=global \
+            --labels=environment=${{ needs.setup.outputs.environment }},version=${{ github.sha }},status=success
+
+      - name: Cleanup Terraform lock
+        if: always()
+        run: |
+          echo "Cleaning up Terraform state lock..."
+          LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
+          if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
+            gcloud storage rm "$LOCK_PATH"
+            echo "Lock removed from $LOCK_PATH"
+          fi
+
+  # Verify deployment
+  verify:
+    needs: [setup, deploy]
+    if: success()
+    runs-on: [self-hosted, neural-engine]
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Python
+        run: |
+          echo "Setting up Python environment"
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          python --version
+
+      - name: Install test dependencies
+        run: |
+          source venv/bin/activate
+          pip install google-cloud-pubsub google-cloud-bigtable
+
+      - name: Verify infrastructure
+        run: |
+          # Verify Pub/Sub topics exist
+          gcloud pubsub topics list --project=${{ needs.setup.outputs.project_id }} | grep "neural-data-eeg-${{ needs.setup.outputs.environment }}"
+
+          # Verify Bigtable instance exists
+          gcloud bigtable instances list --project=${{ needs.setup.outputs.project_id }} | grep "neural-data-${{ needs.setup.outputs.environment }}"
+
+      - name: Run integration test
+        if: needs.setup.outputs.environment != 'production'
+        run: |
+          source venv/bin/activate
+          python -c "
+          import json
+          import time
+          from google.cloud import pubsub_v1
+
+          publisher = pubsub_v1.PublisherClient()
+          topic_path = publisher.topic_path('${{ needs.setup.outputs.project_id }}', 'neural-data-eeg-${{ needs.setup.outputs.environment }}')
+
+          test_message = {
+              'device_id': 'test_device',
+              'timestamp': time.time(),
+              'data': [[0.0] * 256] * 8
+          }
+
+          future = publisher.publish(topic_path, json.dumps(test_message).encode())
+          print(f'Published test message: {future.result()}')
+          "

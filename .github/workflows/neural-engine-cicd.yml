@@ -113,23 +113,38 @@ jobs:
             exit 1
           fi
 
-      # SKIP CACHING PYTHON TO FORCE FRESH INSTALL
-      # - name: Cache Python dependencies
-      #   if: steps.test-cache.outputs.cache-hit != 'true'
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       venv
-      #       ~/.cache/pip
-      #     key: ${{ runner.os }}-python-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-python-
+      # Cache Python dependencies
+      - name: Cache Python dependencies
+        if: steps.test-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            venv
+            ~/.cache/pip
+          key: ${{ runner.os }}-python-3.12.11-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-3.12.11-
 
       - name: Install dependencies
         if: steps.test-cache.outputs.cache-hit != 'true'
         working-directory: neural-engine
         run: |
-          source ../venv/bin/activate
+          # Check if venv exists and has correct Python version
+          if [[ -d "../venv" ]]; then
+            source ../venv/bin/activate
+            if ! python --version 2>&1 | grep -q "3.12.11"; then
+              echo "ERROR: Cached venv has wrong Python version: $(python --version)"
+              echo "Removing cached venv and recreating..."
+              deactivate
+              rm -rf ../venv
+              /opt/homebrew/bin/python3.12 -m venv ../venv --clear
+              source ../venv/bin/activate
+            fi
+          else
+            source ../venv/bin/activate
+          fi
+
+          python --version
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
@@ -314,16 +329,16 @@ jobs:
             exit 1
           fi
 
-      # SKIP CACHING TO FORCE PYTHON 3.12.11
-      # - name: Cache Python dependencies
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       venv
-      #       ~/.cache/pip
-      #     key: ${{ runner.os }}-python-functions
-      #     restore-keys: |
-      #       ${{ runner.os }}-python-
+      # Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            venv
+            ~/.cache/pip
+          key: ${{ runner.os }}-python-3.12.11-functions-${{ hashFiles('neural-engine/functions/stream_ingestion/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-3.12.11-functions-
 
       - name: Package Cloud Functions
         working-directory: neural-engine/functions/stream_ingestion
@@ -532,16 +547,16 @@ jobs:
             exit 1
           fi
 
-      # SKIP CACHING TO FORCE PYTHON 3.12.11
-      # - name: Cache Python dependencies
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       venv
-      #       ~/.cache/pip
-      #     key: ${{ runner.os }}-python-verify
-      #     restore-keys: |
-      #       ${{ runner.os }}-python-
+      # Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            venv
+            ~/.cache/pip
+          key: ${{ runner.os }}-python-3.12.11-verify-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-python-3.12.11-verify-
 
       - name: Install test dependencies
         run: |

@@ -144,6 +144,9 @@ jobs:
           driver-opts: |
             image=moby/buildkit:latest
             network=host
+          buildkitd-config-inline: |
+            [worker.oci]
+              max-parallelism = 8
 
       - name: Configure Docker for Artifact Registry
         if: steps.check_docker.outputs.docker_available == 'true'
@@ -163,6 +166,9 @@ jobs:
           platforms: linux/amd64
           cache-from: type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache
           cache-to: type=registry,ref=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:buildcache,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            DOCKER_BUILDKIT=1
 
   # Package Cloud Functions
   package-functions:

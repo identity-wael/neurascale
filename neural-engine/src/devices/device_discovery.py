@@ -107,7 +107,7 @@ class DeviceDiscoveryService:
         if callback in self._discovery_callbacks:
             self._discovery_callbacks.remove(callback)
 
-    async def start_discovery(self, protocols: Optional[List[DeviceProtocol]] = None):
+    async def start_discovery(self, protocols: Optional[List[DeviceProtocol]] = None)) -> None:
         """
         Start device discovery.
 
@@ -144,7 +144,7 @@ class DeviceDiscoveryService:
         # Run all discovery tasks
         self._scan_task = asyncio.create_task(self._run_discovery(tasks))
 
-    async def stop_discovery(self):
+    async def stop_discovery(self) -> None:
         """Stop device discovery."""
         self._is_scanning = False
 
@@ -165,7 +165,7 @@ class DeviceDiscoveryService:
             self._zeroconf.close()
             self._zeroconf = None
 
-    async def _run_discovery(self, tasks: List[asyncio.Task]):
+    async def _run_discovery(self, tasks: List[asyncio.Task])) -> None:
         """Run discovery tasks."""
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -191,7 +191,7 @@ class DeviceDiscoveryService:
             except Exception as e:
                 logger.error(f"Error in discovery callback: {e}")
 
-    async def _discover_serial_devices(self):
+    async def _discover_serial_devices(self) -> None:
         """Discover devices connected via serial ports."""
         logger.info("Scanning for serial devices...")
 
@@ -305,7 +305,7 @@ class DeviceDiscoveryService:
         except Exception as e:
             logger.error(f"Error scanning Bluetooth devices: {e}")
 
-    async def _discover_wifi_devices(self):
+    async def _discover_wifi_devices(self) -> None:
         """Discover WiFi devices using mDNS/Bonjour."""
         if not ZEROCONF_AVAILABLE:
             logger.warning("Zeroconf module not available")
@@ -381,7 +381,7 @@ class DeviceDiscoveryService:
 
                 self._notify_device_discovered(device)
 
-    async def _discover_lsl_devices(self):
+    async def _discover_lsl_devices(self) -> None:
         """Discover LSL streams."""
         if not LSL_AVAILABLE:
             logger.warning("LSL module not available")
@@ -419,7 +419,7 @@ class DeviceDiscoveryService:
         except Exception as e:
             logger.error(f"Error scanning LSL streams: {e}")
 
-    async def _discover_brainflow_devices(self):
+    async def _discover_brainflow_devices(self) -> None:
         """Discover devices supported by BrainFlow."""
         if not BRAINFLOW_AVAILABLE:
             return

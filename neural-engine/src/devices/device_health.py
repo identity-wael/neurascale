@@ -317,9 +317,9 @@ class DeviceHealthMonitor:
             ]:
                 self._generate_health_alert(device_id, metrics, new_status)
 
-    def _evaluate_health_status(
+    def _evaluate_health_status(  # noqa: C901
         self, metrics: DeviceMetrics
-    ) -> HealthStatus:  # noqa: C901
+    ) -> HealthStatus:
         """Evaluate overall health status from metrics."""
         issues = []
 

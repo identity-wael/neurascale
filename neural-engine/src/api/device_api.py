@@ -2,21 +2,18 @@
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Optional
 from datetime import datetime
 from pathlib import Path
-import json
-
 from flask import Blueprint, jsonify, request, Response
 from flask_cors import CORS
 
 from ..devices.device_manager import DeviceManager
-from ..devices.interfaces.base_device import DeviceState
 
 logger = logging.getLogger(__name__)
 
 # Create Blueprint
-device_api = Blueprint('device_api', __name__, url_prefix='/api/v1/devices')
+device_api = Blueprint("device_api", __name__, url_prefix="/api/v1/devices")
 CORS(device_api)  # Enable CORS for device API
 
 # Global device manager instance
@@ -52,7 +49,8 @@ def run_async(coro):
 
 # Device Management Endpoints
 
-@device_api.route('/', methods=['GET'])
+
+@device_api.route("/", methods=["GET"])
 def list_devices() -> Response:
     """
     List all devices.
@@ -69,7 +67,7 @@ def list_devices() -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>', methods=['GET'])
+@device_api.route("/<device_id>", methods=["GET"])
 def get_device(device_id: str) -> Response:
     """
     Get specific device information.
@@ -100,7 +98,9 @@ def get_device(device_id: str) -> Response:
             device_info["capabilities"] = {
                 "supported_sampling_rates": device.get_capabilities().supported_sampling_rates,
                 "max_channels": device.get_capabilities().max_channels,
-                "signal_types": [st.value for st in device.get_capabilities().signal_types],
+                "signal_types": [
+                    st.value for st in device.get_capabilities().signal_types
+                ],
                 "has_impedance_check": device.get_capabilities().has_impedance_check,
                 "has_battery_monitor": device.get_capabilities().has_battery_monitor,
             }
@@ -112,7 +112,7 @@ def get_device(device_id: str) -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/', methods=['POST'])
+@device_api.route("/", methods=["POST"])
 def add_device() -> Response:
     """
     Add a new device.
@@ -145,12 +145,17 @@ def add_device() -> Response:
         manager = get_device_manager()
         device = run_async(manager.add_device(device_id, device_type, **device_config))
 
-        return jsonify({
-            "device_id": device_id,
-            "device_name": device.device_name,
-            "state": device.state.value,
-            "message": f"Device {device_id} added successfully"
-        }), 201
+        return (
+            jsonify(
+                {
+                    "device_id": device_id,
+                    "device_name": device.device_name,
+                    "state": device.state.value,
+                    "message": f"Device {device_id} added successfully",
+                }
+            ),
+            201,
+        )
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -159,7 +164,7 @@ def add_device() -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>', methods=['DELETE'])
+@device_api.route("/<device_id>", methods=["DELETE"])
 def remove_device(device_id: str) -> Response:
     """
     Remove a device.
@@ -174,9 +179,7 @@ def remove_device(device_id: str) -> Response:
         manager = get_device_manager()
         run_async(manager.remove_device(device_id))
 
-        return jsonify({
-            "message": f"Device {device_id} removed successfully"
-        })
+        return jsonify({"message": f"Device {device_id} removed successfully"})
 
     except Exception as e:
         logger.error(f"Error removing device {device_id}: {e}")
@@ -185,7 +188,8 @@ def remove_device(device_id: str) -> Response:
 
 # Device Control Endpoints
 
-@device_api.route('/<device_id>/connect', methods=['POST'])
+
+@device_api.route("/<device_id>/connect", methods=["POST"])
 def connect_device(device_id: str) -> Response:
     """
     Connect to a device.
@@ -211,17 +215,24 @@ def connect_device(device_id: str) -> Response:
         success = run_async(manager.connect_device(device_id, **connection_params))
 
         if success:
-            return jsonify({
-                "device_id": device_id,
-                "connected": True,
-                "message": f"Device {device_id} connected successfully"
-            })
+            return jsonify(
+                {
+                    "device_id": device_id,
+                    "connected": True,
+                    "message": f"Device {device_id} connected successfully",
+                }
+            )
         else:
-            return jsonify({
-                "device_id": device_id,
-                "connected": False,
-                "error": "Failed to connect to device"
-            }), 500
+            return (
+                jsonify(
+                    {
+                        "device_id": device_id,
+                        "connected": False,
+                        "error": "Failed to connect to device",
+                    }
+                ),
+                500,
+            )
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -230,7 +241,7 @@ def connect_device(device_id: str) -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>/disconnect', methods=['POST'])
+@device_api.route("/<device_id>/disconnect", methods=["POST"])
 def disconnect_device(device_id: str) -> Response:
     """
     Disconnect from a device.
@@ -245,18 +256,20 @@ def disconnect_device(device_id: str) -> Response:
         manager = get_device_manager()
         run_async(manager.disconnect_device(device_id))
 
-        return jsonify({
-            "device_id": device_id,
-            "connected": False,
-            "message": f"Device {device_id} disconnected successfully"
-        })
+        return jsonify(
+            {
+                "device_id": device_id,
+                "connected": False,
+                "message": f"Device {device_id} disconnected successfully",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error disconnecting device {device_id}: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>/stream/start', methods=['POST'])
+@device_api.route("/<device_id>/stream/start", methods=["POST"])
 def start_streaming(device_id: str) -> Response:
     """
     Start streaming from a device.
@@ -271,19 +284,21 @@ def start_streaming(device_id: str) -> Response:
         manager = get_device_manager()
         run_async(manager.start_streaming([device_id]))
 
-        return jsonify({
-            "device_id": device_id,
-            "streaming": True,
-            "session_id": manager.active_session_id,
-            "message": f"Device {device_id} started streaming"
-        })
+        return jsonify(
+            {
+                "device_id": device_id,
+                "streaming": True,
+                "session_id": manager.active_session_id,
+                "message": f"Device {device_id} started streaming",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error starting stream for device {device_id}: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>/stream/stop', methods=['POST'])
+@device_api.route("/<device_id>/stream/stop", methods=["POST"])
 def stop_streaming(device_id: str) -> Response:
     """
     Stop streaming from a device.
@@ -298,11 +313,13 @@ def stop_streaming(device_id: str) -> Response:
         manager = get_device_manager()
         run_async(manager.stop_streaming([device_id]))
 
-        return jsonify({
-            "device_id": device_id,
-            "streaming": False,
-            "message": f"Device {device_id} stopped streaming"
-        })
+        return jsonify(
+            {
+                "device_id": device_id,
+                "streaming": False,
+                "message": f"Device {device_id} stopped streaming",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error stopping stream for device {device_id}: {e}")
@@ -311,7 +328,8 @@ def stop_streaming(device_id: str) -> Response:
 
 # Device Discovery Endpoints
 
-@device_api.route('/discover', methods=['GET'])
+
+@device_api.route("/discover", methods=["GET"])
 def discover_devices() -> Response:
     """
     Discover available devices.
@@ -324,8 +342,12 @@ def discover_devices() -> Response:
         JSON array of discovered devices
     """
     try:
-        timeout = float(request.args.get('timeout', 10))
-        protocols = request.args.get('protocols', '').split(',') if request.args.get('protocols') else None
+        timeout = float(request.args.get("timeout", 10))
+        # protocols = (
+        #     request.args.get("protocols", "").split(",")
+        #     if request.args.get("protocols")
+        #     else None
+        # )
 
         manager = get_device_manager()
         discovered = run_async(manager.auto_discover_devices(timeout=timeout))
@@ -337,7 +359,7 @@ def discover_devices() -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/discover/<discovery_id>/create', methods=['POST'])
+@device_api.route("/discover/<discovery_id>/create", methods=["POST"])
 def create_from_discovery(discovery_id: str) -> Response:
     """
     Create a device from discovery.
@@ -358,17 +380,23 @@ def create_from_discovery(discovery_id: str) -> Response:
         custom_device_id = data.get("device_id")
 
         manager = get_device_manager()
-        device = run_async(manager.create_device_from_discovery(
-            discovery_id,
-            device_id=custom_device_id
-        ))
+        device = run_async(
+            manager.create_device_from_discovery(
+                discovery_id, device_id=custom_device_id
+            )
+        )
 
-        return jsonify({
-            "device_id": custom_device_id or discovery_id,
-            "device_name": device.device_name,
-            "state": device.state.value,
-            "message": "Device created successfully from discovery"
-        }), 201
+        return (
+            jsonify(
+                {
+                    "device_id": custom_device_id or discovery_id,
+                    "device_name": device.device_name,
+                    "state": device.state.value,
+                    "message": "Device created successfully from discovery",
+                }
+            ),
+            201,
+        )
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -379,7 +407,8 @@ def create_from_discovery(discovery_id: str) -> Response:
 
 # Device Health and Telemetry Endpoints
 
-@device_api.route('/health', methods=['GET'])
+
+@device_api.route("/health", methods=["GET"])
 def get_health() -> Response:
     """
     Get health status for all devices or specific device.
@@ -391,7 +420,7 @@ def get_health() -> Response:
         JSON object with health information
     """
     try:
-        device_id = request.args.get('device_id')
+        device_id = request.args.get("device_id")
         manager = get_device_manager()
 
         health_info = manager.get_device_health(device_id)
@@ -402,7 +431,7 @@ def get_health() -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/health/alerts', methods=['GET'])
+@device_api.route("/health/alerts", methods=["GET"])
 def get_health_alerts() -> Response:
     """
     Get active health alerts.
@@ -414,7 +443,7 @@ def get_health_alerts() -> Response:
         JSON array of health alerts
     """
     try:
-        device_id = request.args.get('device_id')
+        device_id = request.args.get("device_id")
         manager = get_device_manager()
 
         alerts = manager.get_health_alerts(device_id)
@@ -425,7 +454,7 @@ def get_health_alerts() -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/health/monitoring/start', methods=['POST'])
+@device_api.route("/health/monitoring/start", methods=["POST"])
 def start_health_monitoring() -> Response:
     """
     Start health monitoring for all devices.
@@ -437,17 +466,14 @@ def start_health_monitoring() -> Response:
         manager = get_device_manager()
         run_async(manager.start_health_monitoring())
 
-        return jsonify({
-            "monitoring": True,
-            "message": "Health monitoring started"
-        })
+        return jsonify({"monitoring": True, "message": "Health monitoring started"})
 
     except Exception as e:
         logger.error(f"Error starting health monitoring: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/health/monitoring/stop', methods=['POST'])
+@device_api.route("/health/monitoring/stop", methods=["POST"])
 def stop_health_monitoring() -> Response:
     """
     Stop health monitoring for all devices.
@@ -459,17 +485,14 @@ def stop_health_monitoring() -> Response:
         manager = get_device_manager()
         run_async(manager.stop_health_monitoring())
 
-        return jsonify({
-            "monitoring": False,
-            "message": "Health monitoring stopped"
-        })
+        return jsonify({"monitoring": False, "message": "Health monitoring stopped"})
 
     except Exception as e:
         logger.error(f"Error stopping health monitoring: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/telemetry/start', methods=['POST'])
+@device_api.route("/telemetry/start", methods=["POST"])
 def start_telemetry() -> Response:
     """
     Start telemetry collection.
@@ -489,24 +512,28 @@ def start_telemetry() -> Response:
         enable_cloud = data.get("enable_cloud", False)
 
         manager = get_device_manager()
-        run_async(manager.start_telemetry_collection(
-            output_dir=Path(output_dir) if output_dir else None,
-            enable_cloud=enable_cloud
-        ))
+        run_async(
+            manager.start_telemetry_collection(
+                output_dir=Path(output_dir) if output_dir else None,
+                enable_cloud=enable_cloud,
+            )
+        )
 
-        return jsonify({
-            "telemetry": True,
-            "output_dir": output_dir,
-            "cloud_enabled": enable_cloud,
-            "message": "Telemetry collection started"
-        })
+        return jsonify(
+            {
+                "telemetry": True,
+                "output_dir": output_dir,
+                "cloud_enabled": enable_cloud,
+                "message": "Telemetry collection started",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error starting telemetry: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/telemetry/stop', methods=['POST'])
+@device_api.route("/telemetry/stop", methods=["POST"])
 def stop_telemetry() -> Response:
     """
     Stop telemetry collection.
@@ -519,18 +546,20 @@ def stop_telemetry() -> Response:
         stats = manager.get_telemetry_statistics()
         run_async(manager.stop_telemetry_collection())
 
-        return jsonify({
-            "telemetry": False,
-            "statistics": stats,
-            "message": "Telemetry collection stopped"
-        })
+        return jsonify(
+            {
+                "telemetry": False,
+                "statistics": stats,
+                "message": "Telemetry collection stopped",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error stopping telemetry: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/telemetry/stats', methods=['GET'])
+@device_api.route("/telemetry/stats", methods=["GET"])
 def get_telemetry_stats() -> Response:
     """
     Get telemetry statistics.
@@ -551,7 +580,8 @@ def get_telemetry_stats() -> Response:
 
 # Session Management Endpoints
 
-@device_api.route('/session/start', methods=['POST'])
+
+@device_api.route("/session/start", methods=["POST"])
 def start_session() -> Response:
     """
     Start a new recording session.
@@ -571,18 +601,20 @@ def start_session() -> Response:
         manager = get_device_manager()
         session_id = manager.start_session(session_id)
 
-        return jsonify({
-            "session_id": session_id,
-            "started_at": datetime.now().isoformat(),
-            "message": "Session started successfully"
-        })
+        return jsonify(
+            {
+                "session_id": session_id,
+                "started_at": datetime.now().isoformat(),
+                "message": "Session started successfully",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error starting session: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/session/end', methods=['POST'])
+@device_api.route("/session/end", methods=["POST"])
 def end_session() -> Response:
     """
     End the current recording session.
@@ -595,18 +627,20 @@ def end_session() -> Response:
         session_id = manager.active_session_id
         manager.end_session()
 
-        return jsonify({
-            "session_id": session_id,
-            "ended_at": datetime.now().isoformat(),
-            "message": "Session ended successfully"
-        })
+        return jsonify(
+            {
+                "session_id": session_id,
+                "ended_at": datetime.now().isoformat(),
+                "message": "Session ended successfully",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error ending session: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/session', methods=['GET'])
+@device_api.route("/session", methods=["GET"])
 def get_session() -> Response:
     """
     Get current session information.
@@ -618,15 +652,9 @@ def get_session() -> Response:
         manager = get_device_manager()
 
         if manager.active_session_id:
-            return jsonify({
-                "session_id": manager.active_session_id,
-                "active": True
-            })
+            return jsonify({"session_id": manager.active_session_id, "active": True})
         else:
-            return jsonify({
-                "session_id": None,
-                "active": False
-            })
+            return jsonify({"session_id": None, "active": False})
 
     except Exception as e:
         logger.error(f"Error getting session: {e}")
@@ -635,7 +663,8 @@ def get_session() -> Response:
 
 # Device-specific Operations
 
-@device_api.route('/<device_id>/impedance', methods=['GET'])
+
+@device_api.route("/<device_id>/impedance", methods=["GET"])
 def check_impedance(device_id: str) -> Response:
     """
     Check impedance for a device.
@@ -650,8 +679,8 @@ def check_impedance(device_id: str) -> Response:
         JSON object with impedance values
     """
     try:
-        channels = request.args.get('channels')
-        channel_ids = [int(ch) for ch in channels.split(',')] if channels else None
+        channels = request.args.get("channels")
+        channel_ids = [int(ch) for ch in channels.split(",")] if channels else None
 
         manager = get_device_manager()
         device = manager.get_device(device_id)
@@ -664,14 +693,16 @@ def check_impedance(device_id: str) -> Response:
 
         impedances = run_async(device.check_impedance(channel_ids))
 
-        return jsonify({
-            "device_id": device_id,
-            "impedances": {
-                str(ch): {"value_ohms": imp, "value_kohms": imp/1000}
-                for ch, imp in impedances.items()
-            },
-            "timestamp": datetime.now().isoformat()
-        })
+        return jsonify(
+            {
+                "device_id": device_id,
+                "impedances": {
+                    str(ch): {"value_ohms": imp, "value_kohms": imp / 1000}
+                    for ch, imp in impedances.items()
+                },
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
     except NotImplementedError:
         return jsonify({"error": "Device does not support impedance checking"}), 501
@@ -680,7 +711,7 @@ def check_impedance(device_id: str) -> Response:
         return jsonify({"error": str(e)}), 500
 
 
-@device_api.route('/<device_id>/signal-quality', methods=['GET'])
+@device_api.route("/<device_id>/signal-quality", methods=["GET"])
 def get_signal_quality(device_id: str) -> Response:
     """
     Get signal quality metrics for a device.
@@ -695,8 +726,8 @@ def get_signal_quality(device_id: str) -> Response:
         JSON object with signal quality metrics
     """
     try:
-        channels = request.args.get('channels')
-        channel_ids = [int(ch) for ch in channels.split(',')] if channels else None
+        channels = request.args.get("channels")
+        channel_ids = [int(ch) for ch in channels.split(",")] if channels else None
 
         manager = get_device_manager()
         device = manager.get_device(device_id)
@@ -705,28 +736,36 @@ def get_signal_quality(device_id: str) -> Response:
             return jsonify({"error": "Device not found"}), 404
 
         if not device.is_streaming():
-            return jsonify({"error": "Device must be streaming to assess signal quality"}), 400
+            return (
+                jsonify({"error": "Device must be streaming to assess signal quality"}),
+                400,
+            )
 
-        if hasattr(device, 'get_signal_quality'):
+        if hasattr(device, "get_signal_quality"):
             quality_metrics = run_async(device.get_signal_quality(channel_ids))
 
-            return jsonify({
-                "device_id": device_id,
-                "signal_quality": {
-                    str(ch_id): {
-                        "snr_db": metrics.snr_db,
-                        "quality_level": metrics.quality_level.value,
-                        "is_acceptable": metrics.is_acceptable,
-                        "rms_amplitude": metrics.rms_amplitude,
-                        "line_noise_power": metrics.line_noise_power,
-                        "artifacts_detected": metrics.artifacts_detected,
-                    }
-                    for ch_id, metrics in quality_metrics.items()
-                },
-                "timestamp": datetime.now().isoformat()
-            })
+            return jsonify(
+                {
+                    "device_id": device_id,
+                    "signal_quality": {
+                        str(ch_id): {
+                            "snr_db": metrics.snr_db,
+                            "quality_level": metrics.quality_level.value,
+                            "is_acceptable": metrics.is_acceptable,
+                            "rms_amplitude": metrics.rms_amplitude,
+                            "line_noise_power": metrics.line_noise_power,
+                            "artifacts_detected": metrics.artifacts_detected,
+                        }
+                        for ch_id, metrics in quality_metrics.items()
+                    },
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
         else:
-            return jsonify({"error": "Device does not support signal quality assessment"}), 501
+            return (
+                jsonify({"error": "Device does not support signal quality assessment"}),
+                501,
+            )
 
     except Exception as e:
         logger.error(f"Error getting signal quality: {e}")

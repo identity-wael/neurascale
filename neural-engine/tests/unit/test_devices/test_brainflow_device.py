@@ -3,8 +3,7 @@
 import pytest
 import asyncio
 import numpy as np
-from unittest.mock import Mock, MagicMock, patch, AsyncMock
-from datetime import datetime, timezone
+from unittest.mock import Mock, MagicMock, patch
 
 from src.devices.implementations.brainflow_device import BrainFlowDevice
 from src.devices.interfaces.base_device import DeviceState, DeviceCapabilities
@@ -80,18 +79,19 @@ class MockBoardShim:
         return None
 
 
-@pytest.mark.skipif(
-    not BrainFlowDevice,
-    reason="BrainFlow not available"
-)
+@pytest.mark.skipif(not BrainFlowDevice, reason="BrainFlow not available")
 class TestBrainFlowDevice:
     """Test suite for BrainFlow device implementation."""
 
     @pytest.fixture
     def mock_brainflow(self):
         """Mock BrainFlow imports."""
-        with patch("src.devices.implementations.brainflow_device.BRAINFLOW_AVAILABLE", True):
-            with patch("src.devices.implementations.brainflow_device.BoardShim", MockBoardShim):
+        with patch(
+            "src.devices.implementations.brainflow_device.BRAINFLOW_AVAILABLE", True
+        ):
+            with patch(
+                "src.devices.implementations.brainflow_device.BoardShim", MockBoardShim
+            ):
                 # Mock BoardIds enum
                 board_ids = MagicMock()
                 board_ids.SYNTHETIC_BOARD = 0
@@ -99,7 +99,9 @@ class TestBrainFlowDevice:
                 board_ids.CYTON_DAISY_BOARD = 2
                 board_ids.GANGLION_BOARD = 3
 
-                with patch("src.devices.implementations.brainflow_device.BoardIds", board_ids):
+                with patch(
+                    "src.devices.implementations.brainflow_device.BoardIds", board_ids
+                ):
                     yield
 
     @pytest.fixture
@@ -311,24 +313,16 @@ class TestBrainFlowDevice:
     async def test_connection_parameters(self, mock_brainflow):
         """Test different connection parameters."""
         # Test serial port
-        device = BrainFlowDevice(
-            board_name="cyton",
-            serial_port="/dev/ttyUSB0"
-        )
+        device = BrainFlowDevice(board_name="cyton", serial_port="/dev/ttyUSB0")
         assert device.params.serial_port == "/dev/ttyUSB0"
 
         # Test Bluetooth
-        device = BrainFlowDevice(
-            board_name="ganglion",
-            mac_address="00:11:22:33:44:55"
-        )
+        device = BrainFlowDevice(board_name="ganglion", mac_address="00:11:22:33:44:55")
         assert device.params.mac_address == "00:11:22:33:44:55"
 
         # Test WiFi
         device = BrainFlowDevice(
-            board_name="cyton",
-            ip_address="192.168.1.100",
-            ip_port=3000
+            board_name="cyton", ip_address="192.168.1.100", ip_port=3000
         )
         assert device.params.ip_address == "192.168.1.100"
         assert device.params.ip_port == 3000
@@ -386,6 +380,8 @@ class TestBrainFlowDevice:
     @pytest.mark.asyncio
     async def test_no_brainflow_import(self):
         """Test behavior when BrainFlow is not installed."""
-        with patch("src.devices.implementations.brainflow_device.BRAINFLOW_AVAILABLE", False):
+        with patch(
+            "src.devices.implementations.brainflow_device.BRAINFLOW_AVAILABLE", False
+        ):
             with pytest.raises(ImportError, match="brainflow is not installed"):
                 BrainFlowDevice()

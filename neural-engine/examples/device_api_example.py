@@ -1,7 +1,6 @@
 """Example usage of the Device Management REST API."""
 
 import requests
-import json
 import time
 from typing import Dict, Any
 
@@ -19,12 +18,14 @@ class DeviceAPIClient:
         response = requests.get(f"{self.api_url}/")
         return response.json()
 
-    def add_device(self, device_id: str, device_type: str, config: Dict[str, Any] = None) -> Dict[str, Any]:
+    def add_device(
+        self, device_id: str, device_type: str, config: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """Add a new device."""
         data = {
             "device_id": device_id,
             "device_type": device_type,
-            "device_config": config or {}
+            "device_config": config or {},
         }
         response = requests.post(f"{self.api_url}/", json=data)
         return response.json()
@@ -98,11 +99,7 @@ def main():
     result = client.add_device(
         device_id="synthetic_eeg_001",
         device_type="synthetic",
-        config={
-            "n_channels": 8,
-            "sampling_rate": 256.0,
-            "signal_type": "EEG"
-        }
+        config={"n_channels": 8, "sampling_rate": 256.0, "signal_type": "EEG"},
     )
     print(f"   Device added: {result['device_name']} (state: {result['state']})")
 
@@ -127,18 +124,22 @@ def main():
     time.sleep(3)
     health = client.get_health("synthetic_eeg_001")
     print(f"   Health status: {health['status']}")
-    if health.get('metrics'):
-        metrics = health['metrics']
+    if health.get("metrics"):
+        metrics = health["metrics"]
         print(f"   Data rate: {metrics['data']['data_rate_hz']:.1f} Hz")
-        print(f"   Connection uptime: {metrics['connection']['uptime_seconds']:.1f} seconds")
+        print(
+            f"   Connection uptime: {metrics['connection']['uptime_seconds']:.1f} seconds"
+        )
 
     # 7. Try to get signal quality
     print("\n7. Getting signal quality...")
     try:
         quality = client.get_signal_quality("synthetic_eeg_001")
-        if 'signal_quality' in quality:
-            for ch_id, ch_quality in quality['signal_quality'].items():
-                print(f"   Channel {ch_id}: {ch_quality['quality_level']} (SNR: {ch_quality['snr_db']:.1f} dB)")
+        if "signal_quality" in quality:
+            for ch_id, ch_quality in quality["signal_quality"].items():
+                print(
+                    f"   Channel {ch_id}: {ch_quality['quality_level']} (SNR: {ch_quality['snr_db']:.1f} dB)"
+                )
     except Exception as e:
         print(f"   Signal quality not available: {e}")
 
@@ -162,7 +163,9 @@ def main():
     discovered = client.discover_devices(timeout=5.0)
     print(f"    Found {len(discovered)} devices:")
     for device in discovered:
-        print(f"    - {device['name']} ({device['device_type']}) on {device['protocol']}")
+        print(
+            f"    - {device['name']} ({device['device_type']}) on {device['protocol']}"
+        )
 
     print("\n=== Example completed ===")
 

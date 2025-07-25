@@ -2,7 +2,6 @@
 
 import pytest
 import numpy as np
-from datetime import datetime, timezone
 
 from src.devices.signal_quality import (
     SignalQualityMonitor,
@@ -139,9 +138,7 @@ class TestSignalQualityMonitor:
         channels.append(signal)
 
         # Channel 3: With line noise
-        channels.append(
-            np.sin(2 * np.pi * 10 * t) + 0.8 * np.sin(2 * np.pi * 60 * t)
-        )
+        channels.append(np.sin(2 * np.pi * 10 * t) + 0.8 * np.sin(2 * np.pi * 60 * t))
 
         signals = np.array(channels)
 

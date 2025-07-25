@@ -8,11 +8,10 @@ from datetime import datetime, timezone
 from enum import Enum
 import serial
 import serial.tools.list_ports
-import socket
-import struct
 
 try:
     from zeroconf import ServiceBrowser, Zeroconf, ServiceInfo
+
     ZEROCONF_AVAILABLE = True
 except ImportError:
     ZEROCONF_AVAILABLE = False
@@ -22,6 +21,7 @@ except ImportError:
 
 try:
     import bluetooth
+
     BLUETOOTH_AVAILABLE = True
 except ImportError:
     BLUETOOTH_AVAILABLE = False
@@ -29,13 +29,15 @@ except ImportError:
 
 try:
     from pylsl import resolve_streams
+
     LSL_AVAILABLE = True
 except ImportError:
     LSL_AVAILABLE = False
     resolve_streams = None
 
 try:
-    from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
+    from brainflow.board_shim import BoardShim, BoardIds
+
     BRAINFLOW_AVAILABLE = True
 except ImportError:
     BRAINFLOW_AVAILABLE = False
@@ -71,7 +73,9 @@ class DiscoveredDevice:
         if self.protocol == DeviceProtocol.SERIAL:
             return f"{self.device_type}_{self.connection_info.get('port', 'unknown')}"
         elif self.protocol == DeviceProtocol.BLUETOOTH:
-            return f"{self.device_type}_{self.connection_info.get('address', 'unknown')}"
+            return (
+                f"{self.device_type}_{self.connection_info.get('address', 'unknown')}"
+            )
         elif self.protocol == DeviceProtocol.WIFI:
             return f"{self.device_type}_{self.connection_info.get('ip', 'unknown')}"
         elif self.protocol == DeviceProtocol.LSL:
@@ -201,7 +205,10 @@ class DeviceDiscoveryService:
                 device_name = port.description
 
                 # OpenBCI detection
-                if any(keyword in port.description.lower() for keyword in ["openbci", "ftdi", "ch340"]):
+                if any(
+                    keyword in port.description.lower()
+                    for keyword in ["openbci", "ftdi", "ch340"]
+                ):
                     device_type = "OpenBCI"
 
                     # Try to identify specific OpenBCI board
@@ -213,7 +220,10 @@ class DeviceDiscoveryService:
                         device_name = "OpenBCI Device"
 
                 # Generic FTDI/Arduino detection (could be custom BCI)
-                elif "ftdi" in port.description.lower() or "arduino" in port.description.lower():
+                elif (
+                    "ftdi" in port.description.lower()
+                    or "arduino" in port.description.lower()
+                ):
                     device_type = "Serial BCI"
                     device_name = f"Serial Device ({port.description})"
 
@@ -233,7 +243,7 @@ class DeviceDiscoveryService:
                             "manufacturer": port.manufacturer,
                             "product": port.product,
                             "serial_number": port.serial_number,
-                        }
+                        },
                     )
 
                     self._notify_device_discovered(device)
@@ -241,7 +251,7 @@ class DeviceDiscoveryService:
         except Exception as e:
             logger.error(f"Error scanning serial devices: {e}")
 
-    async def _discover_bluetooth_devices(self):
+    async def _discover_bluetooth_devices(self):  # noqa: C901
         """Discover Bluetooth devices."""
         if not BLUETOOTH_AVAILABLE:
             logger.warning("Bluetooth module not available")
@@ -273,7 +283,9 @@ class DeviceDiscoveryService:
                     elif "crown" in name_lower or "neurosity" in name_lower:
                         device_type = "Neurosity"
                         device_name = "Neurosity Crown"
-                    elif any(keyword in name_lower for keyword in ["eeg", "bci", "brain"]):
+                    elif any(
+                        keyword in name_lower for keyword in ["eeg", "bci", "brain"]
+                    ):
                         device_type = "Bluetooth BCI"
                         device_name = name
 
@@ -285,7 +297,7 @@ class DeviceDiscoveryService:
                         connection_info={
                             "address": addr,
                             "name": name,
-                        }
+                        },
                     )
 
                     self._notify_device_discovered(device)
@@ -319,7 +331,7 @@ class DeviceDiscoveryService:
                 browser = ServiceBrowser(
                     self._zeroconf,
                     service_type,
-                    handlers=[self._on_service_state_change]
+                    handlers=[self._on_service_state_change],
                 )
                 browsers.append(browser)
 
@@ -340,7 +352,7 @@ class DeviceDiscoveryService:
             if info:
                 # Parse service info
                 device_type = "WiFi BCI"
-                device_name = name.split('.')[0]
+                device_name = name.split(".")[0]
 
                 if "openbci" in name.lower():
                     device_type = "OpenBCI"
@@ -364,7 +376,7 @@ class DeviceDiscoveryService:
                     },
                     metadata={
                         "properties": info.properties,
-                    }
+                    },
                 )
 
                 self._notify_device_discovered(device)
@@ -399,7 +411,7 @@ class DeviceDiscoveryService:
                         "channel_count": info.channel_count(),
                         "sampling_rate": info.nominal_srate(),
                         "channel_format": info.channel_format(),
-                    }
+                    },
                 )
 
                 self._notify_device_discovered(device)
@@ -420,11 +432,15 @@ class DeviceDiscoveryService:
             device_name="BrainFlow Synthetic Board",
             protocol=DeviceProtocol.USB,  # Synthetic device
             connection_info={
-                "board_id": BoardIds.SYNTHETIC_BOARD.value if hasattr(BoardIds, 'SYNTHETIC_BOARD') else -1,
+                "board_id": (
+                    BoardIds.SYNTHETIC_BOARD.value
+                    if hasattr(BoardIds, "SYNTHETIC_BOARD")
+                    else -1
+                ),
             },
             metadata={
                 "is_synthetic": True,
-            }
+            },
         )
 
         self._notify_device_discovered(device)

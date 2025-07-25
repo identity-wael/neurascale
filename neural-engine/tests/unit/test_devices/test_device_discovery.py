@@ -190,7 +190,9 @@ class TestDeviceDiscoveryService:
         mock_port2.product = "Arduino Uno"
         mock_port2.serial_number = "B7654321"
 
-        with patch("serial.tools.list_ports.comports", return_value=[mock_port1, mock_port2]):
+        with patch(
+            "serial.tools.list_ports.comports", return_value=[mock_port1, mock_port2]
+        ):
             await discovery_service._discover_serial_devices()
 
         devices = discovery_service.get_discovered_devices()
@@ -290,8 +292,12 @@ class TestDeviceDiscoveryService:
     async def test_quick_scan(self, discovery_service):
         """Test quick scan functionality."""
         # Mock some discoveries
-        with patch.object(discovery_service, "_discover_serial_devices", new_callable=AsyncMock):
-            with patch.object(discovery_service, "_discover_brainflow_devices", new_callable=AsyncMock):
+        with patch.object(
+            discovery_service, "_discover_serial_devices", new_callable=AsyncMock
+        ):
+            with patch.object(
+                discovery_service, "_discover_brainflow_devices", new_callable=AsyncMock
+            ):
                 devices = await discovery_service.quick_scan(timeout=0.1)
 
         # Should clear previous devices and return new ones

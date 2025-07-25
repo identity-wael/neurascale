@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from typing import Dict, List, Optional, Callable, Any, Type, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from pathlib import Path
 
@@ -13,9 +13,12 @@ from .implementations.openbci_device import OpenBCIDevice
 from .implementations.brainflow_device import BrainFlowDevice
 from .implementations.synthetic_device import SyntheticDevice
 from .device_discovery import DeviceDiscoveryService, DiscoveredDevice, DeviceProtocol
-from .signal_quality import SignalQualityMetrics, SignalQualityLevel
-from .device_health import DeviceHealthMonitor, HealthStatus, DeviceMetrics
-from .device_telemetry import DeviceTelemetryCollector, TelemetryType, FileTelemetryExporter
+from .signal_quality import SignalQualityMonitor  # noqa: F401
+from .device_health import DeviceHealthMonitor
+from .device_telemetry import (  # noqa: F401
+    DeviceTelemetryCollector,
+    FileTelemetryExporter,
+)
 from ..ingestion.data_types import NeuralDataPacket
 
 logger = logging.getLogger(__name__)
@@ -119,7 +122,7 @@ class DeviceManager:
                     "device_type": device_type,
                     "device_name": device.device_name,
                     "added_at": datetime.now(timezone.utc).isoformat(),
-                }
+                },
             )
         )
 
@@ -149,7 +152,7 @@ class DeviceManager:
             {
                 "event": "device_removed",
                 "removed_at": datetime.now(timezone.utc).isoformat(),
-            }
+            },
         )
 
         del self.devices[device_id]
@@ -318,7 +321,7 @@ class DeviceManager:
             self.telemetry_collector.collect_connection_event(
                 device_id,
                 f"state_changed_to_{state.value}",
-                {"previous_state": "unknown", "new_state": state.value}
+                {"previous_state": "unknown", "new_state": state.value},
             )
         )
 
@@ -472,14 +475,16 @@ class DeviceManager:
                 device_type = self._map_device_type(device)
 
                 if device_type:
-                    discovered.append({
-                        "device_type": device_type,
-                        "device_id": device.unique_id,
-                        "name": device.device_name,
-                        "protocol": device.protocol.value,
-                        "connection_info": device.connection_info,
-                        "metadata": device.metadata,
-                    })
+                    discovered.append(
+                        {
+                            "device_type": device_type,
+                            "device_id": device.unique_id,
+                            "name": device.device_name,
+                            "protocol": device.protocol.value,
+                            "connection_info": device.connection_info,
+                            "metadata": device.metadata,
+                        }
+                    )
 
             logger.info(f"Discovered {len(discovered)} devices")
             return discovered
@@ -494,7 +499,12 @@ class DeviceManager:
             return "lsl"
         elif discovered_device.device_type == "OpenBCI":
             return "openbci"
-        elif discovered_device.device_type in ["BrainFlow", "Muse", "BrainBit", "Neurosity"]:
+        elif discovered_device.device_type in [
+            "BrainFlow",
+            "Muse",
+            "BrainBit",
+            "Neurosity",
+        ]:
             return "brainflow"
         elif discovered_device.device_type == "Synthetic":
             return "synthetic"
@@ -632,22 +642,28 @@ class DeviceManager:
         if device_id:
             return {
                 "status": self.health_monitor.get_device_health(device_id).value,
-                "metrics": self.health_monitor.get_device_metrics(device_id).to_dict()
-                if self.health_monitor.get_device_metrics(device_id)
-                else None,
+                "metrics": (
+                    self.health_monitor.get_device_metrics(device_id).to_dict()
+                    if self.health_monitor.get_device_metrics(device_id)
+                    else None
+                ),
             }
         else:
             return {
                 device_id: {
                     "status": status.value,
-                    "metrics": self.health_monitor.get_device_metrics(device_id).to_dict()
-                    if self.health_monitor.get_device_metrics(device_id)
-                    else None,
+                    "metrics": (
+                        self.health_monitor.get_device_metrics(device_id).to_dict()
+                        if self.health_monitor.get_device_metrics(device_id)
+                        else None
+                    ),
                 }
                 for device_id, status in self.health_monitor.get_all_health_status().items()
             }
 
-    def get_health_alerts(self, device_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_health_alerts(
+        self, device_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Get active health alerts."""
         alerts = self.health_monitor.get_active_alerts(device_id)
         return [

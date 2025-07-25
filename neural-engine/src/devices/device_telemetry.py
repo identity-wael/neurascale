@@ -4,11 +4,10 @@ import asyncio
 import json
 import logging
 from typing import Dict, List, Optional, Any, Callable, Protocol
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 import gzip
-import io
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -113,7 +112,7 @@ class FileTelemetryExporter:
 
         # Write event
         event_json = event.to_json() + "\n"
-        event_bytes = event_json.encode('utf-8')
+        event_bytes = event_json.encode("utf-8")
 
         if self.compress:
             event_bytes = gzip.compress(event_bytes)
@@ -133,10 +132,10 @@ class FileTelemetryExporter:
 
         if self.compress:
             filename = f"telemetry_{timestamp}_{self._file_counter:04d}.jsonl.gz"
-            mode = 'wb'
+            mode = "wb"
         else:
             filename = f"telemetry_{timestamp}_{self._file_counter:04d}.jsonl"
-            mode = 'w'
+            mode = "w"
 
         filepath = self.output_dir / filename
         self._current_file = open(filepath, mode)

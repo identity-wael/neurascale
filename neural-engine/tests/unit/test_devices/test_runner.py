@@ -7,22 +7,28 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 sys.path.insert(0, project_root)
 
+
 def test_imports():
     """Test that all test modules can be imported."""
     try:
-        from . import test_base_device
+        from . import test_base_device  # noqa: F401
+
         print("✓ test_base_device imported successfully")
 
-        from . import test_signal_quality
+        from . import test_signal_quality  # noqa: F401
+
         print("✓ test_signal_quality imported successfully")
 
-        from . import test_device_discovery
+        from . import test_device_discovery  # noqa: F401
+
         print("✓ test_device_discovery imported successfully")
 
-        from . import test_brainflow_device
+        from . import test_brainflow_device  # noqa: F401
+
         print("✓ test_brainflow_device imported successfully")
 
-        from . import test_device_manager
+        from . import test_device_manager  # noqa: F401
+
         print("✓ test_device_manager imported successfully")
 
         print("\nAll test modules imported successfully!")

@@ -20,3 +20,6 @@ alert_notification_channels = []  # Add PagerDuty channel IDs here
 
 # Cost optimization
 enable_scheduled_scaling = false  # Production runs 24/7
+enable_bigtable_autoscaling = true  # Enable autoscaling for production
+budget_amount = "10000"
+cost_center = "neural-research-prod"

@@ -171,6 +171,25 @@ module "neural_ingestion" {
   ]
 }
 
+# Deploy monitoring infrastructure
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  project_id                = var.project_id
+  environment               = var.environment
+  enable_monitoring_alerts  = var.enable_monitoring_alerts
+  notification_channels     = var.alert_notification_channels
+
+  depends_on = [
+    module.project_apis,
+    module.neural_ingestion
+  ]
+}
+
+# Include cost optimization configuration
+# This is included directly rather than as a module since it needs access to other modules
+# and the billing_account_id may not be available in all environments
+
 # Outputs
 output "environment" {
   value = local.environment
@@ -186,6 +205,11 @@ output "artifact_registry_url" {
 
 output "functions_bucket" {
   value = module.neural_ingestion.functions_bucket
+}
+
+output "monitoring_dashboard" {
+  value = module.monitoring.custom_metrics
+  description = "Custom monitoring metrics"
 }
 
 output "function_topics" {

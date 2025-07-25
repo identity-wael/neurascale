@@ -20,3 +20,8 @@ alert_notification_channels = []
 
 # Cost optimization
 enable_scheduled_scaling = true  # Scale down during off-hours
+enable_bigtable_autoscaling = false
+bigtable_nodes_dev = 2
+bigtable_min_nodes_dev = 1
+budget_amount = "1000"
+cost_center = "neural-research-dev"

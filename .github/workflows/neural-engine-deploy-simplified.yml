@@ -237,8 +237,7 @@ jobs:
         working-directory: neural-engine/terraform
         run: |
           terraform init \
-            -backend-config="bucket=neurascale-terraform-state" \
-            -backend-config="prefix=neural-engine/${{ needs.setup.outputs.environment }}"
+            -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
 
       - name: Terraform Plan
         working-directory: neural-engine/terraform

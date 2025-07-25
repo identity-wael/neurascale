@@ -1,36 +1,5 @@
 # Cloud Functions for Neural Data Processing
 
-# Variables for Cloud Functions configuration
-variable "enable_cloud_functions" {
-  type        = bool
-  description = "Whether to deploy Cloud Functions"
-  default     = true
-}
-
-variable "function_memory_mb" {
-  type        = number
-  description = "Memory allocation for Cloud Functions in MB"
-  default     = 512
-}
-
-variable "function_timeout_seconds" {
-  type        = number
-  description = "Timeout for Cloud Functions in seconds"
-  default     = 300
-}
-
-variable "function_max_instances" {
-  type        = number
-  description = "Maximum number of function instances"
-  default     = 100
-}
-
-variable "function_min_instances" {
-  type        = number
-  description = "Minimum number of function instances"
-  default     = 0
-}
-
 # Local variables for function configuration
 locals {
   function_source_dir = "${path.module}/../../../functions"
@@ -177,17 +146,4 @@ resource "google_cloud_scheduler_job" "scale_down" {
   }
 }
 
-# Outputs for Cloud Functions
-output "cloud_function_urls" {
-  value = var.enable_cloud_functions ? {
-    for k, v in google_cloudfunctions2_function.process_neural_stream : k => v.service_config[0].uri
-  } : {}
-  description = "URLs of deployed Cloud Functions"
-}
-
-output "cloud_function_names" {
-  value = var.enable_cloud_functions ? {
-    for k, v in google_cloudfunctions2_function.process_neural_stream : k => v.name
-  } : {}
-  description = "Names of deployed Cloud Functions"
-}
+# Outputs moved to outputs.tf file

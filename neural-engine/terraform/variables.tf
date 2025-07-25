@@ -10,6 +10,16 @@ variable "project_id" {
   }
 }
 
+variable "environment" {
+  type        = string
+  description = "Environment name (development, staging, production)"
+
+  validation {
+    condition     = contains(["development", "staging", "production"], var.environment)
+    error_message = "Environment must be one of: development, staging, production."
+  }
+}
+
 variable "region" {
   type        = string
   description = "GCP region for resources"
@@ -90,4 +100,46 @@ variable "enable_scheduled_scaling" {
   type        = bool
   description = "Enable scheduled scaling for non-production environments"
   default     = false
+}
+
+variable "enable_bigtable_autoscaling" {
+  type        = bool
+  description = "Enable Bigtable autoscaling for production"
+  default     = false
+}
+
+variable "bigtable_nodes_dev" {
+  type        = number
+  description = "Number of Bigtable nodes for development during business hours"
+  default     = 1
+}
+
+variable "bigtable_min_nodes_dev" {
+  type        = number
+  description = "Minimum number of Bigtable nodes for development after hours"
+  default     = 1
+}
+
+variable "cost_center" {
+  type        = string
+  description = "Cost center for billing allocation"
+  default     = "neural-research"
+}
+
+variable "budget_amount" {
+  type        = string
+  description = "Monthly budget amount in USD"
+  default     = "1000"
+}
+
+variable "billing_account_id" {
+  type        = string
+  description = "Billing account ID for budget alerts"
+  default     = ""
+}
+
+variable "budget_notification_channels" {
+  type        = list(string)
+  description = "Notification channels for budget alerts"
+  default     = []
 }

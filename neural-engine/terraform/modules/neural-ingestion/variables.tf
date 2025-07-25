@@ -100,3 +100,34 @@ variable "budget_alert_thresholds" {
   description = "Budget alert threshold percentages"
   default     = [50, 80, 90, 100]
 }
+
+# Cloud Functions Variables
+variable "enable_cloud_functions" {
+  type        = bool
+  description = "Enable Cloud Functions deployment"
+  default     = true
+}
+
+variable "function_memory_mb" {
+  type        = number
+  description = "Memory allocation for Cloud Functions in MB"
+  default     = 512
+}
+
+variable "function_timeout_seconds" {
+  type        = number
+  description = "Timeout for Cloud Functions in seconds"
+  default     = 300
+}
+
+variable "function_max_instances" {
+  type        = number
+  description = "Maximum number of function instances"
+  default     = 100
+}
+
+variable "function_min_instances" {
+  type        = number
+  description = "Minimum number of function instances"
+  default     = 0
+}

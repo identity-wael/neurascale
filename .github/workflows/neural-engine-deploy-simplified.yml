@@ -258,21 +258,31 @@ jobs:
 
       - name: Terraform Init
         working-directory: neural-engine/terraform
+        timeout-minutes: 3
         run: |
           terraform init \
+            -input=false \
             -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
 
       - name: Terraform Plan
         working-directory: neural-engine/terraform
-        timeout-minutes: 5
+        timeout-minutes: 2
         run: |
           echo "Starting Terraform plan for environment: ${{ needs.setup.outputs.environment }}"
           echo "Project ID: ${{ needs.setup.outputs.project_id }}"
+          echo "Working directory: $(pwd)"
+          echo "Checking tfvars file:"
+          cat environments/${{ needs.setup.outputs.environment }}.tfvars | head -5
 
           # Try to remove any stale locks first
           gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null || true
 
+          # Enable debug logging for Terraform
+          export TF_LOG=DEBUG
+          export TF_LOG_PATH=terraform-debug.log
+
           terraform plan \
+            -input=false \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
             -lock-timeout=30s \
@@ -285,7 +295,7 @@ jobs:
         working-directory: neural-engine/terraform
         timeout-minutes: 20
         run: |
-          terraform apply -auto-approve tfplan
+          terraform apply -input=false -auto-approve tfplan
 
       - name: Mark deployment in monitoring
         if: success() && (github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging'))

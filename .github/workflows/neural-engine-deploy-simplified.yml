@@ -314,6 +314,8 @@ jobs:
           terraform plan \
             -input=false \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+            -var="environment=${{ needs.setup.outputs.environment }}" \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
             -lock-timeout=30s \
             -out=tfplan \

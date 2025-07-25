@@ -162,6 +162,6 @@ output "functions_bucket" {
   value = module.neural_ingestion.functions_bucket
 }
 
-output "function_urls" {
-  value = module.neural_ingestion.function_urls
+output "function_topics" {
+  value = module.neural_ingestion.function_topics
 }

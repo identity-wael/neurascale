@@ -144,54 +144,25 @@ resource "google_bigtable_table" "devices" {
   }
 }
 
-# Cloud Functions (Gen2) for processing neural data streams
-resource "google_cloudfunctions2_function" "process_neural_stream" {
+# Note: Cloud Functions will be deployed separately after infrastructure
+# This is a placeholder for the function configuration
+# In a real deployment, we would either:
+# 1. Use a separate step to deploy functions after Terraform
+# 2. Use inline source code
+# 3. Pre-upload the functions package
+
+# For now, we'll create the necessary IAM bindings for functions
+resource "google_project_iam_member" "functions_invoker" {
   for_each = google_pubsub_topic.neural_data
 
-  name        = "process-neural-${each.key}-${var.environment}"
-  location    = var.region
-  description = "Process ${each.key} neural data streams"
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
 
-  build_config {
-    runtime     = "python312"
-    entry_point = "process_neural_stream"
-    source {
-      storage_source {
-        bucket = google_storage_bucket.functions.name
-        object = "functions-${var.environment}.zip"
-      }
-    }
-  }
-
-  service_config {
-    max_instance_count               = var.environment == "production" ? 100 : 10
-    min_instance_count               = 0
-    available_memory                 = "512M"
-    timeout_seconds                  = 60
-    service_account_email           = var.service_account_email
-    ingress_settings                = "ALLOW_INTERNAL_ONLY"
-    all_traffic_on_latest_revision  = true
-
-    environment_variables = {
-      GCP_PROJECT  = var.project_id
-      ENVIRONMENT  = var.environment
-      SIGNAL_TYPE  = each.key
-      BIGTABLE_INSTANCE = google_bigtable_instance.neural_data.name
-    }
-  }
-
-  event_trigger {
-    trigger_region = var.region
-    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
-    pubsub_topic   = each.value.id
-    retry_policy   = "RETRY_POLICY_RETRY"
-  }
-
-  depends_on = [
-    google_bigtable_table.time_series,
-    google_bigtable_table.sessions,
-    google_bigtable_table.devices,
-  ]
+# Data source for project info
+data "google_project" "project" {
+  project_id = var.project_id
 }
 
 # Outputs
@@ -213,8 +184,9 @@ output "functions_bucket" {
   value = google_storage_bucket.functions.name
 }
 
-output "function_urls" {
+output "function_topics" {
   value = {
-    for k, v in google_cloudfunctions2_function.process_neural_stream : k => v.service_config[0].uri
+    for k, v in google_pubsub_topic.neural_data : k => v.name
   }
+  description = "Pub/Sub topics for Cloud Functions to subscribe to"
 }

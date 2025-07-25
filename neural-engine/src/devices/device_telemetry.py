@@ -3,7 +3,7 @@
 import asyncio
 import json
 import logging
-from typing import Dict, List, Optional, Any, Callable, Protocol
+from typing import Dict, List, Optional, Any, Callable, Protocol, IO
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -90,8 +90,8 @@ class FileTelemetryExporter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Current file
-        self._current_file = None
-        self._current_size = 0
+        self._current_file: Optional[IO[bytes]] = None
+        self._current_size: int = 0
         self._file_counter = 0
 
     async def export(self, events: List[TelemetryEvent]) -> bool:
@@ -104,7 +104,7 @@ class FileTelemetryExporter:
             logger.error(f"Failed to export telemetry to file: {e}")
             return False
 
-    async def _write_event(self, event: TelemetryEvent):
+    async def _write_event(self, event: TelemetryEvent) -> None:
         """Write single event to file."""
         # Get or create file
         if self._current_file is None or self._current_size >= self.max_file_size_bytes:
@@ -120,7 +120,7 @@ class FileTelemetryExporter:
         self._current_file.write(event_bytes)
         self._current_size += len(event_bytes)
 
-    async def _rotate_file(self):
+    async def _rotate_file(self) -> None:
         """Rotate to new file."""
         # Close current file
         if self._current_file:
@@ -138,12 +138,12 @@ class FileTelemetryExporter:
             mode = "w"
 
         filepath = self.output_dir / filename
-        self._current_file = open(filepath, mode)
+        self._current_file = open(filepath, mode + "b")  # Open in binary mode
         self._current_size = 0
 
         logger.info(f"Rotated telemetry file to: {filename}")
 
-    async def close(self):
+    async def close(self) -> None:
         """Close file resources."""
         if self._current_file:
             self._current_file.close()
@@ -178,7 +178,7 @@ class CloudTelemetryExporter:
         logger.debug(f"Would export {len(events)} events to BigQuery")
         return True
 
-    async def close(self):
+    async def close(self) -> None:
         """Close cloud resources."""
         pass
 
@@ -226,15 +226,15 @@ class DeviceTelemetryCollector:
             "export_failures": 0,
         }
 
-    def add_exporter(self, exporter: TelemetryExporter):
+    def add_exporter(self, exporter: TelemetryExporter) -> None:
         """Add a telemetry exporter."""
         self.exporters.append(exporter)
 
-    def add_filter(self, filter_func: Callable[[TelemetryEvent], bool]):
+    def add_filter(self, filter_func: Callable[[TelemetryEvent], bool]) -> None:
         """Add a filter function (returns True to keep event)."""
         self._filters.append(filter_func)
 
-    async def start(self):
+    async def start(self) -> None:
         """Start telemetry collection."""
         if self._flush_task and not self._flush_task.done():
             logger.warning("Telemetry collection already started")
@@ -244,7 +244,7 @@ class DeviceTelemetryCollector:
         self._flush_task = asyncio.create_task(self._flush_loop())
         logger.info("Started telemetry collection")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop telemetry collection."""
         self._stop_flushing.set()
 
@@ -261,7 +261,7 @@ class DeviceTelemetryCollector:
 
         logger.info(f"Stopped telemetry collection. Stats: {self._stats}")
 
-    async def _flush_loop(self):
+    async def _flush_loop(self) -> None:
         """Periodic flush loop."""
         while not self._stop_flushing.is_set():
             try:

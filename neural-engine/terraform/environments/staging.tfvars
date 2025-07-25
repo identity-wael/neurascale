@@ -25,3 +25,6 @@ bigtable_nodes_dev          = 2
 bigtable_min_nodes_dev      = 1
 budget_amount               = "2000"
 cost_center                 = "neural-research-staging"
+
+# Temporarily disable cloud functions to debug timeout
+enable_cloud_functions = false

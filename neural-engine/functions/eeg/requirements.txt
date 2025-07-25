@@ -1,0 +1,6 @@
+functions-framework==3.*
+google-cloud-bigtable==2.*
+google-cloud-monitoring==2.*
+google-cloud-error-reporting==1.*
+numpy==1.24.*
+scipy==1.10.*

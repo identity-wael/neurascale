@@ -72,3 +72,66 @@ terraform.tfvars
 # Kubernetes
 kubeconfig
 *.kubeconfig
+
+# ML/Model files
+*.h5
+*.pb
+*.pth
+*.pt
+*.onnx
+*.tflite
+checkpoints/
+model_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# MyPy
+.mypy_cache/
+dmypy.json
+
+# Testing
+.tox/
+.nox/
+.hypothesis/
+*.cover
+.mutmut-cache
+
+# Documentation
+docs/_build/
+site/
+
+# Profiling
+*.prof
+*.stats
+
+# Virtual environments
+venv*/
+ENV*/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Monitoring
+prometheus_data/
+grafana_data/
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# Terraform
+terraform/modules/neural-ingestion/tmp/

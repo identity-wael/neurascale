@@ -1,26 +1,5 @@
 # Neural Ingestion Infrastructure Module
 
-# Variables
-variable "project_id" {
-  type        = string
-  description = "Project ID"
-}
-
-variable "environment" {
-  type        = string
-  description = "Environment name (production, staging, development)"
-}
-
-variable "region" {
-  type        = string
-  description = "Google Cloud region"
-}
-
-variable "service_account_email" {
-  type        = string
-  description = "Service account email for running the services"
-}
-
 locals {
   env_short = substr(var.environment, 0, 4) # prod, stag, dev
 }
@@ -95,20 +74,29 @@ resource "google_pubsub_subscription" "neural_data" {
   }
 }
 
-# Bigtable instance
+# Bigtable instance with autoscaling
 resource "google_bigtable_instance" "neural_data" {
   name         = "neural-data-${var.environment}"
   display_name = "Neural Data Storage - ${var.environment}"
 
+  deletion_protection = var.enable_deletion_protection && var.environment == "production"
+
   cluster {
     cluster_id   = "neural-data-cluster-${local.env_short}"
-    num_nodes    = var.environment == "production" ? 3 : 1
     storage_type = "SSD"
     zone         = "${var.region}-a"
+
+    autoscaling_config {
+      min_nodes      = var.bigtable_min_nodes
+      max_nodes      = var.bigtable_max_nodes
+      cpu_target     = var.bigtable_cpu_target
+      storage_target = var.bigtable_ssd_size_gb
+    }
   }
 
   labels = {
     environment = var.environment
+    managed_by  = "terraform"
   }
 }
 
@@ -216,28 +204,4 @@ resource "google_project_iam_member" "functions_service_account_permissions" {
   member  = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
 }
 
-# Outputs
-output "artifact_registry_url" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.neural_engine.repository_id}"
-}
-
-output "pubsub_topics" {
-  value = {
-    for k, v in google_pubsub_topic.neural_data : k => v.id
-  }
-}
-
-output "bigtable_instance_id" {
-  value = google_bigtable_instance.neural_data.id
-}
-
-output "functions_bucket" {
-  value = google_storage_bucket.functions.name
-}
-
-output "function_topics" {
-  value = {
-    for k, v in google_pubsub_topic.neural_data : k => v.name
-  }
-  description = "Pub/Sub topics for Cloud Functions to subscribe to"
-}
+# Outputs moved to outputs.tf

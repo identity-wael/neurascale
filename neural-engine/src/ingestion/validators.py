@@ -1,7 +1,7 @@
 """Data validation for neural signals."""
 
 import numpy as np
-from typing import List, Optional
+from typing import Optional
 import logging
 
 from .data_types import NeuralDataPacket, ValidationResult, NeuralSignalType

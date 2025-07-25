@@ -3,10 +3,8 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Callable, Any
-import numpy as np
+from typing import Dict, Optional, Callable, Any
 import json
-import hashlib
 
 # Optional imports for Google Cloud services
 try:
@@ -25,7 +23,6 @@ from .data_types import (
     NeuralSignalType,
     DataSource,
     ValidationResult,
-    DeviceInfo,
 )
 from .validators import DataValidator
 from .anonymizer import DataAnonymizer
@@ -204,7 +201,6 @@ class NeuralDataIngestion:
         row_key = f"{packet.session_id}#{packet.timestamp.timestamp()}"
 
         # Store each channel as a separate column
-        rows = []
         row = self.bt_table.direct_row(row_key.encode())
 
         # Store metadata

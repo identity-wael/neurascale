@@ -365,11 +365,9 @@ jobs:
         if: success()
         run: |
           gcloud logging write deployments \
-            "Deployment completed for ${{ github.sha }}" \
+            "Deployment completed for ${{ github.sha }} in ${{ needs.setup.outputs.environment }}" \
             --severity=NOTICE \
-            --project=${{ needs.setup.outputs.project_id }} \
-            --payload-type=json \
-            --payload='{"environment":"${{ needs.setup.outputs.environment }}","version":"${{ github.sha }}","status":"success"}'
+            --project=${{ needs.setup.outputs.project_id }}
 
       - name: Cleanup Terraform lock
         if: always()

@@ -113,17 +113,17 @@ jobs:
             exit 1
           fi
 
-      # Cache Python dependencies
-      - name: Cache Python dependencies
-        if: steps.test-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            venv
-            ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
+      # SKIP CACHING PYTHON TO FORCE FRESH INSTALL
+      # - name: Cache Python dependencies
+      #   if: steps.test-cache.outputs.cache-hit != 'true'
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       venv
+      #       ~/.cache/pip
+      #     key: ${{ runner.os }}-python-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-python-
 
       - name: Install dependencies
         if: steps.test-cache.outputs.cache-hit != 'true'
@@ -314,16 +314,16 @@ jobs:
             exit 1
           fi
 
-      # Cache Python dependencies
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            venv
-            ~/.cache/pip
-          key: ${{ runner.os }}-python-functions
-          restore-keys: |
-            ${{ runner.os }}-python-
+      # SKIP CACHING TO FORCE PYTHON 3.12.11
+      # - name: Cache Python dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       venv
+      #       ~/.cache/pip
+      #     key: ${{ runner.os }}-python-functions
+      #     restore-keys: |
+      #       ${{ runner.os }}-python-
 
       - name: Package Cloud Functions
         working-directory: neural-engine/functions/stream_ingestion
@@ -532,16 +532,16 @@ jobs:
             exit 1
           fi
 
-      # Cache Python dependencies
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            venv
-            ~/.cache/pip
-          key: ${{ runner.os }}-python-verify
-          restore-keys: |
-            ${{ runner.os }}-python-
+      # SKIP CACHING TO FORCE PYTHON 3.12.11
+      # - name: Cache Python dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       venv
+      #       ~/.cache/pip
+      #     key: ${{ runner.os }}-python-verify
+      #     restore-keys: |
+      #       ${{ runner.os }}-python-
 
       - name: Install test dependencies
         run: |

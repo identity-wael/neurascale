@@ -154,7 +154,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: neural-engine
-          file: docker/Dockerfile.${{ matrix.service }}
+          file: neural-engine/docker/Dockerfile.${{ matrix.service }}
           push: true
           tags: |
             ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}

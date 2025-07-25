@@ -96,6 +96,8 @@ locals {
 
 # Budget Alerts
 resource "google_billing_budget" "neural_platform_budget" {
+  count = var.billing_account_id != "" ? 1 : 0
+
   billing_account = var.billing_account_id
   display_name    = "Neural Platform - ${var.environment}"
 

@@ -84,6 +84,12 @@ resource "google_project_iam_custom_role" "github_deploy" {
   role_id     = "githubDeployRole"
   title       = "GitHub Actions Deploy Role"
   description = "Custom role for GitHub Actions with minimal required permissions"
+
+  # Handle case where role might already exist
+  lifecycle {
+    create_before_destroy = true
+  }
+
   permissions = [
     # Cloud Functions permissions
     "cloudfunctions.functions.create",

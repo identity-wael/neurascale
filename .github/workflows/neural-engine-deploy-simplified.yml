@@ -359,7 +359,14 @@ jobs:
             -out=tfplan \
             -refresh=false \
             -parallelism=1 \
-            -compact-warnings || (echo "Plan failed, showing debug log:" && cat terraform-debug.log | tail -100)
+            -compact-warnings || {
+              echo "Plan failed with exit code $?"
+              echo "Showing last 200 lines of debug log:"
+              tail -200 terraform-debug.log || true
+              echo "Checking for specific errors:"
+              grep -i "error" terraform-debug.log | tail -20 || true
+              exit 1
+            }
 
       - name: Terraform Apply
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging')

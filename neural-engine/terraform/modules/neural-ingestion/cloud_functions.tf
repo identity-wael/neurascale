@@ -3,7 +3,7 @@
 # Local variables for function configuration
 locals {
   function_source_dir = "${path.module}/../../../functions"
-  function_types = toset(["eeg", "ecog", "lfp", "spikes", "emg", "accelerometer"])
+  function_types      = toset(["eeg", "ecog", "lfp", "spikes", "emg", "accelerometer"])
 }
 
 # ZIP the function source code for each signal type
@@ -45,18 +45,18 @@ resource "google_cloudfunctions2_function" "process_neural_stream" {
     }
 
     environment_variables = {
-      PROJECT_ID    = var.project_id
-      ENVIRONMENT   = var.environment
-      SIGNAL_TYPE   = each.key
+      PROJECT_ID        = var.project_id
+      ENVIRONMENT       = var.environment
+      SIGNAL_TYPE       = each.key
       BIGTABLE_INSTANCE = google_bigtable_instance.neural_data.name
     }
   }
 
   service_config {
-    max_instance_count    = var.function_max_instances
-    min_instance_count    = var.function_min_instances
-    available_memory      = "${var.function_memory_mb}M"
-    timeout_seconds       = var.function_timeout_seconds
+    max_instance_count = var.function_max_instances
+    min_instance_count = var.function_min_instances
+    available_memory   = "${var.function_memory_mb}M"
+    timeout_seconds    = var.function_timeout_seconds
 
     environment_variables = {
       PROJECT_ID        = var.project_id
@@ -93,7 +93,7 @@ resource "google_cloud_scheduler_job" "scale_up" {
 
   name             = "scale-up-${each.key}-${var.environment}"
   region           = var.region
-  schedule         = "0 8 * * MON-FRI"  # 8 AM on weekdays
+  schedule         = "0 8 * * MON-FRI" # 8 AM on weekdays
   time_zone        = "America/Los_Angeles"
   attempt_deadline = "320s"
 
@@ -122,7 +122,7 @@ resource "google_cloud_scheduler_job" "scale_down" {
 
   name             = "scale-down-${each.key}-${var.environment}"
   region           = var.region
-  schedule         = "0 20 * * MON-FRI"  # 8 PM on weekdays
+  schedule         = "0 20 * * MON-FRI" # 8 PM on weekdays
   time_zone        = "America/Los_Angeles"
   attempt_deadline = "320s"
 

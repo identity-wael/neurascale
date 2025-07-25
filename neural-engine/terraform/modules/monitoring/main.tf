@@ -126,7 +126,7 @@ resource "google_monitoring_slo" "api_availability" {
 
   request_based_sli {
     good_total_ratio {
-      good_service_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND metric.label.response_code_class=\"2xx\""
+      good_service_filter  = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND metric.label.response_code_class=\"2xx\""
       total_service_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_count\""
     }
   }
@@ -241,7 +241,7 @@ resource "google_monitoring_notification_channel" "pagerduty" {
   type         = "pagerduty"
 
   labels = {
-    "servicekey" = "YOUR_PAGERDUTY_INTEGRATION_KEY"  # TODO: Use Secret Manager
+    "servicekey" = "YOUR_PAGERDUTY_INTEGRATION_KEY" # TODO: Use Secret Manager
   }
 
   enabled = true
@@ -263,10 +263,10 @@ output "slo_id" {
 
 output "custom_metrics" {
   value = {
-    data_quality      = google_logging_metric.neural_data_quality.id
+    data_quality       = google_logging_metric.neural_data_quality.id
     processing_latency = google_logging_metric.processing_latency.id
-    inference_time    = google_logging_metric.model_inference_time.id
-    device_connection = google_logging_metric.device_connection_status.id
+    inference_time     = google_logging_metric.model_inference_time.id
+    device_connection  = google_logging_metric.device_connection_status.id
   }
   description = "IDs of custom metrics"
 }

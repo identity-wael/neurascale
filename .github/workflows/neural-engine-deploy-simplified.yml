@@ -276,15 +276,18 @@ jobs:
 
       - name: Terraform Plan
         working-directory: neural-engine/terraform
+        timeout-minutes: 10
         run: |
           terraform plan \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            -lock-timeout=5m \
             -out=tfplan
 
       - name: Terraform Apply
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging')
         working-directory: neural-engine/terraform
+        timeout-minutes: 20
         run: |
           terraform apply -auto-approve tfplan
 

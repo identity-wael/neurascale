@@ -40,6 +40,7 @@ google-cloud-scheduler==2.16.0   # Cron jobs
 
 # API Framework (Cloud Run compatible)
 flask==3.1.1
+flask-cors==5.0.0
 gunicorn==23.0.0
 # google-cloud-endpoints         # Deprecated, use Cloud Run/API Gateway instead
 

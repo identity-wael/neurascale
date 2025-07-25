@@ -5,12 +5,17 @@ import logging
 from typing import Dict, List, Optional, Callable, Any, Type, Tuple
 from datetime import datetime
 import uuid
+from pathlib import Path
 
 from .interfaces.base_device import BaseDevice, DeviceState
 from .implementations.lsl_device import LSLDevice
 from .implementations.openbci_device import OpenBCIDevice
 from .implementations.brainflow_device import BrainFlowDevice
 from .implementations.synthetic_device import SyntheticDevice
+from .device_discovery import DeviceDiscoveryService, DiscoveredDevice, DeviceProtocol
+from .signal_quality import SignalQualityMetrics, SignalQualityLevel
+from .device_health import DeviceHealthMonitor, HealthStatus, DeviceMetrics
+from .device_telemetry import DeviceTelemetryCollector, TelemetryType, FileTelemetryExporter
 from ..ingestion.data_types import NeuralDataPacket
 
 logger = logging.getLogger(__name__)
@@ -37,6 +42,19 @@ class DeviceManager:
         self._aggregation_task: Optional[asyncio.Task] = None
         self._aggregation_queue: asyncio.Queue[Tuple[str, NeuralDataPacket]] = (
             asyncio.Queue()
+        )
+
+        # Discovery service
+        self.discovery_service = DeviceDiscoveryService()
+        self._discovered_devices: Dict[str, DiscoveredDevice] = {}
+
+        # Health monitoring
+        self.health_monitor = DeviceHealthMonitor(check_interval=5.0)
+
+        # Telemetry collection
+        self.telemetry_collector = DeviceTelemetryCollector(
+            buffer_size=1000,
+            flush_interval=60.0,
         )
 
     def register_device_type(
@@ -89,6 +107,22 @@ class DeviceManager:
             device.set_session_id(self.active_session_id)
 
         self.devices[device_id] = device
+
+        # Add to health monitoring
+        self.health_monitor.add_device(device_id, device)
+
+        # Collect device info telemetry
+        asyncio.create_task(
+            self.telemetry_collector.collect_device_info(
+                device_id,
+                {
+                    "device_type": device_type,
+                    "device_name": device.device_name,
+                    "added_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+        )
+
         logger.info(f"Added device: {device_id} (type: {device_type})")
 
         return device
@@ -105,6 +139,18 @@ class DeviceManager:
             await device.stop_streaming()
         if device.is_connected():
             await device.disconnect()
+
+        # Remove from health monitoring
+        self.health_monitor.remove_device(device_id)
+
+        # Collect removal telemetry
+        await self.telemetry_collector.collect_device_info(
+            device_id,
+            {
+                "event": "device_removed",
+                "removed_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         del self.devices[device_id]
         logger.info(f"Removed device: {device_id}")
@@ -246,6 +292,9 @@ class DeviceManager:
             packet.metadata = {}
         packet.metadata["device_id"] = device_id
 
+        # Record packet for health monitoring
+        self.health_monitor.record_packet(device_id, packet.timestamp)
+
         # Add to aggregation queue if aggregation is active
         if self._aggregation_task and not self._aggregation_task.done():
             try:
@@ -264,6 +313,15 @@ class DeviceManager:
 
     def _handle_device_state(self, device_id: str, state: DeviceState) -> None:
         """Handle device state change."""
+        # Collect telemetry for state changes
+        asyncio.create_task(
+            self.telemetry_collector.collect_connection_event(
+                device_id,
+                f"state_changed_to_{state.value}",
+                {"previous_state": "unknown", "new_state": state.value}
+            )
+        )
+
         if self._state_callback:
             try:
                 self._state_callback(device_id, state)
@@ -273,6 +331,19 @@ class DeviceManager:
     def _handle_device_error(self, device_id: str, error: Exception) -> None:
         """Handle device error."""
         logger.error(f"Device {device_id} error: {error}")
+
+        # Record error for health monitoring
+        self.health_monitor.record_error(device_id, error)
+
+        # Collect error telemetry
+        asyncio.create_task(
+            self.telemetry_collector.collect_error(
+                device_id,
+                type(error).__name__,
+                str(error),
+            )
+        )
+
         if self._error_callback:
             try:
                 self._error_callback(device_id, error)
@@ -372,7 +443,7 @@ class DeviceManager:
 
     async def auto_discover_devices(self, timeout: float = 5.0) -> List[Dict[str, Any]]:
         """
-        Auto - discover available devices.
+        Auto-discover available devices using the discovery service.
 
         Args:
             timeout: Discovery timeout in seconds
@@ -380,60 +451,220 @@ class DeviceManager:
         Returns:
             List of discovered devices
         """
-        discovered = []
+        # Clear previous discoveries
+        self._discovered_devices.clear()
 
-        # Try LSL discovery
+        # Set up callback to track discoveries
+        def on_device_discovered(device: DiscoveredDevice):
+            self._discovered_devices[device.unique_id] = device
+            logger.info(f"Discovered: {device.device_name} ({device.device_type})")
+
+        self.discovery_service.add_discovery_callback(on_device_discovered)
+
         try:
-            lsl_device = LSLDevice(timeout=timeout)
-            lsl_streams = await lsl_device.get_available_streams()
-            for stream in lsl_streams:
-                discovered.append(
-                    {
-                        "device_type": "lsl",
-                        "device_id": f"lsl_{stream['uid']}",
-                        "name": stream["name"],
-                        "info": stream,
-                    }
-                )
-        except Exception as e:
-            logger.warning(f"LSL discovery failed: {e}")
+            # Perform discovery scan
+            discovered_devices = await self.discovery_service.quick_scan(timeout)
 
-        # Try serial port discovery for OpenBCI
-        try:
-            import serial.tools.list_ports
+            # Convert to expected format
+            discovered = []
+            for device in discovered_devices:
+                # Map discovery device types to our device types
+                device_type = self._map_device_type(device)
 
-            ports = serial.tools.list_ports.comports()
-            for port in ports:
-                if any(
-                    id_str in str(port.description).lower()
-                    for id_str in ["openbci", "ftdi", "serial"]
-                ):
-                    discovered.append(
-                        {
-                            "device_type": "openbci",
-                            "device_id": f"openbci_{port.device}",
-                            "name": f"OpenBCI on {port.device}",
-                            "info": {
-                                "port": port.device,
-                                "description": port.description,
-                            },
-                        }
-                    )
-        except Exception as e:
-            logger.warning(f"Serial port discovery failed: {e}")
+                if device_type:
+                    discovered.append({
+                        "device_type": device_type,
+                        "device_id": device.unique_id,
+                        "name": device.device_name,
+                        "protocol": device.protocol.value,
+                        "connection_info": device.connection_info,
+                        "metadata": device.metadata,
+                    })
 
-        # Always include synthetic device option
-        discovered.append(
-            {
-                "device_type": "synthetic",
-                "device_id": "synthetic_eeg",
-                "name": "Synthetic EEG Device",
-                "info": {"signal_type": "EEG"},
+            logger.info(f"Discovered {len(discovered)} devices")
+            return discovered
+
+        finally:
+            # Remove callback
+            self.discovery_service.remove_discovery_callback(on_device_discovered)
+
+    def _map_device_type(self, discovered_device: DiscoveredDevice) -> Optional[str]:
+        """Map discovered device to internal device type."""
+        if discovered_device.device_type == "LSL":
+            return "lsl"
+        elif discovered_device.device_type == "OpenBCI":
+            return "openbci"
+        elif discovered_device.device_type in ["BrainFlow", "Muse", "BrainBit", "Neurosity"]:
+            return "brainflow"
+        elif discovered_device.device_type == "Synthetic":
+            return "synthetic"
+        else:
+            # Unknown device type
+            return None
+
+    async def create_device_from_discovery(
+        self, discovery_id: str, device_id: Optional[str] = None
+    ) -> BaseDevice:
+        """
+        Create a device instance from a discovered device.
+
+        Args:
+            discovery_id: The unique ID from device discovery
+            device_id: Optional custom device ID (uses discovery_id if not provided)
+
+        Returns:
+            The created device instance
+        """
+        if discovery_id not in self._discovered_devices:
+            raise ValueError(f"No discovered device with ID: {discovery_id}")
+
+        discovered = self._discovered_devices[discovery_id]
+        device_type = self._map_device_type(discovered)
+
+        if not device_type:
+            raise ValueError(f"Cannot map device type: {discovered.device_type}")
+
+        # Use discovery ID as device ID if not provided
+        if device_id is None:
+            device_id = discovery_id
+
+        # Prepare device kwargs based on type
+        device_kwargs = {}
+
+        if device_type == "lsl":
+            device_kwargs = {
+                "stream_name": discovered.connection_info.get("name"),
+                "stream_type": discovered.connection_info.get("type"),
             }
-        )
+        elif device_type == "openbci":
+            device_kwargs = {
+                "port": discovered.connection_info.get("port"),
+            }
+        elif device_type == "brainflow":
+            # Map discovered device to BrainFlow board name
+            board_name = self._get_brainflow_board_name(discovered)
+            device_kwargs = {"board_name": board_name}
 
-        logger.info(f"Discovered {len(discovered)} devices")
-        return discovered
+            # Add connection parameters
+            if discovered.protocol == DeviceProtocol.SERIAL:
+                device_kwargs["serial_port"] = discovered.connection_info.get("port")
+            elif discovered.protocol == DeviceProtocol.BLUETOOTH:
+                device_kwargs["mac_address"] = discovered.connection_info.get("address")
+            elif discovered.protocol == DeviceProtocol.WIFI:
+                device_kwargs["ip_address"] = discovered.connection_info.get("ip")
+                device_kwargs["ip_port"] = discovered.connection_info.get("port")
+
+        # Create device
+        return await self.add_device(device_id, device_type, **device_kwargs)
+
+    def _get_brainflow_board_name(self, discovered_device: DiscoveredDevice) -> str:
+        """Get BrainFlow board name from discovered device."""
+        device_name = discovered_device.device_name.lower()
+
+        if "cyton" in device_name:
+            return "cyton"
+        elif "ganglion" in device_name:
+            return "ganglion"
+        elif "muse s" in device_name:
+            return "muse_s"
+        elif "muse 2" in device_name:
+            return "muse_2"
+        elif "crown" in device_name:
+            return "neurosity_crown"
+        elif "brainbit" in device_name:
+            return "brainbit"
+        elif "unicorn" in device_name:
+            return "unicorn"
+        elif "synthetic" in device_name:
+            return "synthetic"
+        else:
+            # Default to synthetic if unknown
+            return "synthetic"
+
+    async def start_health_monitoring(self):
+        """Start device health monitoring."""
+        await self.health_monitor.start_monitoring()
+
+    async def stop_health_monitoring(self):
+        """Stop device health monitoring."""
+        await self.health_monitor.stop_monitoring()
+
+    async def start_telemetry_collection(
+        self,
+        output_dir: Optional[Path] = None,
+        enable_cloud: bool = False,
+    ):
+        """
+        Start telemetry collection.
+
+        Args:
+            output_dir: Directory for file telemetry export
+            enable_cloud: Enable cloud telemetry export (requires GCP setup)
+        """
+        # Add file exporter if output directory provided
+        if output_dir:
+            file_exporter = FileTelemetryExporter(
+                output_dir=Path(output_dir),
+                compress=True,
+            )
+            self.telemetry_collector.add_exporter(file_exporter)
+
+        # Add cloud exporter if enabled (placeholder for now)
+        if enable_cloud:
+            logger.info("Cloud telemetry export not yet implemented")
+
+        await self.telemetry_collector.start()
+
+    async def stop_telemetry_collection(self):
+        """Stop telemetry collection."""
+        await self.telemetry_collector.stop()
+
+    def get_device_health(self, device_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get device health information.
+
+        Args:
+            device_id: Specific device ID, or None for all devices
+
+        Returns:
+            Health information dictionary
+        """
+        if device_id:
+            return {
+                "status": self.health_monitor.get_device_health(device_id).value,
+                "metrics": self.health_monitor.get_device_metrics(device_id).to_dict()
+                if self.health_monitor.get_device_metrics(device_id)
+                else None,
+            }
+        else:
+            return {
+                device_id: {
+                    "status": status.value,
+                    "metrics": self.health_monitor.get_device_metrics(device_id).to_dict()
+                    if self.health_monitor.get_device_metrics(device_id)
+                    else None,
+                }
+                for device_id, status in self.health_monitor.get_all_health_status().items()
+            }
+
+    def get_health_alerts(self, device_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get active health alerts."""
+        alerts = self.health_monitor.get_active_alerts(device_id)
+        return [
+            {
+                "device_id": alert.device_id,
+                "severity": alert.severity.value,
+                "category": alert.category,
+                "message": alert.message,
+                "timestamp": alert.timestamp.isoformat(),
+                "metadata": alert.metadata,
+            }
+            for alert in alerts
+        ]
+
+    def get_telemetry_statistics(self) -> Dict[str, int]:
+        """Get telemetry collection statistics."""
+        return self.telemetry_collector.get_statistics()
 
     async def __aenter__(self) -> "DeviceManager":
         """Async context manager entry."""
@@ -441,6 +672,12 @@ class DeviceManager:
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit - cleanup all devices."""
+        # Stop health monitoring
+        await self.stop_health_monitoring()
+
+        # Stop telemetry collection
+        await self.stop_telemetry_collection()
+
         # Stop aggregation if running
         await self.stop_aggregation()
 

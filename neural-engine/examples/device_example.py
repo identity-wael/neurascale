@@ -13,11 +13,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.devices import DeviceManager  # noqa: E402
 from src.devices.interfaces.base_device import DeviceState  # noqa: E402
-from src.ingestion.data_types import (
+from src.ingestion.data_types import (  # noqa: E402
     NeuralDataPacket,
     NeuralSignalType,
     ChannelInfo,
-)  # noqa: E402
+)
 
 # Setup logging
 logging.basicConfig(

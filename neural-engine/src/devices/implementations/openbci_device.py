@@ -4,14 +4,13 @@ import asyncio
 import logging
 import serial
 import serial.tools.list_ports
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 import numpy as np
 import struct
 
 from ..interfaces.base_device import BaseDevice, DeviceState, DeviceCapabilities
 from ...ingestion.data_types import (
-    NeuralDataPacket,
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
@@ -224,7 +223,7 @@ class OpenBCIDevice(BaseDevice):
 
         self._update_state(DeviceState.CONNECTED)
 
-    async def _streaming_loop(self) -> None:
+    async def _streaming_loop(self) -> None:  # noqa: C901
         """Main streaming loop."""
         if not self.serial:
             return

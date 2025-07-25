@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 import numpy as np
 
@@ -17,7 +17,6 @@ except ImportError:
 
 from ..interfaces.base_device import BaseDevice, DeviceState, DeviceCapabilities
 from ...ingestion.data_types import (
-    NeuralDataPacket,
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,

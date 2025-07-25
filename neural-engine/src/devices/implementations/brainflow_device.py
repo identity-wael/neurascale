@@ -20,7 +20,6 @@ except ImportError:
 
 from ..interfaces.base_device import BaseDevice, DeviceState, DeviceCapabilities
 from ...ingestion.data_types import (
-    NeuralDataPacket,
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
@@ -132,7 +131,7 @@ class BrainFlowDevice(BaseDevice):
 
             try:
                 self.marker_channel = BoardShim.get_marker_channel(self.board_id)
-            except:
+            except Exception:
                 self.marker_channel = None
 
             # All data channels
@@ -211,7 +210,7 @@ class BrainFlowDevice(BaseDevice):
                     # Stop streaming if active
                     try:
                         self.board.stop_stream()
-                    except:
+                    except Exception:
                         pass
 
                     # Release session
@@ -264,7 +263,7 @@ class BrainFlowDevice(BaseDevice):
 
         self._update_state(DeviceState.CONNECTED)
 
-    async def _streaming_loop(self) -> None:
+    async def _streaming_loop(self) -> None:  # noqa: C901
         """Main streaming loop."""
         if not self.board:
             return

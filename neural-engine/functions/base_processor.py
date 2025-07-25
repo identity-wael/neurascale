@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 import functions_framework
 from google.cloud import bigtable
@@ -167,7 +167,7 @@ class NeuralDataProcessor:
         if self.signal_type in ['eeg', 'ecog', 'lfp']:
             # Add frequency domain features (simplified)
             fft_vals = np.fft.fft(data)
-            power_spectrum = np.abs(fft_vals[:len(fft_vals)//2])**2
+            power_spectrum = np.abs(fft_vals[:len(fft_vals) // 2])**2
             features['total_power'] = float(np.sum(power_spectrum))
 
         elif self.signal_type == 'accelerometer':

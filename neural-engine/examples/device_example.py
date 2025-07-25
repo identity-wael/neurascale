@@ -2,8 +2,18 @@
 
 import asyncio
 import logging
-from datetime import datetime
+import sys
+import os
+from typing import Dict
+
 import numpy as np
+
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.devices import DeviceManager
+from src.devices.interfaces.base_device import DeviceState
+from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType, ChannelInfo
 
 # Setup logging
 logging.basicConfig(
@@ -11,16 +21,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# Add parent directory to path
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from typing import Dict
-from src.devices import DeviceManager, SyntheticDevice
-from src.devices.interfaces.base_device import DeviceState
-from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType
 
 
 class DataProcessor:
@@ -40,10 +40,12 @@ class DataProcessor:
 
         # Log every 20th packet
         if self.packet_count % 20 == 0:
-            logger.info(f"Device {device_id}: Packet {self.packet_count}, "
-                       f"Channels: {packet.n_channels}, "
-                       f"Samples: {packet.n_samples}, "
-                       f"Mean amplitude: {np.mean(means):.2f}µV")
+            logger.info(
+                f"Device {device_id}: Packet {self.packet_count}, "
+                f"Channels: {packet.n_channels}, "
+                f"Samples: {packet.n_samples}, "
+                f"Mean amplitude: {np.mean(means):.2f}µV"
+            )
 
 
 def device_state_handler(device_id: str, state: DeviceState) -> None:
@@ -89,8 +91,10 @@ async def main() -> None:
 
             # Check capabilities
             capabilities = eeg_device.get_capabilities()
-            logger.info(f"Device capabilities: {capabilities.max_channels} channels, "
-                       f"sampling rates: {capabilities.supported_sampling_rates}")
+            logger.info(
+                f"Device capabilities: {capabilities.max_channels} channels, "
+                f"sampling rates: {capabilities.supported_sampling_rates}"
+            )
 
             # Start streaming
             await manager.start_streaming(["synthetic_eeg_001"])
@@ -109,7 +113,7 @@ async def main() -> None:
         logger.info("\n=== Example 2: Multiple Devices with Aggregation ===")
 
         # Add EMG device
-        emg_device = await manager.add_device(
+        await manager.add_device(
             device_id="synthetic_emg_001",
             device_type="synthetic",
             signal_type=NeuralSignalType.EMG,
@@ -120,7 +124,7 @@ async def main() -> None:
         )
 
         # Add accelerometer device
-        accel_device = await manager.add_device(
+        await manager.add_device(
             device_id="synthetic_accel_001",
             device_type="synthetic",
             signal_type=NeuralSignalType.ACCELEROMETER,
@@ -195,7 +199,7 @@ async def lsl_example() -> None:
 
     try:
         # Try to find LSL streams
-        lsl_device = await manager.add_device(
+        await manager.add_device(
             device_id="lsl_any",
             device_type="lsl",
             stream_type="EEG",  # Look for EEG streams
@@ -241,9 +245,8 @@ async def openbci_example() -> None:
             logger.info("Connected to OpenBCI device")
 
             # Configure channels (turn off channels 5-8)
-            from src.ingestion.data_types import ChannelInfo
             channels = [
-                ChannelInfo(channel_id=i, label=f"Ch{i+1}", unit="microvolts", sampling_rate=250.0)
+                ChannelInfo(channel_id=i, label=f"Ch{i + 1}", unit="microvolts", sampling_rate=250.0)
                 for i in range(4)  # Only use first 4 channels
             ]
             device.configure_channels(channels)

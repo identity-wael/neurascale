@@ -29,7 +29,7 @@ class EMGProcessor(NeuralDataProcessor):
         if window_size > len(rectified):
             window_size = len(rectified)
 
-        smoothed = np.convolve(rectified, np.ones(window_size)/window_size, mode='valid')
+        smoothed = np.convolve(rectified, np.ones(window_size) / window_size, mode='valid')
 
         # Calculate activation metrics
         return {

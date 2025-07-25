@@ -142,7 +142,7 @@ class ExtractSpectralFeatures(beam.DoFn):
 
             # FFT for spectral analysis
             fft_vals = scipy.fft.fft(data)
-            fft_freq = scipy.fft.fftfreq(len(data), 1/self.sampling_rate)
+            fft_freq = scipy.fft.fftfreq(len(data), 1 / self.sampling_rate)
 
             # Get positive frequencies only
             pos_mask = fft_freq > 0
@@ -206,14 +206,14 @@ class ExtractTemporalFeatures(beam.DoFn):
                     return float(max([abs(ua - va) for ua, va in zip(xi[0:m], xj[0:m])]))
 
                 def _phi(m: int) -> float:
-                    patterns = np.array([data[i:i+m] for i in range(N-m+1)])
+                    patterns = np.array([data[i:i + m] for i in range(N - m + 1)])
                     C = 0
-                    for i in range(N-m+1):
-                        matches = sum([1 for j in range(N-m+1) if i != j and _maxdist(patterns[i], patterns[j], m) <= r])
+                    for i in range(N - m + 1):
+                        matches = sum([1 for j in range(N - m + 1) if i != j and _maxdist(patterns[i], patterns[j], m) <= r])
                         C += matches
-                    return C / (N-m+1) / (N-m)
+                    return C / (N - m + 1) / (N - m)
 
-                return -np.log(_phi(m+1) / _phi(m)) if _phi(m) > 0 else 0
+                return -np.log(_phi(m + 1) / _phi(m)) if _phi(m) > 0 else 0
 
             temporal_features = {
                 **autocorr_features,

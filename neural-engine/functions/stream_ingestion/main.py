@@ -22,6 +22,7 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'staging')
 BIGTABLE_INSTANCE = f'neural-data-{ENVIRONMENT}'
 BIGTABLE_TABLE = 'neural-time-series'
 
+
 @functions_framework.cloud_event  # type: ignore
 def process_neural_stream(cloud_event: Any) -> None:
     """Process neural data stream from Pub/Sub."""
@@ -46,8 +47,10 @@ def process_neural_stream(cloud_event: Any) -> None:
             return
 
         # Log data info
-        logger.info(f"Signal type: {signal_type}, Channels: {len(channels)}, "
-                   f"Samples: {len(samples)}, Sampling rate: {sampling_rate}Hz")
+        logger.info(
+            f"Signal type: {signal_type}, Channels: {len(channels)}, "
+            f"Samples: {len(samples)}, Sampling rate: {sampling_rate}Hz"
+        )
 
         # Store in Bigtable (simplified for now)
         try:

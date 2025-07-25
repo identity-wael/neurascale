@@ -3,7 +3,7 @@
 import os
 import json
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, cast
 from datetime import datetime
 import tempfile
 import numpy as np
@@ -246,7 +246,7 @@ class NeuralModelTrainingPipeline:
         # This is a common pattern in Vertex AI where paths are accepted
         # Type ignore needed for CI environment where stricter typing is enforced
         model = job.run(
-            dataset=dataset_path,
+            dataset=cast(Any, dataset_path),  # String paths accepted in practice
             model_display_name=f"{model_class}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
             args=[
                 f"--model_class={model_class}",

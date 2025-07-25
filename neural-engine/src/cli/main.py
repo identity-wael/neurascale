@@ -91,7 +91,7 @@ def run_inference(host: str, port: int, config: Optional[str]):
 def train_model(model_type: str, data_path: str, project_id: str, epochs: int):
     """Train a neural model."""
     try:
-        from models.training_pipeline import NeuralModelTrainingPipeline
+        # from models.training_pipeline import NeuralModelTrainingPipeline
 
         # Load data (placeholder - implement actual data loading)
         logger.info(f"Loading data from {data_path}")

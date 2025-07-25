@@ -40,6 +40,16 @@ This consolidated workflow handles:
 **Cause**: Delay between plan and apply steps allowing state changes
 **Fix**: Combined plan and apply into a single step (fixed in commit)
 
+#### Provider Inconsistent Result
+
+**Issue**: "Provider produced inconsistent result after apply" for IAM bindings
+**Cause**: Race conditions when multiple IAM bindings are created/modified
+**Fix**:
+
+- Changed from `google_project_iam_member` to `google_project_iam_binding` for authoritative management
+- Added retry logic with state refresh between attempts
+- Maximum 3 attempts with 30-second delays
+
 ### Troubleshooting
 
 If you encounter deployment issues:

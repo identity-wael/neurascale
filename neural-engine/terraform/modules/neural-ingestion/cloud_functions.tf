@@ -26,7 +26,8 @@ resource "google_storage_bucket_object" "function_source" {
 
 # Cloud Functions (2nd gen) for processing neural streams
 resource "google_cloudfunctions2_function" "process_neural_stream" {
-  for_each = var.enable_cloud_functions ? local.function_types : toset([])
+  # Temporarily disabled due to Cloud Build permission issues
+  for_each = toset([])
 
   name     = "process-neural-${each.key}-${var.environment}"
   location = var.region

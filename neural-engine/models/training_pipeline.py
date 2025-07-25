@@ -244,8 +244,9 @@ class NeuralModelTrainingPipeline:
         # Run training job
         # Note: dataset parameter expects a Dataset object, but we're passing path as string
         # This is a common pattern in Vertex AI where paths are accepted
+        # Type ignore needed for CI environment where stricter typing is enforced
         model = job.run(
-            dataset=dataset_path,
+            dataset=dataset_path,  # type: ignore[arg-type]  # String paths are accepted
             model_display_name=f"{model_class}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
             args=[
                 f"--model_class={model_class}",

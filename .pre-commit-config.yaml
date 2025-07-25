@@ -39,14 +39,15 @@ repos:
           - typescript@5.3.3
 
   # Python code quality tools for neural-engine
-  # Black is temporarily disabled due to Python 3.12.5 compatibility issue
-  # It runs successfully in CI/CD with Python 3.12.11
-  # - repo: https://github.com/psf/black
-  #   rev: 24.10.0
-  #   hooks:
-  #     - id: black
-  #       files: ^neural-engine/.*\.py$
-  #       language_version: python3.12
+  - repo: local
+    hooks:
+      - id: black-neural-engine
+        name: black
+        entry: /opt/homebrew/bin/python3.12 -m black
+        language: system
+        types: [python]
+        files: ^neural-engine/.*\.py$
+        require_serial: true
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1

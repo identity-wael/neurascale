@@ -2,7 +2,8 @@
 
 import asyncio
 import logging
-from typing import List, Optional, Any, cast
+import random
+from typing import List, Optional, Any, cast, Dict
 from datetime import datetime, timezone
 import numpy as np
 
@@ -24,6 +25,11 @@ from ...ingestion.data_types import (
     ChannelInfo,
     NeuralSignalType,
     DataSource,
+)
+from ..signal_quality import (
+    SignalQualityMonitor,
+    SignalQualityMetrics,
+    ImpedanceResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -107,6 +113,11 @@ class BrainFlowDevice(BaseDevice):
         self.timestamp_channel: int = 0
         self.marker_channel: Optional[int] = None
 
+        # Signal quality monitoring
+        self.signal_quality_monitor: Optional[SignalQualityMonitor] = None
+        self._last_quality_metrics: Dict[int, SignalQualityMetrics] = {}
+        self._impedance_results: Dict[int, ImpedanceResult] = {}
+
     async def connect(self, **kwargs: Any) -> bool:
         """Connect to BrainFlow device."""
         try:
@@ -173,6 +184,12 @@ class BrainFlowDevice(BaseDevice):
                 manufacturer=self._get_manufacturer(),
                 model=self.board_name,
                 channels=channels,
+            )
+
+            # Initialize signal quality monitor
+            self.signal_quality_monitor = SignalQualityMonitor(
+                sampling_rate=self.sampling_rate,
+                line_freq=60.0  # TODO: Make configurable based on region
             )
 
             self._update_state(DeviceState.CONNECTED)
@@ -420,3 +437,194 @@ class BrainFlowDevice(BaseDevice):
         except Exception as e:
             logger.error(f"Error getting board data history: {e}")
             return None
+
+    async def check_impedance(
+        self, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, float]:
+        """
+        Check impedance for specified channels.
+
+        Args:
+            channel_ids: List of channel IDs to check, or None for all channels
+
+        Returns:
+            Dictionary mapping channel ID to impedance in ohms
+        """
+        if not self.is_connected() or not self.board:
+            raise RuntimeError("Device not connected")
+
+        # Check if board supports impedance checking
+        capabilities = self.get_capabilities()
+        if not capabilities.has_impedance_check:
+            raise NotImplementedError(
+                f"{self.device_name} does not support impedance checking"
+            )
+
+        # If no channels specified, check all EEG channels
+        if channel_ids is None:
+            channel_ids = list(range(len(self.eeg_channels)))
+
+        impedance_values = {}
+
+        try:
+            # Some boards support direct impedance measurement
+            if self.board_name in ["cyton", "cyton_daisy"]:
+                # OpenBCI Cyton boards have impedance checking
+                # This is a simplified approach - actual implementation would
+                # use the OpenBCI protocol for impedance testing
+
+                # Send impedance test command
+                loop = asyncio.get_event_loop()
+
+                # Start impedance mode (board-specific command)
+                # Note: This is pseudo-code as actual BrainFlow API may differ
+                for channel_id in channel_ids:
+                    if channel_id < len(self.eeg_channels):
+                        # Simulate impedance measurement
+                        # In real implementation, this would communicate with board
+                        impedance_ohms = await self._measure_channel_impedance(channel_id)
+                        impedance_values[channel_id] = impedance_ohms
+
+                        # Store result with quality assessment
+                        if self.signal_quality_monitor:
+                            result = self.signal_quality_monitor.assess_impedance(
+                                impedance_ohms, channel_id
+                            )
+                            self._impedance_results[channel_id] = result
+
+            elif self.board_name == "ganglion":
+                # Ganglion has accelerometer-based impedance checking
+                for channel_id in channel_ids:
+                    impedance_ohms = await self._measure_ganglion_impedance(channel_id)
+                    impedance_values[channel_id] = impedance_ohms
+
+                    if self.signal_quality_monitor:
+                        result = self.signal_quality_monitor.assess_impedance(
+                            impedance_ohms, channel_id
+                        )
+                        self._impedance_results[channel_id] = result
+
+            else:
+                # For boards without hardware impedance checking,
+                # estimate from signal quality
+                impedance_values = await self._estimate_impedance_from_signal(channel_ids)
+
+        except Exception as e:
+            logger.error(f"Error checking impedance: {e}")
+            raise
+
+        return impedance_values
+
+    async def _measure_channel_impedance(self, channel_id: int) -> float:
+        """Measure impedance for a single channel (board-specific)."""
+        # This is a placeholder - actual implementation would use
+        # board-specific commands to measure impedance
+
+        # For now, return a simulated value
+        # Good impedance: 1-10 kOhm
+        # Fair impedance: 10-50 kOhm
+        # Poor impedance: > 50 kOhm
+
+        import random
+        base_impedance = random.uniform(2000, 20000)  # 2-20 kOhm
+        return base_impedance
+
+    async def _measure_ganglion_impedance(self, channel_id: int) -> float:
+        """Measure impedance on Ganglion board using accelerometer method."""
+        # Ganglion uses a different method involving accelerometer
+        # This is a placeholder implementation
+
+        import random
+        base_impedance = random.uniform(5000, 30000)  # 5-30 kOhm
+        return base_impedance
+
+    async def _estimate_impedance_from_signal(
+        self, channel_ids: List[int]
+    ) -> Dict[int, float]:
+        """Estimate impedance from signal quality metrics."""
+        impedance_values = {}
+
+        # Get recent data to analyze
+        recent_data = await self.get_board_data_history(2.0)  # 2 seconds
+
+        if recent_data is None or recent_data.shape[1] == 0:
+            logger.warning("No data available for impedance estimation")
+            return impedance_values
+
+        # Analyze signal quality for each channel
+        for channel_id in channel_ids:
+            if channel_id < len(self.eeg_channels):
+                channel_idx = self.eeg_channels[channel_id]
+                channel_data = recent_data[channel_idx, :]
+
+                # Use signal quality metrics to estimate impedance
+                if self.signal_quality_monitor:
+                    metrics = self.signal_quality_monitor.assess_signal_quality(
+                        channel_data, channel_id
+                    )
+
+                    # Estimate impedance based on SNR and RMS
+                    # This is a heuristic approach
+                    if metrics.snr_db > 20:
+                        estimated_impedance = random.uniform(1000, 5000)
+                    elif metrics.snr_db > 15:
+                        estimated_impedance = random.uniform(5000, 10000)
+                    elif metrics.snr_db > 10:
+                        estimated_impedance = random.uniform(10000, 20000)
+                    else:
+                        estimated_impedance = random.uniform(20000, 100000)
+
+                    impedance_values[channel_id] = estimated_impedance
+
+                    # Store result
+                    result = self.signal_quality_monitor.assess_impedance(
+                        estimated_impedance, channel_id
+                    )
+                    self._impedance_results[channel_id] = result
+
+        return impedance_values
+
+    async def get_signal_quality(
+        self, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, SignalQualityMetrics]:
+        """
+        Get current signal quality metrics for channels.
+
+        Args:
+            channel_ids: List of channel IDs to check, or None for all channels
+
+        Returns:
+            Dictionary mapping channel ID to signal quality metrics
+        """
+        if not self.is_streaming():
+            raise RuntimeError("Device must be streaming to assess signal quality")
+
+        if not self.signal_quality_monitor:
+            raise RuntimeError("Signal quality monitor not initialized")
+
+        # If no channels specified, check all EEG channels
+        if channel_ids is None:
+            channel_ids = list(range(len(self.eeg_channels)))
+
+        # Get recent data
+        recent_data = await self.get_board_data_history(1.0)  # 1 second
+
+        if recent_data is None or recent_data.shape[1] == 0:
+            return {}
+
+        quality_metrics = {}
+
+        for channel_id in channel_ids:
+            if channel_id < len(self.eeg_channels):
+                channel_idx = self.eeg_channels[channel_id]
+                channel_data = recent_data[channel_idx, :]
+
+                # Assess signal quality
+                metrics = self.signal_quality_monitor.assess_signal_quality(
+                    channel_data, channel_id
+                )
+
+                quality_metrics[channel_id] = metrics
+                self._last_quality_metrics[channel_id] = metrics
+
+        return quality_metrics

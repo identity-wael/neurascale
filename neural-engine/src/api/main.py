@@ -2,11 +2,18 @@
 
 from flask import Flask, jsonify, Response
 import logging
+from flask_cors import CORS
+
+from .device_api import device_api
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for the entire app
+
+# Register blueprints
+app.register_blueprint(device_api)
 
 
 @app.route("/")

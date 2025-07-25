@@ -19,7 +19,7 @@ env:
 jobs:
   # Determine target environment based on event
   setup:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment: ${{ steps.determine.outputs.environment }}
       project_id: ${{ steps.determine.outputs.project_id }}
@@ -89,7 +89,7 @@ jobs:
   # Build Docker images and Cloud Functions package
   build:
     needs: [setup, test]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
       contents: read
@@ -166,7 +166,7 @@ jobs:
   # Package Cloud Functions
   package-functions:
     needs: [setup, test]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
       contents: read
@@ -214,7 +214,7 @@ jobs:
   # Deploy infrastructure and functions together
   deploy:
     needs: [setup, test, package-functions]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
       contents: read
@@ -265,7 +265,7 @@ jobs:
   # Verify deployment
   verify:
     needs: [setup, deploy]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
       contents: read

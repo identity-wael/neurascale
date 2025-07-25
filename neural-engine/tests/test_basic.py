@@ -11,6 +11,7 @@ def test_environment_setup():
 def test_python_version():
     """Test Python version is compatible."""
     import sys
+
     assert sys.version_info >= (3, 11)
     assert sys.version_info < (3, 13)
 
@@ -20,6 +21,7 @@ def test_imports():
     # Test neural signal processing imports
     try:
         import pylsl
+
         has_lsl = True
     except RuntimeError as e:
         if "LSL binary library file was not found" in str(e):
@@ -27,16 +29,16 @@ def test_imports():
         else:
             raise
 
-    import brainflow
+    import brainflow  # noqa: F401
     import numpy
-    import scipy
-    import sklearn
+    import scipy  # noqa: F401
+    import sklearn  # noqa: F401
 
     # Test Google Cloud imports
-    from google.cloud import pubsub_v1
-    from google.cloud import firestore
-    from google.cloud import bigquery
-    from google.cloud import storage
+    from google.cloud import pubsub_v1  # noqa: F401
+    from google.cloud import firestore  # noqa: F401
+    from google.cloud import bigquery  # noqa: F401
+    from google.cloud import storage  # noqa: F401
 
     # Test TensorFlow
     import tensorflow as tf
@@ -50,7 +52,8 @@ def test_imports():
 
 @pytest.mark.asyncio
 async def test_async_support():
-    """Test that async/await is working."""
+    """Test that async / await is working."""
+
     async def sample_async_function():
         return "async works"
 
@@ -62,7 +65,7 @@ class TestNeuralEngineSetup:
     """Test class for Neural Engine setup verification."""
 
     def test_class_based_test(self):
-        """Test that class-based tests work."""
+        """Test that class - based tests work."""
         assert 1 + 1 == 2
 
     def test_numpy_operations(self):

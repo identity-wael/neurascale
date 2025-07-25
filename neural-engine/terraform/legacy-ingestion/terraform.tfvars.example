@@ -1,0 +1,13 @@
+# Example Terraform variables file
+# Copy this to terraform.tfvars and update with your values
+
+project_id = "neurascale"
+region     = "northamerica-northeast1"  # Montreal
+environment = "development"
+
+# Customize signal types if needed
+# signal_types = ["eeg", "ecog", "spikes", "lfp", "emg", "accelerometer", "custom"]
+
+# Customize Bigtable instance if needed
+# bigtable_instance_id = "neural-data"
+# bigtable_table_id    = "time-series"

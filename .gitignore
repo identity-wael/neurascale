@@ -48,3 +48,6 @@ scripts/google/google-ads-*.yaml
 # Google Analytics
 ga4-config.json
 scripts/google/ga4-config.json
+
+# Pre-commit
+.pre-commit-venv/

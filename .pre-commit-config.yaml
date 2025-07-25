@@ -37,3 +37,40 @@ repos:
           - eslint@8.56.0
           - eslint-config-next@14.0.4
           - typescript@5.3.3
+
+  # Python code quality tools for neural-engine
+  - repo: local
+    hooks:
+      - id: black-neural-engine
+        name: black
+        entry: .pre-commit-scripts/run-black.sh
+        language: system
+        types: [python]
+        files: ^neural-engine/.*\.py$
+        require_serial: true
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        files: ^neural-engine/.*\.py$
+        args: ['--config=neural-engine/.flake8']
+
+  - repo: local
+    hooks:
+      - id: mypy-neural-engine
+        name: mypy
+        entry: bash -c 'cd neural-engine && mypy src/ --config-file=mypy.ini --namespace-packages'
+        language: system
+        types: [python]
+        files: ^neural-engine/.*\.py$
+        require_serial: true
+
+  # Terraform formatting
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.96.2
+    hooks:
+      - id: terraform_fmt
+        files: ^neural-engine/terraform/.*\.tf$
+        args:
+          - --args=-recursive

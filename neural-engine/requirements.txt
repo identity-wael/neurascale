@@ -39,22 +39,60 @@ google-cloud-tasks==2.16.5       # Task queues
 google-cloud-scheduler==2.16.0   # Cron jobs
 
 # API Framework (Cloud Run compatible)
-flask==3.1.0
+flask==3.1.1
 gunicorn==23.0.0
 # google-cloud-endpoints         # Deprecated, use Cloud Run/API Gateway instead
-
-# Testing
-pytest==8.3.4
-pytest-asyncio==0.25.1
 
 # Data Processing
 h5py==3.12.1
 matplotlib==3.10.0
 joblib==1.4.2
 pywavelets==1.7.0
+pandas==2.2.3
+msgpack==1.0.8
+lz4==4.3.3
 
-# Development Tools
-black==24.10.0
-flake8==7.1.1
-mypy==1.13.0
-ipython==8.29.0
+# Deep Learning
+torch==2.5.1  # PyTorch for Python 3.12
+
+# API Framework additions
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.0
+websockets==11.0.3
+python-multipart==0.0.6
+
+# Cloud Functions
+functions-framework==3.8.2
+
+# Additional dependencies
+wandb==0.18.5
+tensorboard==2.17.0
+python-dotenv==1.0.1
+pyyaml==6.0.2
+click==8.1.7
+tqdm==4.67.0
+statsmodels==0.14.4
+
+# Async support
+aiohttp==3.10.11
+aiokafka==0.11.0
+asyncpg==0.30.0
+
+# Cache and message queue
+redis==5.2.0
+pymemcache==4.0.0
+
+# Security
+cryptography==44.0.0
+pyjwt==2.10.0
+
+# Google Cloud Error Reporting (missing from original)
+google-cloud-error-reporting==1.12.0
+
+# Development dependencies
+# Testing and development tools moved to requirements-dev.txt
+
+# Signal processing additions
+mne==1.8.0  # For EEG/MEG processing
+pyedflib==0.1.38  # For EDF file format

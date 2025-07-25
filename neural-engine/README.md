@@ -40,7 +40,7 @@ neural-engine/
 - **Device Integration**: Lab Streaming Layer (LSL), BrainFlow
 - **3D Visualization**: NVIDIA Omniverse
 - **Infrastructure**: Kubernetes, Terraform
-- **Languages**: Python 3.9+, Node.js 18+
+- **Languages**: Python 3.12+, Node.js 18+
 
 ## Getting Started
 
@@ -82,6 +82,29 @@ pytest tests/
 
 For detailed implementation instructions, see [instructions.md](./instructions.md).
 
+## Multi-Environment Setup
+
+The Neural Engine supports three environments:
+
+- **Production** (`production-neurascale`): Main branch deployments
+- **Staging** (`staging-neurascale`): Pull request deployments
+- **Development** (`development-neurascale`): Development branch deployments
+
+### Infrastructure Management
+
+Infrastructure is managed through Terraform with state stored in Google Cloud Storage:
+
+- **State Bucket**: `neurascale-terraform-state`
+- **Production State**: `gs://neurascale-terraform-state/neural-engine/production/`
+- **Staging State**: `gs://neurascale-terraform-state/neural-engine/staging/`
+- **Development State**: `gs://neurascale-terraform-state/neural-engine/development/`
+
+### Deployment Flow
+
+1. **Pull Requests** → Deploy to staging environment
+2. **Main Branch** → Deploy to production environment
+3. **Development Branch** → Deploy to development environment
+
 ## Documentation
 
 - [instructions.md](./instructions.md) - Step-by-step implementation guide
@@ -94,24 +117,34 @@ For detailed implementation instructions, see [instructions.md](./instructions.m
 - Project structure created
 - Core dependencies configured (Python 3.12)
 - Basic tests implemented
-- CI/CD pipeline setup (with self-hosted runner support)
-- Docker configurations for processor and API
+- CI/CD pipeline setup with multi-environment support
+- Docker configurations for ingestion, processor, and API services
 - Google Cloud deployment configurations
 - GitHub issues created for all implementation phases (#121-#141)
+- Data ingestion system with validators
+- Multi-environment infrastructure (production, staging, development)
+- GCS backend for Terraform state management
 
 ### 🚧 Current Issues
 
-- GitHub Actions workflow experiencing startup failures
 - Need to configure GCP_SA_KEY secret after running setup script
+- GitHub Actions uses Workload Identity Federation for GCP authentication
 
 ### 📋 Next Steps
 
 1. Run `gcloud auth login` and `./scripts/setup-gcp-auth.sh`
 2. Add GCP_SA_KEY to GitHub secrets
-3. Continue with Phase 1 implementation
+3. Deploy infrastructure using GitHub Actions
+4. Continue with neural processing implementation
 
 Track progress in the [GitHub Project](https://github.com/identity-wael/neurascale/projects/1) or see issues #121-#141 for detailed implementation tasks.
 
 ## License
 
 Part of the NeuraScale platform. See main repository for license details.
+
+# Trigger workflow
+
+# Trigger deployment
+
+# Trigger deployment with fixed permissions

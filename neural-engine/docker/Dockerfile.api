@@ -1,5 +1,5 @@
 # Neural Engine API Dockerfile
-FROM python:3.12-slim
+FROM python:3.12-slim AS base
 
 WORKDIR /app
 
@@ -8,10 +8,19 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Set pip to use more parallel downloads
+ENV PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
 
+# First stage: Dependencies
+FROM base AS dependencies
+# Copy only requirements to cache dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt --progress-bar off
+
+# Second stage: Application
+FROM dependencies AS app
 # Copy source code
 COPY src/ ./src/
 COPY setup.py .

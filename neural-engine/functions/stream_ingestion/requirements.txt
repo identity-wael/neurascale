@@ -1,0 +1,3 @@
+functions-framework==3.*
+google-cloud-pubsub==2.18.*
+google-cloud-bigtable==2.21.*

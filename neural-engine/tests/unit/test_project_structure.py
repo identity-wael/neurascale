@@ -1,6 +1,5 @@
 """Test the Neural Engine project structure."""
 
-import os
 import pytest
 from pathlib import Path
 

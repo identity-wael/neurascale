@@ -264,6 +264,16 @@ jobs:
             -input=false \
             -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
 
+      - name: Terraform Version and Providers
+        working-directory: neural-engine/terraform
+        timeout-minutes: 1
+        run: |
+          echo "Checking Terraform version..."
+          terraform version
+
+          echo "Checking Terraform providers..."
+          terraform providers
+
       - name: Terraform Plan
         working-directory: neural-engine/terraform
         timeout-minutes: 2
@@ -296,6 +306,11 @@ jobs:
           export TF_LOG=DEBUG
           export TF_LOG_PATH=terraform-debug.log
 
+          # First try a simple validate
+          echo "Running terraform validate..."
+          terraform validate
+
+          echo "Running terraform plan..."
           terraform plan \
             -input=false \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
@@ -303,7 +318,8 @@ jobs:
             -lock-timeout=30s \
             -out=tfplan \
             -refresh=false \
-            -parallelism=10
+            -parallelism=1 \
+            -compact-warnings || (echo "Plan failed, showing debug log:" && cat terraform-debug.log | tail -100)
 
       - name: Terraform Apply
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging')

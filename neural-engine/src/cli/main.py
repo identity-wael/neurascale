@@ -9,17 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.version_option(version='0.1.0')
+@click.version_option(version="0.1.0")
 def cli():
     """NeuraScale Neural Engine CLI."""
     pass
 
 
 @cli.command()
-@click.option('--project-id', required=True, help='GCP Project ID')
-@click.option('--region', default='us-central1', help='GCP Region')
-@click.option('--topic', required=True, help='Pub/Sub topic for neural data')
-@click.option('--streaming/--batch', default=True, help='Run in streaming mode')
+@click.option("--project-id", required=True, help="GCP Project ID")
+@click.option("--region", default="us-central1", help="GCP Region")
+@click.option("--topic", required=True, help="Pub/Sub topic for neural data")
+@click.option("--streaming/--batch", default=True, help="Run in streaming mode")
 def run_pipeline(project_id: str, region: str, topic: str, streaming: bool):
     """Run the neural processing pipeline."""
     try:
@@ -30,19 +30,22 @@ def run_pipeline(project_id: str, region: str, topic: str, streaming: bool):
 
     except ImportError as e:
         logger.error(f"Failed to import pipeline: {e}")
-        logger.error("Please install dataflow dependencies: pip install apache-beam[gcp]")
+        logger.error(
+            "Please install dataflow dependencies: pip install apache-beam[gcp]"
+        )
     except Exception as e:
         logger.error(f"Pipeline failed: {e}")
         raise
 
 
 @cli.command()
-@click.option('--host', default='0.0.0.0', help='API server host')
-@click.option('--port', default=8000, help='API server port')
+@click.option("--host", default="0.0.0.0", help="API server host")
+@click.option("--port", default=8000, help="API server port")
 def run_api(host: str, port: int):
     """Run the API server."""
     try:
         import uvicorn
+
         uvicorn.run("src.api.main:app", host=host, port=port, reload=True)
     except ImportError:
         logger.error("Please install API dependencies: pip install fastapi uvicorn")
@@ -52,9 +55,9 @@ def run_api(host: str, port: int):
 
 
 @cli.command()
-@click.option('--host', default='0.0.0.0', help='Inference server host')
-@click.option('--port', default=8080, help='Inference server port')
-@click.option('--config', help='Model configuration file')
+@click.option("--host", default="0.0.0.0", help="Inference server host")
+@click.option("--port", default=8080, help="Inference server port")
+@click.option("--config", help="Model configuration file")
 def run_inference(host: str, port: int, config: Optional[str]):
     """Run the inference server."""
     try:
@@ -67,18 +70,24 @@ def run_inference(host: str, port: int, config: Optional[str]):
 
     except ImportError as e:
         logger.error(f"Failed to import inference server: {e}")
-        logger.error("Please install ML dependencies: pip install tensorflow torch fastapi")
+        logger.error(
+            "Please install ML dependencies: pip install tensorflow torch fastapi"
+        )
     except Exception as e:
         logger.error(f"Inference server failed: {e}")
         raise
 
 
 @cli.command()
-@click.option('--model-type', required=True, type=click.Choice(['movement', 'emotion', 'eegnet']),
-              help='Type of model to train')
-@click.option('--data-path', required=True, help='Path to training data')
-@click.option('--project-id', required=True, help='GCP Project ID')
-@click.option('--epochs', default=100, help='Number of training epochs')
+@click.option(
+    "--model-type",
+    required=True,
+    type=click.Choice(["movement", "emotion", "eegnet"]),
+    help="Type of model to train",
+)
+@click.option("--data-path", required=True, help="Path to training data")
+@click.option("--project-id", required=True, help="GCP Project ID")
+@click.option("--epochs", default=100, help="Number of training epochs")
 def train_model(model_type: str, data_path: str, project_id: str, epochs: int):
     """Train a neural model."""
     try:
@@ -107,10 +116,13 @@ def train_model(model_type: str, data_path: str, project_id: str, epochs: int):
 
 
 @cli.command()
-@click.option('--project-id', required=True, help='GCP Project ID')
-@click.option('--environment', required=True,
-              type=click.Choice(['development', 'staging', 'production']),
-              help='Deployment environment')
+@click.option("--project-id", required=True, help="GCP Project ID")
+@click.option(
+    "--environment",
+    required=True,
+    type=click.Choice(["development", "staging", "production"]),
+    help="Deployment environment",
+)
 def deploy(project_id: str, environment: str):
     """Deploy the neural engine to GCP."""
     logger.info(f"Deploying to {environment} environment in project {project_id}")
@@ -123,12 +135,13 @@ def deploy(project_id: str, environment: str):
 def test():
     """Run tests."""
     import subprocess
-    result = subprocess.run(['pytest', 'tests/', '-v'], capture_output=True, text=True)
+
+    result = subprocess.run(["pytest", "tests/", "-v"], capture_output=True, text=True)
     print(result.stdout)
     if result.stderr:
         print(result.stderr)
     return result.returncode
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

@@ -28,9 +28,9 @@ resource "google_logging_metric" "neural_data_quality" {
   filter = "resource.type=\"cloud_function\" AND jsonPayload.metric_type=\"data_quality\""
 
   metric_descriptor {
-    # Changed from GAUGE to DELTA which is supported
+    # Use DELTA with DISTRIBUTION for value extraction
     metric_kind = "DELTA"
-    value_type  = "DOUBLE"
+    value_type  = "DISTRIBUTION"
     unit        = "1"
 
     labels {
@@ -47,6 +47,15 @@ resource "google_logging_metric" "neural_data_quality" {
   }
 
   value_extractor = "EXTRACT(jsonPayload.quality_score)"
+
+  # Required bucket options for DISTRIBUTION metrics
+  bucket_options {
+    exponential_buckets {
+      num_finite_buckets = 64
+      growth_factor      = 2
+      scale              = 0.01
+    }
+  }
 
   label_extractors = {
     "signal_type" = "EXTRACT(jsonPayload.signal_type)"
@@ -84,8 +93,8 @@ resource "google_logging_metric" "model_inference_time" {
 
   metric_descriptor {
     metric_kind = "DELTA"
-    # Changed from DOUBLE to INT64 which is supported for DELTA
-    value_type = "INT64"
+    # Use DISTRIBUTION for value extraction
+    value_type = "DISTRIBUTION"
     unit       = "ms"
 
     labels {
@@ -96,6 +105,15 @@ resource "google_logging_metric" "model_inference_time" {
   }
 
   value_extractor = "EXTRACT(jsonPayload.inference_time_ms)"
+
+  # Required bucket options for DISTRIBUTION metrics
+  bucket_options {
+    exponential_buckets {
+      num_finite_buckets = 64
+      growth_factor      = 2
+      scale              = 1
+    }
+  }
 
   label_extractors = {
     "model_name" = "EXTRACT(jsonPayload.model_name)"
@@ -108,7 +126,7 @@ resource "google_logging_metric" "device_connection_status" {
   filter = "resource.type=\"cloud_function\" AND jsonPayload.metric_type=\"device_connection\""
 
   metric_descriptor {
-    # Changed from GAUGE to DELTA which is supported
+    # Use DELTA with INT64 (no value extractor)
     metric_kind = "DELTA"
     value_type  = "INT64"
     unit        = "1"
@@ -126,7 +144,8 @@ resource "google_logging_metric" "device_connection_status" {
     }
   }
 
-  value_extractor = "EXTRACT(jsonPayload.connection_count)"
+  # For INT64, the log entry represents count of 1
+  # No value_extractor needed
 
   label_extractors = {
     "device_type" = "EXTRACT(jsonPayload.device_type)"
@@ -144,8 +163,8 @@ resource "google_monitoring_slo" "api_availability" {
 
   request_based_sli {
     good_total_ratio {
-      good_service_filter  = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND metric.label.response_code_class=\"2xx\""
-      total_service_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_count\""
+      good_service_filter  = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\" AND metric.label.response_code_class=\"2xx\""
+      total_service_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\""
     }
   }
 }

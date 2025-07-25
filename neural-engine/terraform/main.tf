@@ -175,10 +175,10 @@ module "neural_ingestion" {
 module "monitoring" {
   source = "./modules/monitoring"
 
-  project_id                = var.project_id
-  environment               = var.environment
-  enable_monitoring_alerts  = var.enable_monitoring_alerts
-  notification_channels     = var.alert_notification_channels
+  project_id               = var.project_id
+  environment              = var.environment
+  enable_monitoring_alerts = var.enable_monitoring_alerts
+  notification_channels    = var.alert_notification_channels
 
   depends_on = [
     module.project_apis,
@@ -208,7 +208,7 @@ output "functions_bucket" {
 }
 
 output "monitoring_dashboard" {
-  value = module.monitoring.custom_metrics
+  value       = module.monitoring.custom_metrics
   description = "Custom monitoring metrics"
 }
 

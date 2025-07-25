@@ -235,11 +235,11 @@ resource "google_bigquery_dataset" "cost_export" {
 # Outputs for cost tracking
 output "cost_optimization_config" {
   value = {
-    budget_id              = google_billing_budget.neural_platform_budget.id
-    cost_dashboard_url     = "https://console.cloud.google.com/monitoring/dashboards/custom/${google_monitoring_dashboard.cost_optimization.id}"
-    scheduled_scaling      = var.environment == "development"
-    autoscaling_enabled    = var.enable_bigtable_autoscaling && var.environment == "production"
-    cost_export_dataset    = google_bigquery_dataset.cost_export.dataset_id
+    budget_id           = google_billing_budget.neural_platform_budget.id
+    cost_dashboard_url  = "https://console.cloud.google.com/monitoring/dashboards/custom/${google_monitoring_dashboard.cost_optimization.id}"
+    scheduled_scaling   = var.environment == "development"
+    autoscaling_enabled = var.enable_bigtable_autoscaling && var.environment == "production"
+    cost_export_dataset = google_bigquery_dataset.cost_export.dataset_id
   }
   description = "Cost optimization configuration details"
 }

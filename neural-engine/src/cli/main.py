@@ -92,14 +92,13 @@ def train_model(model_type: str, data_path: str, project_id: str, epochs: int):
     """Train a neural model."""
     try:
         from models.training_pipeline import NeuralModelTrainingPipeline
-        import numpy as np
 
         # Load data (placeholder - implement actual data loading)
         logger.info(f"Loading data from {data_path}")
         # X, y = load_data(data_path)
 
         # Create training pipeline
-        pipeline = NeuralModelTrainingPipeline(project_id=project_id)
+        # pipeline = NeuralModelTrainingPipeline(project_id=project_id)
 
         # Train model based on type
         logger.info(f"Training {model_type} model for {epochs} epochs")

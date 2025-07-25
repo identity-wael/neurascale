@@ -71,19 +71,30 @@ jobs:
         if: steps.test-cache.outputs.cache-hit != 'true'
         run: |
           echo "Setting up Python environment"
-          # Use Homebrew Python 3.12.11
-          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
-          if [[ -x "$PYTHON_PATH" ]]; then
-            echo "Using Homebrew Python"
-            $PYTHON_PATH --version
-            $PYTHON_PATH -m venv venv
-          else
-            echo "Homebrew Python not found, using system Python"
-            python3 --version
-            python3 -m venv venv
+          # Clear any existing venv
+          rm -rf venv
+
+          # Try multiple Python paths
+          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
+            if [[ -x "$PYTHON_PATH" ]]; then
+              echo "Found Python at: $PYTHON_PATH"
+              $PYTHON_PATH --version
+              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
+                echo "Using Python 3.12 from: $PYTHON_PATH"
+                $PYTHON_PATH -m venv venv
+                break
+              fi
+            fi
+          done
+
+          if [[ ! -d "venv" ]]; then
+            echo "ERROR: Could not create venv with Python 3.12"
+            exit 1
           fi
+
           source venv/bin/activate
           python --version
+          which python
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -244,18 +255,30 @@ jobs:
       - name: Set up Python
         run: |
           echo "Setting up Python environment"
-          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
-          if [[ -x "$PYTHON_PATH" ]]; then
-            echo "Using Homebrew Python"
-            $PYTHON_PATH --version
-            $PYTHON_PATH -m venv venv
-          else
-            echo "Homebrew Python not found, using system Python"
-            python3 --version
-            python3 -m venv venv
+          # Clear any existing venv
+          rm -rf venv
+
+          # Try multiple Python paths
+          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
+            if [[ -x "$PYTHON_PATH" ]]; then
+              echo "Found Python at: $PYTHON_PATH"
+              $PYTHON_PATH --version
+              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
+                echo "Using Python 3.12 from: $PYTHON_PATH"
+                $PYTHON_PATH -m venv venv
+                break
+              fi
+            fi
+          done
+
+          if [[ ! -d "venv" ]]; then
+            echo "ERROR: Could not create venv with Python 3.12"
+            exit 1
           fi
+
           source venv/bin/activate
           python --version
+          which python
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -433,18 +456,30 @@ jobs:
       - name: Set up Python
         run: |
           echo "Setting up Python environment"
-          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
-          if [[ -x "$PYTHON_PATH" ]]; then
-            echo "Using Homebrew Python"
-            $PYTHON_PATH --version
-            $PYTHON_PATH -m venv venv
-          else
-            echo "Homebrew Python not found, using system Python"
-            python3 --version
-            python3 -m venv venv
+          # Clear any existing venv
+          rm -rf venv
+
+          # Try multiple Python paths
+          for PYTHON_PATH in "/opt/homebrew/bin/python3.12" "/usr/local/bin/python3.12" "$(which python3.12 2>/dev/null)" "$(which python3 2>/dev/null)"; do
+            if [[ -x "$PYTHON_PATH" ]]; then
+              echo "Found Python at: $PYTHON_PATH"
+              $PYTHON_PATH --version
+              if $PYTHON_PATH --version 2>&1 | grep -q "3.12"; then
+                echo "Using Python 3.12 from: $PYTHON_PATH"
+                $PYTHON_PATH -m venv venv
+                break
+              fi
+            fi
+          done
+
+          if [[ ! -d "venv" ]]; then
+            echo "ERROR: Could not create venv with Python 3.12"
+            exit 1
           fi
+
           source venv/bin/activate
           python --version
+          which python
 
       # Cache Python dependencies
       - name: Cache Python dependencies

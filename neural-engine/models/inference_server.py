@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Tuple
 from datetime import datetime
 import numpy as np
 import json
@@ -45,7 +45,7 @@ class InferenceResponse(BaseModel):
 class ModelRegistry:
     """Registry for managing multiple models."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.models: Dict[str, Dict[str, BaseNeuralModel]] = {}
         self.model_metadata: Dict[str, Dict[str, Any]] = {}
         self.active_models: Dict[str, str] = {}  # model_name -> active_version
@@ -54,7 +54,7 @@ class ModelRegistry:
                       model: BaseNeuralModel,
                       model_name: str,
                       version: str = "v1",
-                      metadata: Optional[Dict[str, Any]] = None):
+                      metadata: Optional[Dict[str, Any]] = None) -> None:
         """Register a model in the registry."""
         if model_name not in self.models:
             self.models[model_name] = {}
@@ -91,7 +91,7 @@ class ModelRegistry:
             for model_name, versions in self.models.items()
         }
 
-    def set_active_version(self, model_name: str, version: str):
+    def set_active_version(self, model_name: str, version: str) -> None:
         """Set the active version for a model."""
         if model_name not in self.models:
             raise ValueError(f"Model {model_name} not found")
@@ -124,14 +124,14 @@ class NeuralInferenceServer:
         self.batch_timeout_ms = batch_timeout_ms
 
         # Inference queue and batch processing
-        self.inference_queue = asyncio.Queue()
+        self.inference_queue: asyncio.Queue[Dict[str, Any]] = asyncio.Queue()
         self.executor = ThreadPoolExecutor(max_workers=num_workers)
 
         # WebSocket connections for streaming
         self.active_connections: Dict[str, WebSocket] = {}
 
         # Performance metrics
-        self.metrics = {
+        self.metrics: Dict[str, Any] = {
             'total_requests': 0,
             'total_inference_time': 0.0,
             'model_request_counts': {}
@@ -140,15 +140,15 @@ class NeuralInferenceServer:
         # Setup routes
         self._setup_routes()
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         """Setup FastAPI routes."""
 
         @self.app.get("/")
-        async def root():
+        async def root() -> Dict[str, str]:
             return {"message": "Neural Inference Server", "status": "running"}
 
         @self.app.get("/models")
-        async def list_models():
+        async def list_models() -> Dict[str, List[str]]:
             return self.registry.list_models()
 
         @self.app.post("/inference")
@@ -172,10 +172,11 @@ class NeuralInferenceServer:
                 inference_time = (time.time() - start_time) * 1000
 
                 # Update metrics
-                self.metrics['total_requests'] += 1
-                self.metrics['total_inference_time'] += inference_time
-                self.metrics['model_request_counts'][request.model_name] = \
-                    self.metrics['model_request_counts'].get(request.model_name, 0) + 1
+                self.metrics['total_requests'] = int(self.metrics['total_requests']) + 1
+                self.metrics['total_inference_time'] = float(self.metrics['total_inference_time']) + inference_time
+                if request.model_name not in self.metrics['model_request_counts']:
+                    self.metrics['model_request_counts'][request.model_name] = 0
+                self.metrics['model_request_counts'][request.model_name] += 1
 
                 # Prepare response
                 response = InferenceResponse(
@@ -198,7 +199,7 @@ class NeuralInferenceServer:
         async def batch_inference(requests: List[InferenceRequest]) -> List[InferenceResponse]:
             """Batch inference endpoint."""
             # Group requests by model
-            model_groups = {}
+            model_groups: Dict[Tuple[str, Optional[str]], List[InferenceRequest]] = {}
             for req in requests:
                 key = (req.model_name, req.model_version)
                 if key not in model_groups:
@@ -232,7 +233,7 @@ class NeuralInferenceServer:
             return responses
 
         @self.app.websocket("/stream/{session_id}")
-        async def websocket_endpoint(websocket: WebSocket, session_id: str):
+        async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
             """WebSocket endpoint for streaming inference."""
             await websocket.accept()
             self.active_connections[session_id] = websocket
@@ -268,11 +269,11 @@ class NeuralInferenceServer:
                 logger.info(f"WebSocket disconnected: {session_id}")
 
         @self.app.get("/metrics")
-        async def get_metrics():
+        async def get_metrics() -> Dict[str, Any]:
             """Get server metrics."""
             avg_inference_time = (
-                self.metrics['total_inference_time'] / self.metrics['total_requests']
-                if self.metrics['total_requests'] > 0 else 0
+                float(self.metrics['total_inference_time']) / int(self.metrics['total_requests'])
+                if int(self.metrics['total_requests']) > 0 else 0
             )
 
             return {
@@ -284,7 +285,7 @@ class NeuralInferenceServer:
             }
 
         @self.app.post("/models/reload/{model_name}")
-        async def reload_model(model_name: str, model_path: str):
+        async def reload_model(model_name: str, model_path: str) -> Dict[str, str]:
             """Reload a model from disk."""
             # This would load the model from the specified path
             # Implementation depends on model storage strategy
@@ -295,10 +296,10 @@ class NeuralInferenceServer:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, model.predict, data)
 
-    async def _batch_processor(self):
+    async def _batch_processor(self) -> None:
         """Background task for processing batched requests."""
         while True:
-            batch = []
+            batch: List[Dict[str, Any]] = []
             batch_start_time = time.time()
 
             # Collect batch
@@ -321,10 +322,10 @@ class NeuralInferenceServer:
                 # Process batch
                 await self._process_batch(batch)
 
-    async def _process_batch(self, batch: List[Dict[str, Any]]):
+    async def _process_batch(self, batch: List[Dict[str, Any]]) -> None:
         """Process a batch of inference requests."""
         # Group by model
-        model_batches = {}
+        model_batches: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
         for item in batch:
             model_key = (item['model_name'], item['model_version'])
             if model_key not in model_batches:
@@ -351,7 +352,7 @@ class NeuralInferenceServer:
                 for item in model_batch:
                     item['future'].set_exception(e)
 
-    def load_models_from_config(self, config_path: str):
+    def load_models_from_config(self, config_path: str) -> None:
         """Load models from configuration file."""
         with open(config_path, 'r') as f:
             config = json.load(f)
@@ -361,7 +362,7 @@ class NeuralInferenceServer:
             # This is a placeholder - actual implementation would load from disk
             logger.info(f"Loading model: {model_config['name']}")
 
-    def run(self, host: str = "0.0.0.0", port: int = 8000):
+    def run(self, host: str = "0.0.0.0", port: int = 8000) -> None:
         """Run the inference server."""
         # Start batch processor
         asyncio.create_task(self._batch_processor())
@@ -374,7 +375,7 @@ class ModelOptimizer:
     """Optimize models for inference."""
 
     @staticmethod
-    def optimize_tensorflow_model(model_path: str, output_path: str):
+    def optimize_tensorflow_model(model_path: str, output_path: str) -> None:
         """Optimize TensorFlow model for inference."""
         try:
             import tensorflow as tf
@@ -399,12 +400,14 @@ class ModelOptimizer:
         logger.info(f"Model optimized and saved to {output_path}")
 
     @staticmethod
-    def quantize_pytorch_model(model: BaseNeuralModel, calibration_data: np.ndarray):
+    def quantize_pytorch_model(model: BaseNeuralModel, calibration_data: np.ndarray) -> None:
         """Quantize PyTorch model for faster inference."""
         import torch
         import torch.quantization as quantization
 
         # Prepare model for quantization
+        if model.model is None:
+            raise ValueError("No model to quantize")
         model.model.eval()
 
         # Fuse modules
@@ -429,7 +432,7 @@ class ModelOptimizer:
         logger.info("Model quantized successfully")
 
 
-def main():
+def main() -> None:
     """Main entry point for the inference server."""
     import argparse
 

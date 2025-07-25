@@ -224,7 +224,7 @@ class NeuralDataProcessor:
             error_client.report_exception()
             return False
 
-    def send_metrics(self, processing_time: float, success: bool):
+    def send_metrics(self, processing_time: float, success: bool) -> None:
         """Send custom metrics to Cloud Monitoring."""
         try:
             project_name = f"projects/{PROJECT_ID}"
@@ -310,8 +310,8 @@ class NeuralDataProcessor:
             self.send_metrics(processing_time, success)
 
 
-@functions_framework.cloud_event
-def process_neural_stream(cloud_event):
+@functions_framework.cloud_event  # type: ignore
+def process_neural_stream(cloud_event: Any) -> None:
     """Cloud Function entry point for processing neural data streams."""
     # Extract message data
     message = cloud_event.data["message"]
@@ -322,6 +322,8 @@ def process_neural_stream(cloud_event):
         data = json.loads(message_data)
 
         # Initialize processor
+        if SIGNAL_TYPE is None:
+            raise ValueError("SIGNAL_TYPE environment variable not set")
         processor = NeuralDataProcessor(SIGNAL_TYPE)
 
         # Process data

@@ -3,7 +3,7 @@
 import hashlib
 import hmac
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional
+from typing import Dict, Optional, Any, List
 import uuid
 import logging
 from dataclasses import replace
@@ -45,7 +45,7 @@ class DataAnonymizer:
         self._subject_id_cache: Dict[str, str] = {}
 
         # Audit log (in production, use proper audit logging service)
-        self._audit_log = []
+        self._audit_log: List[Dict[str, Any]] = []
 
     def anonymize_packet(self, packet: NeuralDataPacket) -> NeuralDataPacket:
         """
@@ -210,7 +210,7 @@ class DataAnonymizer:
         self,
         original: NeuralDataPacket,
         anonymized: NeuralDataPacket,
-    ):
+    ) -> None:
         """Log anonymization event for audit trail."""
         log_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),

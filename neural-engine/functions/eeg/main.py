@@ -6,10 +6,11 @@ import os
 # Add parent directory to path to import base processor
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from base_processor import process_neural_stream, NeuralDataProcessor
+from base_processor import process_neural_stream as base_process_neural_stream, NeuralDataProcessor
 import numpy as np
 from scipy import signal
 import logging
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +18,12 @@ logger = logging.getLogger(__name__)
 class EEGProcessor(NeuralDataProcessor):
     """Specialized processor for EEG data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('eeg')
 
-    def extract_features(self, data: np.ndarray) -> dict:
+    def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
         """Extract EEG-specific features including band powers."""
-        features = super().extract_features(data)
+        features: Dict[str, Any] = super().extract_features(data)
 
         # Calculate band powers
         sampling_rate = self.config['sampling_rate']
@@ -81,7 +82,7 @@ class EEGProcessor(NeuralDataProcessor):
 
 
 # Override the base process_neural_stream to use EEGProcessor
-def process_neural_stream(cloud_event):
+def process_neural_stream(cloud_event: Any) -> None:
     """Cloud Function entry point for processing EEG data streams."""
     import base64
     import json

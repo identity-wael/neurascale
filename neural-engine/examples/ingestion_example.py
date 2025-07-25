@@ -20,7 +20,7 @@ from src.ingestion.data_types import (  # noqa: E402
 )
 
 
-async def main():
+async def main() -> None:
     """Example of ingesting neural data."""
 
     # Initialize ingestion system

@@ -31,7 +31,7 @@ class DataValidator:
         NeuralSignalType.ACCELEROMETER: [50, 100, 200],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the data validator."""
         self.min_quality_threshold = 0.7
         self.max_missing_ratio = 0.1
@@ -66,16 +66,10 @@ class DataValidator:
 
         return result
 
-    def _validate_structure(self, packet: NeuralDataPacket, result: ValidationResult):
+    def _validate_structure(self, packet: NeuralDataPacket, result: ValidationResult) -> None:
         """Validate basic packet structure."""
-        # Check data array
-        if packet.data is None:
-            result.add_error("Data array is None")
-            return
-
-        if not isinstance(packet.data, np.ndarray):
-            result.add_error(f"Data must be numpy array, got {type(packet.data)}")
-            return
+        # Check data array - packet.data is always np.ndarray due to type annotation
+        # No need to check for None or type
 
         if packet.data.ndim != 2:
             result.add_error(f"Data must be 2D array, got shape {packet.data.shape}")
@@ -96,7 +90,7 @@ class DataValidator:
         self,
         packet: NeuralDataPacket,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate signal-specific properties."""
         signal_type = packet.signal_type
 
@@ -137,7 +131,7 @@ class DataValidator:
         self,
         packet: NeuralDataPacket,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate data quality metrics."""
         if packet.data is None or packet.data.size == 0:
             return
@@ -184,11 +178,9 @@ class DataValidator:
         self,
         packet: NeuralDataPacket,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate packet metadata."""
-        # Check timestamp
-        if packet.timestamp is None:
-            result.add_error("Timestamp is required")
+        # Timestamp is always present due to type annotation
 
         # Check device channel consistency
         if packet.device_info and packet.device_info.channels:

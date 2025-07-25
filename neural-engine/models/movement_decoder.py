@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class MovementDecoder(TensorFlowBaseModel):
     """Deep learning model for decoding movement intentions from neural signals."""
 
-    def __init__(self, n_channels: int, n_samples: int, n_outputs: int = 3, **kwargs):
+    def __init__(self, n_channels: int, n_samples: int, n_outputs: int = 3, **kwargs: Any) -> None:
         """
         Initialize movement decoder.
 
@@ -105,7 +105,7 @@ class MovementDecoder(TensorFlowBaseModel):
             self.model = self.build_model()
 
         # Custom loss function for movement decoding
-        def movement_loss(y_true, y_pred):
+        def movement_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
             # MSE for position/velocity
             mse_loss = tf.reduce_mean(tf.square(y_true - y_pred))
 
@@ -118,6 +118,7 @@ class MovementDecoder(TensorFlowBaseModel):
             return mse_loss
 
         # Compile model
+        assert self.model is not None
         self.model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=self.config.get('learning_rate', 0.001)),
             loss=movement_loss,
@@ -140,7 +141,8 @@ class MovementDecoder(TensorFlowBaseModel):
         ]
 
         # Add custom callback for movement-specific metrics
-        callbacks.append(MovementMetricsCallback(X_val, y_val))
+        if X_val is not None and y_val is not None:
+            callbacks.append(MovementMetricsCallback(X_val, y_val))
 
         # Train
         history = self.model.fit(
@@ -158,7 +160,7 @@ class MovementDecoder(TensorFlowBaseModel):
             'history': history.history,
             'final_loss': float(history.history['loss'][-1]),
             'final_val_loss': float(history.history.get('val_loss', [0])[-1]),
-            'correlation': self.calculate_correlation(X_val, y_val) if X_val is not None else None
+            'correlation': self.calculate_correlation(X_val, y_val) if X_val is not None and y_val is not None else None
         }
 
     def calculate_correlation(self, X: np.ndarray, y_true: np.ndarray) -> Dict[str, float]:
@@ -197,16 +199,16 @@ class KalmanFilterDecoder:
         self.state_dim = n_outputs * 2
 
         # Initialize matrices
-        self.A = None  # State transition matrix
-        self.H = None  # Observation matrix
-        self.Q = None  # Process noise covariance
-        self.R = None  # Measurement noise covariance
-        self.P = None  # State covariance
-        self.x = None  # State estimate
+        self.A: Optional[np.ndarray] = None  # State transition matrix
+        self.H: Optional[np.ndarray] = None  # Observation matrix
+        self.Q: Optional[np.ndarray] = None  # Process noise covariance
+        self.R: Optional[np.ndarray] = None  # Measurement noise covariance
+        self.P: Optional[np.ndarray] = None  # State covariance
+        self.x: Optional[np.ndarray] = None  # State estimate
 
         self._initialize_matrices()
 
-    def _initialize_matrices(self):
+    def _initialize_matrices(self) -> None:
         """Initialize Kalman filter matrices."""
         # State transition matrix (constant velocity model)
         self.A = np.eye(self.state_dim)
@@ -222,7 +224,7 @@ class KalmanFilterDecoder:
         # Initial state (zeros)
         self.x = np.zeros(self.state_dim)
 
-    def fit(self, X_train: np.ndarray, y_train: np.ndarray):
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> None:
         """
         Fit Kalman filter parameters.
 
@@ -239,6 +241,7 @@ class KalmanFilterDecoder:
         self.H = ridge.coef_
 
         # Estimate measurement noise covariance
+        assert self.H is not None
         y_pred = X_train @ self.H.T
         residuals = y_train - y_pred
         self.R = np.cov(residuals.T)
@@ -256,15 +259,18 @@ class KalmanFilterDecoder:
             Predicted movement state (positions and velocities)
         """
         # Prediction step
+        assert self.A is not None and self.x is not None and self.P is not None and self.Q is not None
         x_pred = self.A @ self.x
         P_pred = self.A @ self.P @ self.A.T + self.Q
 
         # Measurement prediction
         z = neural_features
+        assert self.H is not None
         z_pred = self.H @ x_pred
 
         # Innovation
         y = z - z_pred
+        assert self.R is not None
         S = self.H @ P_pred @ self.H.T + self.R
 
         # Kalman gain
@@ -276,7 +282,7 @@ class KalmanFilterDecoder:
 
         return self.x
 
-    def reset_state(self):
+    def reset_state(self) -> None:
         """Reset Kalman filter state."""
         self.x = np.zeros(self.state_dim)
         self.P = np.eye(self.state_dim) * 0.1
@@ -285,10 +291,10 @@ class KalmanFilterDecoder:
 class VelocityIntegrationLayer(layers.Layer):
     """Custom layer to integrate velocity predictions to position."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def call(self, inputs):
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
         """Integrate velocities to get positions."""
         # Cumulative sum along time axis
         return tf.cumsum(inputs, axis=1)
@@ -302,7 +308,7 @@ class MovementMetricsCallback(keras.callbacks.Callback):
         self.X_val = X_val
         self.y_val = y_val
 
-    def on_epoch_end(self, epoch, logs=None):
+    def on_epoch_end(self, epoch: int, logs: Optional[Dict[str, float]] = None) -> None:
         """Calculate and log movement metrics."""
         if self.X_val is not None:
             y_pred = self.model.predict(self.X_val, verbose=0)
@@ -314,7 +320,8 @@ class MovementMetricsCallback(keras.callbacks.Callback):
                 correlations.append(corr)
 
             mean_corr = np.mean(correlations)
-            logs['val_correlation'] = mean_corr
+            if logs is not None:
+                logs['val_correlation'] = mean_corr
 
             if epoch % 10 == 0:
                 logger.info(f"Epoch {epoch} - Val Correlation: {mean_corr:.4f}")
@@ -323,7 +330,7 @@ class MovementMetricsCallback(keras.callbacks.Callback):
 class CursorControlDecoder(MovementDecoder):
     """Specialized decoder for 2D cursor control in BCI applications."""
 
-    def __init__(self, n_channels: int, n_samples: int, **kwargs):
+    def __init__(self, n_channels: int, n_samples: int, **kwargs: Any) -> None:
         """Initialize cursor control decoder for 2D movement."""
         super().__init__(
             n_channels=n_channels,

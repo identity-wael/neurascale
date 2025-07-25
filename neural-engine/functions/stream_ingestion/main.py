@@ -10,6 +10,7 @@ from google.cloud import pubsub_v1
 from google.cloud import bigtable
 from google.cloud.bigtable import column_family
 from google.cloud.bigtable import row_filters
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,8 +22,8 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'staging')
 BIGTABLE_INSTANCE = f'neural-data-{ENVIRONMENT}'
 BIGTABLE_TABLE = 'neural-time-series'
 
-@functions_framework.cloud_event
-def process_neural_stream(cloud_event):
+@functions_framework.cloud_event  # type: ignore
+def process_neural_stream(cloud_event: Any) -> None:
     """Process neural data stream from Pub/Sub."""
     try:
         # Decode the Pub/Sub message

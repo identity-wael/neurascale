@@ -4,10 +4,11 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from base_processor import process_neural_stream, NeuralDataProcessor
+from base_processor import process_neural_stream as base_process_neural_stream, NeuralDataProcessor
 import numpy as np
 from scipy import signal
 import logging
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class EMGProcessor(NeuralDataProcessor):
     """Specialized processor for EMG data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('emg')
 
     def calculate_muscle_activation(self, data: np.ndarray) -> dict:
@@ -38,9 +39,9 @@ class EMGProcessor(NeuralDataProcessor):
             'fatigue_index': float(np.polyfit(range(len(smoothed)), smoothed, 1)[0])  # Slope as fatigue indicator
         }
 
-    def extract_features(self, data: np.ndarray) -> dict:
+    def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
         """Extract EMG-specific features."""
-        features = super().extract_features(data)
+        features: Dict[str, Any] = super().extract_features(data)
 
         # Add EMG-specific features
         activation_metrics = self.calculate_muscle_activation(data)
@@ -58,7 +59,7 @@ class EMGProcessor(NeuralDataProcessor):
 
 
 # Override to use EMGProcessor
-def process_neural_stream(cloud_event):
+def process_neural_stream(cloud_event: Any) -> None:
     """Cloud Function entry point for processing EMG data streams."""
     import base64
     import json

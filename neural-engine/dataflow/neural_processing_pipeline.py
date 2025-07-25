@@ -1,7 +1,7 @@
 """Neural data processing pipeline using Apache Beam for real-time feature extraction."""
 
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Iterator
 from datetime import datetime
 import json
 
@@ -26,7 +26,7 @@ class NeuralSignalQualityCheck(beam.DoFn):
     def __init__(self, artifact_threshold: float = 100.0):
         self.artifact_threshold = artifact_threshold
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             data = np.array(element['data'])
 
@@ -35,14 +35,14 @@ class NeuralSignalQualityCheck(beam.DoFn):
                 element['quality_score'] = 0.0
                 element['artifact_detected'] = True
                 element['artifact_type'] = 'flat_line'
-                return []
+                return
 
             # Check for amplitude artifacts
             if np.max(np.abs(data)) > self.artifact_threshold:
                 element['quality_score'] = 0.3
                 element['artifact_detected'] = True
                 element['artifact_type'] = 'amplitude_artifact'
-                return []
+                return
 
             # Check for clipping
             max_val = np.max(data)
@@ -51,7 +51,7 @@ class NeuralSignalQualityCheck(beam.DoFn):
                 element['quality_score'] = 0.5
                 element['artifact_detected'] = True
                 element['artifact_type'] = 'clipping'
-                return []
+                return
 
             element['quality_score'] = 1.0
             element['artifact_detected'] = False
@@ -77,7 +77,7 @@ class ExtractBandPowers(beam.DoFn):
             'gamma': (30, 100)
         }
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             data = np.array(element['data'])
 
@@ -106,7 +106,7 @@ class ExtractBandPowers(beam.DoFn):
 class ExtractStatisticalFeatures(beam.DoFn):
     """Extract statistical features from neural signals."""
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             data = np.array(element['data'])
 
@@ -136,7 +136,7 @@ class ExtractSpectralFeatures(beam.DoFn):
     def __init__(self, sampling_rate: float = 250.0):
         self.sampling_rate = sampling_rate
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             data = np.array(element['data'])
 
@@ -184,7 +184,7 @@ class ExtractSpectralFeatures(beam.DoFn):
 class ExtractTemporalFeatures(beam.DoFn):
     """Extract temporal features including autocorrelation and entropy."""
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             data = np.array(element['data'])
 
@@ -198,14 +198,14 @@ class ExtractTemporalFeatures(beam.DoFn):
                     autocorr_features[f'autocorr_lag_{lag}'] = float(autocorr) if not np.isnan(autocorr) else 0.0
 
             # Sample entropy
-            def sample_entropy(data, m=2, r=0.2):
+            def sample_entropy(data: np.ndarray, m: int = 2, r: float = 0.2) -> float:
                 N = len(data)
                 r = r * np.std(data)
 
-                def _maxdist(xi, xj, m):
-                    return max([abs(ua - va) for ua, va in zip(xi[0:m], xj[0:m])])
+                def _maxdist(xi: np.ndarray, xj: np.ndarray, m: int) -> float:
+                    return float(max([abs(ua - va) for ua, va in zip(xi[0:m], xj[0:m])]))
 
-                def _phi(m):
+                def _phi(m: int) -> float:
                     patterns = np.array([data[i:i+m] for i in range(N-m+1)])
                     C = 0
                     for i in range(N-m+1):
@@ -232,7 +232,7 @@ class ExtractTemporalFeatures(beam.DoFn):
 class FormatForBigQuery(beam.DoFn):
     """Format processed data for BigQuery insertion."""
 
-    def process(self, element: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, element: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         try:
             # Flatten nested dictionaries
             flattened = {
@@ -297,7 +297,7 @@ class NeuralProcessingPipeline:
 
         return options
 
-    def get_table_schema(self) -> Dict[str, str]:
+    def get_table_schema(self) -> Dict[str, List[Dict[str, str]]]:
         """Get BigQuery table schema."""
         return {
             'fields': [
@@ -343,7 +343,7 @@ class NeuralProcessingPipeline:
             ]
         }
 
-    def run(self, pubsub_topic: str, streaming: bool = True):
+    def run(self, pubsub_topic: str, streaming: bool = True) -> None:
         """Run the neural processing pipeline."""
         options = self.get_pipeline_options(streaming)
 
@@ -401,7 +401,7 @@ class NeuralProcessingPipeline:
             # Note: Add WriteToPubSub for quality metrics if needed
 
 
-def main():
+def main() -> None:
     """Main entry point for the pipeline."""
     import argparse
 

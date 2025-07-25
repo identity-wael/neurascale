@@ -1,6 +1,6 @@
 """Data types and models for neural data ingestion."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Dict, Any
@@ -53,7 +53,7 @@ class DeviceInfo:
     model: Optional[str] = None
     serial_number: Optional[str] = None
     firmware_version: Optional[str] = None
-    channels: List[ChannelInfo] = None
+    channels: Optional[List[ChannelInfo]] = None
 
 
 @dataclass
@@ -77,9 +77,9 @@ class NeuralDataPacket:
     missing_samples: int = 0
 
     # Additional metadata
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate data packet after initialization."""
         if self.data.ndim != 2:
             raise ValueError(f"Data must be 2D array, got shape {self.data.shape}")
@@ -113,22 +113,20 @@ class ValidationResult:
     """Result of data validation."""
 
     is_valid: bool
-    errors: List[str] = None
-    warnings: List[str] = None
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
     data_quality_score: float = 1.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize empty lists if None."""
-        if self.errors is None:
-            self.errors = []
-        if self.warnings is None:
-            self.warnings = []
+        # Lists are now initialized by default_factory, no need for None checks
+        pass
 
-    def add_error(self, error: str):
+    def add_error(self, error: str) -> None:
         """Add an error message."""
         self.errors.append(error)
         self.is_valid = False
 
-    def add_warning(self, warning: str):
+    def add_warning(self, warning: str) -> None:
         """Add a warning message."""
         self.warnings.append(warning)

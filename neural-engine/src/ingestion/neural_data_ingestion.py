@@ -83,7 +83,7 @@ class NeuralDataIngestion:
             "storage_errors": 0,
         }
 
-    def _init_gcp_clients(self):
+    def _init_gcp_clients(self) -> None:
         """Initialize Google Cloud clients."""
         if self.enable_pubsub:
             if not GOOGLE_CLOUD_AVAILABLE:
@@ -173,7 +173,7 @@ class NeuralDataIngestion:
         """Anonymize sensitive information in the packet."""
         return self.anonymizer.anonymize_packet(packet)
 
-    async def _publish_to_pubsub(self, packet: NeuralDataPacket):
+    async def _publish_to_pubsub(self, packet: NeuralDataPacket) -> None:
         """Publish packet to appropriate Pub/Sub topic."""
         topic_path = self.topic_paths[packet.signal_type]
 
@@ -195,7 +195,7 @@ class NeuralDataIngestion:
 
         logger.debug(f"Published packet to {topic_path}: {message_id}")
 
-    async def _store_in_bigtable(self, packet: NeuralDataPacket):
+    async def _store_in_bigtable(self, packet: NeuralDataPacket) -> None:
         """Store packet in Bigtable for time-series analysis."""
         # Create row key: session_id#timestamp#channel
         row_key = f"{packet.session_id}#{packet.timestamp.timestamp()}"
@@ -261,7 +261,7 @@ class NeuralDataIngestion:
         self,
         source: DataSource,
         handler: Callable[[Dict[str, Any]], NeuralDataPacket],
-    ):
+    ) -> None:
         """
         Register a handler for a specific data source.
 
@@ -277,7 +277,7 @@ class NeuralDataIngestion:
         stream_id: str,
         source: DataSource,
         source_config: Dict[str, Any],
-    ):
+    ) -> None:
         """
         Start ingesting from a streaming source.
 
@@ -301,7 +301,7 @@ class NeuralDataIngestion:
         self._active_streams[stream_id] = stream_task
         logger.info(f"Started stream {stream_id} from {source.value}")
 
-    async def stop_stream(self, stream_id: str):
+    async def stop_stream(self, stream_id: str) -> None:
         """Stop an active stream."""
         if stream_id not in self._active_streams:
             logger.warning(f"Stream {stream_id} not found")
@@ -323,7 +323,7 @@ class NeuralDataIngestion:
         stream_id: str,
         source: DataSource,
         source_config: Dict[str, Any],
-    ):
+    ) -> None:
         """Worker coroutine for processing streaming data."""
         handler = self._source_handlers[source]
 
@@ -375,7 +375,7 @@ class NeuralDataIngestion:
         """Get current ingestion metrics."""
         return self.metrics.copy()
 
-    async def close(self):
+    async def close(self) -> None:
         """Clean up resources."""
         # Stop all active streams
         stream_ids = list(self._active_streams.keys())

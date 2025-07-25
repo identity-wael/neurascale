@@ -59,9 +59,9 @@ class NeuralModelTrainingPipeline:
             wandb.init(project="neurascale", name=self.experiment_name)
 
         # Training state
-        self.model = None
-        self.scaler = None
-        self.training_history = {}
+        self.model: Optional[BaseNeuralModel] = None
+        self.scaler: Optional[StandardScaler] = None
+        self.training_history: Dict[str, Any] = {}
         self.metadata = {
             'experiment_name': self.experiment_name,
             'created_at': datetime.utcnow().isoformat(),
@@ -102,9 +102,11 @@ class NeuralModelTrainingPipeline:
             X_train = self.scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1]))
             X_train = X_train.reshape(-1, X.shape[1], X.shape[2])
 
+            assert self.scaler is not None
             X_val = self.scaler.transform(X_val.reshape(-1, X_val.shape[-1]))
             X_val = X_val.reshape(-1, X.shape[1], X.shape[2])
 
+            assert self.scaler is not None
             X_test = self.scaler.transform(X_test.reshape(-1, X_test.shape[-1]))
             X_test = X_test.reshape(-1, X.shape[1], X.shape[2])
 
@@ -149,11 +151,11 @@ class NeuralModelTrainingPipeline:
         self.model = model
 
         # Update model config with hyperparameters
-        if hyperparameters:
+        if hyperparameters and self.model is not None:
             self.model.config.update(hyperparameters)
 
         # Log hyperparameters
-        if self.use_wandb:
+        if self.use_wandb and self.model is not None:
             wandb.config.update(self.model.config)
 
         # Train model
@@ -268,7 +270,7 @@ class NeuralModelTrainingPipeline:
         from google.cloud import aiplatform_v1beta1
 
         # Create study configuration
-        study_config = {
+        study_config: Dict[str, Any] = {
             "algorithm": "ALGORITHM_UNSPECIFIED",  # Bayesian optimization
             "metrics": [{"metric_id": metric, "goal": "MAXIMIZE"}],
             "parameters": []
@@ -374,12 +376,14 @@ class NeuralModelTrainingPipeline:
         if self.model is None:
             raise ValueError("No model to save")
 
+        assert self.model is not None
         model_name = model_name or f"{self.model.model_name}_{self.experiment_name}"
 
         # Create temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
             # Save model
             model_path = os.path.join(temp_dir, 'model')
+            assert self.model is not None
             self.model.save(model_path)
 
             # Save scaler if exists
@@ -433,6 +437,8 @@ class NeuralModelTrainingPipeline:
             Deployed endpoint
         """
         # Upload model to Vertex AI
+        if self.model is None:
+            raise ValueError("No model to deploy")
         model = aiplatform.Model.upload(
             display_name=f"{self.model.model_name}-{self.experiment_name}",
             artifact_uri=model_path,
@@ -444,6 +450,7 @@ class NeuralModelTrainingPipeline:
         endpoint = aiplatform.Endpoint.create(display_name=endpoint_name)
 
         # Deploy model to endpoint
+        assert self.model is not None
         model.deploy(
             endpoint=endpoint,
             deployed_model_display_name=self.model.model_name,

@@ -28,7 +28,7 @@ class BaseNeuralModel(ABC):
         self.input_shape = input_shape
         self.output_shape = output_shape
         self.config = config or {}
-        self.model = None
+        self.model: Optional[Any] = None
         self.is_trained = False
         self.metadata = {
             'created_at': datetime.utcnow().isoformat(),
@@ -125,6 +125,7 @@ class TensorFlowBaseModel(BaseNeuralModel):
             self.model = self.build_model()
 
         # Compile model
+        assert self.model is not None
         self.model.compile(
             optimizer=self.config.get('optimizer', 'adam'),
             loss=self.config.get('loss', 'categorical_crossentropy'),
@@ -156,6 +157,7 @@ class TensorFlowBaseModel(BaseNeuralModel):
             ))
 
         # Train model
+        assert self.model is not None
         history = self.model.fit(
             X_train, y_train,
             batch_size=batch_size,
@@ -177,7 +179,8 @@ class TensorFlowBaseModel(BaseNeuralModel):
         """Make predictions with TensorFlow model."""
         if self.model is None:
             raise ValueError("Model not built or loaded")
-        return self.model.predict(X)
+        predictions = self.model.predict(X)
+        return np.array(predictions)
 
     def save(self, filepath: str) -> None:
         """Save TensorFlow model."""
@@ -208,11 +211,11 @@ class TensorFlowBaseModel(BaseNeuralModel):
 class PyTorchBaseModel(BaseNeuralModel):
     """Base class for PyTorch models."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.optimizer = None
-        self.criterion = None
+        self.optimizer: Optional[torch.optim.Optimizer] = None
+        self.criterion: Optional[nn.Module] = None
 
     def get_framework(self) -> str:
         return 'pytorch'
@@ -255,19 +258,22 @@ class PyTorchBaseModel(BaseNeuralModel):
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         # Training history
-        history = {'loss': [], 'val_loss': []}
+        history: Dict[str, List[float]] = {'loss': [], 'val_loss': []}
         best_val_loss = float('inf')
         patience_counter = 0
 
         # Training loop
         for epoch in range(epochs):
             # Training phase
+            assert self.model is not None
             self.model.train()
             train_loss = 0.0
 
             for batch_X, batch_y in dataloader:
+                assert self.optimizer is not None and self.model is not None
                 self.optimizer.zero_grad()
                 outputs = self.model(batch_X)
+                assert self.criterion is not None
                 loss = self.criterion(outputs, batch_y)
                 loss.backward()
                 self.optimizer.step()
@@ -278,6 +284,7 @@ class PyTorchBaseModel(BaseNeuralModel):
 
             # Validation phase
             if X_val is not None:
+                assert self.model is not None and self.criterion is not None
                 self.model.eval()
                 with torch.no_grad():
                     val_outputs = self.model(X_val_tensor)
@@ -290,11 +297,13 @@ class PyTorchBaseModel(BaseNeuralModel):
                         best_val_loss = val_loss
                         patience_counter = 0
                         # Save best model state
+                        assert self.model is not None
                         best_model_state = self.model.state_dict()
                     else:
                         patience_counter += 1
                         if patience_counter >= self.config.get('early_stopping_patience', 10):
                             # Restore best model
+                            assert self.model is not None
                             self.model.load_state_dict(best_model_state)
                             break
 
@@ -314,6 +323,7 @@ class PyTorchBaseModel(BaseNeuralModel):
         if self.model is None:
             raise ValueError("Model not built or loaded")
 
+        assert self.model is not None
         self.model.eval()
         X_tensor = torch.FloatTensor(X).to(self.device)
 
@@ -329,6 +339,7 @@ class PyTorchBaseModel(BaseNeuralModel):
             raise ValueError("No model to save")
 
         # Save model state
+        assert self.model is not None
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict() if self.optimizer else None,
@@ -345,6 +356,7 @@ class PyTorchBaseModel(BaseNeuralModel):
             self.model = self.build_model().to(self.device)
 
         # Load state
+        assert self.model is not None
         self.model.load_state_dict(checkpoint['model_state_dict'])
 
         # Load optimizer if exists
@@ -361,7 +373,7 @@ class PyTorchBaseModel(BaseNeuralModel):
 class EEGNet(TensorFlowBaseModel):
     """EEGNet implementation for EEG signal classification."""
 
-    def __init__(self, n_channels: int, n_samples: int, n_classes: int, **kwargs):
+    def __init__(self, n_channels: int, n_samples: int, n_classes: int, **kwargs: Any) -> None:
         super().__init__(
             model_name='EEGNet',
             input_shape=(n_samples, n_channels, 1),
@@ -414,7 +426,7 @@ class EEGNet(TensorFlowBaseModel):
 class CNNLSTMModel(TensorFlowBaseModel):
     """CNN-LSTM hybrid model for temporal neural signal processing."""
 
-    def __init__(self, n_channels: int, n_timesteps: int, n_classes: int, **kwargs):
+    def __init__(self, n_channels: int, n_timesteps: int, n_classes: int, **kwargs: Any) -> None:
         super().__init__(
             model_name='CNN-LSTM',
             input_shape=(n_timesteps, n_channels),
@@ -457,10 +469,61 @@ class CNNLSTMModel(TensorFlowBaseModel):
         return model
 
 
+class NeuralTransformer(nn.Module):
+    """Transformer architecture for neural signal processing."""
+
+    def __init__(self, n_channels: int, n_classes: int, d_model: int = 256,
+                 n_heads: int = 8, n_layers: int = 4, dropout: float = 0.1) -> None:
+        super().__init__()
+        self.d_model = d_model
+        self.input_projection = nn.Linear(n_channels, d_model)
+
+        # Positional encoding
+        self.pos_encoding = nn.Parameter(torch.randn(1, 1000, d_model))
+
+        # Transformer encoder
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=n_heads,
+            dropout=dropout
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
+
+        # Output layers
+        self.fc1 = nn.Linear(d_model, d_model // 2)
+        self.fc2 = nn.Linear(d_model // 2, n_classes)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x shape: (batch_size, sequence_length, n_channels)
+        batch_size, seq_len, _ = x.shape
+
+        # Project input
+        x = self.input_projection(x)
+
+        # Add positional encoding
+        x = x + self.pos_encoding[:, :seq_len, :]
+
+        # Transformer expects (seq_len, batch_size, d_model)
+        x = x.transpose(0, 1)
+
+        # Apply transformer
+        x = self.transformer(x)
+
+        # Global average pooling
+        x = x.mean(dim=0)
+
+        # Classification head
+        x = self.dropout(torch.relu(self.fc1(x)))
+        x = self.fc2(x)
+
+        return x
+
+
 class TransformerModel(PyTorchBaseModel):
     """Transformer-based model for neural signal processing."""
 
-    def __init__(self, n_channels: int, sequence_length: int, n_classes: int, **kwargs):
+    def __init__(self, n_channels: int, sequence_length: int, n_classes: int, **kwargs: Any) -> None:
         super().__init__(
             model_name='Transformer',
             input_shape=(sequence_length, n_channels),
@@ -473,54 +536,6 @@ class TransformerModel(PyTorchBaseModel):
 
     def build_model(self) -> nn.Module:
         """Build Transformer architecture."""
-
-        class NeuralTransformer(nn.Module):
-            def __init__(self, n_channels, n_classes, d_model=256, n_heads=8, n_layers=4, dropout=0.1):
-                super().__init__()
-                self.d_model = d_model
-                self.input_projection = nn.Linear(n_channels, d_model)
-
-                # Positional encoding
-                self.pos_encoding = nn.Parameter(torch.randn(1, 1000, d_model))
-
-                # Transformer encoder
-                encoder_layer = nn.TransformerEncoderLayer(
-                    d_model=d_model,
-                    nhead=n_heads,
-                    dropout=dropout
-                )
-                self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
-
-                # Output layers
-                self.fc1 = nn.Linear(d_model, d_model // 2)
-                self.fc2 = nn.Linear(d_model // 2, n_classes)
-                self.dropout = nn.Dropout(dropout)
-
-            def forward(self, x):
-                # x shape: (batch_size, sequence_length, n_channels)
-                batch_size, seq_len, _ = x.shape
-
-                # Project input
-                x = self.input_projection(x)
-
-                # Add positional encoding
-                x = x + self.pos_encoding[:, :seq_len, :]
-
-                # Transformer expects (seq_len, batch_size, d_model)
-                x = x.transpose(0, 1)
-
-                # Apply transformer
-                x = self.transformer(x)
-
-                # Global average pooling
-                x = x.mean(dim=0)
-
-                # Classification head
-                x = self.dropout(torch.relu(self.fc1(x)))
-                x = self.fc2(x)
-
-                return x
-
         return NeuralTransformer(
             self.n_channels,
             self.n_classes,

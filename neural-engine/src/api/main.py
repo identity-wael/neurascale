@@ -1,6 +1,6 @@
 """Main entry point for the Neural Engine API."""
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def home():
+def home() -> Response:
     """Home endpoint."""
     return jsonify(
         {"service": "Neural Engine API", "version": "0.1.0", "status": "ready"}
@@ -18,13 +18,13 @@ def home():
 
 
 @app.route("/health")
-def health():
+def health() -> tuple[Response, int]:
     """Health check endpoint."""
     return jsonify({"status": "healthy"}), 200
 
 
 @app.route("/ready")
-def ready():
+def ready() -> tuple[Response, int]:
     """Readiness check endpoint."""
     # TODO: Check actual service dependencies
     return jsonify({"status": "ready"}), 200

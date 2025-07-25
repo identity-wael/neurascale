@@ -25,7 +25,7 @@ class EmotionClassifier(TensorFlowBaseModel):
     }
 
     def __init__(self, n_channels: int, n_samples: int,
-                 emotion_model: str = 'basic_emotions', **kwargs):
+                 emotion_model: str = 'basic_emotions', **kwargs: Any) -> None:
         """
         Initialize emotion classifier.
 
@@ -138,7 +138,7 @@ class EmotionClassifier(TensorFlowBaseModel):
 class ValenceArousalRegressor(TensorFlowBaseModel):
     """Regression model for continuous valence-arousal prediction."""
 
-    def __init__(self, n_channels: int, n_samples: int, **kwargs):
+    def __init__(self, n_channels: int, n_samples: int, **kwargs: Any) -> None:
         """
         Initialize valence-arousal regressor.
 
@@ -198,7 +198,7 @@ class ValenceArousalRegressor(TensorFlowBaseModel):
             self.model = self.build_model()
 
         # Custom loss that weights valence and arousal differently
-        def valence_arousal_loss(y_true, y_pred):
+        def valence_arousal_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
             valence_weight = self.config.get('valence_weight', 1.0)
             arousal_weight = self.config.get('arousal_weight', 1.0)
 
@@ -374,11 +374,13 @@ class EmotionFeatureExtractor:
     def _hjorth_mobility(self, data: np.ndarray) -> np.ndarray:
         """Calculate Hjorth mobility parameter."""
         diff = np.diff(data, axis=0)
-        return np.sqrt(np.var(diff, axis=0) / np.var(data, axis=0))
+        result = np.sqrt(np.var(diff, axis=0) / np.var(data, axis=0))
+        return np.array(result)
 
     def _hjorth_complexity(self, data: np.ndarray) -> np.ndarray:
         """Calculate Hjorth complexity parameter."""
         mobility = self._hjorth_mobility(data)
         diff2 = np.diff(data, n=2, axis=0)
         mobility2 = np.sqrt(np.var(diff2, axis=0) / np.var(np.diff(data, axis=0), axis=0))
-        return mobility2 / mobility
+        result = mobility2 / mobility
+        return np.array(result)

@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> None:
     """Main function for the processor."""
     logger.info("Starting Neural Engine Processor...")
     logger.info("Processor is ready. Waiting for neural data...")

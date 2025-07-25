@@ -8,6 +8,7 @@ import logging
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from base_processor import NeuralDataProcessor
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class AccelerometerProcessor(NeuralDataProcessor):
     """Specialized processor for accelerometer data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('accelerometer')
 
     def calculate_movement_metrics(self, data: np.ndarray) -> dict:
@@ -61,9 +62,9 @@ class AccelerometerProcessor(NeuralDataProcessor):
 
         return len(peaks)
 
-    def extract_features(self, data: np.ndarray) -> dict:
+    def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
         """Extract accelerometer-specific features."""
-        features = super().extract_features(data)
+        features: Dict[str, Any] = super().extract_features(data)
 
         # Add movement metrics
         movement_metrics = self.calculate_movement_metrics(data)
@@ -83,7 +84,7 @@ class AccelerometerProcessor(NeuralDataProcessor):
 
 
 # Override to use AccelerometerProcessor
-def process_neural_stream(cloud_event):
+def process_neural_stream(cloud_event: Any) -> None:
     """Cloud Function entry point for processing accelerometer data streams."""
     import base64
     import json

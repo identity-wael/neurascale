@@ -102,7 +102,7 @@ class TestDataValidator:
         assert any("infinite" in error.lower() for error in result.errors)
 
     def test_validate_out_of_range_eeg(self, validator, valid_packet):
-        """Test validation with out-of-range EEG values."""
+        """Test validation with out - of - range EEG values."""
         # EEG should be in range -200 to 200 μV
         valid_packet.data[0, :] = 1000  # Too high
 

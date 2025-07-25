@@ -52,7 +52,7 @@ def test_imports():
 
 @pytest.mark.asyncio
 async def test_async_support():
-    """Test that async/await is working."""
+    """Test that async / await is working."""
 
     async def sample_async_function():
         return "async works"
@@ -65,7 +65,7 @@ class TestNeuralEngineSetup:
     """Test class for Neural Engine setup verification."""
 
     def test_class_based_test(self):
-        """Test that class-based tests work."""
+        """Test that class - based tests work."""
         assert 1 + 1 == 2
 
     def test_numpy_operations(self):

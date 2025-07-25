@@ -11,7 +11,7 @@ from .implementations.lsl_device import LSLDevice
 from .implementations.openbci_device import OpenBCIDevice
 from .implementations.brainflow_device import BrainFlowDevice
 from .implementations.synthetic_device import SyntheticDevice
-from ..ingestion.data_types import NeuralDataPacket, NeuralSignalType
+from ..ingestion.data_types import NeuralDataPacket
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +43,16 @@ class DeviceManager:
         logger.info(f"Registered device type: {device_type}")
 
     async def add_device(self,
-                        device_id: str,
-                        device_type: str,
-                        **device_kwargs: Any) -> BaseDevice:
+                         device_id: str,
+                         device_type: str,
+                         **device_kwargs: Any) -> BaseDevice:
         """
         Add a new device to the manager.
 
         Args:
             device_id: Unique identifier for the device
             device_type: Type of device from DEVICE_TYPES
-            **device_kwargs: Device-specific initialization parameters
+            **device_kwargs: Device - specific initialization parameters
 
         Returns:
             The created device instance
@@ -62,7 +62,7 @@ class DeviceManager:
 
         if device_type not in self.DEVICE_TYPES:
             raise ValueError(f"Unknown device type: {device_type}. "
-                           f"Available types: {list(self.DEVICE_TYPES.keys())}")
+                             f"Available types: {list(self.DEVICE_TYPES.keys())}")
 
         # Create device instance
         device_class = self.DEVICE_TYPES[device_type]
@@ -252,8 +252,8 @@ class DeviceManager:
                 logger.error(f"Error in error callback: {e}")
 
     async def start_aggregation(self,
-                               window_size_ms: int = 50,
-                               callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]] = None) -> None:
+                                window_size_ms: int = 50,
+                                callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]] = None) -> None:
         """
         Start aggregating data from multiple devices into synchronized windows.
 
@@ -282,8 +282,8 @@ class DeviceManager:
             logger.info("Stopped data aggregation")
 
     async def _aggregation_loop(self,
-                               window_size_ms: int,
-                               callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]]) -> None:
+                                window_size_ms: int,
+                                callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]]) -> None:
         """Main aggregation loop."""
         window_duration = window_size_ms / 1000.0
         window_data: Dict[str, List[NeuralDataPacket]] = {}
@@ -339,7 +339,7 @@ class DeviceManager:
 
     async def auto_discover_devices(self, timeout: float = 5.0) -> List[Dict[str, Any]]:
         """
-        Auto-discover available devices.
+        Auto - discover available devices.
 
         Args:
             timeout: Discovery timeout in seconds

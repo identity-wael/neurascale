@@ -79,7 +79,7 @@ class BaseNeuralModel(ABC):
         from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
 
         if len(y_pred.shape) > 1 and y_pred.shape[1] > 1:
-            # Multi-class classification
+            # Multi - class classification
             y_pred = np.argmax(y_pred, axis=1)
         if len(y_true.shape) > 1 and y_true.shape[1] > 1:
             y_true = np.argmax(y_true, axis=1)
@@ -108,7 +108,7 @@ class BaseNeuralModel(ABC):
 
 
 class TensorFlowBaseModel(BaseNeuralModel):
-    """Base class for TensorFlow/Keras models."""
+    """Base class for TensorFlow / Keras models."""
 
     def get_framework(self) -> str:
         return 'tensorflow'
@@ -153,7 +153,7 @@ class TensorFlowBaseModel(BaseNeuralModel):
                 monitor='val_loss',
                 factor=0.5,
                 patience=5,
-                min_lr=1e-6
+                min_lr=1e - 6
             ))
 
         # Train model
@@ -259,7 +259,7 @@ class PyTorchBaseModel(BaseNeuralModel):
 
         # Training history
         history: Dict[str, List[float]] = {'loss': [], 'val_loss': []}
-        best_val_loss = float('inf')
+        best_val_loss = float('in')
         patience_counter = 0
 
         # Training loop
@@ -424,11 +424,11 @@ class EEGNet(TensorFlowBaseModel):
 
 
 class CNNLSTMModel(TensorFlowBaseModel):
-    """CNN-LSTM hybrid model for temporal neural signal processing."""
+    """CNN - LSTM hybrid model for temporal neural signal processing."""
 
     def __init__(self, n_channels: int, n_timesteps: int, n_classes: int, **kwargs: Any) -> None:
         super().__init__(
-            model_name='CNN-LSTM',
+            model_name='CNN - LSTM',
             input_shape=(n_timesteps, n_channels),
             output_shape=n_classes,
             config=kwargs
@@ -438,7 +438,7 @@ class CNNLSTMModel(TensorFlowBaseModel):
         self.n_classes = n_classes
 
     def build_model(self) -> keras.Model:
-        """Build CNN-LSTM architecture."""
+        """Build CNN - LSTM architecture."""
         # Parameters
         cnn_filters = self.config.get('cnn_filters', 64)
         lstm_units = self.config.get('lstm_units', 128)
@@ -521,7 +521,7 @@ class NeuralTransformer(nn.Module):
 
 
 class TransformerModel(PyTorchBaseModel):
-    """Transformer-based model for neural signal processing."""
+    """Transformer - based model for neural signal processing."""
 
     def __init__(self, n_channels: int, sequence_length: int, n_classes: int, **kwargs: Any) -> None:
         super().__init__(

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpenBCIDevice(BaseDevice):
-    """OpenBCI device implementation for Cyton (8/16 channel) and Ganglion (4 channel) boards."""
+    """OpenBCI device implementation for Cyton (8 / 16 channel) and Ganglion (4 channel) boards."""
 
     # OpenBCI protocol constants
     BYTE_START = 0xA0
@@ -52,7 +52,7 @@ class OpenBCIDevice(BaseDevice):
         Initialize OpenBCI device.
 
         Args:
-            port: Serial port (e.g., '/dev/ttyUSB0' or 'COM3')
+            port: Serial port (e.g., '/dev / ttyUSB0' or 'COM3')
             board_type: Board type ('cyton' or 'ganglion')
             daisy: Whether Cyton daisy module is attached (16 channels)
         """
@@ -121,16 +121,16 @@ class OpenBCIDevice(BaseDevice):
             # Read and log board response
             if self.serial.in_waiting:
                 response = self.serial.read(self.serial.in_waiting)
-                logger.info(f"Board response: {response.decode('utf-8', errors='ignore')}")
+                logger.info(f"Board response: {response.decode('utf - 8', errors='ignore')}")
 
             # Create device info
             channels = [
                 ChannelInfo(
                     channel_id=i,
-                    label=f"Ch{i+1}",
+                    label=f"Ch{i + 1}",
                     unit="microvolts",
                     sampling_rate=self.sampling_rate,
-                    hardware_id=f"N{i}P" if i < 8 else f"N{i-8}P_DAISY"
+                    hardware_id=f"N{i}P" if i < 8 else f"N{i - 8}P_DAISY"
                 )
                 for i in range(self.n_channels)
             ]
@@ -250,7 +250,7 @@ class OpenBCIDevice(BaseDevice):
                         self.buffer = self.buffer[start_idx:]
 
                     # Check if we have a complete packet
-                    if len(self.buffer) >= packet_size and self.buffer[packet_size-1] == self.BYTE_END:
+                    if len(self.buffer) >= packet_size and self.buffer[packet_size - 1] == self.BYTE_END:
                         packet = self.buffer[:packet_size]
                         self.buffer = self.buffer[packet_size:]
 
@@ -308,10 +308,10 @@ class OpenBCIDevice(BaseDevice):
             logger.warning(f"Dropped packet(s): expected {expected_id}, got {packet_id}")
         self.last_packet_id = packet_id
 
-        # Parse channel data (3 bytes per channel, 24-bit signed)
+        # Parse channel data (3 bytes per channel, 24 - bit signed)
         channel_data = []
         for i in range(8):  # First 8 channels
-            raw = struct.unpack('>I', b'\x00' + packet[2 + i*3:5 + i*3])[0]
+            raw = struct.unpack('>I', b'\x00' + packet[2 + i * 3:5 + i * 3])[0]
             if raw & 0x800000:  # Check sign bit
                 raw = raw - 0x1000000
             channel_data.append(raw * self.scale_factor)

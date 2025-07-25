@@ -53,7 +53,7 @@ class BaseDevice(ABC):
 
         Args:
             device_id: Unique identifier for the device
-            device_name: Human-readable device name
+            device_name: Human - readable device name
         """
         self.device_id = device_id
         self.device_name = device_name
@@ -72,7 +72,7 @@ class BaseDevice(ABC):
         Connect to the device.
 
         Args:
-            **kwargs: Device-specific connection parameters
+            **kwargs: Device - specific connection parameters
 
         Returns:
             True if connection successful, False otherwise
@@ -161,7 +161,7 @@ class BaseDevice(ABC):
         Get battery level.
 
         Returns:
-            Battery level as percentage (0-100)
+            Battery level as percentage (0 - 100)
         """
         capabilities = self.get_capabilities()
         if not capabilities.has_battery_monitor:
@@ -218,7 +218,7 @@ class BaseDevice(ABC):
         return packet
 
     async def _streaming_loop(self) -> None:
-        """Override this method to implement device-specific streaming."""
+        """Override this method to implement device - specific streaming."""
         raise NotImplementedError("Subclasses must implement _streaming_loop")
 
     def is_connected(self) -> bool:

@@ -1,4 +1,4 @@
-"""Neural data processing pipeline using Apache Beam for real-time feature extraction."""
+"""Neural data processing pipeline using Apache Beam for real - time feature extraction."""
 
 import logging
 from typing import Dict, List, Any, Iterator
@@ -387,7 +387,7 @@ class NeuralProcessingPipeline:
             )
 
             # Also write quality metrics to a separate topic for monitoring
-            quality_metrics = (
+            _ = (
                 processed_data
                 | 'FilterQualityMetrics' >> beam.Map(lambda x: {
                     'timestamp': x['timestamp'],

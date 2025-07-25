@@ -17,9 +17,9 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option("--project-id", required=True, help="GCP Project ID")
-@click.option("--region", default="us-central1", help="GCP Region")
-@click.option("--topic", required=True, help="Pub/Sub topic for neural data")
+@click.option("--project - id", required=True, help="GCP Project ID")
+@click.option("--region", default="us - central1", help="GCP Region")
+@click.option("--topic", required=True, help="Pub / Sub topic for neural data")
 @click.option("--streaming/--batch", default=True, help="Run in streaming mode")
 def run_pipeline(project_id: str, region: str, topic: str, streaming: bool) -> None:
     """Run the neural processing pipeline."""
@@ -32,7 +32,7 @@ def run_pipeline(project_id: str, region: str, topic: str, streaming: bool) -> N
     except ImportError as e:
         logger.error(f"Failed to import pipeline: {e}")
         logger.error(
-            "Please install dataflow dependencies: pip install apache-beam[gcp]"
+            "Please install dataflow dependencies: pip install apache - beam[gcp]"
         )
     except Exception as e:
         logger.error(f"Pipeline failed: {e}")
@@ -81,13 +81,13 @@ def run_inference(host: str, port: int, config: Optional[str]) -> None:
 
 @cli.command()
 @click.option(
-    "--model-type",
+    "--model - type",
     required=True,
     type=click.Choice(["movement", "emotion", "eegnet"]),
     help="Type of model to train",
 )
-@click.option("--data-path", required=True, help="Path to training data")
-@click.option("--project-id", required=True, help="GCP Project ID")
+@click.option("--data - path", required=True, help="Path to training data")
+@click.option("--project - id", required=True, help="GCP Project ID")
 @click.option("--epochs", default=100, help="Number of training epochs")
 def train_model(model_type: str, data_path: str, project_id: str, epochs: int) -> None:
     """Train a neural model."""
@@ -116,7 +116,7 @@ def train_model(model_type: str, data_path: str, project_id: str, epochs: int) -
 
 
 @cli.command()
-@click.option("--project-id", required=True, help="GCP Project ID")
+@click.option("--project - id", required=True, help="GCP Project ID")
 @click.option(
     "--environment",
     required=True,
@@ -144,7 +144,7 @@ def test() -> int:
 
 
 @cli.command()
-@click.option("--device-type", required=True, type=click.Choice(["lsl", "openbci", "brainflow", "synthetic"]), help="Device type")
+@click.option("--device - type", required=True, type=click.Choice(["lsl", "openbci", "brainflow", "synthetic"]), help="Device type")
 @click.option("--duration", default=10, help="Streaming duration in seconds")
 @click.option("--config", help="Device configuration as JSON string")
 def test_device(device_type: str, duration: int, config: Optional[str]) -> None:

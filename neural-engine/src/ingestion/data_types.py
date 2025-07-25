@@ -16,7 +16,7 @@ class NeuralSignalType(Enum):
     LFP = "lfp"  # Local field potentials
     EMG = "emg"  # Electromyography
     ACCELEROMETER = "accelerometer"  # Movement data
-    CUSTOM = "custom"  # User-defined signal types
+    CUSTOM = "custom"  # User - defined signal types
 
 
 class DataSource(Enum):
@@ -73,7 +73,7 @@ class NeuralDataPacket:
 
     # Data quality
     sampling_rate: float = 256.0
-    data_quality: float = 1.0  # 0-1 quality score
+    data_quality: float = 1.0  # 0 - 1 quality score
     missing_samples: int = 0
 
     # Additional metadata

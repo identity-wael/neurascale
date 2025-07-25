@@ -35,15 +35,15 @@ class NeuralDataIngestion:
     """
     Main class for ingesting neural data from multiple sources.
 
-    Supports real-time streaming via LSL, batch uploads, and various
+    Supports real - time streaming via LSL, batch uploads, and various
     BCI devices through unified interface.
     """
 
     def __init__(
         self,
         project_id: str,
-        instance_id: str = "neural-data",
-        table_id: str = "time-series",
+        instance_id: str = "neural - data",
+        table_id: str = "time - series",
         enable_pubsub: bool = True,
         enable_bigtable: bool = True,
     ):
@@ -54,7 +54,7 @@ class NeuralDataIngestion:
             project_id: Google Cloud project ID
             instance_id: Bigtable instance ID
             table_id: Bigtable table ID
-            enable_pubsub: Whether to publish to Pub/Sub
+            enable_pubsub: Whether to publish to Pub / Sub
             enable_bigtable: Whether to store in Bigtable
         """
         self.project_id = project_id
@@ -88,14 +88,14 @@ class NeuralDataIngestion:
         if self.enable_pubsub:
             if not GOOGLE_CLOUD_AVAILABLE:
                 logger.warning(
-                    "Google Cloud Pub/Sub not available - install google-cloud-pubsub"
+                    "Google Cloud Pub / Sub not available - install google - cloud - pubsub"
                 )
                 self.enable_pubsub = False
             else:
                 self.publisher = pubsub_v1.PublisherClient()
                 self.topic_paths = {
                     signal_type: self.publisher.topic_path(
-                        self.project_id, f"neural-data-{signal_type.value}"
+                        self.project_id, f"neural - data-{signal_type.value}"
                     )
                     for signal_type in NeuralSignalType
                 }
@@ -103,7 +103,7 @@ class NeuralDataIngestion:
         if self.enable_bigtable:
             if not GOOGLE_CLOUD_AVAILABLE:
                 logger.warning(
-                    "Google Cloud Bigtable not available - install google-cloud-bigtable"
+                    "Google Cloud Bigtable not available - install google - cloud - bigtable"
                 )
                 self.enable_bigtable = False
             else:
@@ -174,10 +174,10 @@ class NeuralDataIngestion:
         return self.anonymizer.anonymize_packet(packet)
 
     async def _publish_to_pubsub(self, packet: NeuralDataPacket) -> None:
-        """Publish packet to appropriate Pub/Sub topic."""
+        """Publish packet to appropriate Pub / Sub topic."""
         topic_path = self.topic_paths[packet.signal_type]
 
-        # Serialize packet for Pub/Sub
+        # Serialize packet for Pub / Sub
         message_data = self._serialize_packet(packet)
 
         # Publish with attributes
@@ -196,7 +196,7 @@ class NeuralDataIngestion:
         logger.debug(f"Published packet to {topic_path}: {message_id}")
 
     async def _store_in_bigtable(self, packet: NeuralDataPacket) -> None:
-        """Store packet in Bigtable for time-series analysis."""
+        """Store packet in Bigtable for time - series analysis."""
         # Create row key: session_id#timestamp#channel
         row_key = f"{packet.session_id}#{packet.timestamp.timestamp()}"
 
@@ -331,7 +331,7 @@ class NeuralDataIngestion:
             while True:
                 # Get data from source (implementation depends on source type)
                 # This is a placeholder - actual implementation would use
-                # source-specific libraries (pylsl, brainflow, etc.)
+                # source - specific libraries (pylsl, brainflow, etc.)
                 raw_data = await self._get_source_data(source, source_config)
 
                 if raw_data is None:
@@ -364,7 +364,7 @@ class NeuralDataIngestion:
 
         Real implementation would interface with:
         - LSL: pylsl library
-        - OpenBCI: openbci-python
+        - OpenBCI: openbci - python
         - BrainFlow: brainflow library
         """
         # This is a placeholder - actual implementation needed

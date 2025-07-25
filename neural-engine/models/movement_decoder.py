@@ -70,7 +70,7 @@ class MovementDecoder(TensorFlowBaseModel):
 
         # Attention mechanism
         if use_attention:
-            # Self-attention layer
+            # Self - attention layer
             attention = layers.MultiHeadAttention(
                 num_heads=8,
                 key_dim=lstm_units // 8
@@ -106,7 +106,7 @@ class MovementDecoder(TensorFlowBaseModel):
 
         # Custom loss function for movement decoding
         def movement_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
-            # MSE for position/velocity
+            # MSE for position / velocity
             mse_loss = tf.reduce_mean(tf.square(y_true - y_pred))
 
             # Add smoothness constraint
@@ -136,11 +136,11 @@ class MovementDecoder(TensorFlowBaseModel):
                 monitor='val_loss',
                 factor=0.5,
                 patience=5,
-                min_lr=1e-6
+                min_lr=1e - 6
             )
         ]
 
-        # Add custom callback for movement-specific metrics
+        # Add custom callback for movement - specific metrics
         if X_val is not None and y_val is not None:
             callbacks.append(MovementMetricsCallback(X_val, y_val))
 
@@ -180,7 +180,7 @@ class MovementDecoder(TensorFlowBaseModel):
 
 
 class KalmanFilterDecoder:
-    """Kalman filter-based movement decoder for real-time BCI applications."""
+    """Kalman filter - based movement decoder for real - time BCI applications."""
 
     def __init__(self, n_channels: int, n_outputs: int = 2, dt: float = 0.05):
         """
@@ -213,7 +213,7 @@ class KalmanFilterDecoder:
         # State transition matrix (constant velocity model)
         self.A = np.eye(self.state_dim)
         for i in range(self.n_outputs):
-            self.A[i*2, i*2+1] = self.dt
+            self.A[i * 2, i * 2 + 1] = self.dt
 
         # Process noise covariance
         self.Q = np.eye(self.state_dim) * 0.001
@@ -230,7 +230,7 @@ class KalmanFilterDecoder:
 
         Args:
             X_train: Neural features (n_samples, n_channels)
-            y_train: Movement data (n_samples, n_outputs*2) - positions and velocities
+            y_train: Movement data (n_samples, n_outputs * 2) - positions and velocities
         """
         # Learn observation matrix H using linear regression
         from sklearn.linear_model import Ridge
@@ -301,7 +301,7 @@ class VelocityIntegrationLayer(layers.Layer):
 
 
 class MovementMetricsCallback(keras.callbacks.Callback):
-    """Custom callback to compute movement-specific metrics during training."""
+    """Custom callback to compute movement - specific metrics during training."""
 
     def __init__(self, X_val: np.ndarray, y_val: np.ndarray):
         super().__init__()

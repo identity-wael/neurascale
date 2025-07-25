@@ -3,7 +3,7 @@
 import os
 import json
 import logging
-from typing import Dict, List, Optional, Tuple, Any, Union
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 import tempfile
 import numpy as np
@@ -17,8 +17,8 @@ from google.cloud import storage
 import wandb
 
 from .base_models import BaseNeuralModel
-from .movement_decoder import MovementDecoder, KalmanFilterDecoder
-from .emotion_classifier import EmotionClassifier, ValenceArousalRegressor
+# from .movement_decoder import MovementDecoder, KalmanFilterDecoder  # Unused imports
+# from .emotion_classifier import EmotionClassifier, ValenceArousalRegressor  # Unused imports
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class NeuralModelTrainingPipeline:
 
     def __init__(self,
                  project_id: str,
-                 location: str = 'us-central1',
+                 location: str = 'us - central1',
                  bucket_name: Optional[str] = None,
                  experiment_name: Optional[str] = None,
                  use_wandb: bool = True):
@@ -44,8 +44,8 @@ class NeuralModelTrainingPipeline:
         """
         self.project_id = project_id
         self.location = location
-        self.bucket_name = bucket_name or f"{project_id}-neural-models"
-        self.experiment_name = experiment_name or f"neural-exp-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        self.bucket_name = bucket_name or f"{project_id}-neural - models"
+        self.experiment_name = experiment_name or f"neural - exp-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         self.use_wandb = use_wandb
 
         # Initialize Vertex AI
@@ -69,23 +69,23 @@ class NeuralModelTrainingPipeline:
         }
 
     def prepare_data(self,
-                    X: np.ndarray,
-                    y: np.ndarray,
-                    test_size: float = 0.2,
-                    val_size: float = 0.2,
-                    standardize: bool = True) -> Dict[str, np.ndarray]:
+                     X: np.ndarray,
+                     y: np.ndarray,
+                     test_size: float = 0.2,
+                     val_size: float = 0.2,
+                     standardize: bool = True) -> Dict[str, np.ndarray]:
         """
-        Prepare data for training with train/val/test splits.
+        Prepare data for training with train / val / test splits.
 
         Args:
             X: Input features
-            y: Target labels/values
+            y: Target labels / values
             test_size: Proportion for test set
             val_size: Proportion for validation set (from training data)
             standardize: Whether to standardize features
 
         Returns:
-            Dictionary with train/val/test splits
+            Dictionary with train / val / test splits
         """
         # Split data
         X_temp, X_test, y_temp, y_test = train_test_split(
@@ -134,15 +134,15 @@ class NeuralModelTrainingPipeline:
         return data_splits
 
     def train_model(self,
-                   model: BaseNeuralModel,
-                   data_splits: Dict[str, np.ndarray],
-                   hyperparameters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                    model: BaseNeuralModel,
+                    data_splits: Dict[str, np.ndarray],
+                    hyperparameters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Train a neural model with tracking and monitoring.
 
         Args:
             model: Neural model instance
-            data_splits: Dictionary with train/val/test data
+            data_splits: Dictionary with train / val / test data
             hyperparameters: Optional hyperparameters to override
 
         Returns:
@@ -199,12 +199,12 @@ class NeuralModelTrainingPipeline:
         return results
 
     def train_on_vertex_ai(self,
-                          model_class: str,
-                          dataset_path: str,
-                          hyperparameters: Dict[str, Any],
-                          machine_type: str = 'n1-standard-8',
-                          accelerator_type: Optional[str] = 'NVIDIA_TESLA_T4',
-                          accelerator_count: int = 1) -> aiplatform.Model:
+                           model_class: str,
+                           dataset_path: str,
+                           hyperparameters: Dict[str, Any],
+                           machine_type: str = 'n1-standard-8',
+                           accelerator_type: Optional[str] = 'NVIDIA_TESLA_T4',
+                           accelerator_count: int = 1) -> aiplatform.Model:
         """
         Train model on Vertex AI with distributed training support.
 
@@ -223,9 +223,9 @@ class NeuralModelTrainingPipeline:
         job = aiplatform.CustomTrainingJob(
             display_name=f"{model_class}-{self.experiment_name}",
             script_path="train.py",  # Training script
-            container_uri="gcr.io/cloud-aiplatform/training/tf-gpu.2-8:latest",
-            requirements=["tensorflow", "numpy", "scikit-learn", "wandb"],
-            model_serving_container_image_uri="gcr.io/cloud-aiplatform/prediction/tf2-gpu.2-8:latest"
+            container_uri="gcr.io / cloud - aiplatform / training / tf - gpu.2 - 8:latest",
+            requirements=["tensorflow", "numpy", "scikit - learn", "wandb"],
+            model_serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest"
         )
 
         # Run training job
@@ -249,11 +249,11 @@ class NeuralModelTrainingPipeline:
         return model
 
     def hyperparameter_tuning(self,
-                             model_class: type,
-                             data_splits: Dict[str, np.ndarray],
-                             param_grid: Dict[str, List[Any]],
-                             metric: str = 'accuracy',
-                             n_trials: int = 20) -> Dict[str, Any]:
+                              model_class: type,
+                              data_splits: Dict[str, np.ndarray],
+                              param_grid: Dict[str, List[Any]],
+                              metric: str = 'accuracy',
+                              n_trials: int = 20) -> Dict[str, Any]:
         """
         Perform hyperparameter tuning using Vertex AI Vizier.
 
@@ -352,7 +352,7 @@ class NeuralModelTrainingPipeline:
                 best_score = score
                 best_params = trial_params
 
-            logger.info(f"Trial {i+1}/{n_trials} - Score: {score:.4f}")
+            logger.info(f"Trial {i + 1}/{n_trials} - Score: {score:.4f}")
 
         return {
             'best_params': best_params,
@@ -361,8 +361,8 @@ class NeuralModelTrainingPipeline:
         }
 
     def save_model(self,
-                  model_name: Optional[str] = None,
-                  include_preprocessor: bool = True) -> str:
+                   model_name: Optional[str] = None,
+                   include_preprocessor: bool = True) -> str:
         """
         Save trained model to GCS.
 
@@ -418,11 +418,11 @@ class NeuralModelTrainingPipeline:
             return f"gs://{self.bucket_name}/{gcs_path}"
 
     def deploy_model(self,
-                    model_path: str,
-                    endpoint_name: Optional[str] = None,
-                    machine_type: str = 'n1-standard-4',
-                    min_replica_count: int = 1,
-                    max_replica_count: int = 3) -> aiplatform.Endpoint:
+                     model_path: str,
+                     endpoint_name: Optional[str] = None,
+                     machine_type: str = 'n1-standard-4',
+                     min_replica_count: int = 1,
+                     max_replica_count: int = 3) -> aiplatform.Endpoint:
         """
         Deploy model to Vertex AI endpoint.
 
@@ -442,7 +442,7 @@ class NeuralModelTrainingPipeline:
         model = aiplatform.Model.upload(
             display_name=f"{self.model.model_name}-{self.experiment_name}",
             artifact_uri=model_path,
-            serving_container_image_uri="gcr.io/cloud-aiplatform/prediction/tf2-gpu.2-8:latest"
+            serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest"
         )
 
         # Create endpoint

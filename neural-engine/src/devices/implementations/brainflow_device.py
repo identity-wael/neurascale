@@ -2,13 +2,13 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import List, Optional, Any
 from datetime import datetime, timezone
 import numpy as np
 
 try:
     from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
-    from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
+    from brainflow.data_filter import DataFilter
     BRAINFLOW_AVAILABLE = True
 except ImportError:
     BRAINFLOW_AVAILABLE = False
@@ -333,7 +333,7 @@ class BrainFlowDevice(BaseDevice):
         if self.accel_channels:
             signal_types.append(NeuralSignalType.ACCELEROMETER)
 
-        # Board-specific capabilities
+        # Board - specific capabilities
         has_wireless = self.board_name in ['ganglion', 'muse_s', 'muse_2',
                                           'neurosity_crown', 'brainbit', 'unicorn']
         has_battery = has_wireless
@@ -389,7 +389,7 @@ class BrainFlowDevice(BaseDevice):
                 self.board.get_board_data,
                 n_samples
             )
-            return data  # type: ignore[no-any-return]
+            return data  # type: ignore[no - any - return]
         except Exception as e:
             logger.error(f"Error getting board data history: {e}")
             return None

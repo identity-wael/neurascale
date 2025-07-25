@@ -11,9 +11,9 @@ import numpy as np
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.devices import DeviceManager
-from src.devices.interfaces.base_device import DeviceState
-from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType, ChannelInfo
+from src.devices import DeviceManager  # noqa: E402
+from src.devices.interfaces.base_device import DeviceState  # noqa: E402
+from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType, ChannelInfo  # noqa: E402
 
 # Setup logging
 logging.basicConfig(
@@ -160,7 +160,7 @@ async def main() -> None:
         await manager.stop_streaming()
         await manager.stop_aggregation()
 
-        # Example 3: Auto-discovery (if LSL is available)
+        # Example 3: Auto - discovery (if LSL is available)
         logger.info("\n=== Example 3: Device Discovery ===")
 
         discovered = await manager.auto_discover_devices(timeout=2.0)
@@ -236,7 +236,7 @@ async def openbci_example() -> None:
             device_id="openbci_cyton",
             device_type="openbci",
             board_type="cyton",
-            port=None  # Auto-detect
+            port=None  # Auto - detect
         )
 
         # Try to connect
@@ -244,7 +244,7 @@ async def openbci_example() -> None:
         if connected:
             logger.info("Connected to OpenBCI device")
 
-            # Configure channels (turn off channels 5-8)
+            # Configure channels (turn off channels 5 - 8)
             channels = [
                 ChannelInfo(channel_id=i, label=f"Ch{i + 1}", unit="microvolts", sampling_rate=250.0)
                 for i in range(4)  # Only use first 4 channels

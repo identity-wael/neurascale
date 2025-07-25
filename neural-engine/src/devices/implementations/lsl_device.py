@@ -70,7 +70,7 @@ class LSLDevice(BaseDevice):
             )
 
             if not streams:
-                raise ConnectionError(f"No LSL streams found matching criteria")
+                raise ConnectionError("No LSL streams found matching criteria")
 
             # Use the first matching stream
             stream_info = streams[0]
@@ -96,7 +96,7 @@ class LSLDevice(BaseDevice):
 
             # If no channel names found, create default names
             if not self.channel_names:
-                self.channel_names = [f"Ch{i+1}" for i in range(self.n_channels)]
+                self.channel_names = [f"Ch{i + 1}" for i in range(self.n_channels)]
 
             # Determine signal type from stream type
             stream_type_str = stream_info.type().upper()
@@ -113,7 +113,7 @@ class LSLDevice(BaseDevice):
             channels = [
                 ChannelInfo(
                     channel_id=i,
-                    label=self.channel_names[i] if i < len(self.channel_names) else f"Ch{i+1}",
+                    label=self.channel_names[i] if i < len(self.channel_names) else f"Ch{i + 1}",
                     unit="microvolts",
                     sampling_rate=self.sampling_rate
                 )
@@ -160,7 +160,7 @@ class LSLDevice(BaseDevice):
 
         self.stream_info = None
         self._update_state(DeviceState.DISCONNECTED)
-        logger.info(f"Disconnected from LSL stream")
+        logger.info("Disconnected from LSL stream")
 
     async def start_streaming(self) -> None:
         """Start streaming data from LSL."""
@@ -245,7 +245,7 @@ class LSLDevice(BaseDevice):
             signal_types=[self.signal_type],
             has_impedance_check=False,
             has_battery_monitor=False,
-            has_wireless=True,  # LSL is network-based
+            has_wireless=True,  # LSL is network - based
             has_trigger_input=True,  # LSL supports markers
             has_aux_channels=True  # Depends on stream
         )

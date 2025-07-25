@@ -4,12 +4,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import torch
-import torch.nn as nn
+# import torch  # Unused import
+# import torch.nn as nn  # Unused import
 from typing import Dict, Optional, Tuple, List, Any
 import logging
 
-from .base_models import TensorFlowBaseModel, PyTorchBaseModel
+from .base_models import TensorFlowBaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class EmotionClassifier(TensorFlowBaseModel):
 
     # Emotion categories based on dimensional model
     EMOTION_CATEGORIES = {
-        'valence_arousal': 4,  # High/Low Valence × High/Low Arousal
+        'valence_arousal': 4,  # High / Low Valence × High / Low Arousal
         'basic_emotions': 7,   # Happy, Sad, Angry, Fear, Surprise, Disgust, Neutral
         'complex_emotions': 15  # Extended emotion set
     }
@@ -48,7 +48,7 @@ class EmotionClassifier(TensorFlowBaseModel):
         self.emotion_model = emotion_model
 
     def build_model(self) -> keras.Model:
-        """Build emotion classification architecture with multi-scale feature extraction."""
+        """Build emotion classification architecture with multi - scale feature extraction."""
         # Parameters
         dropout_rate = self.config.get('dropout_rate', 0.4)
         use_spatial_attention = self.config.get('use_spatial_attention', True)
@@ -56,7 +56,7 @@ class EmotionClassifier(TensorFlowBaseModel):
         # Input layer
         inputs = keras.Input(shape=self.input_shape)
 
-        # Multi-scale temporal convolutions
+        # Multi - scale temporal convolutions
         conv_outputs = []
         kernel_sizes = [3, 7, 15]  # Different temporal scales
 
@@ -70,7 +70,7 @@ class EmotionClassifier(TensorFlowBaseModel):
             conv = layers.GlobalMaxPooling1D()(conv)
             conv_outputs.append(conv)
 
-        # Concatenate multi-scale features
+        # Concatenate multi - scale features
         concatenated = layers.Concatenate()(conv_outputs)
 
         # Spatial attention mechanism for channel selection
@@ -86,7 +86,7 @@ class EmotionClassifier(TensorFlowBaseModel):
             attended_features = layers.Conv1D(256, 5, padding='same', activation='relu')(attended_input)
             attended_features = layers.GlobalMaxPooling1D()(attended_features)
 
-            # Combine with multi-scale features
+            # Combine with multi - scale features
             concatenated = layers.Concatenate()([concatenated, attended_features])
 
         # Deep feature extraction
@@ -111,7 +111,7 @@ class EmotionClassifier(TensorFlowBaseModel):
     def get_emotion_labels(self) -> List[str]:
         """Get emotion labels based on the emotion model."""
         if self.emotion_model == 'valence_arousal':
-            return ['HAHV', 'HALV', 'LAHV', 'LALV']  # High/Low Arousal/Valence
+            return ['HAHV', 'HALV', 'LAHV', 'LALV']  # High / Low Arousal / Valence
         elif self.emotion_model == 'basic_emotions':
             return ['Happy', 'Sad', 'Angry', 'Fear', 'Surprise', 'Disgust', 'Neutral']
         else:  # complex_emotions
@@ -136,11 +136,11 @@ class EmotionClassifier(TensorFlowBaseModel):
 
 
 class ValenceArousalRegressor(TensorFlowBaseModel):
-    """Regression model for continuous valence-arousal prediction."""
+    """Regression model for continuous valence - arousal prediction."""
 
     def __init__(self, n_channels: int, n_samples: int, **kwargs: Any) -> None:
         """
-        Initialize valence-arousal regressor.
+        Initialize valence - arousal regressor.
 
         Args:
             n_channels: Number of neural recording channels
@@ -193,7 +193,7 @@ class ValenceArousalRegressor(TensorFlowBaseModel):
     def train(self, X_train: np.ndarray, y_train: np.ndarray,
               X_val: Optional[np.ndarray] = None,
               y_val: Optional[np.ndarray] = None) -> Dict[str, Any]:
-        """Train with custom loss for valence-arousal prediction."""
+        """Train with custom loss for valence - arousal prediction."""
         if self.model is None:
             self.model = self.build_model()
 
@@ -237,7 +237,7 @@ class ValenceArousalRegressor(TensorFlowBaseModel):
 
 
 class EmotionFeatureExtractor:
-    """Extract emotion-relevant features from neural signals."""
+    """Extract emotion - relevant features from neural signals."""
 
     def __init__(self, sampling_rate: float = 250.0):
         self.sampling_rate = sampling_rate
@@ -254,7 +254,7 @@ class EmotionFeatureExtractor:
         """
         features = {}
 
-        # Frequency band powers (emotion-relevant bands)
+        # Frequency band powers (emotion - relevant bands)
         features.update(self._extract_band_powers(neural_data))
 
         # Asymmetry features (frontal alpha asymmetry)
@@ -269,7 +269,7 @@ class EmotionFeatureExtractor:
         return features
 
     def _extract_band_powers(self, data: np.ndarray) -> Dict[str, np.ndarray]:
-        """Extract power in emotion-relevant frequency bands."""
+        """Extract power in emotion - relevant frequency bands."""
         from scipy import signal
 
         bands = {
@@ -284,7 +284,7 @@ class EmotionFeatureExtractor:
         for band_name, (low_freq, high_freq) in bands.items():
             # Butterworth bandpass filter
             b, a = signal.butter(4, [low_freq, high_freq],
-                               btype='band', fs=self.sampling_rate)
+                                 btype='band', fs=self.sampling_rate)
 
             # Filter each channel
             filtered = np.zeros_like(data)
@@ -346,7 +346,7 @@ class EmotionFeatureExtractor:
         plv_matrix = np.zeros((n_channels, n_channels))
 
         for i in range(n_channels):
-            for j in range(i+1, n_channels):
+            for j in range(i + 1, n_channels):
                 phase_diff = phases[:, i] - phases[:, j]
                 plv_matrix[i, j] = np.abs(np.mean(np.exp(1j * phase_diff)))
                 plv_matrix[j, i] = plv_matrix[i, j]

@@ -108,7 +108,7 @@ class SyntheticDevice(BaseDevice):
                     labels = ['X', 'Y', 'Z']
                     label = f"Accel_{labels[i % 3]}"
                 else:
-                    label = f"Ch{i+1}"
+                    label = f"Ch{i + 1}"
 
                 channels.append(ChannelInfo(
                     channel_id=i,
@@ -209,7 +209,7 @@ class SyntheticDevice(BaseDevice):
                 # Update time offset
                 self.time_offset += chunk_duration
 
-                # Sleep to maintain real-time streaming
+                # Sleep to maintain real - time streaming
                 await asyncio.sleep(chunk_duration)
 
         except Exception as e:
@@ -217,7 +217,7 @@ class SyntheticDevice(BaseDevice):
 
     def _generate_eeg_data(self, n_samples: int) -> np.ndarray:
         """Generate realistic EEG data with frequency bands."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples/self.sampling_rate, n_samples)
+        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
         data = np.zeros((self.n_channels, n_samples))
 
         for ch in range(self.n_channels):
@@ -225,13 +225,13 @@ class SyntheticDevice(BaseDevice):
             for band_name, (min_freq, max_freq, amplitude) in self.config['bands'].items():
                 # Random frequency within band
                 freq = np.random.uniform(min_freq, max_freq)
-                phase = np.random.uniform(0, 2*np.pi)
+                phase = np.random.uniform(0, 2 * np.pi)
 
                 # Add some amplitude variation
                 amp_variation = 1 + 0.2 * np.sin(2 * np.pi * 0.1 * t)
                 data[ch] += amplitude * amp_variation * np.sin(2 * np.pi * freq * t + phase)
 
-            # Add pink noise (1/f)
+            # Add pink noise (1 / f)
             noise = self._generate_pink_noise(n_samples) * self.config['noise_level']
             data[ch] += noise
 
@@ -239,13 +239,13 @@ class SyntheticDevice(BaseDevice):
             if np.random.random() < self.config['artifact_probability']:
                 artifact_start = np.random.randint(0, n_samples - 10)
                 artifact_amplitude = np.random.uniform(50, 200)
-                data[ch, artifact_start:artifact_start+10] += artifact_amplitude
+                data[ch, artifact_start:artifact_start + 10] += artifact_amplitude
 
         return data
 
     def _generate_emg_data(self, n_samples: int) -> np.ndarray:
         """Generate realistic EMG data with muscle activation bursts."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples/self.sampling_rate, n_samples)
+        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
         data = np.zeros((self.n_channels, n_samples))
 
         for ch in range(self.n_channels):
@@ -270,7 +270,7 @@ class SyntheticDevice(BaseDevice):
                     amplitude = 100 / harmonic  # Decreasing amplitude with harmonics
                     data[ch] += amplitude * np.sin(2 * np.pi * freq * t)
 
-                # Add high-frequency components
+                # Add high - frequency components
                 hf_noise = np.random.randn(n_samples) * 50
                 data[ch] += hf_noise
 
@@ -312,30 +312,30 @@ class SyntheticDevice(BaseDevice):
                 # Store spike time for refractory period
                 self.spike_times[ch].append(self.time_offset + spike_time)
 
-        return data  # type: ignore[no-any-return]
+        return data  # type: ignore[no - any - return]
 
     def _create_spike_waveform(self, duration: int) -> np.ndarray:
         """Create a realistic spike waveform."""
         t = np.linspace(0, 1, duration)
         # Biphasic spike shape
         waveform = np.exp(-10 * t) * np.sin(2 * np.pi * 5 * t)
-        return waveform  # type: ignore[no-any-return]
+        return waveform  # type: ignore[no - any - return]
 
     def _generate_accelerometer_data(self, n_samples: int) -> np.ndarray:
         """Generate synthetic accelerometer data."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples/self.sampling_rate, n_samples)
+        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
         data = np.zeros((self.n_channels, n_samples))
 
         # Simulate periodic movement
         movement_freq = self.config['movement_frequency']
 
-        # X-axis: forward-backward movement
+        # X - axis: forward - backward movement
         data[0] = 0.1 * np.sin(2 * np.pi * movement_freq * t)
 
-        # Y-axis: side-to-side movement
-        data[1] = 0.05 * np.sin(2 * np.pi * movement_freq * 2 * t + np.pi/4)
+        # Y - axis: side - to - side movement
+        data[1] = 0.05 * np.sin(2 * np.pi * movement_freq * 2 * t + np.pi / 4)
 
-        # Z-axis: up-down movement + gravity
+        # Z - axis: up - down movement + gravity
         data[2] = 1.0 + 0.02 * np.sin(2 * np.pi * movement_freq * 4 * t)
 
         # Add noise to all channels
@@ -345,16 +345,16 @@ class SyntheticDevice(BaseDevice):
         return data
 
     def _generate_pink_noise(self, n_samples: int) -> np.ndarray:
-        """Generate pink (1/f) noise."""
+        """Generate pink (1 / f) noise."""
         # Simple approximation using filtered white noise
         white = np.random.randn(n_samples)
 
-        # Apply multiple first-order filters
+        # Apply multiple first - order filters
         pink = np.zeros(n_samples)
         pink[0] = white[0]
 
         for i in range(1, n_samples):
-            pink[i] = 0.99 * pink[i-1] + white[i]
+            pink[i] = 0.99 * pink[i - 1] + white[i]
 
         # Normalize
         pink = pink / np.std(pink)
@@ -409,10 +409,10 @@ class SyntheticDevice(BaseDevice):
         for ch_id in channel_ids:
             # Most channels have good impedance
             if np.random.random() < 0.8:
-                impedance = np.random.uniform(1000, 5000)  # 1-5 kΩ
+                impedance = np.random.uniform(1000, 5000)  # 1 - 5 kΩ
             else:
                 # Some channels have higher impedance
-                impedance = np.random.uniform(5000, 20000)  # 5-20 kΩ
+                impedance = np.random.uniform(5000, 20000)  # 5 - 20 kΩ
             impedances[ch_id] = impedance
 
         return impedances

@@ -23,7 +23,7 @@ class TestNeuralDataIngestion:
     def ingestion(self):
         """Create ingestion instance with GCP disabled."""
         return NeuralDataIngestion(
-            project_id="test-project",
+            project_id="test - project",
             enable_pubsub=False,
             enable_bigtable=False,
         )
@@ -181,19 +181,19 @@ class TestNeuralDataIngestion:
 
     @pytest.mark.asyncio
     async def test_pubsub_integration(self):
-        """Test Pub/Sub integration when enabled."""
+        """Test Pub / Sub integration when enabled."""
         with patch("src.ingestion.neural_data_ingestion.GOOGLE_CLOUD_AVAILABLE", True):
             with patch("src.ingestion.neural_data_ingestion.pubsub_v1") as mock_pubsub:
                 # Setup mocks
                 mock_publisher = Mock()
                 mock_future = Mock()
-                mock_future.result.return_value = "message-id-123"
+                mock_future.result.return_value = "message - id - 123"
                 mock_publisher.publish.return_value = mock_future
                 mock_pubsub.PublisherClient.return_value = mock_publisher
 
-                # Create ingestion with Pub/Sub enabled
+                # Create ingestion with Pub / Sub enabled
                 ingestion = NeuralDataIngestion(
-                    project_id="test-project",
+                    project_id="test - project",
                     enable_pubsub=True,
                     enable_bigtable=False,
                 )

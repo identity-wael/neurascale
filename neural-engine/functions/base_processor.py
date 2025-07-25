@@ -35,11 +35,11 @@ class NeuralDataProcessor:
         self.signal_type = signal_type
         self.bigtable_client = bigtable.Client(project=PROJECT_ID)
         self.instance = self.bigtable_client.instance(BIGTABLE_INSTANCE)
-        self.time_series_table = self.instance.table('neural-time-series')
-        self.sessions_table = self.instance.table('neural-sessions')
-        self.devices_table = self.instance.table('neural-devices')
+        self.time_series_table = self.instance.table('neural - time - series')
+        self.sessions_table = self.instance.table('neural - sessions')
+        self.devices_table = self.instance.table('neural - devices')
 
-        # Signal-specific configuration
+        # Signal - specific configuration
         self.config = self.get_signal_config(signal_type)
 
     def get_signal_config(self, signal_type: str) -> Dict[str, Any]:
@@ -138,7 +138,7 @@ class NeuralDataProcessor:
 
         # Apply basic artifact rejection
         if self.signal_type != 'accelerometer':
-            # Z-score based artifact detection
+            # Z - score based artifact detection
             z_scores = np.abs((data - np.mean(data)) / np.std(data))
             artifact_mask = z_scores > 5  # 5 standard deviations
 
@@ -163,7 +163,7 @@ class NeuralDataProcessor:
             'rms': float(np.sqrt(np.mean(data**2))),
         }
 
-        # Signal-specific features
+        # Signal - specific features
         if self.signal_type in ['eeg', 'ecog', 'lfp']:
             # Add frequency domain features (simplified)
             fft_vals = np.fft.fft(data)
@@ -171,7 +171,7 @@ class NeuralDataProcessor:
             features['total_power'] = float(np.sum(power_spectrum))
 
         elif self.signal_type == 'accelerometer':
-            # Add motion-specific features
+            # Add motion - specific features
             features['magnitude'] = float(np.sqrt(np.sum(data**2)))
 
         return features
@@ -230,13 +230,13 @@ class NeuralDataProcessor:
             project_name = f"projects/{PROJECT_ID}"
 
             series = monitoring_v3.TimeSeries()
-            series.metric.type = f"custom.googleapis.com/neural/{self.signal_type}/processing_time"
+            series.metric.type = f"custom.googleapis.com / neural/{self.signal_type}/processing_time"
             series.metric.labels['environment'] = ENVIRONMENT
             series.metric.labels['success'] = str(success).lower()
 
             series.resource.type = 'cloud_function'
-            series.resource.labels['function_name'] = f"process-neural-{self.signal_type}-{ENVIRONMENT}"
-            series.resource.labels['region'] = os.environ.get('FUNCTION_REGION', 'us-central1')
+            series.resource.labels['function_name'] = f"process - neural-{self.signal_type}-{ENVIRONMENT}"
+            series.resource.labels['region'] = os.environ.get('FUNCTION_REGION', 'us - central1')
 
             now = datetime.utcnow()
             interval = monitoring_v3.TimeInterval(

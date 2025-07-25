@@ -1,1 +1,1 @@
-"""Command-line interface for Neural Engine."""
+"""Command - line interface for Neural Engine."""

@@ -30,7 +30,7 @@ class DataAnonymizer:
         Initialize the anonymizer.
 
         Args:
-            secret_key: Secret key for HMAC-based ID generation.
+            secret_key: Secret key for HMAC - based ID generation.
                        If None, generates a random key (not recommended for production)
         """
         if secret_key is None:
@@ -55,7 +55,7 @@ class DataAnonymizer:
             packet: Original packet with potential PII
 
         Returns:
-            Anonymized packet safe for storage/transmission
+            Anonymized packet safe for storage / transmission
         """
         # Create a copy to avoid modifying original
         anonymized = replace(packet)
@@ -198,11 +198,11 @@ class DataAnonymizer:
                 if age < 18:
                     sanitized["age_range"] = "under_18"
                 elif age < 30:
-                    sanitized["age_range"] = "18-29"
+                    sanitized["age_range"] = "18 - 29"
                 elif age < 50:
-                    sanitized["age_range"] = "30-49"
+                    sanitized["age_range"] = "30 - 49"
                 elif age < 70:
-                    sanitized["age_range"] = "50-69"
+                    sanitized["age_range"] = "50 - 69"
                 else:
                     sanitized["age_range"] = "70+"
 

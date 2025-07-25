@@ -4,11 +4,11 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from base_processor import process_neural_stream as base_process_neural_stream, NeuralDataProcessor
-import numpy as np
-from scipy import signal
-import logging
-from typing import Any, Dict
+from base_processor import NeuralDataProcessor  # noqa: E402, F401
+import numpy as np  # noqa: E402
+from scipy import signal  # noqa: E402
+import logging  # noqa: E402
+from typing import Any, Dict  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class SpikeProcessor(NeuralDataProcessor):
 
     def detect_spikes(self, data: np.ndarray, threshold_factor: float = 4.0) -> dict:
         """Detect spikes using threshold crossing method."""
-        # High-pass filter the data
+        # High - pass filter the data
         b, a = signal.butter(4, 300, 'high', fs=self.config['sampling_rate'])
         filtered_data = signal.filtfilt(b, a, data)
 
@@ -44,7 +44,7 @@ class SpikeProcessor(NeuralDataProcessor):
         }
 
     def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
-        """Extract spike-specific features."""
+        """Extract spike - specific features."""
         features: Dict[str, Any] = super().extract_features(data)
 
         # Add spike detection results

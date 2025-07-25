@@ -4,11 +4,11 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from base_processor import process_neural_stream as base_process_neural_stream, NeuralDataProcessor
-import numpy as np
-from scipy import signal
-import logging
-from typing import Any, Dict
+from base_processor import NeuralDataProcessor  # noqa: E402, F401
+import numpy as np  # noqa: E402
+from scipy import signal  # noqa: E402
+import logging  # noqa: E402
+from typing import Any, Dict  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class EMGProcessor(NeuralDataProcessor):
         return {
             'mean_activation': float(np.mean(smoothed)),
             'peak_activation': float(np.max(smoothed)),
-            'activation_duration': float(np.sum(smoothed > 0.1 * np.max(smoothed)) / self.config['sampling_rate']),
+            'activation_duration': float(np.sum(smoothed > 0.1 * np.max(smoothed)) / self.config['sampling_rate']),  # noqa: E501
             'fatigue_index': float(np.polyfit(range(len(smoothed)), smoothed, 1)[0])  # Slope as fatigue indicator
         }
 

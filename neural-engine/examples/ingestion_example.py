@@ -64,9 +64,9 @@ async def main() -> None:
 
         for ch in range(n_channels):
             # Add different frequency components per channel
-            # Alpha (8-12 Hz)
+            # Alpha (8 - 12 Hz)
             data[ch] += 20 * np.sin(2 * np.pi * 10 * t)
-            # Beta (12-30 Hz)
+            # Beta (12 - 30 Hz)
             data[ch] += 10 * np.sin(2 * np.pi * 20 * t)
             # Noise
             data[ch] += 5 * np.random.randn(n_samples)

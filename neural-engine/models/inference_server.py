@@ -1,4 +1,4 @@
-"""Real-time inference server for neural models."""
+"""Real - time inference server for neural models."""
 
 import asyncio
 import logging
@@ -10,13 +10,13 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import JSONResponse
+# from fastapi.responses import JSONResponse  # Unused import
 from pydantic import BaseModel
 import uvicorn
 
 from .base_models import BaseNeuralModel
-from .movement_decoder import MovementDecoder, KalmanFilterDecoder
-from .emotion_classifier import EmotionClassifier, ValenceArousalRegressor
+# from .movement_decoder import MovementDecoder, KalmanFilterDecoder  # Unused imports
+# from .emotion_classifier import EmotionClassifier, ValenceArousalRegressor  # Unused imports
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +51,10 @@ class ModelRegistry:
         self.active_models: Dict[str, str] = {}  # model_name -> active_version
 
     def register_model(self,
-                      model: BaseNeuralModel,
-                      model_name: str,
-                      version: str = "v1",
-                      metadata: Optional[Dict[str, Any]] = None) -> None:
+                       model: BaseNeuralModel,
+                       model_name: str,
+                       version: str = "v1",
+                       metadata: Optional[Dict[str, Any]] = None) -> None:
         """Register a model in the registry."""
         if model_name not in self.models:
             self.models[model_name] = {}
@@ -104,7 +104,7 @@ class ModelRegistry:
 
 
 class NeuralInferenceServer:
-    """High-performance inference server for neural models."""
+    """High - performance inference server for neural models."""
 
     def __init__(self,
                  max_batch_size: int = 32,
@@ -284,7 +284,7 @@ class NeuralInferenceServer:
                 'models_loaded': len(self.registry.models)
             }
 
-        @self.app.post("/models/reload/{model_name}")
+        @self.app.post("/models / reload/{model_name}")
         async def reload_model(model_name: str, model_path: str) -> Dict[str, str]:
             """Reload a model from disk."""
             # This would load the model from the specified path
@@ -423,7 +423,7 @@ class ModelOptimizer:
         # Calibrate with sample data
         with torch.no_grad():
             for i in range(0, len(calibration_data), 32):
-                batch = torch.FloatTensor(calibration_data[i:i+32])
+                batch = torch.FloatTensor(calibration_data[i:i + 32])
                 model.model(batch)
 
         # Convert to quantized model
@@ -440,8 +440,8 @@ def main() -> None:
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8080, help="Port to bind to")
     parser.add_argument("--config", help="Path to configuration file")
-    parser.add_argument("--max-batch-size", type=int, default=32, help="Maximum batch size")
-    parser.add_argument("--batch-timeout", type=int, default=50, help="Batch timeout in ms")
+    parser.add_argument("--max - batch - size", type=int, default=32, help="Maximum batch size")
+    parser.add_argument("--batch - timeout", type=int, default=50, help="Batch timeout in ms")
     parser.add_argument("--workers", type=int, default=4, help="Number of worker threads")
 
     args = parser.parse_args()

@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 class DataValidator:
     """Validates neural data packets for quality and integrity."""
 
-    # Signal-specific validation parameters
+    # Signal - specific validation parameters
     SIGNAL_RANGES = {
         NeuralSignalType.EEG: (-200, 200),  # microvolts
         NeuralSignalType.ECOG: (-500, 500),  # microvolts
         NeuralSignalType.LFP: (-1000, 1000),  # microvolts
         NeuralSignalType.EMG: (-5000, 5000),  # microvolts
         NeuralSignalType.SPIKES: (-100, 100),  # microvolts
-        NeuralSignalType.ACCELEROMETER: (-20, 20),  # g-force
+        NeuralSignalType.ACCELEROMETER: (-20, 20),  # g - force
     }
 
     EXPECTED_SAMPLING_RATES = {
@@ -52,7 +52,7 @@ class DataValidator:
         # Basic structure validation
         self._validate_structure(packet, result)
 
-        # Signal-specific validation
+        # Signal - specific validation
         self._validate_signal_properties(packet, result)
 
         # Data quality validation
@@ -91,7 +91,7 @@ class DataValidator:
         packet: NeuralDataPacket,
         result: ValidationResult,
     ) -> None:
-        """Validate signal-specific properties."""
+        """Validate signal - specific properties."""
         signal_type = packet.signal_type
 
         # Check sampling rate
@@ -140,7 +140,7 @@ class DataValidator:
         for ch_idx in range(packet.n_channels):
             channel_data = packet.data[ch_idx, :]
             if np.std(channel_data) < 0.01:  # Almost no variation
-                result.add_warning(f"Channel {ch_idx} appears to be flat/disconnected")
+                result.add_warning(f"Channel {ch_idx} appears to be flat / disconnected")
 
         # Check for excessive noise
         for ch_idx in range(packet.n_channels):
@@ -153,7 +153,7 @@ class DataValidator:
                 mad = np.median(np.abs(diff - np.median(diff)))
                 noise_estimate = mad * 1.4826  # Scale factor for MAD to std
 
-                # Use robust signal estimate (IQR-based)
+                # Use robust signal estimate (IQR - based)
                 q75, q25 = np.percentile(channel_data, [75, 25])
                 signal_estimate = (q75 - q25) / 1.349  # Scale factor for IQR to std
 
@@ -200,7 +200,7 @@ class DataValidator:
 
             # Check for potential PII
             if any(char.isalpha() for char in packet.subject_id[:4]):
-                result.add_warning("Subject ID may contain non-anonymized data")
+                result.add_warning("Subject ID may contain non - anonymized data")
 
     def _calculate_quality_score(
         self,

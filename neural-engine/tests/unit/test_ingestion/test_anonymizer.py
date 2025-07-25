@@ -28,10 +28,10 @@ class TestDataAnonymizer:
         device_info = DeviceInfo(
             device_id="device_serial_12345",
             device_type="OpenBCI",
-            serial_number="SN-12345",
+            serial_number="SN - 12345",
             channels=[
-                ChannelInfo(0, "Ch1", hardware_id="HW-001"),
-                ChannelInfo(1, "Ch2", hardware_id="HW-002"),
+                ChannelInfo(0, "Ch1", hardware_id="HW - 001"),
+                ChannelInfo(1, "Ch2", hardware_id="HW - 002"),
             ],
         )
 
@@ -103,9 +103,9 @@ class TestDataAnonymizer:
 
         # Age should be converted to range
         assert "age" not in anonymized.metadata
-        assert anonymized.metadata["age_range"] == "30-49"
+        assert anonymized.metadata["age_range"] == "30 - 49"
 
-        # Non-PII fields should remain
+        # Non - PII fields should remain
         assert anonymized.metadata["experiment"] == "motor_imagery"
 
     def test_different_secret_keys(self, test_packet):
@@ -174,7 +174,7 @@ class TestDataAnonymizer:
         # Age in nested dict should be removed (not converted to range currently)
         assert "age" not in anonymized.metadata["participant"]
 
-        # Non-PII nested fields should remain
+        # Non - PII nested fields should remain
         assert anonymized.metadata["participant"]["id"] == "P001"
 
         # Check location handling - should have room but not address
@@ -187,12 +187,12 @@ class TestDataAnonymizer:
         test_ages = [
             (10, "under_18"),
             (17, "under_18"),
-            (18, "18-29"),
-            (25, "18-29"),
-            (30, "30-49"),
-            (45, "30-49"),
-            (50, "50-69"),
-            (65, "50-69"),
+            (18, "18 - 29"),
+            (25, "18 - 29"),
+            (30, "30 - 49"),
+            (45, "30 - 49"),
+            (50, "50 - 69"),
+            (65, "50 - 69"),
             (70, "70+"),
             (85, "70+"),
         ]

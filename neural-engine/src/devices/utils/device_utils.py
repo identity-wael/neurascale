@@ -1,12 +1,12 @@
 """Utilities for device interface layer."""
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 import numpy as np
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import asyncio
 
-from ..interfaces.base_device import BaseDevice, DeviceState
+from ..interfaces.base_device import BaseDevice
 from ...ingestion.data_types import NeuralDataPacket, NeuralSignalType
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ class DeviceRecorder:
         # Store timestamp
         ts_group = h5file['timestamps']
         ts_group.create_dataset(f'packet_{packet_idx}',
-                               data=packet.timestamp.timestamp())
+                                data=packet.timestamp.timestamp())
 
         # Store metadata on first packet
         if packet_idx == 0:
@@ -114,7 +114,7 @@ class DeviceRecorder:
             filenames[device_id] = session['filename']
 
             logger.info(f"Stopped recording for device {device_id}: "
-                       f"{session['packet_count']} packets recorded")
+                        f"{session['packet_count']} packets recorded")
 
         self.recording_sessions.clear()
         return filenames

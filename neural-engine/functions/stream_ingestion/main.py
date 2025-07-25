@@ -6,10 +6,10 @@ import base64
 from datetime import datetime
 import logging
 import os
-from google.cloud import pubsub_v1
+# from google.cloud import pubsub_v1  # Unused import
 from google.cloud import bigtable
-from google.cloud.bigtable import column_family
-from google.cloud.bigtable import row_filters
+# from google.cloud.bigtable import column_family  # Unused import
+# from google.cloud.bigtable import row_filters  # Unused import
 from typing import Any
 
 # Configure logging

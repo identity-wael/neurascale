@@ -6,11 +6,11 @@ import os
 # Add parent directory to path to import base processor
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from base_processor import process_neural_stream as base_process_neural_stream, NeuralDataProcessor
-import numpy as np
-from scipy import signal
-import logging
-from typing import Any, Dict
+from base_processor import NeuralDataProcessor  # noqa: E402, F401
+import numpy as np  # noqa: E402
+from scipy import signal  # noqa: E402
+import logging  # noqa: E402
+from typing import Any, Dict  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class EEGProcessor(NeuralDataProcessor):
         super().__init__('eeg')
 
     def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
-        """Extract EEG-specific features including band powers."""
+        """Extract EEG - specific features including band powers."""
         features: Dict[str, Any] = super().extract_features(data)
 
         # Calculate band powers
@@ -61,7 +61,7 @@ class EEGProcessor(NeuralDataProcessor):
 
     def detect_eye_blinks(self, data: np.ndarray) -> int:
         """Detect potential eye blink artifacts in frontal channels."""
-        # Simple threshold-based detection for demonstration
+        # Simple threshold - based detection for demonstration
         # In production, use more sophisticated methods
         diff_signal = np.diff(data)
         threshold = 3 * np.std(diff_signal)

@@ -334,9 +334,9 @@ jobs:
             -upgrade \
             -lock=false
 
-      - name: Terraform Plan
+      - name: Terraform Plan and Apply
         working-directory: neural-engine/terraform
-        timeout-minutes: 5
+        timeout-minutes: 25
         run: |
           # Remove any stale locks first
           LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
@@ -346,6 +346,8 @@ jobs:
             sleep 2
           fi
 
+          # Plan
+          echo "Creating Terraform plan..."
           terraform plan \
             -input=false \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
@@ -355,10 +357,8 @@ jobs:
             -lock=false \
             -out=tfplan
 
-      - name: Terraform Apply
-        working-directory: neural-engine/terraform
-        timeout-minutes: 20
-        run: |
+          # Apply immediately to prevent stale plan
+          echo "Applying Terraform plan..."
           terraform apply -input=false -auto-approve tfplan
 
       - name: Mark deployment in monitoring

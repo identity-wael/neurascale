@@ -346,20 +346,53 @@ jobs:
             sleep 2
           fi
 
-          # Plan
-          echo "Creating Terraform plan..."
-          terraform plan \
-            -input=false \
-            -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
-            -var="environment=${{ needs.setup.outputs.environment }}" \
-            -var="project_id=${{ needs.setup.outputs.project_id }}" \
-            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            -lock=false \
-            -out=tfplan
+          # Function to run terraform with retry
+          terraform_apply_with_retry() {
+            local max_attempts=3
+            local attempt=1
 
-          # Apply immediately to prevent stale plan
-          echo "Applying Terraform plan..."
-          terraform apply -input=false -auto-approve tfplan
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt of $max_attempts..."
+
+              # Plan
+              echo "Creating Terraform plan..."
+              terraform plan \
+                -input=false \
+                -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+                -var="environment=${{ needs.setup.outputs.environment }}" \
+                -var="project_id=${{ needs.setup.outputs.project_id }}" \
+                -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+                -lock=false \
+                -out=tfplan
+
+              # Apply immediately to prevent stale plan
+              echo "Applying Terraform plan..."
+              if terraform apply -input=false -auto-approve tfplan; then
+                echo "Terraform apply succeeded!"
+                return 0
+              else
+                echo "Terraform apply failed on attempt $attempt"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting 30 seconds before retry..."
+                  sleep 30
+                  # Refresh state before retry
+                  terraform refresh \
+                    -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+                    -var="environment=${{ needs.setup.outputs.environment }}" \
+                    -var="project_id=${{ needs.setup.outputs.project_id }}" \
+                    -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com"
+                fi
+              fi
+
+              attempt=$((attempt + 1))
+            done
+
+            echo "Terraform apply failed after $max_attempts attempts"
+            return 1
+          }
+
+          # Run terraform with retry
+          terraform_apply_with_retry
 
       - name: Mark deployment in monitoring
         if: success()

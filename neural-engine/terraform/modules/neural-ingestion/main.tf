@@ -134,12 +134,19 @@ resource "google_bigtable_table" "devices" {
 # 3. Pre-upload the functions package
 
 # For now, we'll create the necessary IAM bindings for functions
-resource "google_project_iam_member" "functions_invoker" {
-  for_each = google_pubsub_topic.neural_data
-
+# Using authoritative binding to avoid conflicts
+resource "google_project_iam_binding" "pubsub_invoker" {
   project = var.project_id
   role    = "roles/run.invoker"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+  ]
+
+  # Add lifecycle to prevent recreation on every apply
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Data source for project info

@@ -288,13 +288,14 @@ jobs:
           echo "Checking for stale Terraform locks..."
 
           # Method 1: Remove lock file directly from GCS
-          if gcloud storage ls gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null; then
-            echo "Found stale lock, removing..."
-            gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock
+          LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
+          if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
+            echo "Found stale lock at $LOCK_PATH, removing..."
+            gcloud storage rm "$LOCK_PATH"
             echo "Lock file removed from GCS"
             sleep 2  # Give GCS time to propagate the deletion
           else
-            echo "No stale locks found in GCS"
+            echo "No stale locks found in GCS at $LOCK_PATH"
           fi
 
           # Method 2: Try terraform force-unlock if we know a lock ID
@@ -328,7 +329,21 @@ jobs:
         working-directory: neural-engine/terraform
         timeout-minutes: 20
         run: |
-          terraform apply -input=false -auto-approve tfplan
+          # Verify tfplan exists
+          if [ ! -f tfplan ]; then
+            echo "ERROR: tfplan file not found!"
+            exit 1
+          fi
+
+          echo "Applying Terraform plan..."
+          terraform apply -input=false -auto-approve tfplan || {
+            echo "Terraform apply failed. Checking state..."
+            terraform state list || echo "Unable to list state"
+            echo "Checking for lock issues..."
+            LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
+            gcloud storage ls "$LOCK_PATH" 2>/dev/null && echo "Lock file found in GCS at $LOCK_PATH"
+            exit 1
+          }
 
       - name: Mark deployment in monitoring
         if: success() && (github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging'))
@@ -343,11 +358,12 @@ jobs:
         if: always()
         run: |
           echo "Cleaning up Terraform state lock..."
-          if gcloud storage ls gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null; then
-            gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock
-            echo "Lock removed"
+          LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
+          if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
+            gcloud storage rm "$LOCK_PATH"
+            echo "Lock removed from $LOCK_PATH"
           else
-            echo "No lock to remove"
+            echo "No lock to remove at $LOCK_PATH"
           fi
 
   # Verify deployment after everything is built and deployed

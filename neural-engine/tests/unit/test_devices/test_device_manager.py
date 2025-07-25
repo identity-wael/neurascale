@@ -2,14 +2,12 @@
 
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime
-import uuid
+from unittest.mock import Mock, patch
 
 from src.devices.device_manager import DeviceManager
 from src.devices.interfaces.base_device import BaseDevice, DeviceState
 from src.devices.device_discovery import DiscoveredDevice, DeviceProtocol
-from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType, DataSource
+from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType
 
 
 class MockDevice(BaseDevice):
@@ -40,6 +38,7 @@ class MockDevice(BaseDevice):
 
     def get_capabilities(self):
         from src.devices.interfaces.base_device import DeviceCapabilities
+
         return DeviceCapabilities(
             supported_sampling_rates=[256.0],
             max_channels=8,
@@ -283,8 +282,7 @@ class TestDeviceManager:
 
         # Start aggregation
         await manager.start_aggregation(
-            window_size_ms=50,
-            callback=aggregation_callback
+            window_size_ms=50, callback=aggregation_callback
         )
 
         # Simulate data from devices
@@ -326,9 +324,7 @@ class TestDeviceManager:
 
         # Mock discovery service
         with patch.object(
-            manager.discovery_service,
-            "quick_scan",
-            return_value=mock_devices
+            manager.discovery_service, "quick_scan", return_value=mock_devices
         ):
             discovered = await manager.auto_discover_devices(timeout=1.0)
 
@@ -373,9 +369,18 @@ class TestDeviceManager:
         """Test device type mapping."""
         test_cases = [
             (DiscoveredDevice("LSL", "Stream", DeviceProtocol.LSL, {}), "lsl"),
-            (DiscoveredDevice("OpenBCI", "Cyton", DeviceProtocol.SERIAL, {}), "openbci"),
-            (DiscoveredDevice("BrainFlow", "Synthetic", DeviceProtocol.USB, {}), "brainflow"),
-            (DiscoveredDevice("Muse", "Muse S", DeviceProtocol.BLUETOOTH, {}), "brainflow"),
+            (
+                DiscoveredDevice("OpenBCI", "Cyton", DeviceProtocol.SERIAL, {}),
+                "openbci",
+            ),
+            (
+                DiscoveredDevice("BrainFlow", "Synthetic", DeviceProtocol.USB, {}),
+                "brainflow",
+            ),
+            (
+                DiscoveredDevice("Muse", "Muse S", DeviceProtocol.BLUETOOTH, {}),
+                "brainflow",
+            ),
             (DiscoveredDevice("Unknown", "Device", DeviceProtocol.USB, {}), None),
         ]
 

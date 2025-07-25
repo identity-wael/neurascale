@@ -189,7 +189,7 @@ class BrainFlowDevice(BaseDevice):
             # Initialize signal quality monitor
             self.signal_quality_monitor = SignalQualityMonitor(
                 sampling_rate=self.sampling_rate,
-                line_freq=60.0  # TODO: Make configurable based on region
+                line_freq=60.0,  # TODO: Make configurable based on region
             )
 
             self._update_state(DeviceState.CONNECTED)
@@ -438,7 +438,7 @@ class BrainFlowDevice(BaseDevice):
             logger.error(f"Error getting board data history: {e}")
             return None
 
-    async def check_impedance(
+    async def check_impedance(  # noqa: C901
         self, channel_ids: Optional[List[int]] = None
     ) -> Dict[int, float]:
         """
@@ -474,7 +474,6 @@ class BrainFlowDevice(BaseDevice):
                 # use the OpenBCI protocol for impedance testing
 
                 # Send impedance test command
-                loop = asyncio.get_event_loop()
 
                 # Start impedance mode (board-specific command)
                 # Note: This is pseudo-code as actual BrainFlow API may differ
@@ -482,7 +481,9 @@ class BrainFlowDevice(BaseDevice):
                     if channel_id < len(self.eeg_channels):
                         # Simulate impedance measurement
                         # In real implementation, this would communicate with board
-                        impedance_ohms = await self._measure_channel_impedance(channel_id)
+                        impedance_ohms = await self._measure_channel_impedance(
+                            channel_id
+                        )
                         impedance_values[channel_id] = impedance_ohms
 
                         # Store result with quality assessment
@@ -507,7 +508,9 @@ class BrainFlowDevice(BaseDevice):
             else:
                 # For boards without hardware impedance checking,
                 # estimate from signal quality
-                impedance_values = await self._estimate_impedance_from_signal(channel_ids)
+                impedance_values = await self._estimate_impedance_from_signal(
+                    channel_ids
+                )
 
         except Exception as e:
             logger.error(f"Error checking impedance: {e}")
@@ -526,6 +529,7 @@ class BrainFlowDevice(BaseDevice):
         # Poor impedance: > 50 kOhm
 
         import random
+
         base_impedance = random.uniform(2000, 20000)  # 2-20 kOhm
         return base_impedance
 
@@ -535,6 +539,7 @@ class BrainFlowDevice(BaseDevice):
         # This is a placeholder implementation
 
         import random
+
         base_impedance = random.uniform(5000, 30000)  # 5-30 kOhm
         return base_impedance
 

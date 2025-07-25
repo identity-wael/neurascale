@@ -14,10 +14,10 @@ class SignalQualityLevel(Enum):
     """Signal quality levels."""
 
     EXCELLENT = "excellent"  # SNR > 20 dB, impedance < 5k
-    GOOD = "good"           # SNR > 15 dB, impedance < 10k
-    FAIR = "fair"           # SNR > 10 dB, impedance < 20k
-    POOR = "poor"           # SNR > 5 dB, impedance < 50k
-    BAD = "bad"             # SNR < 5 dB or impedance > 50k
+    GOOD = "good"  # SNR > 15 dB, impedance < 10k
+    FAIR = "fair"  # SNR > 10 dB, impedance < 20k
+    POOR = "poor"  # SNR > 5 dB, impedance < 50k
+    BAD = "bad"  # SNR < 5 dB or impedance > 50k
 
 
 @dataclass
@@ -53,7 +53,7 @@ class SignalQualityMetrics:
         return self.quality_level in [
             SignalQualityLevel.EXCELLENT,
             SignalQualityLevel.GOOD,
-            SignalQualityLevel.FAIR
+            SignalQualityLevel.FAIR,
         ]
 
 
@@ -64,7 +64,7 @@ class SignalQualityMonitor:
         self,
         sampling_rate: float,
         line_freq: float = 60.0,  # 60 Hz for US, 50 Hz for EU
-        window_duration: float = 1.0  # 1 second window
+        window_duration: float = 1.0,  # 1 second window
     ):
         """
         Initialize signal quality monitor.
@@ -88,16 +88,14 @@ class SignalQualityMonitor:
         }
 
         self.impedance_thresholds = {
-            SignalQualityLevel.EXCELLENT: 5000,   # 5 kOhm
-            SignalQualityLevel.GOOD: 10000,       # 10 kOhm
-            SignalQualityLevel.FAIR: 20000,       # 20 kOhm
-            SignalQualityLevel.POOR: 50000,       # 50 kOhm
+            SignalQualityLevel.EXCELLENT: 5000,  # 5 kOhm
+            SignalQualityLevel.GOOD: 10000,  # 10 kOhm
+            SignalQualityLevel.FAIR: 20000,  # 20 kOhm
+            SignalQualityLevel.POOR: 50000,  # 50 kOhm
         }
 
     def assess_signal_quality(
-        self,
-        signal: np.ndarray,
-        channel_id: int
+        self, signal: np.ndarray, channel_id: int
     ) -> SignalQualityMetrics:
         """
         Assess signal quality for a single channel.
@@ -110,7 +108,7 @@ class SignalQualityMonitor:
             Signal quality metrics
         """
         # Calculate basic metrics
-        rms = np.sqrt(np.mean(signal ** 2))
+        rms = np.sqrt(np.mean(signal**2))
 
         # Calculate SNR
         snr_db = self._calculate_snr(signal)
@@ -130,13 +128,11 @@ class SignalQualityMonitor:
             rms_amplitude=rms,
             line_noise_power=line_noise_power,
             artifacts_detected=artifacts,
-            quality_level=quality_level
+            quality_level=quality_level,
         )
 
     def assess_impedance(
-        self,
-        impedance_ohms: float,
-        channel_id: int
+        self, impedance_ohms: float, channel_id: int
     ) -> ImpedanceResult:
         """
         Assess impedance measurement.
@@ -160,7 +156,7 @@ class SignalQualityMonitor:
             channel_id=channel_id,
             impedance_ohms=impedance_ohms,
             timestamp=datetime.now(timezone.utc),
-            quality_level=quality_level
+            quality_level=quality_level,
         )
 
     def _calculate_snr(self, signal: np.ndarray) -> float:
@@ -169,15 +165,15 @@ class SignalQualityMonitor:
         # This is a simplified approach - more sophisticated methods exist
 
         # Apply high-pass filter to estimate noise
-        nyquist = self.sampling_rate / 2
-        high_cutoff = min(40.0, nyquist * 0.8)  # 40 Hz or 80% of Nyquist
+        # nyquist = self.sampling_rate / 2
+        # high_cutoff = min(40.0, nyquist * 0.8)  # 40 Hz or 80% of Nyquist
 
         # Simple differencing as high-pass filter
         noise = np.diff(signal)
 
         # Calculate powers
-        signal_power = np.mean(signal ** 2)
-        noise_power = np.mean(noise ** 2)
+        signal_power = np.mean(signal**2)
+        noise_power = np.mean(noise**2)
 
         # Avoid log(0)
         if noise_power == 0:
@@ -225,9 +221,7 @@ class SignalQualityMonitor:
         return SignalQualityLevel.BAD
 
     def assess_multi_channel(
-        self,
-        signals: np.ndarray,
-        channel_ids: Optional[List[int]] = None
+        self, signals: np.ndarray, channel_ids: Optional[List[int]] = None
     ) -> List[SignalQualityMetrics]:
         """
         Assess signal quality for multiple channels.
@@ -247,17 +241,13 @@ class SignalQualityMonitor:
         metrics = []
         for i, channel_id in enumerate(channel_ids):
             if i < n_channels:
-                channel_metrics = self.assess_signal_quality(
-                    signals[i, :],
-                    channel_id
-                )
+                channel_metrics = self.assess_signal_quality(signals[i, :], channel_id)
                 metrics.append(channel_metrics)
 
         return metrics
 
     def get_overall_quality(
-        self,
-        metrics: List[SignalQualityMetrics]
+        self, metrics: List[SignalQualityMetrics]
     ) -> Tuple[SignalQualityLevel, Dict[str, float]]:
         """
         Get overall quality assessment from multiple channels.
@@ -280,12 +270,13 @@ class SignalQualityMonitor:
 
         # Count channels at each quality level
         level_counts = {
-            level: quality_levels.count(level)
-            for level in SignalQualityLevel
+            level: quality_levels.count(level) for level in SignalQualityLevel
         }
 
         # Determine overall quality (conservative approach - use worst case)
-        overall_quality = min(quality_levels, key=lambda x: list(SignalQualityLevel).index(x))
+        overall_quality = min(
+            quality_levels, key=lambda x: list(SignalQualityLevel).index(x)
+        )
 
         summary = {
             "avg_snr_db": avg_snr,

@@ -3,7 +3,7 @@
 import pytest
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock
 import numpy as np
 
 from src.devices.interfaces.base_device import (
@@ -23,7 +23,9 @@ from src.ingestion.data_types import (
 class MockDevice(BaseDevice):
     """Mock implementation of BaseDevice for testing."""
 
-    def __init__(self, device_id: str = "test_device", device_name: str = "Test Device"):
+    def __init__(
+        self, device_id: str = "test_device", device_name: str = "Test Device"
+    ):
         super().__init__(device_id, device_name)
         self.connect_called = False
         self.disconnect_called = False

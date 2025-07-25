@@ -89,13 +89,15 @@ class DeviceMetrics:
                 "cpu_usage_percent": self.cpu_usage_percent,
                 "memory_usage_mb": self.memory_usage_mb,
             },
-            "battery": {
-                "level_percent": self.battery_level_percent,
-                "charging": self.battery_charging,
-                "estimated_minutes": self.estimated_battery_minutes,
-            }
-            if self.battery_level_percent is not None
-            else None,
+            "battery": (
+                {
+                    "level_percent": self.battery_level_percent,
+                    "charging": self.battery_charging,
+                    "estimated_minutes": self.estimated_battery_minutes,
+                }
+                if self.battery_level_percent is not None
+                else None
+            ),
         }
 
 
@@ -168,7 +170,7 @@ class DeviceHealthMonitor:
         self._error_counts[device_id] = 0
 
         # Set connection time if device is connected
-        if hasattr(device, 'is_connected') and device.is_connected():
+        if hasattr(device, "is_connected") and device.is_connected():
             self._connection_times[device_id] = datetime.now(timezone.utc)
 
     def remove_device(self, device_id: str):
@@ -225,7 +227,7 @@ class DeviceHealthMonitor:
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
 
-    async def _check_device_health(self, device_id: str):
+    async def _check_device_health(self, device_id: str):  # noqa: C901
         """Check health of a specific device."""
         device = self._devices.get(device_id)
         if not device:
@@ -236,16 +238,21 @@ class DeviceHealthMonitor:
             return
 
         # Update connection metrics
-        if hasattr(device, 'is_connected') and device.is_connected():
+        if hasattr(device, "is_connected") and device.is_connected():
             if device_id in self._connection_times:
-                uptime = (datetime.now(timezone.utc) - self._connection_times[device_id]).total_seconds()
+                uptime = (
+                    datetime.now(timezone.utc) - self._connection_times[device_id]
+                ).total_seconds()
                 metrics.connection_uptime = uptime
         else:
             metrics.connection_uptime = 0.0
             self._connection_times.pop(device_id, None)
 
         # Update data rate metrics
-        if device_id in self._packet_timestamps and len(self._packet_timestamps[device_id]) > 1:
+        if (
+            device_id in self._packet_timestamps
+            and len(self._packet_timestamps[device_id]) > 1
+        ):
             timestamps = list(self._packet_timestamps[device_id])
             time_span = (timestamps[-1] - timestamps[0]).total_seconds()
             if time_span > 0:
@@ -254,30 +261,29 @@ class DeviceHealthMonitor:
                 # Calculate latency (time between packets)
                 if len(timestamps) > 1:
                     intervals = [
-                        (timestamps[i] - timestamps[i-1]).total_seconds() * 1000
+                        (timestamps[i] - timestamps[i - 1]).total_seconds() * 1000
                         for i in range(1, len(timestamps))
                     ]
                     metrics.latency_ms = statistics.median(intervals)
 
         # Update signal quality metrics if available
-        if hasattr(device, '_last_quality_metrics'):
+        if hasattr(device, "_last_quality_metrics"):
             quality_metrics = device._last_quality_metrics
             if quality_metrics:
                 snr_values = [m.snr_db for m in quality_metrics.values()]
                 if snr_values:
                     metrics.average_snr_db = statistics.mean(snr_values)
                     metrics.channels_good_quality = sum(
-                        1 for m in quality_metrics.values()
-                        if m.is_acceptable
+                        1 for m in quality_metrics.values() if m.is_acceptable
                     )
                     metrics.channels_total = len(quality_metrics)
 
         # Update battery metrics if available
-        if hasattr(device, 'get_battery_level'):
+        if hasattr(device, "get_battery_level"):
             try:
                 battery_level = await device.get_battery_level()
                 metrics.battery_level_percent = battery_level
-            except:
+            except Exception:
                 pass
 
         # Calculate connection stability
@@ -288,10 +294,12 @@ class DeviceHealthMonitor:
             metrics.connection_stability = error_factor * reconnect_factor
 
         # Store metrics in history
-        self._metrics_history[device_id].append({
-            'timestamp': metrics.timestamp,
-            'metrics': DeviceMetrics(**metrics.__dict__)  # Copy
-        })
+        self._metrics_history[device_id].append(
+            {
+                "timestamp": metrics.timestamp,
+                "metrics": DeviceMetrics(**metrics.__dict__),  # Copy
+            }
+        )
 
         # Evaluate health status
         new_status = self._evaluate_health_status(metrics)
@@ -302,10 +310,14 @@ class DeviceHealthMonitor:
             self._notify_health_change(device_id, new_status)
 
             # Generate alert if degraded
-            if new_status in [HealthStatus.DEGRADED, HealthStatus.UNHEALTHY, HealthStatus.CRITICAL]:
+            if new_status in [
+                HealthStatus.DEGRADED,
+                HealthStatus.UNHEALTHY,
+                HealthStatus.CRITICAL,
+            ]:
                 self._generate_health_alert(device_id, metrics, new_status)
 
-    def _evaluate_health_status(self, metrics: DeviceMetrics) -> HealthStatus:
+    def _evaluate_health_status(self, metrics: DeviceMetrics) -> HealthStatus:  # noqa: C901
         """Evaluate overall health status from metrics."""
         issues = []
 
@@ -355,10 +367,7 @@ class DeviceHealthMonitor:
             return HealthStatus.HEALTHY
 
     def _generate_health_alert(
-        self,
-        device_id: str,
-        metrics: DeviceMetrics,
-        status: HealthStatus
+        self, device_id: str, metrics: DeviceMetrics, status: HealthStatus
     ):
         """Generate health alert for device."""
         # Determine alert message
@@ -379,7 +388,7 @@ class DeviceHealthMonitor:
             severity=status,
             category="health",
             message=message,
-            metadata={"metrics": metrics.to_dict()}
+            metadata={"metrics": metrics.to_dict()},
         )
 
         # Store alert
@@ -409,7 +418,7 @@ class DeviceHealthMonitor:
         cutoff_time = datetime.now(timezone.utc) - self.history_window
 
         for device_id, history in self._metrics_history.items():
-            while history and history[0]['timestamp'] < cutoff_time:
+            while history and history[0]["timestamp"] < cutoff_time:
                 history.popleft()
 
     def record_packet(self, device_id: str, timestamp: Optional[datetime] = None):
@@ -456,9 +465,7 @@ class DeviceHealthMonitor:
         return self._health_status.copy()
 
     def get_device_history(
-        self,
-        device_id: str,
-        minutes: Optional[int] = None
+        self, device_id: str, minutes: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """Get historical metrics for a device."""
         if device_id not in self._metrics_history:
@@ -468,10 +475,7 @@ class DeviceHealthMonitor:
 
         if minutes:
             cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=minutes)
-            return [
-                entry for entry in history
-                if entry['timestamp'] >= cutoff_time
-            ]
+            return [entry for entry in history if entry["timestamp"] >= cutoff_time]
         else:
             return list(history)
 

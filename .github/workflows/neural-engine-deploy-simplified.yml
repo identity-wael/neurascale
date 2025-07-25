@@ -256,10 +256,25 @@ jobs:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
+      - name: Verify Google Cloud Authentication
+        run: |
+          echo "Verifying Google Cloud authentication..."
+          gcloud auth list
+          echo "Current project:"
+          gcloud config get-value project
+          echo "Setting project explicitly:"
+          gcloud config set project ${{ needs.setup.outputs.project_id }}
+          echo "Testing API access:"
+          gcloud projects describe ${{ needs.setup.outputs.project_id }} --format="value(projectId)" || echo "Unable to access project"
+
       - name: Terraform Init
         working-directory: neural-engine/terraform
         timeout-minutes: 3
         run: |
+          echo "Checking access to state bucket..."
+          gcloud storage ls gs://neurascale-terraform-state/ || echo "Cannot access state bucket"
+
+          echo "Running terraform init..."
           terraform init \
             -input=false \
             -backend-config=backend-configs/${{ needs.setup.outputs.environment }}.hcl
@@ -311,7 +326,29 @@ jobs:
           echo "Running terraform validate..."
           terraform validate
 
-          echo "Running terraform plan..."
+          # Check current state
+          echo "Checking current Terraform state..."
+          terraform state list 2>&1 || echo "No existing state or unable to access"
+
+          # Try a targeted plan first to narrow down the issue
+          echo "Testing with a minimal plan..."
+          timeout 30s terraform plan \
+            -input=false \
+            -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+            -var="environment=${{ needs.setup.outputs.environment }}" \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            -target=module.project_apis \
+            -lock=false \
+            -refresh=false || {
+              echo "Minimal plan timed out or failed. Checking logs..."
+              tail -50 terraform-debug.log || true
+              echo "Checking provider configuration..."
+              terraform providers
+              exit 1
+            }
+
+          echo "Running full terraform plan..."
           terraform plan \
             -input=false \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \

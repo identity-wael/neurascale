@@ -80,64 +80,129 @@ resource "google_project_iam_member" "neural_ingestion_roles" {
 }
 
 # Create custom role for GitHub Actions with minimal permissions
-resource "google_project_iam_custom_role" "github_deploy" {
-  role_id     = "githubDeployRole"
-  title       = "GitHub Actions Deploy Role"
-  description = "Custom role for GitHub Actions with minimal required permissions"
-  permissions = [
-    "cloudfunctions.functions.create",
-    "cloudfunctions.functions.update",
-    "cloudfunctions.functions.delete",
-    "cloudfunctions.functions.get",
-    "cloudfunctions.functions.list",
-    "cloudfunctions.operations.get",
-    "cloudfunctions.operations.list",
-    "iam.serviceAccounts.actAs",
-    "storage.buckets.get",
-    "storage.buckets.list",
-    "storage.objects.create",
-    "storage.objects.delete",
-    "storage.objects.get",
-    "storage.objects.list",
-    "artifactregistry.repositories.get",
-    "artifactregistry.repositories.list",
-    "artifactregistry.repositories.uploadArtifacts",
-    "artifactregistry.repositories.downloadArtifacts",
-    "run.services.create",
-    "run.services.update",
-    "run.services.get",
-    "run.services.list",
-    "resourcemanager.projects.get",
-    "serviceusage.services.use",
-    "pubsub.topics.get",
-    "pubsub.topics.list",
-    "pubsub.subscriptions.get",
-    "pubsub.subscriptions.list",
-    "bigtable.instances.get",
-    "bigtable.instances.list",
-    "bigtable.tables.get",
-    "bigtable.tables.list",
-    "logging.logEntries.create",
-    "monitoring.timeSeries.create"
-  ]
-
-  depends_on = [module.project_apis]
-}
+# TEMPORARY: Commented out - requires roles/iam.roleAdmin permission
+# resource "google_project_iam_custom_role" "github_deploy" {
+#   role_id     = "githubDeployRole"
+#   title       = "GitHub Actions Deploy Role"
+#   description = "Custom role for GitHub Actions with minimal required permissions"
+#   permissions = [
+#
+##     # Cloud Functions permissions
+##     "cloudfunctions.functions.create",
+#    "cloudfunctions.functions.update",
+#    "cloudfunctions.functions.delete",
+#    "cloudfunctions.functions.get",
+#    "cloudfunctions.functions.list",
+#    "cloudfunctions.operations.get",
+#    "cloudfunctions.operations.list",
+#
+#    # IAM permissions
+#    "iam.serviceAccounts.actAs",
+#    "iam.serviceAccounts.create",
+#    "iam.serviceAccounts.delete",
+#    "iam.serviceAccounts.get",
+#    "iam.serviceAccounts.list",
+#    "iam.serviceAccounts.getIamPolicy",
+#    "iam.serviceAccounts.setIamPolicy",
+#    "iam.roles.create",
+#    "iam.roles.delete",
+#    "iam.roles.get",
+#    "iam.roles.list",
+#    "iam.roles.update",
+#    "resourcemanager.projects.getIamPolicy",
+#    "resourcemanager.projects.setIamPolicy",
+#
+#    # Storage permissions
+#    "storage.buckets.get",
+#    "storage.buckets.list",
+#    "storage.objects.create",
+#    "storage.objects.delete",
+#    "storage.objects.get",
+#    "storage.objects.list",
+#
+#    # Artifact Registry permissions
+#    "artifactregistry.repositories.get",
+#    "artifactregistry.repositories.list",
+#    "artifactregistry.repositories.uploadArtifacts",
+#    "artifactregistry.repositories.downloadArtifacts",
+#
+#    # Cloud Run permissions
+#    "run.services.create",
+#    "run.services.update",
+#    "run.services.get",
+#    "run.services.list",
+#
+#    # Project permissions
+#    "resourcemanager.projects.get",
+#    "serviceusage.services.use",
+#
+#    # Pub/Sub permissions
+#    "pubsub.topics.get",
+#    "pubsub.topics.list",
+#    "pubsub.subscriptions.get",
+#    "pubsub.subscriptions.list",
+#
+#    # Bigtable permissions
+#    "bigtable.instances.get",
+#    "bigtable.instances.list",
+#    "bigtable.tables.get",
+#    "bigtable.tables.list",
+#
+#    # Logging and Monitoring permissions
+#    "logging.logEntries.create",
+#    "logging.logMetrics.create",
+#    "logging.logMetrics.get",
+#    "logging.logMetrics.list",
+#    "monitoring.timeSeries.create",
+#    "monitoring.dashboards.create",
+#    "monitoring.dashboards.get",
+#    "monitoring.dashboards.list",
+#    "monitoring.notificationChannels.create",
+#    "monitoring.notificationChannels.get",
+#    "monitoring.notificationChannels.list",
+#
+#    # BigQuery permissions
+#    "bigquery.datasets.create",
+#    "bigquery.datasets.get",
+#    "bigquery.datasets.getIamPolicy",
+#    "bigquery.datasets.setIamPolicy",
+#
+#    # Billing permissions
+#    "billing.budgets.create",
+#    "billing.budgets.get",
+#    "billing.budgets.list"
+#   ]
+#
+#   depends_on = [module.project_apis]
+# }
 
 # Grant custom role to GitHub Actions service account
-resource "google_project_iam_member" "github_actions_custom_role" {
-  project = var.project_id
-  role    = google_project_iam_custom_role.github_deploy.id
-  member  = "serviceAccount:${var.github_actions_service_account}"
+# TEMPORARY: Commented out - depends on custom role above
+# resource "google_project_iam_member" "github_actions_custom_role" {
+#   project = var.project_id
+#   role    = google_project_iam_custom_role.github_deploy.id
+#   member  = "serviceAccount:${var.github_actions_service_account}"
+#
+#   depends_on = [google_project_iam_custom_role.github_deploy]
+# }
 
-  depends_on = [google_project_iam_custom_role.github_deploy]
-}
-
-# Additional minimal roles for GitHub Actions (kept for compatibility during migration)
-# TODO: Review and remove redundant permissions after custom role is verified
+# Additional roles for GitHub Actions to deploy infrastructure
+# Using predefined roles to ensure sufficient permissions
 resource "google_project_iam_member" "github_actions_deploy" {
   for_each = toset([
     "roles/serviceusage.serviceUsageConsumer",
+    "roles/iam.serviceAccountAdmin",         # To create/manage service accounts
+    "roles/iam.roleAdmin",                   # To create/manage custom roles
+    "roles/resourcemanager.projectIamAdmin", # To set IAM policies
+    "roles/bigquery.dataOwner",              # To create BigQuery datasets
+    "roles/monitoring.editor",               # To create monitoring resources
+    "roles/logging.configWriter",            # To create log metrics
+    "roles/billing.costsManager",            # To create budgets
+    "roles/cloudfunctions.admin",            # To manage Cloud Functions
+    "roles/pubsub.admin",                    # To manage Pub/Sub
+    "roles/bigtable.admin",                  # To manage Bigtable
+    "roles/storage.admin",                   # To manage storage
+    "roles/artifactregistry.admin",          # To manage Artifact Registry
   ])
 
   project = var.project_id

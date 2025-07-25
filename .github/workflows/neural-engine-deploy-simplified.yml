@@ -45,11 +45,18 @@ jobs:
 
       - name: Set up Python
         run: |
-          echo "Using system Python"
-          python3 --version
-          echo "Python path: $(which python3)"
-          # Create virtual environment
-          python3 -m venv venv
+          echo "Setting up Python environment"
+          # Use Homebrew Python 3.12.11
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
           source venv/bin/activate
           python --version
 
@@ -66,19 +73,9 @@ jobs:
         working-directory: neural-engine
         run: |
           source ../venv/bin/activate
-          # Check Python version for Black compatibility
-          PYTHON_VERSION=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')")
-          echo "Python version: $PYTHON_VERSION"
-
-          if [[ "$PYTHON_VERSION" == "3.12.5" ]]; then
-            echo "Warning: Python 3.12.5 has known issues with Black's AST safety checks"
-            echo "Skipping Black formatting check due to Python 3.12.5 compatibility issue"
-            echo "Please upgrade to Python 3.12.6 or use Python 3.12.4"
-          else
-            python -m black --check src/ tests/ examples/
-          fi
-
-          # Flake8 should still work fine
+          echo "Python version: $(python --version)"
+          # Run Black and Flake8
+          python -m black --check src/ tests/ examples/
           python -m flake8 src/ tests/ examples/ --config=.flake8
 
       - name: Run type checking
@@ -189,11 +186,18 @@ jobs:
 
       - name: Set up Python
         run: |
-          echo "Using system Python"
-          python3 --version
-          echo "Python path: $(which python3)"
-          # Create virtual environment
-          python3 -m venv venv
+          echo "Setting up Python environment"
+          # Use Homebrew Python 3.12.11
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
           source venv/bin/activate
           python --version
 
@@ -299,11 +303,18 @@ jobs:
 
       - name: Set up Python
         run: |
-          echo "Using system Python"
-          python3 --version
-          echo "Python path: $(which python3)"
-          # Create virtual environment
-          python3 -m venv venv
+          echo "Setting up Python environment"
+          # Use Homebrew Python 3.12.11
+          export PYTHON_PATH="/opt/homebrew/bin/python3.12"
+          if [[ -x "$PYTHON_PATH" ]]; then
+            echo "Using Homebrew Python"
+            $PYTHON_PATH --version
+            $PYTHON_PATH -m venv venv
+          else
+            echo "Homebrew Python not found, using system Python"
+            python3 --version
+            python3 -m venv venv
+          fi
           source venv/bin/activate
           python --version
 

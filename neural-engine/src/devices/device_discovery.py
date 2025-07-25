@@ -98,11 +98,15 @@ class DeviceDiscoveryService:
         self._zeroconf: Optional[Zeroconf] = None
         self._browser: Optional[ServiceBrowser] = None
 
-    def add_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]) -> None:
+    def add_discovery_callback(
+        self, callback: Callable[[DiscoveredDevice], None]
+    ) -> None:
         """Add callback for device discovery events."""
         self._discovery_callbacks.append(callback)
 
-    def remove_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]) -> None:
+    def remove_discovery_callback(
+        self, callback: Callable[[DiscoveredDevice], None]
+    ) -> None:
         """Remove discovery callback."""
         if callback in self._discovery_callbacks:
             self._discovery_callbacks.remove(callback)
@@ -347,7 +351,9 @@ class DeviceDiscoveryService:
         except Exception as e:
             logger.error(f"Error scanning WiFi devices: {e}")
 
-    def _on_service_state_change(self, zeroconf, service_type, name, state_change) -> None:
+    def _on_service_state_change(
+        self, zeroconf, service_type, name, state_change
+    ) -> None:
         """Handle mDNS service discovery."""
         if state_change == "added":
             info = zeroconf.get_service_info(service_type, name)

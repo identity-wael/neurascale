@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Union, Tuple
 from datetime import datetime
 from pathlib import Path
 from flask import Blueprint, jsonify, request, Response
@@ -51,7 +51,7 @@ def run_async(coro):
 
 
 @device_api.route("/", methods=["GET"])
-def list_devices() -> Response:
+def list_devices() -> Union[Response, Tuple[Response, int]]:
     """
     List all devices.
 

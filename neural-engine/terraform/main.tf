@@ -169,12 +169,7 @@ resource "google_project_iam_custom_role" "github_deploy" {
     "bigquery.datasets.create",
     "bigquery.datasets.get",
     "bigquery.datasets.getIamPolicy",
-    "bigquery.datasets.setIamPolicy",
-
-    # Billing permissions
-    "billing.budgets.create",
-    "billing.budgets.get",
-    "billing.budgets.list"
+    "bigquery.datasets.setIamPolicy"
   ]
 
   depends_on = [module.project_apis]

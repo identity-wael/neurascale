@@ -39,7 +39,7 @@ google-cloud-tasks==2.16.5       # Task queues
 google-cloud-scheduler==2.16.0   # Cron jobs
 
 # API Framework (Cloud Run compatible)
-flask==3.1.0
+flask==3.1.1
 gunicorn==23.0.0
 # google-cloud-endpoints         # Deprecated, use Cloud Run/API Gateway instead
 

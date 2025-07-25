@@ -34,6 +34,12 @@ variable "create_alerts" {
   default     = false
 }
 
+variable "region" {
+  type        = string
+  description = "GCP region for resources"
+  default     = "northamerica-northeast1"
+}
+
 # Custom Metrics for Neural Data Quality
 resource "google_logging_metric" "neural_data_quality" {
   name   = "neural-data-quality-${var.environment}"
@@ -191,6 +197,7 @@ resource "google_monitoring_service" "neural_api" {
   basic_service {
     service_type = "CLOUD_RUN"
     service_labels = {
+      location     = var.region
       service_name = "neural-api-${var.environment}"
     }
   }

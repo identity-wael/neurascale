@@ -219,6 +219,7 @@ module "monitoring" {
 
   project_id               = var.project_id
   environment              = var.environment
+  region                   = var.region
   enable_monitoring_alerts = var.enable_monitoring_alerts
   notification_channels    = var.alert_notification_channels
 

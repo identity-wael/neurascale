@@ -171,7 +171,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: neural-engine
-          file: neural-engine/docker/${{ matrix.service }}.Dockerfile
+          file: docker/Dockerfile.${{ matrix.service }}
           push: true
           tags: |
             ${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/${{ matrix.service }}:${{ github.sha }}
@@ -276,13 +276,18 @@ jobs:
 
       - name: Terraform Plan
         working-directory: neural-engine/terraform
-        timeout-minutes: 10
+        timeout-minutes: 5
         run: |
+          echo "Starting Terraform plan for environment: ${{ needs.setup.outputs.environment }}"
+          echo "Project ID: ${{ needs.setup.outputs.project_id }}"
+
           terraform plan \
             -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            -lock-timeout=5m \
-            -out=tfplan
+            -lock-timeout=2m \
+            -out=tfplan \
+            -refresh=false \
+            -parallelism=10
 
       - name: Terraform Apply
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && needs.setup.outputs.environment == 'staging')

@@ -67,7 +67,7 @@ jobs:
       - name: Run linting
         working-directory: neural-engine
         run: |
-          ruff check .
+          flake8 .
           black --check .
 
       - name: Run type checking

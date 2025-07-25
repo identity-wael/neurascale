@@ -1,17 +1,18 @@
 # Cloud Functions Rollback Mechanism
 
 # Store the current function version for rollback
-resource "google_storage_bucket_object" "function_version_backup" {
-  for_each = var.enable_cloud_functions ? local.function_types : toset([])
-
-  name   = "functions/backups/${each.key}-previous.zip"
-  bucket = google_storage_bucket.functions.name
-  source = google_storage_bucket_object.function_source[each.key].name
-
-  lifecycle {
-    ignore_changes = [source]
-  }
-}
+# Temporarily disabled until functions are deployed
+# resource "google_storage_bucket_object" "function_version_backup" {
+#   for_each = var.enable_cloud_functions ? local.function_types : toset([])
+#
+#   name   = "functions/backups/${each.key}-previous.zip"
+#   bucket = google_storage_bucket.functions.name
+#   source = google_storage_bucket_object.function_source[each.key].name
+#
+#   lifecycle {
+#     ignore_changes = [source]
+#   }
+# }
 
 # Output rollback commands
 output "rollback_commands" {

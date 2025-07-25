@@ -85,13 +85,7 @@ resource "google_bigtable_instance" "neural_data" {
     cluster_id   = "neural-data-cluster-${local.env_short}"
     storage_type = "SSD"
     zone         = "${var.region}-a"
-
-    autoscaling_config {
-      min_nodes      = var.bigtable_min_nodes
-      max_nodes      = var.bigtable_max_nodes
-      cpu_target     = var.bigtable_cpu_target
-      storage_target = var.bigtable_ssd_size_gb
-    }
+    num_nodes    = var.bigtable_min_nodes
   }
 
   labels = {

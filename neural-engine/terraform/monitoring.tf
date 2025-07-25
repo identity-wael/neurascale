@@ -29,7 +29,7 @@ resource "google_monitoring_dashboard" "infrastructure" {
               dataSets = [{
                 timeSeriesQuery = {
                   timeSeriesFilter = {
-                    filter = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" resource.type=\"bigtable_cluster\" resource.label.\"cluster\"=~\"neural-data-${local.environment}.*\""
+                    filter = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" resource.type=\"bigtable_cluster\" resource.label.\"cluster\":\"neural-data-${local.environment}\""
                     aggregation = {
                       alignmentPeriod  = "60s"
                       perSeriesAligner = "ALIGN_MEAN"
@@ -57,7 +57,7 @@ resource "google_monitoring_dashboard" "infrastructure" {
               dataSets = [{
                 timeSeriesQuery = {
                   timeSeriesFilter = {
-                    filter = "metric.type=\"pubsub.googleapis.com/topic/send_message_operation_count\" resource.type=\"pubsub_topic\" resource.label.\"topic_id\"=~\"neural-data-.*-${local.environment}\""
+                    filter = "metric.type=\"pubsub.googleapis.com/topic/send_message_operation_count\" resource.type=\"pubsub_topic\" resource.label.\"topic_id\":\"${local.environment}\""
                     aggregation = {
                       alignmentPeriod    = "60s"
                       perSeriesAligner   = "ALIGN_RATE"
@@ -82,7 +82,7 @@ resource "google_monitoring_dashboard" "infrastructure" {
               dataSets = [{
                 timeSeriesQuery = {
                   timeSeriesFilter = {
-                    filter = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\" resource.label.\"function_name\"=~\"process-neural-stream-${local.environment}\""
+                    filter = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\" resource.label.\"function_name\"=\"process-neural-stream-${local.environment}\""
                     aggregation = {
                       alignmentPeriod  = "60s"
                       perSeriesAligner = "ALIGN_RATE"
@@ -191,7 +191,7 @@ resource "google_monitoring_alert_policy" "bigtable_high_cpu" {
     display_name = "CPU above 80%"
 
     condition_threshold {
-      filter          = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" resource.type=\"bigtable_cluster\" resource.label.\"cluster\"=~\"neural-data-${local.environment}.*\""
+      filter          = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" resource.type=\"bigtable_cluster\" resource.label.\"cluster\":\"neural-data-${local.environment}\""
       duration        = "300s"
       comparison      = "COMPARISON_GT"
       threshold_value = 0.8
@@ -205,11 +205,8 @@ resource "google_monitoring_alert_policy" "bigtable_high_cpu" {
 
   notification_channels = [google_monitoring_notification_channel.email.id]
 
-  alert_strategy {
-    notification_rate_limit {
-      period = "3600s" # 1 hour
-    }
-  }
+  # notification_rate_limit is only for log-based alerts
+  # Removing to fix: "only log-based alert policies may specify a notification rate limit"
 }
 
 # Alert policy for Cloud Functions errors
@@ -226,7 +223,7 @@ resource "google_monitoring_alert_policy" "function_errors" {
     display_name = "Error rate above 5%"
 
     condition_threshold {
-      filter          = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\" resource.label.\"function_name\"=~\"process-neural-stream-${local.environment}\""
+      filter          = "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\" resource.label.\"function_name\"=\"process-neural-stream-${local.environment}\""
       duration        = "300s"
       comparison      = "COMPARISON_GT"
       threshold_value = 0.05

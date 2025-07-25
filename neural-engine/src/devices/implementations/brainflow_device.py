@@ -325,7 +325,7 @@ class BrainFlowDevice(BaseDevice):
                         metadata["emg_data"] = emg_data.tolist()
                     if (
                         accel_data.size > 0
-                        and signal_type != NeuralSignalType.ACCELEROMETER
+                        and signal_type != NeuralSignalType.ACCELEROMETER  # noqa: W503
                     ):
                         metadata["accel_data"] = accel_data.tolist()
 

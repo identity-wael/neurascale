@@ -108,8 +108,8 @@ class DataValidator:
         # Check signal range
         if (
             signal_type in self.SIGNAL_RANGES
-            and packet.data is not None
-            and packet.data.size > 0
+            and packet.data is not None  # noqa: W503
+            and packet.data.size > 0  # noqa: W503
         ):
             min_val, max_val = self.SIGNAL_RANGES[signal_type]
             data_min = np.min(packet.data)

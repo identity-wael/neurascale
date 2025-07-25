@@ -278,7 +278,9 @@ class SyntheticDevice(BaseDevice):
                 # Potentially start a burst
                 if (
                     np.random.random()
-                    < self.config["burst_probability"] * n_samples / self.sampling_rate
+                    < self.config["burst_probability"]
+                    * n_samples
+                    / self.sampling_rate  # noqa: W503
                 ):
                     self.emg_burst_state[ch] = True
                     self.emg_burst_start[ch] = self.time_offset

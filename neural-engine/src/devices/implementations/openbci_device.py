@@ -260,7 +260,7 @@ class OpenBCIDevice(BaseDevice):
                     # Check if we have a complete packet
                     if (
                         len(self.buffer) >= packet_size
-                        and self.buffer[packet_size - 1] == self.BYTE_END
+                        and self.buffer[packet_size - 1] == self.BYTE_END  # noqa: W503
                     ):
                         packet = self.buffer[:packet_size]
                         self.buffer = self.buffer[packet_size:]

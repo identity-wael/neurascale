@@ -117,8 +117,9 @@ class FileTelemetryExporter:
         if self.compress:
             event_bytes = gzip.compress(event_bytes)
 
-        self._current_file.write(event_bytes)
-        self._current_size += len(event_bytes)
+        if self._current_file:
+            self._current_file.write(event_bytes)
+            self._current_size += len(event_bytes)
 
     async def _rotate_file(self) -> None:
         """Rotate to new file."""
@@ -309,7 +310,7 @@ class DeviceTelemetryCollector:
         event_type: TelemetryType,
         data: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         """
         Collect a telemetry event.
 

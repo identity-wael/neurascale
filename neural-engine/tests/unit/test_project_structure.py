@@ -9,8 +9,8 @@ class TestProjectStructure:
 
     @pytest.fixture
     def project_root(self):
-        """Get the neural - engine project root."""
-        # Go up from tests / unit to neural - engine
+        """Get the neural-engine project root."""
+        # Go up from tests/unit to neural-engine
         return Path(__file__).parent.parent.parent
 
     def test_required_directories_exist(self, project_root):
@@ -18,9 +18,9 @@ class TestProjectStructure:
         required_dirs = [
             "src",
             "tests",
-            "tests / unit",
-            "tests / integration",
-            "tests / performance",
+            "tests/unit",
+            "tests/integration",
+            "tests/performance",
             "functions",
             "docker",
             "configs",
@@ -38,7 +38,7 @@ class TestProjectStructure:
         required_files = [
             "README.md",
             "requirements.txt",
-            "requirements - dev.txt",
+            "requirements-dev.txt",
             "setup.py",
             ".flake8",
             "pytest.ini",
@@ -52,14 +52,14 @@ class TestProjectStructure:
     def test_src_structure(self, project_root):
         """Test the src directory structure."""
         src_modules = [
-            "src / neural_engine",
-            "src / neural_engine / __init__.py",
-            "src / processors",
-            "src / processors / __init__.py",
-            "src / api",
-            "src / api / __init__.py",
-            "src / utils",
-            "src / utils / __init__.py",
+            "src/neural_engine",
+            "src/neural_engine/__init__.py",
+            "src/processors",
+            "src/processors/__init__.py",
+            "src/api",
+            "src/api/__init__.py",
+            "src/utils",
+            "src/utils/__init__.py",
         ]
 
         for module_path in src_modules:
@@ -69,10 +69,10 @@ class TestProjectStructure:
     def test_docker_files(self, project_root):
         """Test Docker configuration files."""
         docker_files = [
-            "docker / Dockerfile.processor",
-            "docker / Dockerfile.api",
-            "docker / docker - compose.yml",
-            "docker / docker - compose.dev.yml",
+            "docker/Dockerfile.processor",
+            "docker/Dockerfile.api",
+            "docker/docker-compose.yml",
+            "docker/docker-compose.dev.yml",
         ]
 
         for docker_file in docker_files:

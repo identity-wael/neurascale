@@ -121,7 +121,18 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Check Docker availability
+        id: check_docker
+        run: |
+          if docker info >/dev/null 2>&1; then
+            echo "docker_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "docker_available=false" >> $GITHUB_OUTPUT
+            echo "Docker is not running on this runner. Skipping Docker build."
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.check_docker.outputs.docker_available == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
@@ -129,6 +140,7 @@ jobs:
             network=host
 
       - name: Cache Docker layers
+        if: steps.check_docker.outputs.docker_available == 'true'
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
@@ -138,6 +150,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Configure Docker for Artifact Registry
+        if: steps.check_docker.outputs.docker_available == 'true'
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
@@ -154,7 +167,7 @@ jobs:
           fi
 
       - name: Build and push Docker image
-        if: steps.check_registry.outputs.exists == 'true'
+        if: steps.check_registry.outputs.exists == 'true' && steps.check_docker.outputs.docker_available == 'true'
         uses: docker/build-push-action@v5
         with:
           context: neural-engine
@@ -168,7 +181,7 @@ jobs:
           platforms: linux/amd64
 
       - name: Move cache
-        if: steps.check_registry.outputs.exists == 'true'
+        if: steps.check_registry.outputs.exists == 'true' && steps.check_docker.outputs.docker_available == 'true'
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache

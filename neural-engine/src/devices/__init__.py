@@ -8,12 +8,12 @@ from .implementations.synthetic_device import SyntheticDevice
 from .device_manager import DeviceManager
 
 __all__ = [
-    'BaseDevice',
-    'DeviceState',
-    'DeviceCapabilities',
-    'LSLDevice',
-    'OpenBCIDevice',
-    'BrainFlowDevice',
-    'SyntheticDevice',
-    'DeviceManager',
+    "BaseDevice",
+    "DeviceState",
+    "DeviceCapabilities",
+    "LSLDevice",
+    "OpenBCIDevice",
+    "BrainFlowDevice",
+    "SyntheticDevice",
+    "DeviceManager",
 ]

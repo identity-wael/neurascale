@@ -21,10 +21,10 @@ class DeviceManager:
 
     # Device type registry
     DEVICE_TYPES: Dict[str, Type[BaseDevice]] = {
-        'lsl': LSLDevice,
-        'openbci': OpenBCIDevice,
-        'brainflow': BrainFlowDevice,
-        'synthetic': SyntheticDevice,
+        "lsl": LSLDevice,
+        "openbci": OpenBCIDevice,
+        "brainflow": BrainFlowDevice,
+        "synthetic": SyntheticDevice,
     }
 
     def __init__(self) -> None:
@@ -35,17 +35,20 @@ class DeviceManager:
         self._state_callback: Optional[Callable[[str, DeviceState], None]] = None
         self._error_callback: Optional[Callable[[str, Exception], None]] = None
         self._aggregation_task: Optional[asyncio.Task] = None
-        self._aggregation_queue: asyncio.Queue[Tuple[str, NeuralDataPacket]] = asyncio.Queue()
+        self._aggregation_queue: asyncio.Queue[Tuple[str, NeuralDataPacket]] = (
+            asyncio.Queue()
+        )
 
-    def register_device_type(self, device_type: str, device_class: Type[BaseDevice]) -> None:
+    def register_device_type(
+        self, device_type: str, device_class: Type[BaseDevice]
+    ) -> None:
         """Register a custom device type."""
         self.DEVICE_TYPES[device_type] = device_class
         logger.info(f"Registered device type: {device_type}")
 
-    async def add_device(self,
-                         device_id: str,
-                         device_type: str,
-                         **device_kwargs: Any) -> BaseDevice:
+    async def add_device(
+        self, device_id: str, device_type: str, **device_kwargs: Any
+    ) -> BaseDevice:
         """
         Add a new device to the manager.
 
@@ -61,17 +64,25 @@ class DeviceManager:
             raise ValueError(f"Device {device_id} already exists")
 
         if device_type not in self.DEVICE_TYPES:
-            raise ValueError(f"Unknown device type: {device_type}. "
-                             f"Available types: {list(self.DEVICE_TYPES.keys())}")
+            raise ValueError(
+                f"Unknown device type: {device_type}. "
+                f"Available types: {list(self.DEVICE_TYPES.keys())}"
+            )
 
         # Create device instance
         device_class = self.DEVICE_TYPES[device_type]
         device = device_class(**device_kwargs)
 
         # Set up callbacks
-        device.set_data_callback(lambda packet: self._handle_device_data(device_id, packet))
-        device.set_state_callback(lambda state: self._handle_device_state(device_id, state))
-        device.set_error_callback(lambda error: self._handle_device_error(device_id, error))
+        device.set_data_callback(
+            lambda packet: self._handle_device_data(device_id, packet)
+        )
+        device.set_state_callback(
+            lambda state: self._handle_device_state(device_id, state)
+        )
+        device.set_error_callback(
+            lambda error: self._handle_device_error(device_id, error)
+        )
 
         # Set session ID if active
         if self.active_session_id:
@@ -106,14 +117,18 @@ class DeviceManager:
         """List all devices with their status."""
         device_list = []
         for device_id, device in self.devices.items():
-            device_list.append({
-                'device_id': device_id,
-                'device_name': device.device_name,
-                'state': device.state.value,
-                'connected': device.is_connected(),
-                'streaming': device.is_streaming(),
-                'capabilities': device.get_capabilities() if device.is_connected() else None
-            })
+            device_list.append(
+                {
+                    "device_id": device_id,
+                    "device_name": device.device_name,
+                    "state": device.state.value,
+                    "connected": device.is_connected(),
+                    "streaming": device.is_streaming(),
+                    "capabilities": (
+                        device.get_capabilities() if device.is_connected() else None
+                    ),
+                }
+            )
         return device_list
 
     async def connect_device(self, device_id: str, **connect_kwargs: Any) -> bool:
@@ -138,7 +153,9 @@ class DeviceManager:
             device_ids: List of device IDs to start streaming, or None for all connected devices
         """
         if device_ids is None:
-            device_ids = [dev_id for dev_id, dev in self.devices.items() if dev.is_connected()]
+            device_ids = [
+                dev_id for dev_id, dev in self.devices.items() if dev.is_connected()
+            ]
 
         # Start session if not active
         if not self.active_session_id:
@@ -163,7 +180,9 @@ class DeviceManager:
             device_ids: List of device IDs to stop streaming, or None for all streaming devices
         """
         if device_ids is None:
-            device_ids = [dev_id for dev_id, dev in self.devices.items() if dev.is_streaming()]
+            device_ids = [
+                dev_id for dev_id, dev in self.devices.items() if dev.is_streaming()
+            ]
 
         # Stop streaming for each device
         tasks = []
@@ -186,7 +205,10 @@ class DeviceManager:
         Returns:
             The session ID
         """
-        self.active_session_id = session_id or f"session_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        self.active_session_id = (
+            session_id
+            or f"session_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        )
 
         # Update all devices with new session ID
         for device in self.devices.values():
@@ -201,7 +223,9 @@ class DeviceManager:
             logger.info(f"Ended session: {self.active_session_id}")
             self.active_session_id = None
 
-    def set_data_callback(self, callback: Callable[[str, NeuralDataPacket], None]) -> None:
+    def set_data_callback(
+        self, callback: Callable[[str, NeuralDataPacket], None]
+    ) -> None:
         """Set callback for data packets from any device."""
         self._data_callback = callback
 
@@ -218,14 +242,16 @@ class DeviceManager:
         # Add device ID to packet metadata
         if packet.metadata is None:
             packet.metadata = {}
-        packet.metadata['device_id'] = device_id
+        packet.metadata["device_id"] = device_id
 
         # Add to aggregation queue if aggregation is active
         if self._aggregation_task and not self._aggregation_task.done():
             try:
                 self._aggregation_queue.put_nowait((device_id, packet))
             except asyncio.QueueFull:
-                logger.warning(f"Aggregation queue full, dropping packet from {device_id}")
+                logger.warning(
+                    f"Aggregation queue full, dropping packet from {device_id}"
+                )
 
         # Call user callback
         if self._data_callback:
@@ -251,9 +277,11 @@ class DeviceManager:
             except Exception as e:
                 logger.error(f"Error in error callback: {e}")
 
-    async def start_aggregation(self,
-                                window_size_ms: int = 50,
-                                callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]] = None) -> None:
+    async def start_aggregation(
+        self,
+        window_size_ms: int = 50,
+        callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]] = None,
+    ) -> None:
         """
         Start aggregating data from multiple devices into synchronized windows.
 
@@ -281,9 +309,11 @@ class DeviceManager:
             self._aggregation_task = None
             logger.info("Stopped data aggregation")
 
-    async def _aggregation_loop(self,
-                                window_size_ms: int,
-                                callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]]) -> None:
+    async def _aggregation_loop(
+        self,
+        window_size_ms: int,
+        callback: Optional[Callable[[Dict[str, NeuralDataPacket]], None]],
+    ) -> None:
         """Main aggregation loop."""
         window_duration = window_size_ms / 1000.0
         window_data: Dict[str, List[NeuralDataPacket]] = {}
@@ -293,7 +323,9 @@ class DeviceManager:
             while True:
                 try:
                     # Get packet with timeout
-                    remaining_time = window_duration - (asyncio.get_event_loop().time() - window_start)
+                    remaining_time = window_duration - (
+                        asyncio.get_event_loop().time() - window_start
+                    )
                     if remaining_time <= 0:
                         # Window complete, process data
                         if window_data and callback:
@@ -311,8 +343,7 @@ class DeviceManager:
 
                     # Get next packet
                     device_id, packet = await asyncio.wait_for(
-                        self._aggregation_queue.get(),
-                        timeout=remaining_time
+                        self._aggregation_queue.get(), timeout=remaining_time
                     )
 
                     # Add to window
@@ -354,45 +385,55 @@ class DeviceManager:
             lsl_device = LSLDevice(timeout=timeout)
             lsl_streams = await lsl_device.get_available_streams()
             for stream in lsl_streams:
-                discovered.append({
-                    'device_type': 'lsl',
-                    'device_id': f"lsl_{stream['uid']}",
-                    'name': stream['name'],
-                    'info': stream
-                })
+                discovered.append(
+                    {
+                        "device_type": "lsl",
+                        "device_id": f"lsl_{stream['uid']}",
+                        "name": stream["name"],
+                        "info": stream,
+                    }
+                )
         except Exception as e:
             logger.warning(f"LSL discovery failed: {e}")
 
         # Try serial port discovery for OpenBCI
         try:
             import serial.tools.list_ports
+
             ports = serial.tools.list_ports.comports()
             for port in ports:
-                if any(id_str in str(port.description).lower() for id_str in ['openbci', 'ftdi', 'serial']):
-                    discovered.append({
-                        'device_type': 'openbci',
-                        'device_id': f"openbci_{port.device}",
-                        'name': f"OpenBCI on {port.device}",
-                        'info': {
-                            'port': port.device,
-                            'description': port.description
+                if any(
+                    id_str in str(port.description).lower()
+                    for id_str in ["openbci", "ftdi", "serial"]
+                ):
+                    discovered.append(
+                        {
+                            "device_type": "openbci",
+                            "device_id": f"openbci_{port.device}",
+                            "name": f"OpenBCI on {port.device}",
+                            "info": {
+                                "port": port.device,
+                                "description": port.description,
+                            },
                         }
-                    })
+                    )
         except Exception as e:
             logger.warning(f"Serial port discovery failed: {e}")
 
         # Always include synthetic device option
-        discovered.append({
-            'device_type': 'synthetic',
-            'device_id': 'synthetic_eeg',
-            'name': 'Synthetic EEG Device',
-            'info': {'signal_type': 'EEG'}
-        })
+        discovered.append(
+            {
+                "device_type": "synthetic",
+                "device_id": "synthetic_eeg",
+                "name": "Synthetic EEG Device",
+                "info": {"signal_type": "EEG"},
+            }
+        )
 
         logger.info(f"Discovered {len(discovered)} devices")
         return discovered
 
-    async def __aenter__(self) -> 'DeviceManager':
+    async def __aenter__(self) -> "DeviceManager":
         """Async context manager entry."""
         return self
 

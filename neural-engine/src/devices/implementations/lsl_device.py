@@ -8,6 +8,7 @@ import numpy as np
 
 try:
     from pylsl import StreamInlet, resolve_stream, StreamInfo
+
     LSL_AVAILABLE = True
 except ImportError:
     LSL_AVAILABLE = False
@@ -20,7 +21,7 @@ from ...ingestion.data_types import (
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
-    DataSource
+    DataSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,10 +30,12 @@ logger = logging.getLogger(__name__)
 class LSLDevice(BaseDevice):
     """Lab Streaming Layer device for receiving neural data streams."""
 
-    def __init__(self,
-                 stream_name: Optional[str] = None,
-                 stream_type: Optional[str] = None,
-                 timeout: float = 5.0):
+    def __init__(
+        self,
+        stream_name: Optional[str] = None,
+        stream_type: Optional[str] = None,
+        timeout: float = 5.0,
+    ):
         """
         Initialize LSL device.
 
@@ -64,10 +67,7 @@ class LSLDevice(BaseDevice):
 
             # Run stream resolution in executor to avoid blocking
             loop = asyncio.get_event_loop()
-            streams = await loop.run_in_executor(
-                None,
-                self._resolve_streams
-            )
+            streams = await loop.run_in_executor(None, self._resolve_streams)
 
             if not streams:
                 raise ConnectionError("No LSL streams found matching criteria")
@@ -101,21 +101,27 @@ class LSLDevice(BaseDevice):
             # Determine signal type from stream type
             stream_type_str = stream_info.type().upper()
             signal_type_map = {
-                'EEG': NeuralSignalType.EEG,
-                'EMG': NeuralSignalType.EMG,
-                'ECG': NeuralSignalType.ECOG,
-                'ACCELEROMETER': NeuralSignalType.ACCELEROMETER,
-                'ACC': NeuralSignalType.ACCELEROMETER,
+                "EEG": NeuralSignalType.EEG,
+                "EMG": NeuralSignalType.EMG,
+                "ECG": NeuralSignalType.ECOG,
+                "ACCELEROMETER": NeuralSignalType.ACCELEROMETER,
+                "ACC": NeuralSignalType.ACCELEROMETER,
             }
-            self.signal_type = signal_type_map.get(stream_type_str, NeuralSignalType.CUSTOM)
+            self.signal_type = signal_type_map.get(
+                stream_type_str, NeuralSignalType.CUSTOM
+            )
 
             # Create device info
             channels = [
                 ChannelInfo(
                     channel_id=i,
-                    label=self.channel_names[i] if i < len(self.channel_names) else f"Ch{i + 1}",
+                    label=(
+                        self.channel_names[i]
+                        if i < len(self.channel_names)
+                        else f"Ch{i + 1}"
+                    ),
                     unit="microvolts",
-                    sampling_rate=self.sampling_rate
+                    sampling_rate=self.sampling_rate,
                 )
                 for i in range(self.n_channels)
             ]
@@ -125,12 +131,14 @@ class LSLDevice(BaseDevice):
                 device_type="LSL",
                 manufacturer=stream_info.hostname(),
                 model=stream_info.name(),
-                channels=channels
+                channels=channels,
             )
 
             self._update_state(DeviceState.CONNECTED)
-            logger.info(f"Connected to LSL stream: {stream_info.name()} "
-                       f"({self.n_channels} channels @ {self.sampling_rate}Hz)")
+            logger.info(
+                f"Connected to LSL stream: {stream_info.name()} "
+                f"({self.n_channels} channels @ {self.sampling_rate}Hz)"
+            )
             return True
 
         except Exception as e:
@@ -205,7 +213,7 @@ class LSLDevice(BaseDevice):
                     None,
                     self.inlet.pull_chunk,
                     0.0,  # timeout
-                    chunk_size  # max samples
+                    chunk_size,  # max samples
                 )
 
                 if samples:
@@ -222,9 +230,11 @@ class LSLDevice(BaseDevice):
                         signal_type=self.signal_type,
                         source=DataSource.LSL,
                         metadata={
-                            'lsl_timestamps': timestamps,
-                            'stream_name': self.stream_info.name() if self.stream_info else None
-                        }
+                            "lsl_timestamps": timestamps,
+                            "stream_name": (
+                                self.stream_info.name() if self.stream_info else None
+                            ),
+                        },
                     )
 
                     if self._data_callback:
@@ -240,14 +250,16 @@ class LSLDevice(BaseDevice):
         """Get device capabilities."""
         # LSL streams can have varying capabilities
         return DeviceCapabilities(
-            supported_sampling_rates=[self.sampling_rate] if self.sampling_rate else [256.0],
+            supported_sampling_rates=(
+                [self.sampling_rate] if self.sampling_rate else [256.0]
+            ),
             max_channels=self.n_channels if self.n_channels else 64,
             signal_types=[self.signal_type],
             has_impedance_check=False,
             has_battery_monitor=False,
             has_wireless=True,  # LSL is network - based
             has_trigger_input=True,  # LSL supports markers
-            has_aux_channels=True  # Depends on stream
+            has_aux_channels=True,  # Depends on stream
         )
 
     def configure_channels(self, channels: List[ChannelInfo]) -> bool:
@@ -264,19 +276,20 @@ class LSLDevice(BaseDevice):
         """Get list of available LSL streams."""
         loop = asyncio.get_event_loop()
         streams = await loop.run_in_executor(
-            None,
-            lambda: resolve_stream(timeout=self.timeout)
+            None, lambda: resolve_stream(timeout=self.timeout)
         )
 
         stream_list = []
         for stream in streams:
-            stream_list.append({
-                'name': stream.name(),
-                'type': stream.type(),
-                'channels': stream.channel_count(),
-                'sampling_rate': stream.nominal_srate(),
-                'hostname': stream.hostname(),
-                'uid': stream.uid()
-            })
+            stream_list.append(
+                {
+                    "name": stream.name(),
+                    "type": stream.type(),
+                    "channels": stream.channel_count(),
+                    "sampling_rate": stream.nominal_srate(),
+                    "hostname": stream.hostname(),
+                    "uid": stream.uid(),
+                }
+            )
 
         return stream_list

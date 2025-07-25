@@ -144,7 +144,12 @@ def test() -> int:
 
 
 @cli.command()
-@click.option("--device - type", required=True, type=click.Choice(["lsl", "openbci", "brainflow", "synthetic"]), help="Device type")
+@click.option(
+    "--device - type",
+    required=True,
+    type=click.Choice(["lsl", "openbci", "brainflow", "synthetic"]),
+    help="Device type",
+)
 @click.option("--duration", default=10, help="Streaming duration in seconds")
 @click.option("--config", help="Device configuration as JSON string")
 def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
@@ -165,16 +170,16 @@ def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
             packet_count += 1
             if packet_count % 20 == 0:
                 quality = SignalQualityAnalyzer.analyze_packet(packet)
-                logger.info(f"Packet {packet_count}: Quality score = {quality['quality_score']:.2f}")
+                logger.info(
+                    f"Packet {packet_count}: Quality score = {quality['quality_score']:.2f}"
+                )
 
         manager.set_data_callback(data_callback)
 
         try:
             # Add device
             device = await manager.add_device(
-                device_id="test_device",
-                device_type=device_type,
-                **device_config
+                device_id="test_device", device_type=device_type, **device_config
             )
 
             # Connect
@@ -190,7 +195,9 @@ def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
             # Test latency
             logger.info("Testing device latency...")
             latency_stats = await test_device_latency(device, duration=5)
-            logger.info(f"Latency: {latency_stats['mean_latency_ms']:.1f} ± {latency_stats['std_latency_ms']:.1f} ms")
+            logger.info(
+                f"Latency: {latency_stats['mean_latency_ms']:.1f} ± {latency_stats['std_latency_ms']:.1f} ms"
+            )
 
             # Stream data
             logger.info(f"Streaming data for {duration} seconds...")

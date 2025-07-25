@@ -66,7 +66,9 @@ class DataValidator:
 
         return result
 
-    def _validate_structure(self, packet: NeuralDataPacket, result: ValidationResult) -> None:
+    def _validate_structure(
+        self, packet: NeuralDataPacket, result: ValidationResult
+    ) -> None:
         """Validate basic packet structure."""
         # Check data array - packet.data is always np.ndarray due to type annotation
         # No need to check for None or type
@@ -140,7 +142,9 @@ class DataValidator:
         for ch_idx in range(packet.n_channels):
             channel_data = packet.data[ch_idx, :]
             if np.std(channel_data) < 0.01:  # Almost no variation
-                result.add_warning(f"Channel {ch_idx} appears to be flat / disconnected")
+                result.add_warning(
+                    f"Channel {ch_idx} appears to be flat / disconnected"
+                )
 
         # Check for excessive noise
         for ch_idx in range(packet.n_channels):

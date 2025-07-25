@@ -14,7 +14,7 @@ from ...ingestion.data_types import (
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
-    DataSource
+    DataSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class DeviceState(Enum):
     """Device connection states."""
+
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
     CONNECTED = "connected"
@@ -32,6 +33,7 @@ class DeviceState(Enum):
 @dataclass
 class DeviceCapabilities:
     """Capabilities of a neural data acquisition device."""
+
     supported_sampling_rates: List[float]
     max_channels: int
     signal_types: List[NeuralSignalType]
@@ -141,7 +143,9 @@ class BaseDevice(ABC):
         """Set the current session ID."""
         self.session_id = session_id
 
-    async def check_impedance(self, channel_ids: Optional[List[int]] = None) -> Dict[int, float]:
+    async def check_impedance(
+        self, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, float]:
         """
         Check impedance for specified channels.
 
@@ -153,7 +157,9 @@ class BaseDevice(ABC):
         """
         capabilities = self.get_capabilities()
         if not capabilities.has_impedance_check:
-            raise NotImplementedError(f"{self.device_name} does not support impedance checking")
+            raise NotImplementedError(
+                f"{self.device_name} does not support impedance checking"
+            )
         return {}
 
     async def get_battery_level(self) -> float:
@@ -165,7 +171,9 @@ class BaseDevice(ABC):
         """
         capabilities = self.get_capabilities()
         if not capabilities.has_battery_monitor:
-            raise NotImplementedError(f"{self.device_name} does not have battery monitoring")
+            raise NotImplementedError(
+                f"{self.device_name} does not have battery monitoring"
+            )
         return 100.0
 
     def _update_state(self, new_state: DeviceState) -> None:
@@ -191,12 +199,14 @@ class BaseDevice(ABC):
             except Exception as e:
                 logger.error(f"Error in error callback: {e}")
 
-    def _create_packet(self,
-                      data: np.ndarray,
-                      timestamp: datetime,
-                      signal_type: NeuralSignalType,
-                      source: DataSource,
-                      metadata: Optional[Dict[str, Any]] = None) -> NeuralDataPacket:
+    def _create_packet(
+        self,
+        data: np.ndarray,
+        timestamp: datetime,
+        signal_type: NeuralSignalType,
+        source: DataSource,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> NeuralDataPacket:
         """Create a neural data packet."""
         if self.device_info is None:
             raise ValueError("Device info not set")
@@ -211,8 +221,12 @@ class BaseDevice(ABC):
             source=source,
             device_info=self.device_info,
             session_id=self.session_id,
-            sampling_rate=self.device_info.channels[0].sampling_rate if self.device_info.channels else 256.0,
-            metadata=metadata
+            sampling_rate=(
+                self.device_info.channels[0].sampling_rate
+                if self.device_info.channels
+                else 256.0
+            ),
+            metadata=metadata,
         )
 
         return packet
@@ -229,7 +243,7 @@ class BaseDevice(ABC):
         """Check if device is streaming."""
         return self.state == DeviceState.STREAMING
 
-    async def __aenter__(self) -> 'BaseDevice':
+    async def __aenter__(self) -> "BaseDevice":
         """Async context manager entry."""
         return self
 

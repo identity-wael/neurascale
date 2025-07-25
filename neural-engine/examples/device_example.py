@@ -13,12 +13,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.devices import DeviceManager  # noqa: E402
 from src.devices.interfaces.base_device import DeviceState  # noqa: E402
-from src.ingestion.data_types import NeuralDataPacket, NeuralSignalType, ChannelInfo  # noqa: E402
+from src.ingestion.data_types import (
+    NeuralDataPacket,
+    NeuralSignalType,
+    ChannelInfo,
+)  # noqa: E402
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -78,10 +81,7 @@ async def main() -> None:
             device_id="synthetic_eeg_001",
             device_type="synthetic",
             signal_type=NeuralSignalType.EEG,
-            config={
-                'n_channels': 8,
-                'sampling_rate': 256.0
-            }
+            config={"n_channels": 8, "sampling_rate": 256.0},
         )
 
         # Connect to device
@@ -117,10 +117,7 @@ async def main() -> None:
             device_id="synthetic_emg_001",
             device_type="synthetic",
             signal_type=NeuralSignalType.EMG,
-            config={
-                'n_channels': 4,
-                'sampling_rate': 1000.0
-            }
+            config={"n_channels": 4, "sampling_rate": 1000.0},
         )
 
         # Add accelerometer device
@@ -128,10 +125,7 @@ async def main() -> None:
             device_id="synthetic_accel_001",
             device_type="synthetic",
             signal_type=NeuralSignalType.ACCELEROMETER,
-            config={
-                'n_channels': 3,
-                'sampling_rate': 100.0
-            }
+            config={"n_channels": 3, "sampling_rate": 100.0},
         )
 
         # Connect all devices
@@ -146,8 +140,7 @@ async def main() -> None:
 
         # Start aggregation with 100ms windows
         await manager.start_aggregation(
-            window_size_ms=100,
-            callback=aggregation_callback
+            window_size_ms=100, callback=aggregation_callback
         )
 
         # Start streaming from all devices
@@ -203,7 +196,7 @@ async def lsl_example() -> None:
             device_id="lsl_any",
             device_type="lsl",
             stream_type="EEG",  # Look for EEG streams
-            timeout=5.0
+            timeout=5.0,
         )
 
         # Connect to first available stream
@@ -236,7 +229,7 @@ async def openbci_example() -> None:
             device_id="openbci_cyton",
             device_type="openbci",
             board_type="cyton",
-            port=None  # Auto - detect
+            port=None,  # Auto - detect
         )
 
         # Try to connect
@@ -246,7 +239,12 @@ async def openbci_example() -> None:
 
             # Configure channels (turn off channels 5 - 8)
             channels = [
-                ChannelInfo(channel_id=i, label=f"Ch{i + 1}", unit="microvolts", sampling_rate=250.0)
+                ChannelInfo(
+                    channel_id=i,
+                    label=f"Ch{i + 1}",
+                    unit="microvolts",
+                    sampling_rate=250.0,
+                )
                 for i in range(4)  # Only use first 4 channels
             ]
             device.configure_channels(channels)

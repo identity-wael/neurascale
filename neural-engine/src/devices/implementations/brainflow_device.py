@@ -9,6 +9,7 @@ import numpy as np
 try:
     from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
     from brainflow.data_filter import DataFilter
+
     BRAINFLOW_AVAILABLE = True
 except ImportError:
     BRAINFLOW_AVAILABLE = False
@@ -23,7 +24,7 @@ from ...ingestion.data_types import (
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
-    DataSource
+    DataSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,24 +35,26 @@ class BrainFlowDevice(BaseDevice):
 
     # Supported boards mapping
     SUPPORTED_BOARDS = {
-        'cyton': BoardIds.CYTON_BOARD if BRAINFLOW_AVAILABLE else None,
-        'cyton_daisy': BoardIds.CYTON_DAISY_BOARD if BRAINFLOW_AVAILABLE else None,
-        'ganglion': BoardIds.GANGLION_BOARD if BRAINFLOW_AVAILABLE else None,
-        'synthetic': BoardIds.SYNTHETIC_BOARD if BRAINFLOW_AVAILABLE else None,
-        'muse_s': BoardIds.MUSE_S_BOARD if BRAINFLOW_AVAILABLE else None,
-        'muse_2': BoardIds.MUSE_2_BOARD if BRAINFLOW_AVAILABLE else None,
-        'neurosity_crown': BoardIds.CROWN_BOARD if BRAINFLOW_AVAILABLE else None,
-        'brainbit': BoardIds.BRAINBIT_BOARD if BRAINFLOW_AVAILABLE else None,
-        'unicorn': BoardIds.UNICORN_BOARD if BRAINFLOW_AVAILABLE else None,
+        "cyton": BoardIds.CYTON_BOARD if BRAINFLOW_AVAILABLE else None,
+        "cyton_daisy": BoardIds.CYTON_DAISY_BOARD if BRAINFLOW_AVAILABLE else None,
+        "ganglion": BoardIds.GANGLION_BOARD if BRAINFLOW_AVAILABLE else None,
+        "synthetic": BoardIds.SYNTHETIC_BOARD if BRAINFLOW_AVAILABLE else None,
+        "muse_s": BoardIds.MUSE_S_BOARD if BRAINFLOW_AVAILABLE else None,
+        "muse_2": BoardIds.MUSE_2_BOARD if BRAINFLOW_AVAILABLE else None,
+        "neurosity_crown": BoardIds.CROWN_BOARD if BRAINFLOW_AVAILABLE else None,
+        "brainbit": BoardIds.BRAINBIT_BOARD if BRAINFLOW_AVAILABLE else None,
+        "unicorn": BoardIds.UNICORN_BOARD if BRAINFLOW_AVAILABLE else None,
     }
 
-    def __init__(self,
-                 board_name: str = 'synthetic',
-                 serial_port: Optional[str] = None,
-                 mac_address: Optional[str] = None,
-                 ip_address: Optional[str] = None,
-                 ip_port: Optional[int] = None,
-                 serial_number: Optional[str] = None):
+    def __init__(
+        self,
+        board_name: str = "synthetic",
+        serial_port: Optional[str] = None,
+        mac_address: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        ip_port: Optional[int] = None,
+        serial_number: Optional[str] = None,
+    ):
         """
         Initialize BrainFlow device.
 
@@ -64,11 +67,15 @@ class BrainFlowDevice(BaseDevice):
             serial_number: Serial number for some boards
         """
         if not BRAINFLOW_AVAILABLE:
-            raise ImportError("brainflow is not installed. Install with: pip install brainflow")
+            raise ImportError(
+                "brainflow is not installed. Install with: pip install brainflow"
+            )
 
         if board_name not in self.SUPPORTED_BOARDS:
-            raise ValueError(f"Unsupported board: {board_name}. "
-                           f"Supported boards: {list(self.SUPPORTED_BOARDS.keys())}")
+            raise ValueError(
+                f"Unsupported board: {board_name}. "
+                f"Supported boards: {list(self.SUPPORTED_BOARDS.keys())}"
+            )
 
         device_id = f"brainflow_{board_name}"
         device_name = f"BrainFlow-{board_name.replace('_', ' ').title()}"
@@ -129,7 +136,9 @@ class BrainFlowDevice(BaseDevice):
                 self.marker_channel = None
 
             # All data channels
-            all_channels = list(set(self.eeg_channels + self.emg_channels + self.accel_channels))
+            all_channels = list(
+                set(self.eeg_channels + self.emg_channels + self.accel_channels)
+            )
             self.n_channels = len(all_channels)
 
             # Create channel info
@@ -148,13 +157,15 @@ class BrainFlowDevice(BaseDevice):
                     signal_type = "Other"
                     unit = "unknown"
 
-                channels.append(ChannelInfo(
-                    channel_id=i,
-                    label=f"{signal_type}{ch_idx}",
-                    unit=unit,
-                    sampling_rate=self.sampling_rate,
-                    hardware_id=str(ch_idx)
-                ))
+                channels.append(
+                    ChannelInfo(
+                        channel_id=i,
+                        label=f"{signal_type}{ch_idx}",
+                        unit=unit,
+                        sampling_rate=self.sampling_rate,
+                        hardware_id=str(ch_idx),
+                    )
+                )
 
             # Create device info
             self.device_info = DeviceInfo(
@@ -162,13 +173,15 @@ class BrainFlowDevice(BaseDevice):
                 device_type="BrainFlow",
                 manufacturer=self._get_manufacturer(),
                 model=self.board_name,
-                channels=channels
+                channels=channels,
             )
 
             self._update_state(DeviceState.CONNECTED)
-            logger.info(f"Connected to {self.device_name} "
-                       f"({len(self.eeg_channels)} EEG, {len(self.emg_channels)} EMG, "
-                       f"{len(self.accel_channels)} Accel channels @ {self.sampling_rate}Hz)")
+            logger.info(
+                f"Connected to {self.device_name} "
+                f"({len(self.eeg_channels)} EEG, {len(self.emg_channels)} EMG, "
+                f"{len(self.accel_channels)} Accel channels @ {self.sampling_rate}Hz)"
+            )
             return True
 
         except Exception as e:
@@ -178,17 +191,17 @@ class BrainFlowDevice(BaseDevice):
     def _get_manufacturer(self) -> str:
         """Get manufacturer name for board."""
         manufacturer_map = {
-            'cyton': 'OpenBCI',
-            'cyton_daisy': 'OpenBCI',
-            'ganglion': 'OpenBCI',
-            'muse_s': 'InteraXon',
-            'muse_2': 'InteraXon',
-            'neurosity_crown': 'Neurosity',
-            'brainbit': 'BrainBit',
-            'unicorn': 'g.tec',
-            'synthetic': 'BrainFlow'
+            "cyton": "OpenBCI",
+            "cyton_daisy": "OpenBCI",
+            "ganglion": "OpenBCI",
+            "muse_s": "InteraXon",
+            "muse_2": "InteraXon",
+            "neurosity_crown": "Neurosity",
+            "brainbit": "BrainBit",
+            "unicorn": "g.tec",
+            "synthetic": "BrainFlow",
         }
-        return manufacturer_map.get(self.board_name, 'Unknown')
+        return manufacturer_map.get(self.board_name, "Unknown")
 
     async def disconnect(self) -> None:
         """Disconnect from BrainFlow device."""
@@ -264,16 +277,26 @@ class BrainFlowDevice(BaseDevice):
                 # Get data from board
                 loop = asyncio.get_event_loop()
                 data = await loop.run_in_executor(
-                    None,
-                    self.board.get_board_data,
-                    chunk_size
+                    None, self.board.get_board_data, chunk_size
                 )
 
                 if data.shape[1] > 0:  # If we have samples
                     # Extract relevant channels
-                    eeg_data = data[self.eeg_channels, :] if self.eeg_channels else np.array([])
-                    emg_data = data[self.emg_channels, :] if self.emg_channels else np.array([])
-                    accel_data = data[self.accel_channels, :] if self.accel_channels else np.array([])
+                    eeg_data = (
+                        data[self.eeg_channels, :]
+                        if self.eeg_channels
+                        else np.array([])
+                    )
+                    emg_data = (
+                        data[self.emg_channels, :]
+                        if self.emg_channels
+                        else np.array([])
+                    )
+                    accel_data = (
+                        data[self.accel_channels, :]
+                        if self.accel_channels
+                        else np.array([])
+                    )
                     timestamps = data[self.timestamp_channel, :]
 
                     # Determine primary signal type
@@ -294,15 +317,18 @@ class BrainFlowDevice(BaseDevice):
 
                     # Create metadata
                     metadata = {
-                        'timestamps': timestamps.tolist(),
-                        'board_name': self.board_name
+                        "timestamps": timestamps.tolist(),
+                        "board_name": self.board_name,
                     }
 
                     # Add auxiliary data to metadata if present
                     if emg_data.size > 0 and signal_type != NeuralSignalType.EMG:
-                        metadata['emg_data'] = emg_data.tolist()
-                    if accel_data.size > 0 and signal_type != NeuralSignalType.ACCELEROMETER:
-                        metadata['accel_data'] = accel_data.tolist()
+                        metadata["emg_data"] = emg_data.tolist()
+                    if (
+                        accel_data.size > 0
+                        and signal_type != NeuralSignalType.ACCELEROMETER
+                    ):
+                        metadata["accel_data"] = accel_data.tolist()
 
                     # Create and send packet
                     packet = self._create_packet(
@@ -310,7 +336,7 @@ class BrainFlowDevice(BaseDevice):
                         timestamp=timestamp,
                         signal_type=signal_type,
                         source=DataSource.BRAINFLOW,
-                        metadata=metadata
+                        metadata=metadata,
                     )
 
                     if self._data_callback:
@@ -334,19 +360,25 @@ class BrainFlowDevice(BaseDevice):
             signal_types.append(NeuralSignalType.ACCELEROMETER)
 
         # Board - specific capabilities
-        has_wireless = self.board_name in ['ganglion', 'muse_s', 'muse_2',
-                                          'neurosity_crown', 'brainbit', 'unicorn']
+        has_wireless = self.board_name in [
+            "ganglion",
+            "muse_s",
+            "muse_2",
+            "neurosity_crown",
+            "brainbit",
+            "unicorn",
+        ]
         has_battery = has_wireless
 
         return DeviceCapabilities(
             supported_sampling_rates=[self.sampling_rate],
             max_channels=self.n_channels,
             signal_types=signal_types,
-            has_impedance_check=self.board_name in ['cyton', 'cyton_daisy', 'ganglion'],
+            has_impedance_check=self.board_name in ["cyton", "cyton_daisy", "ganglion"],
             has_battery_monitor=has_battery,
             has_wireless=has_wireless,
             has_trigger_input=self.marker_channel is not None,
-            has_aux_channels=len(self.accel_channels) > 0
+            has_aux_channels=len(self.accel_channels) > 0,
         )
 
     def configure_channels(self, channels: List[ChannelInfo]) -> bool:
@@ -366,17 +398,15 @@ class BrainFlowDevice(BaseDevice):
 
         try:
             loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                None,
-                self.board.insert_marker,
-                marker
-            )
+            await loop.run_in_executor(None, self.board.insert_marker, marker)
             return True
         except Exception as e:
             logger.error(f"Error inserting marker: {e}")
             return False
 
-    async def get_board_data_history(self, duration_seconds: float) -> Optional[np.ndarray]:
+    async def get_board_data_history(
+        self, duration_seconds: float
+    ) -> Optional[np.ndarray]:
         """Get historical data from the board's ring buffer."""
         if not self.board:
             return None
@@ -385,9 +415,7 @@ class BrainFlowDevice(BaseDevice):
             n_samples = int(self.sampling_rate * duration_seconds)
             loop = asyncio.get_event_loop()
             data = await loop.run_in_executor(
-                None,
-                self.board.get_board_data,
-                n_samples
+                None, self.board.get_board_data, n_samples
             )
             return data  # type: ignore[no - any - return]
         except Exception as e:

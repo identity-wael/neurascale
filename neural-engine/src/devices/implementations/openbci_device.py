@@ -15,7 +15,7 @@ from ...ingestion.data_types import (
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
-    DataSource
+    DataSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,12 +29,12 @@ class OpenBCIDevice(BaseDevice):
     BYTE_END = 0xC0
 
     # Commands
-    CMD_STOP = b's'
-    CMD_START = b'b'
-    CMD_RESET = b'v'
-    CMD_QUERY = b'?'
-    CMD_CHANNEL_OFF = {i: f'{i}'.encode() for i in range(1, 17)}
-    CMD_CHANNEL_ON = {i: chr(ord('!') + i - 1).encode() for i in range(1, 17)}
+    CMD_STOP = b"s"
+    CMD_START = b"b"
+    CMD_RESET = b"v"
+    CMD_QUERY = b"?"
+    CMD_CHANNEL_OFF = {i: f"{i}".encode() for i in range(1, 17)}
+    CMD_CHANNEL_ON = {i: chr(ord("!") + i - 1).encode() for i in range(1, 17)}
 
     # Sampling rates
     CYTON_SAMPLING_RATE = 250.0
@@ -44,10 +44,9 @@ class OpenBCIDevice(BaseDevice):
     CYTON_SCALE_FACTOR = 4.5 / 24 / (2**23 - 1) * 1e6  # Convert to microvolts
     GANGLION_SCALE_FACTOR = 1.2 / 51.0 * 1e6  # Convert to microvolts
 
-    def __init__(self,
-                 port: Optional[str] = None,
-                 board_type: str = "cyton",
-                 daisy: bool = False):
+    def __init__(
+        self, port: Optional[str] = None, board_type: str = "cyton", daisy: bool = False
+    ):
         """
         Initialize OpenBCI device.
 
@@ -100,11 +99,7 @@ class OpenBCIDevice(BaseDevice):
                     raise ConnectionError("No OpenBCI device found")
 
             # Open serial connection
-            self.serial = serial.Serial(
-                port=self.port,
-                baudrate=115200,
-                timeout=1.0
-            )
+            self.serial = serial.Serial(port=self.port, baudrate=115200, timeout=1.0)
 
             # Reset board
             await self._send_command(self.CMD_RESET)
@@ -121,7 +116,9 @@ class OpenBCIDevice(BaseDevice):
             # Read and log board response
             if self.serial.in_waiting:
                 response = self.serial.read(self.serial.in_waiting)
-                logger.info(f"Board response: {response.decode('utf - 8', errors='ignore')}")
+                logger.info(
+                    f"Board response: {response.decode('utf - 8', errors='ignore')}"
+                )
 
             # Create device info
             channels = [
@@ -130,7 +127,7 @@ class OpenBCIDevice(BaseDevice):
                     label=f"Ch{i + 1}",
                     unit="microvolts",
                     sampling_rate=self.sampling_rate,
-                    hardware_id=f"N{i}P" if i < 8 else f"N{i - 8}P_DAISY"
+                    hardware_id=f"N{i}P" if i < 8 else f"N{i - 8}P_DAISY",
                 )
                 for i in range(self.n_channels)
             ]
@@ -141,7 +138,7 @@ class OpenBCIDevice(BaseDevice):
                 manufacturer="OpenBCI",
                 model=f"{self.board_type.capitalize()}{' + Daisy' if self.daisy else ''}",
                 firmware_version="3.0",  # Would need to parse from query response
-                channels=channels
+                channels=channels,
             )
 
             self._update_state(DeviceState.CONNECTED)
@@ -158,8 +155,13 @@ class OpenBCIDevice(BaseDevice):
 
         for port in ports:
             # OpenBCI boards typically show up with these identifiers
-            if any(id_str in str(port.description).lower() for id_str in ['openbci', 'ftdi', 'serial']):
-                logger.info(f"Found potential OpenBCI device: {port.device} - {port.description}")
+            if any(
+                id_str in str(port.description).lower()
+                for id_str in ["openbci", "ftdi", "serial"]
+            ):
+                logger.info(
+                    f"Found potential OpenBCI device: {port.device} - {port.description}"
+                )
                 return str(port.device)
 
         return None
@@ -250,7 +252,10 @@ class OpenBCIDevice(BaseDevice):
                         self.buffer = self.buffer[start_idx:]
 
                     # Check if we have a complete packet
-                    if len(self.buffer) >= packet_size and self.buffer[packet_size - 1] == self.BYTE_END:
+                    if (
+                        len(self.buffer) >= packet_size
+                        and self.buffer[packet_size - 1] == self.BYTE_END
+                    ):
                         packet = self.buffer[:packet_size]
                         self.buffer = self.buffer[packet_size:]
 
@@ -273,9 +278,9 @@ class OpenBCIDevice(BaseDevice):
                                     signal_type=NeuralSignalType.EEG,
                                     source=DataSource.OPENBCI,
                                     metadata={
-                                        'board_type': self.board_type,
-                                        'daisy': self.daisy
-                                    }
+                                        "board_type": self.board_type,
+                                        "daisy": self.daisy,
+                                    },
                                 )
 
                                 if self._data_callback:
@@ -305,13 +310,15 @@ class OpenBCIDevice(BaseDevice):
         # Check for dropped packets
         expected_id = (self.last_packet_id + 1) % 256
         if self.last_packet_id != -1 and packet_id != expected_id:
-            logger.warning(f"Dropped packet(s): expected {expected_id}, got {packet_id}")
+            logger.warning(
+                f"Dropped packet(s): expected {expected_id}, got {packet_id}"
+            )
         self.last_packet_id = packet_id
 
         # Parse channel data (3 bytes per channel, 24 - bit signed)
         channel_data = []
         for i in range(8):  # First 8 channels
-            raw = struct.unpack('>I', b'\x00' + packet[2 + i * 3:5 + i * 3])[0]
+            raw = struct.unpack(">I", b"\x00" + packet[2 + i * 3 : 5 + i * 3])[0]
             if raw & 0x800000:  # Check sign bit
                 raw = raw - 0x1000000
             channel_data.append(raw * self.scale_factor)
@@ -321,13 +328,21 @@ class OpenBCIDevice(BaseDevice):
         if self.daisy:
             channel_data.extend(channel_data)  # Simplified for demo
 
-        return channel_data[:self.n_channels]
+        return channel_data[: self.n_channels]
 
     def get_capabilities(self) -> DeviceCapabilities:
         """Get device capabilities."""
         if self.board_type == "cyton":
             return DeviceCapabilities(
-                supported_sampling_rates=[250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0],
+                supported_sampling_rates=[
+                    250.0,
+                    500.0,
+                    1000.0,
+                    2000.0,
+                    4000.0,
+                    8000.0,
+                    16000.0,
+                ],
                 max_channels=16 if self.daisy else 8,
                 signal_types=[NeuralSignalType.EEG, NeuralSignalType.EMG],
                 has_impedance_check=True,
@@ -335,7 +350,7 @@ class OpenBCIDevice(BaseDevice):
                 has_wireless=True,  # With WiFi shield
                 has_trigger_input=True,
                 has_aux_channels=True,
-                supported_gains=[1, 2, 4, 6, 8, 12, 24]
+                supported_gains=[1, 2, 4, 6, 8, 12, 24],
             )
         else:  # Ganglion
             return DeviceCapabilities(
@@ -347,7 +362,7 @@ class OpenBCIDevice(BaseDevice):
                 has_wireless=True,  # Bluetooth
                 has_trigger_input=False,
                 has_aux_channels=False,
-                supported_gains=[1, 2, 4, 6, 8, 12, 24, 51]
+                supported_gains=[1, 2, 4, 6, 8, 12, 24, 51],
             )
 
     def configure_channels(self, channels: List[ChannelInfo]) -> bool:
@@ -363,7 +378,9 @@ class OpenBCIDevice(BaseDevice):
             # Turn on specified channels
             for channel in channels:
                 if 0 <= channel.channel_id < self.n_channels:
-                    asyncio.create_task(self._send_command(self.CMD_CHANNEL_ON[channel.channel_id + 1]))
+                    asyncio.create_task(
+                        self._send_command(self.CMD_CHANNEL_ON[channel.channel_id + 1])
+                    )
 
             return True
         except Exception as e:
@@ -381,7 +398,9 @@ class OpenBCIDevice(BaseDevice):
         logger.warning("Sampling rate change not fully implemented")
         return False
 
-    async def check_impedance(self, channel_ids: Optional[List[int]] = None) -> Dict[int, float]:
+    async def check_impedance(
+        self, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, float]:
         """Check impedance for channels."""
         # OpenBCI impedance checking requires special commands
         # and switching to impedance mode

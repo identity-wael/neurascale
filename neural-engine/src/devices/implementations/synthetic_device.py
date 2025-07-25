@@ -12,7 +12,7 @@ from ...ingestion.data_types import (
     DeviceInfo,
     ChannelInfo,
     NeuralSignalType,
-    DataSource
+    DataSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,44 +24,46 @@ class SyntheticDevice(BaseDevice):
     # Default signal parameters
     DEFAULT_CONFIGS = {
         NeuralSignalType.EEG: {
-            'n_channels': 8,
-            'sampling_rate': 256.0,
-            'bands': {
-                'delta': (0.5, 4, 20),    # (min_freq, max_freq, amplitude)
-                'theta': (4, 8, 15),
-                'alpha': (8, 13, 30),
-                'beta': (13, 30, 10),
-                'gamma': (30, 100, 5)
+            "n_channels": 8,
+            "sampling_rate": 256.0,
+            "bands": {
+                "delta": (0.5, 4, 20),  # (min_freq, max_freq, amplitude)
+                "theta": (4, 8, 15),
+                "alpha": (8, 13, 30),
+                "beta": (13, 30, 10),
+                "gamma": (30, 100, 5),
             },
-            'noise_level': 5.0,
-            'artifact_probability': 0.01
+            "noise_level": 5.0,
+            "artifact_probability": 0.01,
         },
         NeuralSignalType.EMG: {
-            'n_channels': 4,
-            'sampling_rate': 1000.0,
-            'base_frequency': 50.0,
-            'burst_probability': 0.1,
-            'burst_duration': 0.5,
-            'noise_level': 10.0
+            "n_channels": 4,
+            "sampling_rate": 1000.0,
+            "base_frequency": 50.0,
+            "burst_probability": 0.1,
+            "burst_duration": 0.5,
+            "noise_level": 10.0,
         },
         NeuralSignalType.SPIKES: {
-            'n_channels': 32,
-            'sampling_rate': 30000.0,
-            'firing_rate': 10.0,  # Hz
-            'spike_amplitude': 100.0,
-            'noise_level': 5.0
+            "n_channels": 32,
+            "sampling_rate": 30000.0,
+            "firing_rate": 10.0,  # Hz
+            "spike_amplitude": 100.0,
+            "noise_level": 5.0,
         },
         NeuralSignalType.ACCELEROMETER: {
-            'n_channels': 3,
-            'sampling_rate': 100.0,
-            'movement_frequency': 1.0,
-            'noise_level': 0.01
-        }
+            "n_channels": 3,
+            "sampling_rate": 100.0,
+            "movement_frequency": 1.0,
+            "noise_level": 0.01,
+        },
     }
 
-    def __init__(self,
-                 signal_type: NeuralSignalType = NeuralSignalType.EEG,
-                 config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        signal_type: NeuralSignalType = NeuralSignalType.EEG,
+        config: Optional[Dict[str, Any]] = None,
+    ):
         """
         Initialize synthetic device.
 
@@ -77,19 +79,29 @@ class SyntheticDevice(BaseDevice):
         self.signal_type = signal_type
 
         # Merge default config with custom config
-        default_config = self.DEFAULT_CONFIGS.get(signal_type, self.DEFAULT_CONFIGS[NeuralSignalType.EEG])
-        self.config: Dict[str, Any] = dict(default_config) if isinstance(default_config, dict) else {}
+        default_config = self.DEFAULT_CONFIGS.get(
+            signal_type, self.DEFAULT_CONFIGS[NeuralSignalType.EEG]
+        )
+        self.config: Dict[str, Any] = (
+            dict(default_config) if isinstance(default_config, dict) else {}
+        )
         if config:
             self.config.update(config)
 
-        self.n_channels: int = self.config['n_channels']
-        self.sampling_rate: float = self.config['sampling_rate']
+        self.n_channels: int = self.config["n_channels"]
+        self.sampling_rate: float = self.config["sampling_rate"]
 
         # State for signal generation
         self.time_offset = 0.0
-        self.spike_times: Dict[int, List[float]] = {i: [] for i in range(self.n_channels)}
-        self.emg_burst_state: Dict[int, bool] = {i: False for i in range(self.n_channels)}
-        self.emg_burst_start: Dict[int, float] = {i: 0.0 for i in range(self.n_channels)}
+        self.spike_times: Dict[int, List[float]] = {
+            i: [] for i in range(self.n_channels)
+        }
+        self.emg_burst_state: Dict[int, bool] = {
+            i: False for i in range(self.n_channels)
+        }
+        self.emg_burst_start: Dict[int, float] = {
+            i: 0.0 for i in range(self.n_channels)
+        }
 
     async def connect(self, **kwargs: Any) -> bool:
         """Connect to synthetic device (always succeeds)."""
@@ -105,17 +117,19 @@ class SyntheticDevice(BaseDevice):
                 unit = "microvolts"
                 if self.signal_type == NeuralSignalType.ACCELEROMETER:
                     unit = "g"
-                    labels = ['X', 'Y', 'Z']
+                    labels = ["X", "Y", "Z"]
                     label = f"Accel_{labels[i % 3]}"
                 else:
                     label = f"Ch{i + 1}"
 
-                channels.append(ChannelInfo(
-                    channel_id=i,
-                    label=label,
-                    unit=unit,
-                    sampling_rate=self.sampling_rate
-                ))
+                channels.append(
+                    ChannelInfo(
+                        channel_id=i,
+                        label=label,
+                        unit=unit,
+                        sampling_rate=self.sampling_rate,
+                    )
+                )
 
             # Create device info
             self.device_info = DeviceInfo(
@@ -124,12 +138,14 @@ class SyntheticDevice(BaseDevice):
                 manufacturer="NeuraScale",
                 model=f"Synthetic_{self.signal_type.value}",
                 firmware_version="1.0.0",
-                channels=channels
+                channels=channels,
             )
 
             self._update_state(DeviceState.CONNECTED)
-            logger.info(f"Connected to {self.device_name} "
-                       f"({self.n_channels} channels @ {self.sampling_rate}Hz)")
+            logger.info(
+                f"Connected to {self.device_name} "
+                f"({self.n_channels} channels @ {self.sampling_rate}Hz)"
+            )
             return True
 
         except Exception as e:
@@ -197,10 +213,7 @@ class SyntheticDevice(BaseDevice):
                     timestamp=datetime.now(timezone.utc),
                     signal_type=self.signal_type,
                     source=DataSource.SYNTHETIC,
-                    metadata={
-                        'synthetic': True,
-                        'time_offset': self.time_offset
-                    }
+                    metadata={"synthetic": True, "time_offset": self.time_offset},
                 )
 
                 if self._data_callback:
@@ -217,54 +230,69 @@ class SyntheticDevice(BaseDevice):
 
     def _generate_eeg_data(self, n_samples: int) -> np.ndarray:
         """Generate realistic EEG data with frequency bands."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
+        t = np.linspace(
+            self.time_offset,
+            self.time_offset + n_samples / self.sampling_rate,
+            n_samples,
+        )
         data = np.zeros((self.n_channels, n_samples))
 
         for ch in range(self.n_channels):
             # Add frequency band components
-            for band_name, (min_freq, max_freq, amplitude) in self.config['bands'].items():
+            for band_name, (min_freq, max_freq, amplitude) in self.config[
+                "bands"
+            ].items():
                 # Random frequency within band
                 freq = np.random.uniform(min_freq, max_freq)
                 phase = np.random.uniform(0, 2 * np.pi)
 
                 # Add some amplitude variation
                 amp_variation = 1 + 0.2 * np.sin(2 * np.pi * 0.1 * t)
-                data[ch] += amplitude * amp_variation * np.sin(2 * np.pi * freq * t + phase)
+                data[ch] += (
+                    amplitude * amp_variation * np.sin(2 * np.pi * freq * t + phase)
+                )
 
             # Add pink noise (1 / f)
-            noise = self._generate_pink_noise(n_samples) * self.config['noise_level']
+            noise = self._generate_pink_noise(n_samples) * self.config["noise_level"]
             data[ch] += noise
 
             # Add occasional artifacts
-            if np.random.random() < self.config['artifact_probability']:
+            if np.random.random() < self.config["artifact_probability"]:
                 artifact_start = np.random.randint(0, n_samples - 10)
                 artifact_amplitude = np.random.uniform(50, 200)
-                data[ch, artifact_start:artifact_start + 10] += artifact_amplitude
+                data[ch, artifact_start : artifact_start + 10] += artifact_amplitude
 
         return data
 
     def _generate_emg_data(self, n_samples: int) -> np.ndarray:
         """Generate realistic EMG data with muscle activation bursts."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
+        t = np.linspace(
+            self.time_offset,
+            self.time_offset + n_samples / self.sampling_rate,
+            n_samples,
+        )
         data = np.zeros((self.n_channels, n_samples))
 
         for ch in range(self.n_channels):
             # Check for burst state
             if not self.emg_burst_state[ch]:
                 # Potentially start a burst
-                if np.random.random() < self.config['burst_probability'] * n_samples / self.sampling_rate:
+                if (
+                    np.random.random()
+                    < self.config["burst_probability"] * n_samples / self.sampling_rate
+                ):
                     self.emg_burst_state[ch] = True
                     self.emg_burst_start[ch] = self.time_offset
             else:
                 # Check if burst should end
                 burst_duration = self.time_offset - self.emg_burst_start[ch]
-                if burst_duration > self.config['burst_duration']:
+                if burst_duration > self.config["burst_duration"]:
                     self.emg_burst_state[ch] = False
 
             # Generate signal
             if self.emg_burst_state[ch]:
                 # Active muscle signal
-                base_freq = self.config['base_frequency']
+                base_freq = self.config["base_frequency"]
                 for harmonic in range(1, 5):
                     freq = base_freq * harmonic
                     amplitude = 100 / harmonic  # Decreasing amplitude with harmonics
@@ -275,27 +303,33 @@ class SyntheticDevice(BaseDevice):
                 data[ch] += hf_noise
 
             # Always add baseline noise
-            data[ch] += np.random.randn(n_samples) * self.config['noise_level']
+            data[ch] += np.random.randn(n_samples) * self.config["noise_level"]
 
         return data
 
     def _generate_spike_data(self, n_samples: int) -> np.ndarray:
         """Generate synthetic spike train data."""
-        data = np.random.randn(self.n_channels, n_samples) * self.config['noise_level']
+        data = np.random.randn(self.n_channels, n_samples) * self.config["noise_level"]
 
         # Time array
         # t = np.arange(n_samples) / self.sampling_rate  # Unused for now
 
         for ch in range(self.n_channels):
             # Generate spikes based on Poisson process
-            firing_rate = self.config['firing_rate'] * (1 + 0.5 * np.sin(2 * np.pi * 0.5 * self.time_offset))
+            firing_rate = self.config["firing_rate"] * (
+                1 + 0.5 * np.sin(2 * np.pi * 0.5 * self.time_offset)
+            )
 
             # Check existing spike times and remove old ones
-            self.spike_times[ch] = [st for st in self.spike_times[ch] if st > self.time_offset - 0.1]
+            self.spike_times[ch] = [
+                st for st in self.spike_times[ch] if st > self.time_offset - 0.1
+            ]
 
             # Generate new spikes
             n_spikes = np.random.poisson(firing_rate * n_samples / self.sampling_rate)
-            new_spike_times = np.sort(np.random.uniform(0, n_samples / self.sampling_rate, n_spikes))
+            new_spike_times = np.sort(
+                np.random.uniform(0, n_samples / self.sampling_rate, n_spikes)
+            )
 
             # Add spikes to data
             for spike_time in new_spike_times:
@@ -307,7 +341,9 @@ class SyntheticDevice(BaseDevice):
 
                     end_idx = min(spike_idx + spike_duration, n_samples)
                     waveform_end = end_idx - spike_idx
-                    data[ch, spike_idx:end_idx] += spike_waveform[:waveform_end] * self.config['spike_amplitude']
+                    data[ch, spike_idx:end_idx] += (
+                        spike_waveform[:waveform_end] * self.config["spike_amplitude"]
+                    )
 
                 # Store spike time for refractory period
                 self.spike_times[ch].append(self.time_offset + spike_time)
@@ -323,11 +359,15 @@ class SyntheticDevice(BaseDevice):
 
     def _generate_accelerometer_data(self, n_samples: int) -> np.ndarray:
         """Generate synthetic accelerometer data."""
-        t = np.linspace(self.time_offset, self.time_offset + n_samples / self.sampling_rate, n_samples)
+        t = np.linspace(
+            self.time_offset,
+            self.time_offset + n_samples / self.sampling_rate,
+            n_samples,
+        )
         data = np.zeros((self.n_channels, n_samples))
 
         # Simulate periodic movement
-        movement_freq = self.config['movement_frequency']
+        movement_freq = self.config["movement_frequency"]
 
         # X - axis: forward - backward movement
         data[0] = 0.1 * np.sin(2 * np.pi * movement_freq * t)
@@ -340,7 +380,7 @@ class SyntheticDevice(BaseDevice):
 
         # Add noise to all channels
         for ch in range(self.n_channels):
-            data[ch] += np.random.randn(n_samples) * self.config['noise_level']
+            data[ch] += np.random.randn(n_samples) * self.config["noise_level"]
 
         return data
 
@@ -367,7 +407,15 @@ class SyntheticDevice(BaseDevice):
     def get_capabilities(self) -> DeviceCapabilities:
         """Get device capabilities."""
         return DeviceCapabilities(
-            supported_sampling_rates=[125.0, 250.0, 256.0, 500.0, 512.0, 1000.0, 2000.0],
+            supported_sampling_rates=[
+                125.0,
+                250.0,
+                256.0,
+                500.0,
+                512.0,
+                1000.0,
+                2000.0,
+            ],
             max_channels=64,
             signal_types=list(self.DEFAULT_CONFIGS.keys()),
             has_impedance_check=True,
@@ -376,7 +424,11 @@ class SyntheticDevice(BaseDevice):
             has_trigger_input=True,
             has_aux_channels=True,
             supported_gains=[1, 2, 4, 8, 12, 24],
-            supported_filters={'notch': [50, 60], 'highpass': [0.1, 0.5, 1.0], 'lowpass': [30, 50, 100]}
+            supported_filters={
+                "notch": [50, 60],
+                "highpass": [0.1, 0.5, 1.0],
+                "lowpass": [30, 50, 100],
+            },
         )
 
     def configure_channels(self, channels: List[ChannelInfo]) -> bool:
@@ -390,14 +442,16 @@ class SyntheticDevice(BaseDevice):
     def set_sampling_rate(self, rate: float) -> bool:
         """Set sampling rate for synthetic device."""
         self.sampling_rate = rate
-        self.config['sampling_rate'] = rate
+        self.config["sampling_rate"] = rate
         # Update channel sampling rates
         if self.device_info and self.device_info.channels:
             for channel in self.device_info.channels:
                 channel.sampling_rate = rate
         return True
 
-    async def check_impedance(self, channel_ids: Optional[List[int]] = None) -> Dict[int, float]:
+    async def check_impedance(
+        self, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, float]:
         """Simulate impedance check."""
         await asyncio.sleep(0.5)  # Simulate measurement time
 

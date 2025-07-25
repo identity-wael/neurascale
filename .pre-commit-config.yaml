@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: black-neural-engine
         name: black
-        entry: /opt/homebrew/bin/python3.12 -m black
+        entry: .pre-commit-scripts/run-black.sh
         language: system
         types: [python]
         files: ^neural-engine/.*\.py$

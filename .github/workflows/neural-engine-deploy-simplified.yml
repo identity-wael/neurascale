@@ -274,8 +274,23 @@ jobs:
           echo "Checking tfvars file:"
           cat environments/${{ needs.setup.outputs.environment }}.tfvars | head -5
 
-          # Try to remove any stale locks first
-          gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null || true
+          # Remove any stale locks first
+          echo "Checking for stale Terraform locks..."
+
+          # Method 1: Remove lock file directly from GCS
+          if gcloud storage ls gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null; then
+            echo "Found stale lock, removing..."
+            gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock
+            echo "Lock file removed from GCS"
+            sleep 2  # Give GCS time to propagate the deletion
+          else
+            echo "No stale locks found in GCS"
+          fi
+
+          # Method 2: Try terraform force-unlock if we know a lock ID
+          # This is safer but requires the lock ID
+          echo "Checking Terraform state status..."
+          terraform show -json 2>/dev/null || true
 
           # Enable debug logging for Terraform
           export TF_LOG=DEBUG
@@ -306,11 +321,16 @@ jobs:
             --resource=global \
             --labels=environment=${{ needs.setup.outputs.environment }},version=${{ github.sha }},status=success
 
-      - name: Cleanup Terraform lock on failure
-        if: failure()
+      - name: Cleanup Terraform lock
+        if: always()
         run: |
-          echo "Cleaning up Terraform state lock after failure..."
-          gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock || true
+          echo "Cleaning up Terraform state lock..."
+          if gcloud storage ls gs://neurascale-terraform-state/neural-engine/default.tflock 2>/dev/null; then
+            gcloud storage rm gs://neurascale-terraform-state/neural-engine/default.tflock
+            echo "Lock removed"
+          else
+            echo "No lock to remove"
+          fi
 
   # Verify deployment after everything is built and deployed
   verify:

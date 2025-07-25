@@ -22,6 +22,18 @@ variable "notification_channels" {
   default     = []
 }
 
+variable "create_slo" {
+  type        = bool
+  description = "Create SLO for services (set to false on initial deployment)"
+  default     = false
+}
+
+variable "create_alerts" {
+  type        = bool
+  description = "Create alert policies (set to false on initial deployment to allow metrics to register)"
+  default     = false
+}
+
 # Custom Metrics for Neural Data Quality
 resource "google_logging_metric" "neural_data_quality" {
   name   = "neural-data-quality-${var.environment}"
@@ -155,6 +167,8 @@ resource "google_logging_metric" "device_connection_status" {
 
 # SLO Monitoring for 99.9% Uptime
 resource "google_monitoring_slo" "api_availability" {
+  count = var.create_slo ? 1 : 0
+
   service      = google_monitoring_service.neural_api.service_id
   display_name = "API Availability SLO"
 
@@ -163,8 +177,8 @@ resource "google_monitoring_slo" "api_availability" {
 
   request_based_sli {
     good_total_ratio {
-      good_service_filter  = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\" AND metric.label.response_code_class=\"2xx\""
-      total_service_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\""
+      good_service_filter  = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\" AND metric.label.response_code_class=\"2xx\""
+      total_service_filter = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.label.service_name=\"neural-api-${var.environment}\""
     }
   }
 }
@@ -177,7 +191,6 @@ resource "google_monitoring_service" "neural_api" {
   basic_service {
     service_type = "CLOUD_RUN"
     service_labels = {
-      location     = "northamerica-northeast1"
       service_name = "neural-api-${var.environment}"
     }
   }
@@ -185,12 +198,19 @@ resource "google_monitoring_service" "neural_api" {
 
 # Alert Policy for Data Quality
 resource "google_monitoring_alert_policy" "data_quality_alert" {
+  count = var.create_alerts ? 1 : 0
+
   display_name = "Low Neural Data Quality - ${var.environment}"
   enabled      = var.enable_monitoring_alerts
   combiner     = "OR"
 
   # Add dependency to ensure metrics exist first
   depends_on = [google_logging_metric.neural_data_quality]
+
+  # Add lifecycle to handle metric creation delay
+  lifecycle {
+    create_before_destroy = true
+  }
 
   documentation {
     content = "Neural data quality has dropped below acceptable threshold. Check device connections and signal processing."
@@ -217,6 +237,8 @@ resource "google_monitoring_alert_policy" "data_quality_alert" {
 
 # Alert Policy for High Latency
 resource "google_monitoring_alert_policy" "high_latency_alert" {
+  count = var.create_alerts ? 1 : 0
+
   display_name = "High Processing Latency - ${var.environment}"
   enabled      = var.enable_monitoring_alerts
   combiner     = "OR"
@@ -247,12 +269,19 @@ resource "google_monitoring_alert_policy" "high_latency_alert" {
 
 # Alert Policy for Device Disconnections
 resource "google_monitoring_alert_policy" "device_disconnection_alert" {
+  count = var.create_alerts ? 1 : 0
+
   display_name = "Device Disconnections - ${var.environment}"
   enabled      = var.enable_monitoring_alerts
   combiner     = "OR"
 
   # Add dependency to ensure metrics exist first
   depends_on = [google_logging_metric.device_connection_status]
+
+  # Add lifecycle to handle metric creation delay
+  lifecycle {
+    create_before_destroy = true
+  }
 
   documentation {
     content = "Multiple device disconnections detected. Check network connectivity and device health."
@@ -262,7 +291,7 @@ resource "google_monitoring_alert_policy" "device_disconnection_alert" {
     display_name = "More than 5 disconnections in 5 minutes"
 
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/device-connection-status-${var.environment}\" AND metric.label.status=\"disconnected\" resource.type=\"cloud_function\""
+      filter          = "metric.type=\"logging.googleapis.com/user/device-connection-status-${var.environment}\" AND metric.label.\"status\"=\"disconnected\" AND resource.type=\"cloud_function\""
       duration        = "300s"
       comparison      = "COMPARISON_GT"
       threshold_value = 5

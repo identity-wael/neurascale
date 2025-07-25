@@ -201,7 +201,9 @@ jobs:
             network=host
           buildkitd-config-inline: |
             [worker.oci]
-              max-parallelism = 8
+              max-parallelism = 12
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
 
       - name: Configure Docker for Artifact Registry
         if: steps.check_docker.outputs.docker_available == 'true'
@@ -228,6 +230,7 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             DOCKER_BUILDKIT=1
+            BUILDKIT_PARALLELISM=12
 
       # Move cache after build
       - name: Move cache

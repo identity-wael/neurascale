@@ -284,7 +284,7 @@ class SyntheticDevice(BaseDevice):
         data = np.random.randn(self.n_channels, n_samples) * self.config['noise_level']
 
         # Time array
-        t = np.arange(n_samples) / self.sampling_rate
+        # t = np.arange(n_samples) / self.sampling_rate  # Unused for now
 
         for ch in range(self.n_channels):
             # Generate spikes based on Poisson process

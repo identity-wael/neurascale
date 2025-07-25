@@ -159,6 +159,7 @@ def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
 
         # Data callback
         packet_count = 0
+
         def data_callback(device_id: str, packet: Any) -> None:
             nonlocal packet_count
             packet_count += 1

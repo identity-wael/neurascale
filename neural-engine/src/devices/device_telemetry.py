@@ -270,7 +270,7 @@ class DeviceTelemetryCollector:
             except Exception as e:
                 logger.error(f"Error in telemetry flush loop: {e}")
 
-    async def _flush_buffer(self):
+    async def _flush_buffer(self) -> None:
         """Flush buffer to exporters."""
         async with self._buffer_lock:
             if not self._buffer:
@@ -347,7 +347,7 @@ class DeviceTelemetryCollector:
 
     # Convenience methods for common telemetry events
 
-    async def collect_device_info(self, device_id: str, info: Dict[str, Any]):
+    async def collect_device_info(self, device_id: str, info: Dict[str, Any]) -> None:
         """Collect device information telemetry."""
         await self.collect_event(
             device_id=device_id,

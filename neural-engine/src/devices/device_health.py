@@ -192,7 +192,7 @@ class DeviceHealthMonitor:
         """Add callback for health alerts."""
         self._alert_callbacks.append(callback)
 
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> None:
         """Start health monitoring."""
         if self._monitor_task and not self._monitor_task.done():
             logger.warning("Health monitoring already running")
@@ -202,7 +202,7 @@ class DeviceHealthMonitor:
         self._monitor_task = asyncio.create_task(self._monitoring_loop())
         logger.info("Started device health monitoring")
 
-    async def stop_monitoring(self):
+    async def stop_monitoring(self) -> None:
         """Stop health monitoring."""
         self._stop_monitoring.set()
         if self._monitor_task:
@@ -210,7 +210,7 @@ class DeviceHealthMonitor:
             self._monitor_task = None
         logger.info("Stopped device health monitoring")
 
-    async def _monitoring_loop(self):
+    async def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
         while not self._stop_monitoring.is_set():
             try:

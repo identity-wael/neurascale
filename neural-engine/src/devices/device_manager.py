@@ -591,11 +591,11 @@ class DeviceManager:
             # Default to synthetic if unknown
             return "synthetic"
 
-    async def start_health_monitoring(self):
+    async def start_health_monitoring(self) -> None:
         """Start device health monitoring."""
         await self.health_monitor.start_monitoring()
 
-    async def stop_health_monitoring(self):
+    async def stop_health_monitoring(self) -> None:
         """Stop device health monitoring."""
         await self.health_monitor.stop_monitoring()
 
@@ -625,7 +625,7 @@ class DeviceManager:
 
         await self.telemetry_collector.start()
 
-    async def stop_telemetry_collection(self):
+    async def stop_telemetry_collection(self) -> None:
         """Stop telemetry collection."""
         await self.telemetry_collector.stop()
 

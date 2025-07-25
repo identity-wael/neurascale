@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpenBCIDevice(BaseDevice):
-    """OpenBCI device implementation for Cyton (8 / 16 channel) and Ganglion (4 channel) boards."""
+    """OpenBCI device implementation for Cyton (8/16 channel) and Ganglion (4 channel) boards."""
 
     # OpenBCI protocol constants
     BYTE_START = 0xA0
@@ -135,7 +135,10 @@ class OpenBCIDevice(BaseDevice):
                 device_id=self.device_id,
                 device_type="OpenBCI",
                 manufacturer="OpenBCI",
-                model=f"{self.board_type.capitalize()}{' + Daisy' if self.daisy else ''}",
+                model=(
+                    f"{self.board_type.capitalize()}"
+                    f"{' + Daisy' if self.daisy else ''}"
+                ),
                 firmware_version="3.0",  # Would need to parse from query response
                 channels=channels,
             )
@@ -159,7 +162,8 @@ class OpenBCIDevice(BaseDevice):
                 for id_str in ["openbci", "ftdi", "serial"]
             ):
                 logger.info(
-                    f"Found potential OpenBCI device: {port.device} - {port.description}"
+                    f"Found potential OpenBCI device: "
+                    f"{port.device} - {port.description}"
                 )
                 return str(port.device)
 

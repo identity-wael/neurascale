@@ -6,8 +6,10 @@ import base64
 from datetime import datetime
 import logging
 import os
+
 # from google.cloud import pubsub_v1  # Unused import
 from google.cloud import bigtable
+
 # from google.cloud.bigtable import column_family  # Unused import
 # from google.cloud.bigtable import row_filters  # Unused import
 from typing import Any
@@ -17,10 +19,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Environment variables
-PROJECT_ID = os.environ.get('GCP_PROJECT', 'staging-neurascale')
-ENVIRONMENT = os.environ.get('ENVIRONMENT', 'staging')
-BIGTABLE_INSTANCE = f'neural-data-{ENVIRONMENT}'
-BIGTABLE_TABLE = 'neural-time-series'
+PROJECT_ID = os.environ.get("GCP_PROJECT", "staging-neurascale")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "staging")
+BIGTABLE_INSTANCE = f"neural-data-{ENVIRONMENT}"
+BIGTABLE_TABLE = "neural-time-series"
 
 
 @functions_framework.cloud_event  # type: ignore
@@ -34,12 +36,12 @@ def process_neural_stream(cloud_event: Any) -> None:
         logger.info(f"Processing neural data from device: {data.get('device_id')}")
 
         # Extract data fields
-        device_id = data.get('device_id')
-        signal_type = data.get('signal_type')
-        timestamp = data.get('timestamp', datetime.utcnow().isoformat())
-        sampling_rate = data.get('sampling_rate')
-        channels = data.get('channels', [])
-        samples = data.get('data', [])
+        device_id = data.get("device_id")
+        signal_type = data.get("signal_type")
+        timestamp = data.get("timestamp", datetime.utcnow().isoformat())
+        sampling_rate = data.get("sampling_rate")
+        channels = data.get("channels", [])
+        samples = data.get("data", [])
 
         # Validate data
         if not device_id or not signal_type:
@@ -66,20 +68,22 @@ def process_neural_stream(cloud_event: Any) -> None:
             row = table.direct_row(row_key)
 
             # Add data to columns
-            row.set_cell('metadata', 'device_id', device_id)
-            row.set_cell('metadata', 'signal_type', signal_type)
-            row.set_cell('metadata', 'timestamp', timestamp)
-            row.set_cell('metadata', 'sampling_rate', str(sampling_rate))
-            row.set_cell('metadata', 'channel_count', str(len(channels)))
+            row.set_cell("metadata", "device_id", device_id)
+            row.set_cell("metadata", "signal_type", signal_type)
+            row.set_cell("metadata", "timestamp", timestamp)
+            row.set_cell("metadata", "sampling_rate", str(sampling_rate))
+            row.set_cell("metadata", "channel_count", str(len(channels)))
 
             # Store sample data as JSON (simplified)
-            row.set_cell('data', 'samples', json.dumps(samples))
-            row.set_cell('data', 'channels', json.dumps(channels))
+            row.set_cell("data", "samples", json.dumps(samples))
+            row.set_cell("data", "channels", json.dumps(channels))
 
             # Commit the row
             row.commit()
 
-            logger.info(f"Successfully stored data for device {device_id} at {timestamp}")
+            logger.info(
+                f"Successfully stored data for device {device_id} at {timestamp}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to store data in Bigtable: {str(e)}")

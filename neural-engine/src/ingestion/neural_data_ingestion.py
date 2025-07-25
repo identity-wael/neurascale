@@ -88,7 +88,8 @@ class NeuralDataIngestion:
         if self.enable_pubsub:
             if not GOOGLE_CLOUD_AVAILABLE:
                 logger.warning(
-                    "Google Cloud Pub/Sub not available - install google-cloud-pubsub"
+                    "Google Cloud Pub/Sub not available - "
+                    "install google-cloud-pubsub"
                 )
                 self.enable_pubsub = False
             else:

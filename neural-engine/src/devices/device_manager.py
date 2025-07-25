@@ -150,7 +150,8 @@ class DeviceManager:
         Start streaming from specified devices.
 
         Args:
-            device_ids: List of device IDs to start streaming, or None for all connected devices
+            device_ids: List of device IDs to start streaming, or None for all
+                connected devices
         """
         if device_ids is None:
             device_ids = [
@@ -177,7 +178,8 @@ class DeviceManager:
         Stop streaming from specified devices.
 
         Args:
-            device_ids: List of device IDs to stop streaming, or None for all streaming devices
+            device_ids: List of device IDs to stop streaming, or None for all
+                streaming devices
         """
         if device_ids is None:
             device_ids = [

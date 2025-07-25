@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import List, Optional, Any
+from typing import List, Optional, Any, cast
 from datetime import datetime, timezone
 import numpy as np
 
@@ -416,7 +416,7 @@ class BrainFlowDevice(BaseDevice):
             data = await loop.run_in_executor(
                 None, self.board.get_board_data, n_samples
             )
-            return data  # type: ignore[no - any - return]
+            return cast(Optional[np.ndarray], data)
         except Exception as e:
             logger.error(f"Error getting board data history: {e}")
             return None

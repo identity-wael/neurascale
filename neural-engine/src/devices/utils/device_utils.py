@@ -34,7 +34,10 @@ class DeviceRecorder:
         timestamp = datetime.utcnow()
 
         for device_id in device_ids:
-            filename = f"{self.output_dir}/{session_id}_{device_id}_{timestamp.strftime('%Y%m%d_%H%M%S')}.h5"
+            filename = (
+                f"{self.output_dir}/{session_id}_{device_id}_"
+                f"{timestamp.strftime('%Y%m%d_%H%M%S')}.h5"
+            )
 
             # Create HDF5 file
             h5file = h5py.File(filename, "w")

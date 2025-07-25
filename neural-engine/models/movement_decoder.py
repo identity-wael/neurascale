@@ -4,12 +4,10 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import torch
-import torch.nn as nn
-from typing import Dict, Optional, Tuple, List, Any
+from typing import Dict, Optional, Any
 import logging
 
-from .base_models import TensorFlowBaseModel, PyTorchBaseModel, EEGNet
+from .base_models import TensorFlowBaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +15,9 @@ logger = logging.getLogger(__name__)
 class MovementDecoder(TensorFlowBaseModel):
     """Deep learning model for decoding movement intentions from neural signals."""
 
-    def __init__(self, n_channels: int, n_samples: int, n_outputs: int = 3, **kwargs: Any) -> None:
+    def __init__(
+        self, n_channels: int, n_samples: int, n_outputs: int = 3, **kwargs: Any
+    ) -> None:
         """
         Initialize movement decoder.
 
@@ -27,23 +27,25 @@ class MovementDecoder(TensorFlowBaseModel):
             n_outputs: Number of movement dimensions (default: 3 for x, y, z)
         """
         super().__init__(
-            model_name='MovementDecoder',
+            model_name="MovementDecoder",
             input_shape=(n_samples, n_channels),
             output_shape=n_outputs,
-            config=kwargs
+            config=kwargs,
         )
         self.n_channels = n_channels
         self.n_samples = n_samples
         self.n_outputs = n_outputs
-        self.decoder_type = self.config.get('decoder_type', 'velocity')  # 'velocity' or 'position'
+        self.decoder_type = self.config.get(
+            "decoder_type", "velocity"
+        )  # 'velocity' or 'position'
 
     def build_model(self) -> keras.Model:
         """Build movement decoder architecture."""
         # Parameters
-        conv_filters = self.config.get('conv_filters', [64, 128, 256])
-        lstm_units = self.config.get('lstm_units', 128)
-        dropout_rate = self.config.get('dropout_rate', 0.3)
-        use_attention = self.config.get('use_attention', True)
+        conv_filters = self.config.get("conv_filters", [64, 128, 256])
+        lstm_units = self.config.get("lstm_units", 128)
+        dropout_rate = self.config.get("dropout_rate", 0.3)
+        use_attention = self.config.get("use_attention", True)
 
         # Input layer
         inputs = keras.Input(shape=self.input_shape)
@@ -54,7 +56,7 @@ class MovementDecoder(TensorFlowBaseModel):
         # Convolutional feature extraction
         for i, filters in enumerate(conv_filters):
             x = layers.TimeDistributed(
-                layers.Conv1D(filters, kernel_size=3, padding='same', activation='relu')
+                layers.Conv1D(filters, kernel_size=3, padding="same", activation="relu")
             )(x)
             if i < len(conv_filters) - 1:
                 x = layers.TimeDistributed(layers.MaxPooling1D(2))(x)
@@ -71,10 +73,9 @@ class MovementDecoder(TensorFlowBaseModel):
         # Attention mechanism
         if use_attention:
             # Self - attention layer
-            attention = layers.MultiHeadAttention(
-                num_heads=8,
-                key_dim=lstm_units // 8
-            )(x, x)
+            attention = layers.MultiHeadAttention(num_heads=8, key_dim=lstm_units // 8)(
+                x, x
+            )
             x = layers.Add()([x, attention])
             x = layers.LayerNormalization()(x)
 
@@ -83,23 +84,27 @@ class MovementDecoder(TensorFlowBaseModel):
         x = layers.Dropout(dropout_rate)(x)
 
         # Dense layers for movement prediction
-        x = layers.Dense(64, activation='relu')(x)
+        x = layers.Dense(64, activation="relu")(x)
         x = layers.Dropout(dropout_rate)(x)
 
         # Output layer (no activation for regression)
-        outputs = layers.Dense(self.n_outputs, name='movement_output')(x)
+        outputs = layers.Dense(self.n_outputs, name="movement_output")(x)
 
         # Add velocity integration if decoding position
-        if self.decoder_type == 'position':
+        if self.decoder_type == "position":
             # Custom layer to integrate velocity to position
             outputs = VelocityIntegrationLayer()(outputs)
 
         model = keras.Model(inputs=inputs, outputs=outputs)
         return model
 
-    def train(self, X_train: np.ndarray, y_train: np.ndarray,
-              X_val: Optional[np.ndarray] = None,
-              y_val: Optional[np.ndarray] = None) -> Dict[str, Any]:
+    def train(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: Optional[np.ndarray] = None,
+        y_val: Optional[np.ndarray] = None,
+    ) -> Dict[str, Any]:
         """Train movement decoder with custom loss."""
         if self.model is None:
             self.model = self.build_model()
@@ -120,24 +125,21 @@ class MovementDecoder(TensorFlowBaseModel):
         # Compile model
         assert self.model is not None
         self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=self.config.get('learning_rate', 0.001)),
+            optimizer=keras.optimizers.Adam(
+                learning_rate=self.config.get("learning_rate", 0.001)
+            ),
             loss=movement_loss,
-            metrics=['mae', 'mse']
+            metrics=["mae", "mse"],
         )
 
         # Training with callbacks
         callbacks = [
             keras.callbacks.EarlyStopping(
-                monitor='val_loss',
-                patience=15,
-                restore_best_weights=True
+                monitor="val_loss", patience=15, restore_best_weights=True
             ),
             keras.callbacks.ReduceLROnPlateau(
-                monitor='val_loss',
-                factor=0.5,
-                patience=5,
-                min_lr=1e-6
-            )
+                monitor="val_loss", factor=0.5, patience=5, min_lr=1e-6
+            ),
         ]
 
         # Add custom callback for movement - specific metrics
@@ -146,35 +148,42 @@ class MovementDecoder(TensorFlowBaseModel):
 
         # Train
         history = self.model.fit(
-            X_train, y_train,
-            batch_size=self.config.get('batch_size', 32),
-            epochs=self.config.get('epochs', 200),
+            X_train,
+            y_train,
+            batch_size=self.config.get("batch_size", 32),
+            epochs=self.config.get("epochs", 200),
             validation_data=(X_val, y_val) if X_val is not None else None,
             callbacks=callbacks,
-            verbose=self.config.get('verbose', 1)
+            verbose=self.config.get("verbose", 1),
         )
 
         self.is_trained = True
 
         return {
-            'history': history.history,
-            'final_loss': float(history.history['loss'][-1]),
-            'final_val_loss': float(history.history.get('val_loss', [0])[-1]),
-            'correlation': self.calculate_correlation(X_val, y_val) if X_val is not None and y_val is not None else None
+            "history": history.history,
+            "final_loss": float(history.history["loss"][-1]),
+            "final_val_loss": float(history.history.get("val_loss", [0])[-1]),
+            "correlation": (
+                self.calculate_correlation(X_val, y_val)
+                if X_val is not None and y_val is not None
+                else None
+            ),
         }
 
-    def calculate_correlation(self, X: np.ndarray, y_true: np.ndarray) -> Dict[str, float]:
+    def calculate_correlation(
+        self, X: np.ndarray, y_true: np.ndarray
+    ) -> Dict[str, float]:
         """Calculate correlation coefficient for each movement dimension."""
         y_pred = self.predict(X)
 
         correlations = {}
-        dimension_names = ['x', 'y', 'z'][:self.n_outputs]
+        dimension_names = ["x", "y", "z"][: self.n_outputs]
 
         for i, dim in enumerate(dimension_names):
             corr = np.corrcoef(y_true[:, i], y_pred[:, i])[0, 1]
-            correlations[f'correlation_{dim}'] = float(corr)
+            correlations[f"correlation_{dim}"] = float(corr)
 
-        correlations['correlation_mean'] = float(np.mean(list(correlations.values())))
+        correlations["correlation_mean"] = float(np.mean(list(correlations.values())))
 
         return correlations
 
@@ -246,7 +255,9 @@ class KalmanFilterDecoder:
         residuals = y_train - y_pred
         self.R = np.cov(residuals.T)
 
-        logger.info(f"Kalman filter fitted with observation matrix shape: {self.H.shape}")
+        logger.info(
+            f"Kalman filter fitted with observation matrix shape: {self.H.shape}"
+        )
 
     def predict_step(self, neural_features: np.ndarray) -> np.ndarray:
         """
@@ -259,7 +270,12 @@ class KalmanFilterDecoder:
             Predicted movement state (positions and velocities)
         """
         # Prediction step
-        assert self.A is not None and self.x is not None and self.P is not None and self.Q is not None
+        assert (
+            self.A is not None
+            and self.x is not None
+            and self.P is not None
+            and self.Q is not None
+        )
         x_pred = self.A @ self.x
         P_pred = self.A @ self.P @ self.A.T + self.Q
 
@@ -280,6 +296,7 @@ class KalmanFilterDecoder:
         self.x = x_pred + K @ y
         self.P = (np.eye(self.state_dim) - K @ self.H) @ P_pred
 
+        assert self.x is not None
         return self.x
 
     def reset_state(self) -> None:
@@ -321,7 +338,7 @@ class MovementMetricsCallback(keras.callbacks.Callback):
 
             mean_corr = np.mean(correlations)
             if logs is not None:
-                logs['val_correlation'] = mean_corr
+                logs["val_correlation"] = mean_corr
 
             if epoch % 10 == 0:
                 logger.info(f"Epoch {epoch} - Val Correlation: {mean_corr:.4f}")
@@ -336,9 +353,9 @@ class CursorControlDecoder(MovementDecoder):
             n_channels=n_channels,
             n_samples=n_samples,
             n_outputs=2,  # x, y coordinates
-            **kwargs
+            **kwargs,
         )
-        self.model_name = 'CursorControlDecoder'
+        self.model_name = "CursorControlDecoder"
 
     def build_model(self) -> keras.Model:
         """Build specialized architecture for cursor control."""
@@ -350,23 +367,19 @@ class CursorControlDecoder(MovementDecoder):
         x = model.layers[-2].output
 
         # Add sigmoid activation to constrain output to [0, 1] range
-        cursor_output = layers.Dense(
-            2,
-            activation='sigmoid',
-            name='cursor_position'
-        )(x)
+        cursor_output = layers.Dense(2, activation="sigmoid", name="cursor_position")(x)
 
         # Create new model with constrained output
-        constrained_model = keras.Model(
-            inputs=model.input,
-            outputs=cursor_output
-        )
+        constrained_model = keras.Model(inputs=model.input, outputs=cursor_output)
 
         return constrained_model
 
-    def post_process_predictions(self, predictions: np.ndarray,
-                               screen_width: int = 1920,
-                               screen_height: int = 1080) -> np.ndarray:
+    def post_process_predictions(
+        self,
+        predictions: np.ndarray,
+        screen_width: int = 1920,
+        screen_height: int = 1080,
+    ) -> np.ndarray:
         """
         Convert normalized predictions to screen coordinates.
 

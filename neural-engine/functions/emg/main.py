@@ -2,6 +2,7 @@
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from base_processor import NeuralDataProcessor  # noqa: E402, F401
@@ -17,7 +18,7 @@ class EMGProcessor(NeuralDataProcessor):
     """Specialized processor for EMG data."""
 
     def __init__(self) -> None:
-        super().__init__('emg')
+        super().__init__("emg")
 
     def calculate_muscle_activation(self, data: np.ndarray) -> dict:
         """Calculate muscle activation metrics from EMG signal."""
@@ -25,18 +26,24 @@ class EMGProcessor(NeuralDataProcessor):
         rectified = np.abs(data)
 
         # Apply moving average (100ms window)
-        window_size = int(0.1 * self.config['sampling_rate'])
+        window_size = int(0.1 * self.config["sampling_rate"])
         if window_size > len(rectified):
             window_size = len(rectified)
 
-        smoothed = np.convolve(rectified, np.ones(window_size) / window_size, mode='valid')
+        smoothed = np.convolve(
+            rectified, np.ones(window_size) / window_size, mode="valid"
+        )
 
         # Calculate activation metrics
         return {
-            'mean_activation': float(np.mean(smoothed)),
-            'peak_activation': float(np.max(smoothed)),
-            'activation_duration': float(np.sum(smoothed > 0.1 * np.max(smoothed)) / self.config['sampling_rate']),  # noqa: E501
-            'fatigue_index': float(np.polyfit(range(len(smoothed)), smoothed, 1)[0])  # Slope as fatigue indicator
+            "mean_activation": float(np.mean(smoothed)),
+            "peak_activation": float(np.max(smoothed)),
+            "activation_duration": float(
+                np.sum(smoothed > 0.1 * np.max(smoothed)) / self.config["sampling_rate"]
+            ),
+            "fatigue_index": float(
+                np.polyfit(range(len(smoothed)), smoothed, 1)[0]
+            ),  # Slope as fatigue indicator
         }
 
     def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
@@ -48,12 +55,12 @@ class EMGProcessor(NeuralDataProcessor):
         features.update(activation_metrics)
 
         # Frequency domain features for EMG
-        freqs, psd = signal.welch(data, self.config['sampling_rate'])
+        freqs, psd = signal.welch(data, self.config["sampling_rate"])
 
         # Median frequency
         cumsum_psd = np.cumsum(psd)
         median_freq_idx = np.where(cumsum_psd >= cumsum_psd[-1] / 2)[0][0]
-        features['median_frequency'] = float(freqs[median_freq_idx])
+        features["median_frequency"] = float(freqs[median_freq_idx])
 
         return features
 

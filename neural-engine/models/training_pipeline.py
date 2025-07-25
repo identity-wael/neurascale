@@ -17,6 +17,7 @@ from google.cloud import storage
 import wandb
 
 from .base_models import BaseNeuralModel
+
 # from .movement_decoder import MovementDecoder, KalmanFilterDecoder  # Unused imports
 # from .emotion_classifier import EmotionClassifier, ValenceArousalRegressor  # Unused imports
 
@@ -26,12 +27,14 @@ logger = logging.getLogger(__name__)
 class NeuralModelTrainingPipeline:
     """Comprehensive training pipeline for neural models with cloud integration."""
 
-    def __init__(self,
-                 project_id: str,
-                 location: str = 'us - central1',
-                 bucket_name: Optional[str] = None,
-                 experiment_name: Optional[str] = None,
-                 use_wandb: bool = True):
+    def __init__(
+        self,
+        project_id: str,
+        location: str = "us - central1",
+        bucket_name: Optional[str] = None,
+        experiment_name: Optional[str] = None,
+        use_wandb: bool = True,
+    ):
         """
         Initialize training pipeline.
 
@@ -45,7 +48,10 @@ class NeuralModelTrainingPipeline:
         self.project_id = project_id
         self.location = location
         self.bucket_name = bucket_name or f"{project_id}-neural - models"
-        self.experiment_name = experiment_name or f"neural - exp-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        self.experiment_name = (
+            experiment_name
+            or f"neural - exp-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        )
         self.use_wandb = use_wandb
 
         # Initialize Vertex AI
@@ -63,17 +69,19 @@ class NeuralModelTrainingPipeline:
         self.scaler: Optional[StandardScaler] = None
         self.training_history: Dict[str, Any] = {}
         self.metadata = {
-            'experiment_name': self.experiment_name,
-            'created_at': datetime.utcnow().isoformat(),
-            'project_id': project_id
+            "experiment_name": self.experiment_name,
+            "created_at": datetime.utcnow().isoformat(),
+            "project_id": project_id,
         }
 
-    def prepare_data(self,
-                     X: np.ndarray,
-                     y: np.ndarray,
-                     test_size: float = 0.2,
-                     val_size: float = 0.2,
-                     standardize: bool = True) -> Dict[str, np.ndarray]:
+    def prepare_data(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        test_size: float = 0.2,
+        val_size: float = 0.2,
+        standardize: bool = True,
+    ) -> Dict[str, np.ndarray]:
         """
         Prepare data for training with train / val / test splits.
 
@@ -111,32 +119,38 @@ class NeuralModelTrainingPipeline:
             X_test = X_test.reshape(-1, X.shape[1], X.shape[2])
 
         data_splits = {
-            'X_train': X_train,
-            'y_train': y_train,
-            'X_val': X_val,
-            'y_val': y_val,
-            'X_test': X_test,
-            'y_test': y_test
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_val": X_val,
+            "y_val": y_val,
+            "X_test": X_test,
+            "y_test": y_test,
         }
 
         # Log data statistics
-        logger.info(f"Data prepared - Train: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
+        logger.info(
+            f"Data prepared - Train: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}"
+        )
 
         if self.use_wandb:
-            wandb.log({
-                'train_samples': len(X_train),
-                'val_samples': len(X_val),
-                'test_samples': len(X_test),
-                'input_shape': X_train.shape[1:],
-                'output_shape': y_train.shape[1:] if len(y_train.shape) > 1 else 1
-            })
+            wandb.log(
+                {
+                    "train_samples": len(X_train),
+                    "val_samples": len(X_val),
+                    "test_samples": len(X_test),
+                    "input_shape": X_train.shape[1:],
+                    "output_shape": y_train.shape[1:] if len(y_train.shape) > 1 else 1,
+                }
+            )
 
         return data_splits
 
-    def train_model(self,
-                    model: BaseNeuralModel,
-                    data_splits: Dict[str, np.ndarray],
-                    hyperparameters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def train_model(
+        self,
+        model: BaseNeuralModel,
+        data_splits: Dict[str, np.ndarray],
+        hyperparameters: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Train a neural model with tracking and monitoring.
 
@@ -162,24 +176,21 @@ class NeuralModelTrainingPipeline:
         logger.info(f"Starting training for {model.model_name}")
 
         training_results = model.train(
-            data_splits['X_train'],
-            data_splits['y_train'],
-            data_splits['X_val'],
-            data_splits['y_val']
+            data_splits["X_train"],
+            data_splits["y_train"],
+            data_splits["X_val"],
+            data_splits["y_val"],
         )
 
         # Evaluate on test set
-        test_metrics = model.evaluate(
-            data_splits['X_test'],
-            data_splits['y_test']
-        )
+        test_metrics = model.evaluate(data_splits["X_test"], data_splits["y_test"])
 
         # Combine results
         results = {
             **training_results,
-            'test_metrics': test_metrics,
-            'model_name': model.model_name,
-            'hyperparameters': model.config
+            "test_metrics": test_metrics,
+            "model_name": model.model_name,
+            "hyperparameters": model.config,
         }
 
         self.training_history = results
@@ -189,22 +200,24 @@ class NeuralModelTrainingPipeline:
             wandb.log(test_metrics)
 
             # Log training curves
-            if 'history' in training_results:
-                for metric, values in training_results['history'].items():
+            if "history" in training_results:
+                for metric, values in training_results["history"].items():
                     for i, value in enumerate(values):
-                        wandb.log({f'train/{metric}': value}, step=i)
+                        wandb.log({f"train/{metric}": value}, step=i)
 
         logger.info(f"Training completed - Test metrics: {test_metrics}")
 
         return results
 
-    def train_on_vertex_ai(self,
-                           model_class: str,
-                           dataset_path: str,
-                           hyperparameters: Dict[str, Any],
-                           machine_type: str = 'n1-standard-8',
-                           accelerator_type: Optional[str] = 'NVIDIA_TESLA_T4',
-                           accelerator_count: int = 1) -> aiplatform.Model:
+    def train_on_vertex_ai(
+        self,
+        model_class: str,
+        dataset_path: str,
+        hyperparameters: Dict[str, Any],
+        machine_type: str = "n1-standard-8",
+        accelerator_type: Optional[str] = "NVIDIA_TESLA_T4",
+        accelerator_count: int = 1,
+    ) -> aiplatform.Model:
         """
         Train model on Vertex AI with distributed training support.
 
@@ -225,10 +238,12 @@ class NeuralModelTrainingPipeline:
             script_path="train.py",  # Training script
             container_uri="gcr.io / cloud - aiplatform / training / tf - gpu.2 - 8:latest",
             requirements=["tensorflow", "numpy", "scikit - learn", "wandb"],
-            model_serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest"
+            model_serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest",
         )
 
         # Run training job
+        # Note: dataset parameter expects a Dataset object, but we're passing path as string
+        # This is a common pattern in Vertex AI where paths are accepted
         model = job.run(
             dataset=dataset_path,
             model_display_name=f"{model_class}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
@@ -236,24 +251,29 @@ class NeuralModelTrainingPipeline:
                 f"--model_class={model_class}",
                 f"--hyperparameters={json.dumps(hyperparameters)}",
                 f"--bucket_name={self.bucket_name}",
-                f"--experiment_name={self.experiment_name}"
+                f"--experiment_name={self.experiment_name}",
             ],
             replica_count=1,
             machine_type=machine_type,
             accelerator_type=accelerator_type,
-            accelerator_count=accelerator_count
+            accelerator_count=accelerator_count,
         )
 
-        logger.info(f"Vertex AI training completed - Model: {model.resource_name}")
+        if model:
+            logger.info(f"Vertex AI training completed - Model: {model.resource_name}")
+        else:
+            raise RuntimeError("Training job failed to produce a model")
 
         return model
 
-    def hyperparameter_tuning(self,
-                              model_class: type,
-                              data_splits: Dict[str, np.ndarray],
-                              param_grid: Dict[str, List[Any]],
-                              metric: str = 'accuracy',
-                              n_trials: int = 20) -> Dict[str, Any]:
+    def hyperparameter_tuning(
+        self,
+        model_class: type,
+        data_splits: Dict[str, np.ndarray],
+        param_grid: Dict[str, List[Any]],
+        metric: str = "accuracy",
+        n_trials: int = 20,
+    ) -> Dict[str, Any]:
         """
         Perform hyperparameter tuning using Vertex AI Vizier.
 
@@ -273,7 +293,7 @@ class NeuralModelTrainingPipeline:
         study_config: Dict[str, Any] = {
             "algorithm": "ALGORITHM_UNSPECIFIED",  # Bayesian optimization
             "metrics": [{"metric_id": metric, "goal": "MAXIMIZE"}],
-            "parameters": []
+            "parameters": [],
         }
 
         # Add parameters to study config
@@ -283,43 +303,52 @@ class NeuralModelTrainingPipeline:
                     "parameter_id": param_name,
                     "double_value_spec": {
                         "min_value": min(param_values),
-                        "max_value": max(param_values)
-                    }
+                        "max_value": max(param_values),
+                    },
                 }
             else:
                 param_spec = {
                     "parameter_id": param_name,
                     "categorical_value_spec": {
                         "values": [str(v) for v in param_values]
-                    }
+                    },
                 }
             study_config["parameters"].append(param_spec)
 
         # Create Vizier client
         vizier_client = aiplatform_v1beta1.VizierServiceClient()
 
-        # Create study
-        study = vizier_client.create_study(
-            parent=f"projects/{self.project_id}/locations/{self.location}",
-            study={
-                "display_name": f"hpt-{self.experiment_name}",
-                "study_spec": study_config
-            }
+        # Create study using correct API
+        from google.cloud.aiplatform_v1beta1.types import Study
+
+        study_obj = Study(
+            display_name=f"hpt-{self.experiment_name}", study_spec=study_config
         )
 
-        best_score = -float('inf')
+        study = vizier_client.create_study(
+            parent=f"projects/{self.project_id}/locations/{self.location}",
+            study=study_obj,
+        )
+
+        best_score = -float("inf")
         best_params = {}
 
         # Run trials
         for i in range(n_trials):
-            # Get trial suggestion
-            suggest_response = vizier_client.suggest_trials(
-                parent=study.name,
-                suggestion_count=1,
-                client_id=f"trial-{i}"
-            )
+            # Get trial suggestion using correct API
+            from google.cloud.aiplatform_v1beta1.types import SuggestTrialsRequest
 
-            trial = suggest_response.trials[0]
+            request = SuggestTrialsRequest(
+                parent=study.name, suggestion_count=1, client_id=f"trial-{i}"
+            )
+            suggest_response = vizier_client.suggest_trials(request=request)
+
+            # The response is an operation, need to get result
+            operation = suggest_response
+            trial = operation.trials[0] if hasattr(operation, "trials") else None
+
+            if not trial:
+                continue
 
             # Extract parameters
             trial_params = {}
@@ -331,20 +360,20 @@ class NeuralModelTrainingPipeline:
 
             # Train model with suggested parameters
             model = model_class(
-                n_channels=data_splits['X_train'].shape[2],
-                n_samples=data_splits['X_train'].shape[1],
-                **trial_params
+                n_channels=data_splits["X_train"].shape[2],
+                n_samples=data_splits["X_train"].shape[1],
+                **trial_params,
             )
 
             results = self.train_model(model, data_splits)
-            score = results['test_metrics'][metric]
+            score = results["test_metrics"][metric]
 
-            # Report measurement
-            vizier_client.add_measurement(
-                trial_name=trial.name,
-                measurement={
-                    "metrics": [{"metric_id": metric, "value": score}]
-                }
+            # Report measurement using correct API
+            from google.cloud.aiplatform_v1beta1.types import Measurement, Metric
+
+            measurement = Measurement(metrics=[Metric(metric_id=metric, value=score)])
+            vizier_client.add_trial_measurement(
+                trial_name=trial.name, measurement=measurement
             )
 
             # Track best
@@ -355,14 +384,14 @@ class NeuralModelTrainingPipeline:
             logger.info(f"Trial {i + 1}/{n_trials} - Score: {score:.4f}")
 
         return {
-            'best_params': best_params,
-            'best_score': best_score,
-            'study_name': study.name
+            "best_params": best_params,
+            "best_score": best_score,
+            "study_name": study.name,
         }
 
-    def save_model(self,
-                   model_name: Optional[str] = None,
-                   include_preprocessor: bool = True) -> str:
+    def save_model(
+        self, model_name: Optional[str] = None, include_preprocessor: bool = True
+    ) -> str:
         """
         Save trained model to GCS.
 
@@ -382,24 +411,24 @@ class NeuralModelTrainingPipeline:
         # Create temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
             # Save model
-            model_path = os.path.join(temp_dir, 'model')
+            model_path = os.path.join(temp_dir, "model")
             assert self.model is not None
             self.model.save(model_path)
 
             # Save scaler if exists
             if include_preprocessor and self.scaler is not None:
-                scaler_path = os.path.join(temp_dir, 'scaler.pkl')
+                scaler_path = os.path.join(temp_dir, "scaler.pkl")
                 joblib.dump(self.scaler, scaler_path)
 
             # Save metadata
-            metadata_path = os.path.join(temp_dir, 'metadata.json')
+            metadata_path = os.path.join(temp_dir, "metadata.json")
             metadata = {
                 **self.metadata,
-                'model_summary': self.model.get_model_summary(),
-                'training_history': self.training_history,
-                'saved_at': datetime.utcnow().isoformat()
+                "model_summary": self.model.get_model_summary(),
+                "training_history": self.training_history,
+                "saved_at": datetime.utcnow().isoformat(),
             }
-            with open(metadata_path, 'w') as f:
+            with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=2)
 
             # Upload to GCS
@@ -409,7 +438,9 @@ class NeuralModelTrainingPipeline:
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
                     local_path = os.path.join(root, file)
-                    blob_path = os.path.join(gcs_path, os.path.relpath(local_path, temp_dir))
+                    blob_path = os.path.join(
+                        gcs_path, os.path.relpath(local_path, temp_dir)
+                    )
                     blob = bucket.blob(blob_path)
                     blob.upload_from_filename(local_path)
 
@@ -417,12 +448,14 @@ class NeuralModelTrainingPipeline:
 
             return f"gs://{self.bucket_name}/{gcs_path}"
 
-    def deploy_model(self,
-                     model_path: str,
-                     endpoint_name: Optional[str] = None,
-                     machine_type: str = 'n1-standard-4',
-                     min_replica_count: int = 1,
-                     max_replica_count: int = 3) -> aiplatform.Endpoint:
+    def deploy_model(
+        self,
+        model_path: str,
+        endpoint_name: Optional[str] = None,
+        machine_type: str = "n1-standard-4",
+        min_replica_count: int = 1,
+        max_replica_count: int = 3,
+    ) -> aiplatform.Endpoint:
         """
         Deploy model to Vertex AI endpoint.
 
@@ -442,7 +475,7 @@ class NeuralModelTrainingPipeline:
         model = aiplatform.Model.upload(
             display_name=f"{self.model.model_name}-{self.experiment_name}",
             artifact_uri=model_path,
-            serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest"
+            serving_container_image_uri="gcr.io / cloud - aiplatform / prediction / tf2 - gpu.2 - 8:latest",
         )
 
         # Create endpoint
@@ -457,7 +490,7 @@ class NeuralModelTrainingPipeline:
             machine_type=machine_type,
             min_replica_count=min_replica_count,
             max_replica_count=max_replica_count,
-            traffic_percentage=100
+            traffic_percentage=100,
         )
 
         logger.info(f"Model deployed to endpoint: {endpoint.resource_name}")

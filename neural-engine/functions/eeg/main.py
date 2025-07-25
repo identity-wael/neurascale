@@ -19,22 +19,22 @@ class EEGProcessor(NeuralDataProcessor):
     """Specialized processor for EEG data."""
 
     def __init__(self) -> None:
-        super().__init__('eeg')
+        super().__init__("eeg")
 
     def extract_features(self, data: np.ndarray) -> Dict[str, Any]:
         """Extract EEG - specific features including band powers."""
         features: Dict[str, Any] = super().extract_features(data)
 
         # Calculate band powers
-        sampling_rate = self.config['sampling_rate']
+        sampling_rate = self.config["sampling_rate"]
 
         # Define EEG frequency bands
         bands = {
-            'delta': (0.5, 4),
-            'theta': (4, 8),
-            'alpha': (8, 13),
-            'beta': (13, 30),
-            'gamma': (30, 100)
+            "delta": (0.5, 4),
+            "theta": (4, 8),
+            "alpha": (8, 13),
+            "beta": (13, 30),
+            "gamma": (30, 100),
         }
 
         # Compute power spectral density
@@ -46,8 +46,10 @@ class EEGProcessor(NeuralDataProcessor):
         for band_name, (low_freq, high_freq) in bands.items():
             idx_band = np.logical_and(freqs >= low_freq, freqs < high_freq)
             band_power = np.trapz(psd[idx_band], freqs[idx_band])
-            features[f'{band_name}_power'] = float(band_power)
-            features[f'{band_name}_relative_power'] = float(band_power / total_power) if total_power > 0 else 0.0
+            features[f"{band_name}_power"] = float(band_power)
+            features[f"{band_name}_relative_power"] = (
+                float(band_power / total_power) if total_power > 0 else 0.0
+            )
 
         # Add alpha peak frequency
         alpha_idx = np.logical_and(freqs >= 8, freqs < 13)
@@ -55,7 +57,7 @@ class EEGProcessor(NeuralDataProcessor):
             alpha_psd = psd[alpha_idx]
             alpha_freqs = freqs[alpha_idx]
             peak_idx = np.argmax(alpha_psd)
-            features['alpha_peak_frequency'] = float(alpha_freqs[peak_idx])
+            features["alpha_peak_frequency"] = float(alpha_freqs[peak_idx])
 
         return features
 
@@ -68,7 +70,7 @@ class EEGProcessor(NeuralDataProcessor):
         peaks = np.where(np.abs(diff_signal) > threshold)[0]
 
         # Count peaks that are sufficiently separated (>100ms apart)
-        min_separation = int(0.1 * self.config['sampling_rate'])
+        min_separation = int(0.1 * self.config["sampling_rate"])
 
         blink_count = 0
         last_peak = -min_separation

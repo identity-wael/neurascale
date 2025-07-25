@@ -196,7 +196,8 @@ def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
             logger.info("Testing device latency...")
             latency_stats = await test_device_latency(device, duration=5)
             logger.info(
-                f"Latency: {latency_stats['mean_latency_ms']:.1f} ± {latency_stats['std_latency_ms']:.1f} ms"
+                f"Latency: {latency_stats['mean_latency_ms']:.1f} ± "
+                f"{latency_stats['std_latency_ms']:.1f} ms"
             )
 
             # Stream data

@@ -17,7 +17,7 @@ class AccelerometerProcessor(NeuralDataProcessor):
     """Specialized processor for accelerometer data."""
 
     def __init__(self) -> None:
-        super().__init__('accelerometer')
+        super().__init__("accelerometer")
 
     def calculate_movement_metrics(self, data: np.ndarray) -> dict:
         """Calculate movement - related metrics from accelerometer data."""
@@ -34,16 +34,18 @@ class AccelerometerProcessor(NeuralDataProcessor):
 
         # Calculate metrics
         metrics = {
-            'mean_acceleration': float(np.mean(magnitude)),
-            'peak_acceleration': float(np.max(magnitude)),
-            'movement_intensity': float(np.std(magnitude)),
-            'step_count_estimate': self.estimate_steps(magnitude_no_gravity)
+            "mean_acceleration": float(np.mean(magnitude)),
+            "peak_acceleration": float(np.max(magnitude)),
+            "movement_intensity": float(np.std(magnitude)),
+            "step_count_estimate": self.estimate_steps(magnitude_no_gravity),
         }
 
         # Detect periods of activity
         activity_threshold = 0.5  # m / s^2
         active_samples = magnitude_no_gravity > activity_threshold
-        metrics['activity_percentage'] = float(np.sum(active_samples) / len(active_samples) * 100)
+        metrics["activity_percentage"] = float(
+            np.sum(active_samples) / len(active_samples) * 100
+        )
 
         return metrics
 
@@ -57,7 +59,9 @@ class AccelerometerProcessor(NeuralDataProcessor):
         peaks, _ = find_peaks(
             magnitude,
             height=1.0,  # Minimum acceleration for a step
-            distance=int(0.3 * self.config['sampling_rate'])  # Minimum 300ms between steps
+            distance=int(
+                0.3 * self.config["sampling_rate"]
+            ),  # Minimum 300ms between steps
         )
 
         return len(peaks)
@@ -77,8 +81,12 @@ class AccelerometerProcessor(NeuralDataProcessor):
             mean_y = np.mean(data[:, 1])
             mean_z = np.mean(data[:, 2])
 
-            features['tilt_x'] = float(np.arctan2(mean_x, np.sqrt(mean_y**2 + mean_z**2)) * 180 / np.pi)
-            features['tilt_y'] = float(np.arctan2(mean_y, np.sqrt(mean_x**2 + mean_z**2)) * 180 / np.pi)
+            features["tilt_x"] = float(
+                np.arctan2(mean_x, np.sqrt(mean_y**2 + mean_z**2)) * 180 / np.pi
+            )
+            features["tilt_y"] = float(
+                np.arctan2(mean_y, np.sqrt(mean_x**2 + mean_z**2)) * 180 / np.pi
+            )
 
         return features
 

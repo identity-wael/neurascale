@@ -2,6 +2,7 @@
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from base_processor import NeuralDataProcessor  # noqa: E402, F401
@@ -17,12 +18,12 @@ class SpikeProcessor(NeuralDataProcessor):
     """Specialized processor for spike data."""
 
     def __init__(self) -> None:
-        super().__init__('spikes')
+        super().__init__("spikes")
 
     def detect_spikes(self, data: np.ndarray, threshold_factor: float = 4.0) -> dict:
         """Detect spikes using threshold crossing method."""
         # High - pass filter the data
-        b, a = signal.butter(4, 300, 'high', fs=self.config['sampling_rate'])
+        b, a = signal.butter(4, 300, "high", fs=self.config["sampling_rate"])
         filtered_data = signal.filtfilt(b, a, data)
 
         # Calculate threshold
@@ -35,12 +36,16 @@ class SpikeProcessor(NeuralDataProcessor):
         # Remove duplicates (keep only first sample of each spike)
         if len(spike_indices) > 1:
             spike_diff = np.diff(spike_indices)
-            spike_indices = spike_indices[np.concatenate(([True], spike_diff > 30))]  # 1ms refractory period at 30kHz
+            spike_indices = spike_indices[
+                np.concatenate(([True], spike_diff > 30))
+            ]  # 1ms refractory period at 30kHz
 
         return {
-            'spike_count': len(spike_indices),
-            'spike_rate': float(len(spike_indices) / (len(data) / self.config['sampling_rate'])),
-            'spike_times': spike_indices.tolist()
+            "spike_count": len(spike_indices),
+            "spike_rate": float(
+                len(spike_indices) / (len(data) / self.config["sampling_rate"])
+            ),
+            "spike_times": spike_indices.tolist(),
         }
 
     def extract_features(self, data: np.ndarray) -> Dict[str, Any]:

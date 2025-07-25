@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, cast
 from datetime import datetime, timezone
 import numpy as np
 
@@ -347,14 +347,14 @@ class SyntheticDevice(BaseDevice):
                 # Store spike time for refractory period
                 self.spike_times[ch].append(self.time_offset + spike_time)
 
-        return data  # type: ignore[no - any - return]
+        return cast(np.ndarray, data)
 
     def _create_spike_waveform(self, duration: int) -> np.ndarray:
         """Create a realistic spike waveform."""
         t = np.linspace(0, 1, duration)
         # Biphasic spike shape
         waveform = np.exp(-10 * t) * np.sin(2 * np.pi * 5 * t)
-        return waveform  # type: ignore[no - any - return]
+        return cast(np.ndarray, waveform)
 
     def _generate_accelerometer_data(self, n_samples: int) -> np.ndarray:
         """Generate synthetic accelerometer data."""

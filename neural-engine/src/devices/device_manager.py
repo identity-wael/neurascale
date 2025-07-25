@@ -209,7 +209,8 @@ class DeviceManager:
         """
         self.active_session_id = (
             session_id
-            or f"session_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+            or f"session_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_"
+            f"{uuid.uuid4().hex[:8]}"
         )
 
         # Update all devices with new session ID

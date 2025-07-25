@@ -104,7 +104,8 @@ class NeuralDataIngestion:
         if self.enable_bigtable:
             if not GOOGLE_CLOUD_AVAILABLE:
                 logger.warning(
-                    "Google Cloud Bigtable not available - install google-cloud-bigtable"
+                    "Google Cloud Bigtable not available - "
+                    "install google-cloud-bigtable"
                 )
                 self.enable_bigtable = False
             else:

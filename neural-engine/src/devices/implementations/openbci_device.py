@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class OpenBCIDevice(BaseDevice):
-    """OpenBCI device implementation for Cyton (8/16 channel) and Ganglion (4 channel) boards."""
+    """OpenBCI device implementation for Cyton and Ganglion boards.
+
+    Supports Cyton (8/16 channel) and Ganglion (4 channel) boards.
+    """
 
     # OpenBCI protocol constants
     BYTE_START = 0xA0

@@ -171,7 +171,8 @@ def test_device(device_type: str, duration: int, config: Optional[str]) -> None:
             if packet_count % 20 == 0:
                 quality = SignalQualityAnalyzer.analyze_packet(packet)
                 logger.info(
-                    f"Packet {packet_count}: Quality score = {quality['quality_score']:.2f}"
+                    f"Packet {packet_count}: "
+                    f"Quality score = {quality['quality_score']:.2f}"
                 )
 
         manager.set_data_callback(data_callback)

@@ -246,7 +246,7 @@ class NeuralModelTrainingPipeline:
         # This is a common pattern in Vertex AI where paths are accepted
         # Type ignore needed for CI environment where stricter typing is enforced
         model = job.run(
-            dataset=dataset_path,  # String paths are accepted in Vertex AI
+            dataset=dataset_path,  # type: ignore[arg-type]  # String paths are accepted in Vertex AI
             model_display_name=f"{model_class}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
             args=[
                 f"--model_class={model_class}",

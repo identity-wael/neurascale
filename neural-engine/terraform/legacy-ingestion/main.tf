@@ -280,13 +280,13 @@ resource "google_cloudfunctions2_function" "process_neural_stream" {
   }
 
   service_config {
-    max_instance_count               = 100
-    min_instance_count               = 1
-    available_memory                 = "1Gi"
-    timeout_seconds                  = 60
-    ingress_settings                 = "ALLOW_INTERNAL_ONLY"
-    all_traffic_on_latest_revision   = true
-    service_account_email            = google_service_account.neural_ingestion.email
+    max_instance_count             = 100
+    min_instance_count             = 1
+    available_memory               = "1Gi"
+    timeout_seconds                = 60
+    ingress_settings               = "ALLOW_INTERNAL_ONLY"
+    all_traffic_on_latest_revision = true
+    service_account_email          = google_service_account.neural_ingestion.email
 
     environment_variables = {
       GCP_PROJECT = var.project_id
@@ -331,13 +331,13 @@ resource "google_cloudfunctions2_function" "ingest_batch" {
   }
 
   service_config {
-    max_instance_count               = 50
-    min_instance_count               = 0
-    available_memory                 = "2Gi"
-    timeout_seconds                  = 300
-    ingress_settings                 = "ALLOW_ALL"
-    all_traffic_on_latest_revision   = true
-    service_account_email            = google_service_account.neural_ingestion.email
+    max_instance_count             = 50
+    min_instance_count             = 0
+    available_memory               = "2Gi"
+    timeout_seconds                = 300
+    ingress_settings               = "ALLOW_ALL"
+    all_traffic_on_latest_revision = true
+    service_account_email          = google_service_account.neural_ingestion.email
 
     environment_variables = {
       GCP_PROJECT = var.project_id

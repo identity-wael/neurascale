@@ -25,9 +25,9 @@ variable "apis" {
     "iamcredentials.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
-    "eventarc.googleapis.com",           # For Cloud Function triggers
-    "cloudscheduler.googleapis.com",     # For scheduled functions
-    "secretmanager.googleapis.com",      # For secure credential storage
+    "eventarc.googleapis.com",       # For Cloud Function triggers
+    "cloudscheduler.googleapis.com", # For scheduled functions
+    "secretmanager.googleapis.com",  # For secure credential storage
   ]
 }
 

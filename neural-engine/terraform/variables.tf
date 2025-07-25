@@ -5,7 +5,7 @@ variable "project_id" {
   description = "GCP Project ID (e.g., development-neurascale, staging-neurascale, production-neurascale)"
 
   validation {
-    condition = can(regex("^(development|staging|production)-neurascale$", var.project_id))
+    condition     = can(regex("^(development|staging|production)-neurascale$", var.project_id))
     error_message = "Project ID must be in format: {environment}-neurascale where environment is development, staging, or production."
   }
 }

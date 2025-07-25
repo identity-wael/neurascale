@@ -87,7 +87,7 @@ class DiscoveredDevice:
 class DeviceDiscoveryService:
     """Service for discovering neural data acquisition devices."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize device discovery service."""
         self._discovered_devices: Dict[str, DiscoveredDevice] = {}
         self._discovery_callbacks: List[Callable[[DiscoveredDevice], None]] = []
@@ -98,11 +98,11 @@ class DeviceDiscoveryService:
         self._zeroconf: Optional[Zeroconf] = None
         self._browser: Optional[ServiceBrowser] = None
 
-    def add_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]):
+    def add_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]) -> None:
         """Add callback for device discovery events."""
         self._discovery_callbacks.append(callback)
 
-    def remove_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]):
+    def remove_discovery_callback(self, callback: Callable[[DiscoveredDevice], None]) -> None:
         """Remove discovery callback."""
         if callback in self._discovery_callbacks:
             self._discovery_callbacks.remove(callback)
@@ -178,7 +178,7 @@ class DeviceDiscoveryService:
         """Get list of discovered devices."""
         return list(self._discovered_devices.values())
 
-    def _notify_device_discovered(self, device: DiscoveredDevice):
+    def _notify_device_discovered(self, device: DiscoveredDevice) -> None:
         """Notify callbacks about discovered device."""
         # Check if device already discovered
         if device.unique_id in self._discovered_devices:
@@ -347,7 +347,7 @@ class DeviceDiscoveryService:
         except Exception as e:
             logger.error(f"Error scanning WiFi devices: {e}")
 
-    def _on_service_state_change(self, zeroconf, service_type, name, state_change):
+    def _on_service_state_change(self, zeroconf, service_type, name, state_change) -> None:
         """Handle mDNS service discovery."""
         if state_change == "added":
             info = zeroconf.get_service_info(service_type, name)

@@ -159,7 +159,7 @@ class DeviceHealthMonitor:
         self._error_counts: Dict[str, int] = {}
         self._connection_times: Dict[str, datetime] = {}
 
-    def add_device(self, device_id: str, device: Any):
+    def add_device(self, device_id: str, device: Any) -> None:
         """Add a device to monitor."""
         self._devices[device_id] = device
         self._current_metrics[device_id] = DeviceMetrics(device_id=device_id)
@@ -173,7 +173,7 @@ class DeviceHealthMonitor:
         if hasattr(device, "is_connected") and device.is_connected():
             self._connection_times[device_id] = datetime.now(timezone.utc)
 
-    def remove_device(self, device_id: str):
+    def remove_device(self, device_id: str) -> None:
         """Remove a device from monitoring."""
         self._devices.pop(device_id, None)
         self._current_metrics.pop(device_id, None)
@@ -184,11 +184,11 @@ class DeviceHealthMonitor:
         self._error_counts.pop(device_id, None)
         self._connection_times.pop(device_id, None)
 
-    def add_health_callback(self, callback: Callable[[str, HealthStatus], None]):
+    def add_health_callback(self, callback: Callable[[str, HealthStatus], None]) -> None:
         """Add callback for health status changes."""
         self._health_callbacks.append(callback)
 
-    def add_alert_callback(self, callback: Callable[[HealthAlert], None]):
+    def add_alert_callback(self, callback: Callable[[HealthAlert], None]) -> None:
         """Add callback for health alerts."""
         self._alert_callbacks.append(callback)
 
@@ -227,7 +227,7 @@ class DeviceHealthMonitor:
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
 
-    async def _check_device_health(self, device_id: str):  # noqa: C901
+    async def _check_device_health(self, device_id: str) -> None:  # noqa: C901
         """Check health of a specific device."""
         device = self._devices.get(device_id)
         if not device:
@@ -370,7 +370,7 @@ class DeviceHealthMonitor:
 
     def _generate_health_alert(
         self, device_id: str, metrics: DeviceMetrics, status: HealthStatus
-    ):
+    ) -> None:
         """Generate health alert for device."""
         # Determine alert message
         if status == HealthStatus.CRITICAL:
@@ -399,7 +399,7 @@ class DeviceHealthMonitor:
         # Notify callbacks
         self._notify_alert(alert)
 
-    def _notify_health_change(self, device_id: str, status: HealthStatus):
+    def _notify_health_change(self, device_id: str, status: HealthStatus) -> None:
         """Notify callbacks of health status change."""
         for callback in self._health_callbacks:
             try:
@@ -407,7 +407,7 @@ class DeviceHealthMonitor:
             except Exception as e:
                 logger.error(f"Error in health callback: {e}")
 
-    def _notify_alert(self, alert: HealthAlert):
+    def _notify_alert(self, alert: HealthAlert) -> None:
         """Notify callbacks of health alert."""
         for callback in self._alert_callbacks:
             try:
@@ -415,7 +415,7 @@ class DeviceHealthMonitor:
             except Exception as e:
                 logger.error(f"Error in alert callback: {e}")
 
-    def _cleanup_old_metrics(self):
+    def _cleanup_old_metrics(self) -> None:
         """Remove metrics older than history window."""
         cutoff_time = datetime.now(timezone.utc) - self.history_window
 
@@ -423,7 +423,7 @@ class DeviceHealthMonitor:
             while history and history[0]["timestamp"] < cutoff_time:
                 history.popleft()
 
-    def record_packet(self, device_id: str, timestamp: Optional[datetime] = None):
+    def record_packet(self, device_id: str, timestamp: Optional[datetime] = None) -> None:
         """Record packet reception for data rate calculation."""
         if device_id in self._packet_timestamps:
             if timestamp is None:
@@ -434,7 +434,7 @@ class DeviceHealthMonitor:
             if device_id in self._current_metrics:
                 self._current_metrics[device_id].packets_received += 1
 
-    def record_error(self, device_id: str, error: Exception):
+    def record_error(self, device_id: str, error: Exception) -> None:
         """Record device error."""
         if device_id in self._error_counts:
             self._error_counts[device_id] += 1
@@ -442,7 +442,7 @@ class DeviceHealthMonitor:
         if device_id in self._current_metrics:
             self._current_metrics[device_id].last_error = str(error)
 
-    def record_reconnection(self, device_id: str):
+    def record_reconnection(self, device_id: str) -> None:
         """Record device reconnection."""
         if device_id in self._current_metrics:
             self._current_metrics[device_id].reconnection_count += 1
@@ -491,7 +491,7 @@ class DeviceHealthMonitor:
                 all_alerts.extend(alerts)
             return all_alerts
 
-    def clear_alerts(self, device_id: Optional[str] = None):
+    def clear_alerts(self, device_id: Optional[str] = None) -> None:
         """Clear alerts for a device or all devices."""
         if device_id:
             self._active_alerts[device_id] = []

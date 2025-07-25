@@ -7,7 +7,7 @@ This document describes the simplified Terraform architecture for the Neural Eng
 The new architecture addresses the following issues from the previous implementation:
 
 - Complex permission chains and race conditions
-- Terraform Cloud workspace management issues
+- Complex state management issues
 - Separation between infrastructure and function deployment
 - Unclear dependencies and resource ordering
 - Overly complex IAM permission structure
@@ -20,7 +20,7 @@ The new architecture addresses the following issues from the previous implementa
 - Clear IAM role assignments at the root level
 - GitHub Actions service account has explicit permissions
 
-### 2. GCS Backend Instead of Terraform Cloud
+### 2. GCS Backend for State Management
 
 - Uses GCS backend for state management
 - State is stored in `neurascale-terraform-state` bucket
@@ -228,7 +228,7 @@ terraform refresh -var="project_id=development-neurascale"
 
 ## Migration from Old Architecture
 
-1. **Backup existing state** (if using Terraform Cloud)
+1. **Backup existing state** (if migrating from another backend)
 2. **Remove old resources** that won't be managed by new architecture
 3. **Import existing resources** that should be preserved
 4. **Run terraform plan** to see what will change

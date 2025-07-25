@@ -39,7 +39,7 @@ neural-engine/
 - **Machine Learning**: TensorFlow, scikit-learn
 - **Device Integration**: Lab Streaming Layer (LSL), BrainFlow
 - **3D Visualization**: NVIDIA Omniverse
-- **Infrastructure**: Kubernetes, Terraform Cloud
+- **Infrastructure**: Kubernetes, Terraform
 - **Languages**: Python 3.12+, Node.js 18+
 
 ## Getting Started
@@ -92,13 +92,12 @@ The Neural Engine supports three environments:
 
 ### Infrastructure Management
 
-Infrastructure is managed through Terraform Cloud with the following workspaces:
+Infrastructure is managed through Terraform with state stored in Google Cloud Storage:
 
-- `neural-engine-production`
-- `neural-engine-staging`
-- `neural-engine-development`
-
-State is stored in Terraform Cloud with backup to GCS buckets in the orchestration project.
+- **State Bucket**: `neurascale-terraform-state`
+- **Production State**: `gs://neurascale-terraform-state/neural-engine/production/`
+- **Staging State**: `gs://neurascale-terraform-state/neural-engine/staging/`
+- **Development State**: `gs://neurascale-terraform-state/neural-engine/development/`
 
 ### Deployment Flow
 
@@ -124,18 +123,18 @@ State is stored in Terraform Cloud with backup to GCS buckets in the orchestrati
 - GitHub issues created for all implementation phases (#121-#141)
 - Data ingestion system with validators
 - Multi-environment infrastructure (production, staging, development)
-- Terraform Cloud integration for state management
+- GCS backend for Terraform state management
 
 ### 🚧 Current Issues
 
 - Need to configure GCP_SA_KEY secret after running setup script
-- Terraform Cloud workspaces need Workload Identity Federation variables
+- GitHub Actions uses Workload Identity Federation for GCP authentication
 
 ### 📋 Next Steps
 
 1. Run `gcloud auth login` and `./scripts/setup-gcp-auth.sh`
 2. Add GCP_SA_KEY to GitHub secrets
-3. Configure Terraform Cloud workspaces with WIF variables
+3. Deploy infrastructure using GitHub Actions
 4. Continue with neural processing implementation
 
 Track progress in the [GitHub Project](https://github.com/identity-wael/neurascale/projects/1) or see issues #121-#141 for detailed implementation tasks.

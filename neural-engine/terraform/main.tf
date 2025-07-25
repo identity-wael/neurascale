@@ -48,28 +48,6 @@ module "project_apis" {
   source = "./modules/project-apis"
 
   project_id = var.project_id
-  apis = [
-    "artifactregistry.googleapis.com",
-    "bigtable.googleapis.com",
-    "bigtableadmin.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "cloudfunctions.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudscheduler.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "compute.googleapis.com",
-    "eventarc.googleapis.com",
-    "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "pubsub.googleapis.com",
-    "run.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "storage-api.googleapis.com",
-    "storage-component.googleapis.com",
-  ]
 }
 
 # Create the main service account for neural ingestion
@@ -101,24 +79,64 @@ resource "google_project_iam_member" "neural_ingestion_roles" {
   depends_on = [google_service_account.neural_ingestion]
 }
 
-# Grant GitHub Actions basic CI/CD permissions (legacy - for state compatibility)
-resource "google_project_iam_member" "ci_cd_permissions" {
-  project = var.project_id
-  role    = "roles/owner"
-  member  = "serviceAccount:${var.github_actions_service_account}"
+# Create custom role for GitHub Actions with minimal permissions
+resource "google_project_iam_custom_role" "github_deploy" {
+  role_id     = "githubDeployRole"
+  title       = "GitHub Actions Deploy Role"
+  description = "Custom role for GitHub Actions with minimal required permissions"
+  permissions = [
+    "cloudfunctions.functions.create",
+    "cloudfunctions.functions.update",
+    "cloudfunctions.functions.delete",
+    "cloudfunctions.functions.get",
+    "cloudfunctions.functions.list",
+    "cloudfunctions.operations.get",
+    "cloudfunctions.operations.list",
+    "iam.serviceAccounts.actAs",
+    "storage.buckets.get",
+    "storage.buckets.list",
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.get",
+    "storage.objects.list",
+    "artifactregistry.repositories.get",
+    "artifactregistry.repositories.list",
+    "artifactregistry.repositories.uploadArtifacts",
+    "artifactregistry.repositories.downloadArtifacts",
+    "run.services.create",
+    "run.services.update",
+    "run.services.get",
+    "run.services.list",
+    "resourcemanager.projects.get",
+    "serviceusage.services.use",
+    "pubsub.topics.get",
+    "pubsub.topics.list",
+    "pubsub.subscriptions.get",
+    "pubsub.subscriptions.list",
+    "bigtable.instances.get",
+    "bigtable.instances.list",
+    "bigtable.tables.get",
+    "bigtable.tables.list",
+    "logging.logEntries.create",
+    "monitoring.timeSeries.create"
+  ]
 
   depends_on = [module.project_apis]
 }
 
-# Grant GitHub Actions service account permission to deploy
+# Grant custom role to GitHub Actions service account
+resource "google_project_iam_member" "github_actions_custom_role" {
+  project = var.project_id
+  role    = google_project_iam_custom_role.github_deploy.id
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [google_project_iam_custom_role.github_deploy]
+}
+
+# Additional minimal roles for GitHub Actions (kept for compatibility during migration)
+# TODO: Review and remove redundant permissions after custom role is verified
 resource "google_project_iam_member" "github_actions_deploy" {
   for_each = toset([
-    "roles/artifactregistry.writer",
-    "roles/cloudfunctions.admin",
-    "roles/iam.serviceAccountUser",
-    "roles/storage.admin",
-    "roles/pubsub.admin",
-    "roles/bigtable.admin",
     "roles/serviceusage.serviceUsageConsumer",
   ])
 

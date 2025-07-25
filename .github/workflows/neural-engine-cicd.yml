@@ -114,6 +114,7 @@ jobs:
     strategy:
       matrix:
         service: [api, ingestion, processor]
+      max-parallel: 3  # Run all builds in parallel
     steps:
       - uses: actions/checkout@v4
 

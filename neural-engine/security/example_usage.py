@@ -138,7 +138,7 @@ def main():
 
     # Rotate the stream DEK
     try:
-        _new_stream_dek = encryption.rotate_dek(stream_dek)
+        encryption.rotate_dek(stream_dek)  # Test key rotation
         print("   ✓ DEK rotated successfully")
     except Exception as e:
         print(f"   ! Key rotation skipped (requires KMS): {e}")

@@ -68,9 +68,9 @@ class EncryptionBenchmark:
 
             # Benchmark decryption
             start_time = time.time()
-            _decrypted_data = self.encryption.decrypt_neural_data(
+            self.encryption.decrypt_neural_data(
                 encrypted_data, encrypted_dek
-            )
+            )  # Test decryption
             decrypt_duration = (time.time() - start_time) * 1000
 
             # Record results
@@ -142,9 +142,9 @@ class EncryptionBenchmark:
 
         # Benchmark decryption
         start_time = time.time()
-        _decrypted_data = self.field_encryption.decrypt_fields(
+        self.field_encryption.decrypt_fields(
             encrypted_data, fields_to_encrypt
-        )
+        )  # Test decryption
         decrypt_duration = (time.time() - start_time) * 1000
 
         # Record results
@@ -239,7 +239,7 @@ class EncryptionBenchmark:
 
         # Benchmark key rotation
         start_time = time.time()
-        _new_encrypted_dek = self.encryption.rotate_dek(encrypted_dek)
+        self.encryption.rotate_dek(encrypted_dek)  # Test key rotation
         rotate_duration = (time.time() - start_time) * 1000
 
         print(f"  DEK generation: {gen_duration:.2f}ms avg")

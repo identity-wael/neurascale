@@ -85,61 +85,88 @@ npm run typecheck # For frontend type checking
 
 4. If CI/CD fails with Python version issues, check and fix local venvs first
 
-## Letta Memory System Integration
+## Mindmeld Memory System
 
-**IMPORTANT**: This project uses Letta for persistent memory and context management. All Claude agents should connect to mindmeld (the memory agent) to maintain project continuity.
+**IMPORTANT**: This project uses Letta/mindmeld for persistent memory and context management. All Claude agents should connect to mindmeld to maintain project continuity and access shared knowledge.
 
-### Quick Connection Guide
+### Quick Start Guide
 
-1. **Check if Letta is running**:
-
-   ```bash
-   docker ps | grep letta
-   ```
-
-2. **Start Letta if needed**:
+1. **Check if mindmeld is running**:
 
    ```bash
-   cd letta-memory
-   ./scripts/start-letta.sh
+   docker-compose -f letta-memory/docker-compose.letta.yml ps
    ```
 
-3. **Update the memory agent**:
+2. **Start mindmeld services if needed**:
 
    ```bash
-   # FASTEST: Lightning responses for common queries (<50ms)
-   python3 letta-memory/agents/lightning_mindmeld.py "status"
-   python3 letta-memory/agents/lightning_mindmeld.py "backend engineer"
-   python3 letta-memory/agents/lightning_mindmeld.py "architecture"
-   
-   # FAST: SuperFast FastAPI interface (1-3s with caching)
-   python3 letta-memory/agents/fast_mindmeld.py "Your message"
-   python3 letta-memory/agents/fast_mindmeld.py code "Code change description"
-   
-   # RELIABLE: Direct Letta (5-10s but comprehensive)
-   python3 letta-memory/agents/quick_update.py "Your question about the project"
+   cd /Users/weg/NeuraScale/neurascale
+   docker-compose -f letta-memory/docker-compose.letta.yml up -d
    ```
 
-### Agent Configuration
+### Three-Tier Speed System
 
-- **Agent ID**: `agent-e9d89542-b2f9-4bb8-9fdf-03babee87e83`
-- **Server URL**: `http://localhost:8283/v1`
+Choose the appropriate interface based on your needs:
+
+#### ⚡ Lightning Tier: <20ms (Pre-computed Responses)
+
+```bash
+# FASTEST: Instant responses for common queries
+python3 letta-memory/agents/lightning_mindmeld.py "status"
+python3 letta-memory/agents/lightning_mindmeld.py "backend"
+python3 letta-memory/agents/lightning_mindmeld.py "architecture"
+python3 letta-memory/agents/lightning_mindmeld.py "progress"
+python3 letta-memory/agents/lightning_mindmeld.py "health"
+python3 letta-memory/agents/lightning_mindmeld.py "tech"
+```
+
+**Available keywords**: status, backend, architecture, progress, health, tech
+
+#### 🚀 Fast Tier: 1-3s (FastAPI with Caching)
+
+```bash
+# FAST: Full responses with intelligent caching
+python3 letta-memory/agents/fast_mindmeld.py "Your message"
+python3 letta-memory/agents/fast_mindmeld.py "Tell me about the Neural Engine"
+```
+
+**Special message types** (auto-formatted):
+
+```bash
+python3 letta-memory/agents/fast_mindmeld.py code "Implemented authentication system"
+python3 letta-memory/agents/fast_mindmeld.py doc "Updated API documentation"
+python3 letta-memory/agents/fast_mindmeld.py decision "Chose FastAPI over Flask"
+python3 letta-memory/agents/fast_mindmeld.py task "Need to implement user roles"
+```
+
+#### 📡 Reliable Tier: 5-10s (Direct Letta)
+
+```bash
+# RELIABLE: Comprehensive responses with full memory access
+python3 letta-memory/agents/quick_update.py "Complex question requiring full context"
+```
+
+### Service Configuration
+
+- **Agent ID**: `agent-e9d89542-b2f9-4bb8-9fdf-03babee87e83` (mindmeld)
+- **Letta Server**: `http://localhost:8283/v1`
+- **FastAPI**: `http://localhost:8000`
+- **Lightning API**: `http://localhost:8001`
 - **MCP Server**: `http://localhost:3001`
-- **Password**: `neurascale-letta-2025` (from `.env.letta`)
+- **Password**: `neurascale-letta-2025`
 
-### Memory Agent Commands
+### Working Directory
 
-When using the interactive mode (`python3 letta-memory/agents/interact_with_agent.py`):
+**CRITICAL**: Always run mindmeld commands from the project root:
 
-- `/code` - Log code changes
-- `/doc` - Log documentation updates
-- `/decision` - Log project decisions
-- `/task` - Log tasks and TODOs
-- `/quit` - Exit interactive mode
+```bash
+cd /Users/weg/NeuraScale/neurascale
+# Then run any mindmeld command
+```
 
-### What to Log
+### What to Log with Mindmeld
 
-Always update the memory agent when:
+Always update mindmeld when:
 
 - Making significant code changes
 - Updating documentation
@@ -148,27 +175,48 @@ Always update the memory agent when:
 - Encountering important bugs or issues
 - Learning new project context
 
-### Accessing Project Context
+### Advanced Usage
 
-To get comprehensive project context:
-
-```bash
-python3 letta-memory/agents/quick_update.py "What is the current status of [component/feature]?"
-```
-
-### Full Re-indexing
-
-If the agent needs updated project information:
+#### Health Monitoring
 
 ```bash
-python3 letta-memory/agents/index_neurascale_project.py
+# Check service health
+curl http://localhost:8000/health
+curl http://localhost:8001/stats
 ```
 
-This will re-index:
+#### Interactive Mode
 
-- Project structure
-- Documentation files
-- Technology stack
-- Recent git commits
-- Current project phase
+```bash
+# For extended conversations (avoid for simple queries)
+python3 letta-memory/agents/interact_with_agent.py
+```
 
+#### Batch Updates
+
+```bash
+# Update multiple changes efficiently
+python3 letta-memory/agents/fast_mindmeld.py "Batch update: [list changes]"
+```
+
+#### Speed Testing
+
+```bash
+# Compare all tiers
+python3 letta-memory/scripts/test-speed.py
+```
+
+### Troubleshooting
+
+#### Connection Issues
+
+1. Verify working directory: `pwd` should show `/Users/weg/NeuraScale/neurascale`
+2. Check services: `docker-compose -f letta-memory/docker-compose.letta.yml ps`
+3. Restart if needed: `docker-compose -f letta-memory/docker-compose.letta.yml restart`
+
+#### Memory Integrity Check
+
+```bash
+# Quick verification
+python3 letta-memory/agents/lightning_mindmeld.py "status"
+```

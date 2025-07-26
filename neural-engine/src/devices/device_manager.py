@@ -19,6 +19,7 @@ from .device_telemetry import (  # noqa: F401
     DeviceTelemetryCollector,
     FileTelemetryExporter,
 )
+from .device_notifications import DeviceNotificationService
 from ..ingestion.data_types import NeuralDataPacket
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,9 @@ class DeviceManager:
             buffer_size=1000,
             flush_interval=60.0,
         )
+
+        # Notification service
+        self.notification_service = DeviceNotificationService()
 
     def register_device_type(
         self, device_type: str, device_class: Type[BaseDevice]
@@ -316,12 +320,23 @@ class DeviceManager:
 
     def _handle_device_state(self, device_id: str, state: DeviceState) -> None:
         """Handle device state change."""
+        # Get previous state if available
+        device = self.devices.get(device_id)
+        previous_state = device.state if device else DeviceState.DISCONNECTED
+
+        # Send WebSocket notification
+        asyncio.create_task(
+            self.notification_service.notify_device_state_change(
+                device_id, previous_state, state
+            )
+        )
+
         # Collect telemetry for state changes
         asyncio.create_task(
             self.telemetry_collector.collect_connection_event(
                 device_id,
                 f"state_changed_to_{state.value}",
-                {"previous_state": "unknown", "new_state": state.value},
+                {"previous_state": previous_state.value, "new_state": state.value},
             )
         )
 
@@ -334,6 +349,11 @@ class DeviceManager:
     def _handle_device_error(self, device_id: str, error: Exception) -> None:
         """Handle device error."""
         logger.error(f"Device {device_id} error: {error}")
+
+        # Send WebSocket notification for error
+        asyncio.create_task(
+            self.notification_service.notify_device_error(device_id, error)
+        )
 
         # Record error for health monitoring
         self.health_monitor.record_error(device_id, error)
@@ -461,6 +481,19 @@ class DeviceManager:
         def on_device_discovered(device: DiscoveredDevice):
             self._discovered_devices[device.unique_id] = device
             logger.info(f"Discovered: {device.device_name} ({device.device_type})")
+
+            # Send WebSocket notification for device discovery
+            device_info = {
+                "device_id": device.unique_id,
+                "device_type": device.device_type,
+                "device_name": device.device_name,
+                "protocol": device.protocol.value,
+                "connection_info": device.connection_info,
+                "metadata": device.metadata,
+            }
+            asyncio.create_task(
+                self.notification_service.notify_device_discovered(device_info)
+            )
 
         self.discovery_service.add_discovery_callback(on_device_discovered)
 
@@ -682,12 +715,65 @@ class DeviceManager:
         """Get telemetry collection statistics."""
         return self.telemetry_collector.get_statistics()
 
+    async def start_notification_service(self) -> None:
+        """Start the WebSocket notification service."""
+        await self.notification_service.start()
+
+    async def stop_notification_service(self) -> None:
+        """Stop the WebSocket notification service."""
+        await self.notification_service.stop()
+
+    async def check_device_impedance(
+        self, device_id: str, channel_ids: Optional[List[int]] = None
+    ) -> Dict[int, float]:
+        """
+        Check impedance for a device and send notifications.
+
+        Args:
+            device_id: Device to check impedance for
+            channel_ids: Specific channels to check, or None for all
+
+        Returns:
+            Dictionary of channel ID to impedance values
+        """
+        device = self.devices.get(device_id)
+        if not device:
+            raise ValueError(f"Device {device_id} not found")
+
+        # Perform impedance check
+        impedance_results = await device.check_impedance(channel_ids)
+
+        # Calculate quality summary
+        quality_summary = {
+            "total_channels": len(impedance_results),
+            "good_channels": sum(1 for v in impedance_results.values() if v < 10000),
+            "fair_channels": sum(
+                1 for v in impedance_results.values() if 10000 <= v < 20000
+            ),
+            "poor_channels": sum(1 for v in impedance_results.values() if v >= 20000),
+            "average_impedance": (
+                sum(impedance_results.values()) / len(impedance_results)
+                if impedance_results
+                else 0
+            ),
+        }
+
+        # Send notification
+        await self.notification_service.notify_impedance_check_complete(
+            device_id, impedance_results, quality_summary
+        )
+
+        return impedance_results
+
     async def __aenter__(self) -> "DeviceManager":
         """Async context manager entry."""
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit - cleanup all devices."""
+        # Stop notification service
+        await self.stop_notification_service()
+
         # Stop health monitoring
         await self.stop_health_monitoring()
 

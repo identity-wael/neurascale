@@ -7,7 +7,7 @@ feature extraction, and real-time processing for BCI neural signals.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple, Union
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np

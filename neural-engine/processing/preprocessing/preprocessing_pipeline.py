@@ -54,7 +54,7 @@ class PreprocessingPipeline:
         self.is_initialized = True
         logger.info("Preprocessing pipeline initialization complete")
 
-    async def process(
+    async def process(  # noqa: C901
         self, signal_data: np.ndarray, quality_metrics: Optional[Any] = None
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """Process signal through preprocessing pipeline.

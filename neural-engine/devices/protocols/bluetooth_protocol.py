@@ -6,14 +6,13 @@ that connect via Bluetooth Low Energy (BLE) or Classic Bluetooth.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Union
+from typing import List, Optional, Any, Callable, Union
 from dataclasses import dataclass
 from enum import Enum
 import threading
 import queue
 
 try:
-    import bluetooth
 
     BLUETOOTH_AVAILABLE = True
 except ImportError:

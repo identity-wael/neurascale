@@ -154,13 +154,22 @@ jobs:
         if: steps.test-cache.outputs.cache-hit != 'true'
         working-directory: neural-engine
         run: |
-          source ../venv/bin/activate
+          # Create and use neural-engine specific venv if needed
+          if [[ ! -d "venv" ]]; then
+            echo "Creating neural-engine venv..."
+            /opt/homebrew/bin/python3.12 -m venv venv --clear
+          fi
+          source venv/bin/activate
           echo "Python version: $(python --version)"
           # Ensure black and flake8 are installed
+          pip install --upgrade pip
           pip install black flake8
+          # Verify installations
+          which black
+          which flake8
           # Run Black and Flake8
-          python -m black --check src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/
-          python -m flake8 src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/ --config=.flake8
+          black --check src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/
+          flake8 src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/ --config=.flake8
 
       - name: Run type checking
         if: steps.test-cache.outputs.cache-hit != 'true'

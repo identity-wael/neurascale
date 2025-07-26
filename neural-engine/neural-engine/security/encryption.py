@@ -33,17 +33,20 @@ logger = logging.getLogger(__name__)
 
 class EncryptionError(Exception):
     """Base exception for encryption-related errors."""
+
     pass
 
 
 class KeyRotationError(EncryptionError):
     """Exception raised during key rotation operations."""
+
     pass
 
 
 @dataclass
 class EncryptionMetrics:
     """Performance metrics for encryption operations."""
+
     operation: str
     duration_ms: float
     data_size_bytes: int
@@ -69,7 +72,7 @@ class NeuralDataEncryption:
         key_ring: str = "neural-data-keyring",
         key_name: str = "neural-data-key",
         enable_caching: bool = True,
-        cache_ttl_seconds: int = 3600
+        cache_ttl_seconds: int = 3600,
     ):
         """Initialize the encryption service.
 
@@ -122,7 +125,7 @@ class NeuralDataEncryption:
                     request={
                         "parent": parent,
                         "key_ring_id": self.key_ring,
-                        "key_ring": {}
+                        "key_ring": {},
                     }
                 )
                 logger.info(f"Created KMS key ring: {self.key_ring}")
@@ -142,7 +145,7 @@ class NeuralDataEncryption:
                                 "algorithm": kms.CryptoKeyVersion.CryptoKeyVersionAlgorithm.GOOGLE_SYMMETRIC_ENCRYPTION
                             },
                             "rotation_period": {"seconds": 7776000},  # 90 days
-                        }
+                        },
                     }
                 )
                 logger.info(f"Created KMS crypto key: {self.key_name}")
@@ -180,10 +183,7 @@ class NeuralDataEncryption:
             # Record metrics
             duration_ms = (time.time() - start_time) * 1000
             self._record_metric(
-                "generate_dek",
-                duration_ms,
-                len(encrypted_dek),
-                success=True
+                "generate_dek", duration_ms, len(encrypted_dek), success=True
             )
 
             return encrypted_dek
@@ -191,11 +191,7 @@ class NeuralDataEncryption:
         except Exception as e:
             duration_ms = (time.time() - start_time) * 1000
             self._record_metric(
-                "generate_dek",
-                duration_ms,
-                0,
-                success=False,
-                error_message=str(e)
+                "generate_dek", duration_ms, 0, success=False, error_message=str(e)
             )
             raise EncryptionError(f"Failed to generate DEK: {e}")
 
@@ -239,30 +235,21 @@ class NeuralDataEncryption:
 
             # Record metrics
             duration_ms = (time.time() - start_time) * 1000
-            self._record_metric(
-                "decrypt_dek",
-                duration_ms,
-                len(dek),
-                success=True
-            )
+            self._record_metric("decrypt_dek", duration_ms, len(dek), success=True)
 
             return dek
 
         except Exception as e:
             duration_ms = (time.time() - start_time) * 1000
             self._record_metric(
-                "decrypt_dek",
-                duration_ms,
-                0,
-                success=False,
-                error_message=str(e)
+                "decrypt_dek", duration_ms, 0, success=False, error_message=str(e)
             )
             raise EncryptionError(f"Failed to decrypt DEK: {e}")
 
     def encrypt_neural_data(
         self,
         data: Union[np.ndarray, Dict[str, Any]],
-        encrypted_dek: Optional[bytes] = None
+        encrypted_dek: Optional[bytes] = None,
     ) -> Tuple[bytes, bytes]:
         """Encrypt neural data using envelope encryption.
 
@@ -285,12 +272,15 @@ class NeuralDataEncryption:
 
             # Serialize the data
             if isinstance(data, np.ndarray):
-                serialized_data = msgpack.packb({
-                    "type": "ndarray",
-                    "data": data.tobytes(),
-                    "shape": data.shape,
-                    "dtype": str(data.dtype)
-                }, use_bin_type=True)
+                serialized_data = msgpack.packb(
+                    {
+                        "type": "ndarray",
+                        "data": data.tobytes(),
+                        "shape": data.shape,
+                        "dtype": str(data.dtype),
+                    },
+                    use_bin_type=True,
+                )
             else:
                 serialized_data = msgpack.packb(data, use_bin_type=True)
 
@@ -301,10 +291,7 @@ class NeuralDataEncryption:
             # Record metrics
             duration_ms = (time.time() - start_time) * 1000
             self._record_metric(
-                "encrypt_neural_data",
-                duration_ms,
-                len(encrypted_data),
-                success=True
+                "encrypt_neural_data", duration_ms, len(encrypted_data), success=True
             )
 
             return encrypted_data, encrypted_dek
@@ -316,14 +303,12 @@ class NeuralDataEncryption:
                 duration_ms,
                 0,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
             raise EncryptionError(f"Failed to encrypt neural data: {e}")
 
     def decrypt_neural_data(
-        self,
-        encrypted_data: bytes,
-        encrypted_dek: bytes
+        self, encrypted_data: bytes, encrypted_dek: bytes
     ) -> Union[np.ndarray, Dict[str, Any]]:
         """Decrypt neural data.
 
@@ -355,10 +340,7 @@ class NeuralDataEncryption:
             # Record metrics
             duration_ms = (time.time() - start_time) * 1000
             self._record_metric(
-                "decrypt_neural_data",
-                duration_ms,
-                len(decrypted_data),
-                success=True
+                "decrypt_neural_data", duration_ms, len(decrypted_data), success=True
             )
 
             return data
@@ -370,7 +352,7 @@ class NeuralDataEncryption:
                 duration_ms,
                 0,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
             raise EncryptionError(f"Failed to decrypt neural data: {e}")
 
@@ -407,7 +389,8 @@ class NeuralDataEncryption:
 
         now = datetime.now()
         expired_keys = [
-            key for key, (_, cached_time) in self._dek_cache.items()
+            key
+            for key, (_, cached_time) in self._dek_cache.items()
             if (now - cached_time).seconds >= self.cache_ttl_seconds
         ]
 
@@ -420,7 +403,7 @@ class NeuralDataEncryption:
         duration_ms: float,
         data_size_bytes: int,
         success: bool,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
     ):
         """Record performance metrics."""
         metric = EncryptionMetrics(
@@ -429,7 +412,7 @@ class NeuralDataEncryption:
             data_size_bytes=data_size_bytes,
             timestamp=datetime.now(),
             success=success,
-            error_message=error_message
+            error_message=error_message,
         )
         self._metrics.append(metric)
 
@@ -462,7 +445,7 @@ class NeuralDataEncryption:
                 "failed": len(op_metrics) - len(successful),
                 "average_duration_ms": avg_duration,
                 "average_size_bytes": avg_size,
-                "success_rate": len(successful) / len(op_metrics) if op_metrics else 0
+                "success_rate": len(successful) / len(op_metrics) if op_metrics else 0,
             }
 
         return summary
@@ -488,9 +471,7 @@ class FieldLevelEncryption:
         self._field_deks: Dict[str, bytes] = {}  # Field-specific DEKs
 
     def encrypt_fields(
-        self,
-        data: Dict[str, Any],
-        fields_to_encrypt: List[str]
+        self, data: Dict[str, Any], fields_to_encrypt: List[str]
     ) -> Dict[str, Any]:
         """Encrypt specific fields in a data dictionary.
 
@@ -517,8 +498,7 @@ class FieldLevelEncryption:
 
             # Encrypt the field value
             encrypted_value, _ = self.encryption_service.encrypt_neural_data(
-                value,
-                self._field_deks[field_path]
+                value, self._field_deks[field_path]
             )
 
             # Store encrypted value and DEK reference
@@ -526,18 +506,16 @@ class FieldLevelEncryption:
                 encrypted_data,
                 field_path,
                 {
-                    "encrypted": base64.b64encode(encrypted_value).decode('utf-8'),
+                    "encrypted": base64.b64encode(encrypted_value).decode("utf-8"),
                     "dek_field": field_path,
-                    "algorithm": "AES-256-GCM"
-                }
+                    "algorithm": "AES-256-GCM",
+                },
             )
 
         return encrypted_data
 
     def decrypt_fields(
-        self,
-        encrypted_data: Dict[str, Any],
-        fields_to_decrypt: List[str]
+        self, encrypted_data: Dict[str, Any], fields_to_decrypt: List[str]
     ) -> Dict[str, Any]:
         """Decrypt specific fields in a data dictionary.
 
@@ -564,8 +542,7 @@ class FieldLevelEncryption:
             # Decrypt the value
             encrypted_value = base64.b64decode(field_data["encrypted"])
             decrypted_value = self.encryption_service.decrypt_neural_data(
-                encrypted_value,
-                self._field_deks[dek_field]
+                encrypted_value, self._field_deks[dek_field]
             )
 
             # Set decrypted value
@@ -575,7 +552,7 @@ class FieldLevelEncryption:
 
     def _get_nested_value(self, data: Dict[str, Any], path: str) -> Any:
         """Get value from nested dictionary using dot notation."""
-        keys = path.split('.')
+        keys = path.split(".")
         value = data
 
         for key in keys:
@@ -588,7 +565,7 @@ class FieldLevelEncryption:
 
     def _set_nested_value(self, data: Dict[str, Any], path: str, value: Any):
         """Set value in nested dictionary using dot notation."""
-        keys = path.split('.')
+        keys = path.split(".")
         current = data
 
         for key in keys[:-1]:

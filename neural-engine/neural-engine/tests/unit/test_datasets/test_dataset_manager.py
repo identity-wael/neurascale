@@ -274,7 +274,7 @@ class TestDatasetManager:
         assert manager._metadata_file.exists()
 
         # Load metadata manually
-        with open(manager._metadata_file, 'r') as f:
+        with open(manager._metadata_file, "r") as f:
             metadata = json.load(f)
 
         assert "mock" in metadata
@@ -304,6 +304,7 @@ class TestDatasetManager:
 
     def test_custom_transform(self, manager):
         """Test loading dataset with custom transforms."""
+
         def transform(x):
             return x * 2.0
 

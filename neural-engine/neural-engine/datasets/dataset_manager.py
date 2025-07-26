@@ -159,7 +159,7 @@ class DatasetManager:
         """Load dataset metadata from disk."""
         if self._metadata_file.exists():
             try:
-                with open(self._metadata_file, 'r') as f:
+                with open(self._metadata_file, "r") as f:
                     metadata = json.load(f)
 
                 # Convert back to DatasetInfo objects
@@ -177,7 +177,7 @@ class DatasetManager:
             metadata[name] = info.to_dict()
 
         try:
-            with open(self._metadata_file, 'w') as f:
+            with open(self._metadata_file, "w") as f:
                 json.dump(metadata, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save metadata: {e}")
@@ -337,10 +337,12 @@ class DatasetManager:
                 datasets.append(dataset_dict)
             except Exception as e:
                 logger.warning(f"Failed to get info for dataset {name}: {e}")
-                datasets.append({
-                    "registered_name": name,
-                    "error": str(e),
-                })
+                datasets.append(
+                    {
+                        "registered_name": name,
+                        "error": str(e),
+                    }
+                )
 
         return datasets
 
@@ -366,10 +368,7 @@ class DatasetManager:
             delete_cache: Whether to also delete cached data
         """
         # Remove from loaded datasets
-        keys_to_remove = [
-            key for key in self._loaded_datasets
-            if key.startswith(name)
-        ]
+        keys_to_remove = [key for key in self._loaded_datasets if key.startswith(name)]
         for key in keys_to_remove:
             del self._loaded_datasets[key]
 
@@ -377,6 +376,7 @@ class DatasetManager:
         dataset_dir = self.data_root / name
         if dataset_dir.exists():
             import shutil
+
             shutil.rmtree(dataset_dir)
             logger.info(f"Deleted dataset data: {dataset_dir}")
 
@@ -385,6 +385,7 @@ class DatasetManager:
             cache_dir = self.cache_root / name
             if cache_dir.exists():
                 import shutil
+
                 shutil.rmtree(cache_dir)
                 logger.info(f"Deleted dataset cache: {cache_dir}")
 
@@ -408,15 +409,16 @@ class DatasetManager:
         else:
             # Clear specific dataset cache
             keys_to_remove = [
-                key for key in self._loaded_datasets
-                if key.startswith(name)
+                key for key in self._loaded_datasets if key.startswith(name)
             ]
             for key in keys_to_remove:
                 dataset = self._loaded_datasets.pop(key)
                 dataset.clear_cache()
             logger.info(f"Cleared cache for dataset: {name}")
 
-    def preload_datasets(self, names: List[str], splits: Optional[List[DatasetSplit]] = None):
+    def preload_datasets(
+        self, names: List[str], splits: Optional[List[DatasetSplit]] = None
+    ):
         """
         Preload multiple datasets for faster access.
 
@@ -470,13 +472,12 @@ class DatasetManager:
             "cache_root": str(self.cache_root),
             "registry": self.registry.list_datasets(),
             "dataset_info": {
-                name: info.to_dict()
-                for name, info in self._dataset_info_cache.items()
+                name: info.to_dict() for name, info in self._dataset_info_cache.items()
             },
             "lazy_loading": self._lazy_loading,
         }
 
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(state, f)
 
         logger.info(f"Saved manager state to: {filepath}")
@@ -488,7 +489,7 @@ class DatasetManager:
         Args:
             filepath: Path to load state from
         """
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             state = pickle.load(f)
 
         self.data_root = Path(state["data_root"])

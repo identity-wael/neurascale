@@ -7,7 +7,7 @@ connection pooling, event dispatching, and error handling.
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -589,7 +589,9 @@ class DeviceManager:
             logger.error(f"Error creating device instance: {str(e)}")
             return None
 
-    async def _discover_by_method(self, method: DiscoveryMethod) -> List[DeviceInfo]:
+    async def _discover_by_method(
+        self, method: DiscoveryMethod
+    ) -> List[DeviceInfo]:  # noqa: C901
         """Discover devices using a specific method.
 
         Args:
@@ -688,9 +690,7 @@ class DeviceManager:
 
         # Check if device is responsive
         try:
-            status = await asyncio.wait_for(
-                device.get_status(), timeout=5.0  # 5 second timeout
-            )
+            await asyncio.wait_for(device.get_status(), timeout=5.0)  # 5 second timeout
 
             # Update last seen time
             device.device_info.last_seen = datetime.utcnow()

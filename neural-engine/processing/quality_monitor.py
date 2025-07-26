@@ -419,7 +419,7 @@ class QualityMonitor:
 
     async def _check_thresholds(
         self, session_id: str, metrics: QualityMetrics
-    ) -> List[QualityAlert]:
+    ) -> List[QualityAlert]:  # noqa: C901
         """Check quality metrics against thresholds.
 
         Args:

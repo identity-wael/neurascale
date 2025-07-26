@@ -7,19 +7,19 @@ support including OpenBCI, Neurosity, Muse, and other BCI devices.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any
 import numpy as np
 import threading
 import time
 
 try:
-    from brainflow.board_shim import (
+    from brainflow.board_shim import (  # noqa: F401
         BoardShim,
         BrainFlowInputParams,
         BoardIds,
         BrainFlowPresets,
     )
-    from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
+    from brainflow.data_filter import DataFilter, FilterTypes, AggOperations  # noqa: F401
 
     BRAINFLOW_AVAILABLE = True
 except ImportError:
@@ -31,9 +31,7 @@ from ..base import (
     DeviceType,
     DeviceStatus,
     ConnectionType,
-    SignalQuality,
     DataSample,
-    DeviceEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -289,14 +287,15 @@ class BrainFlowAdapter(BaseDevice):
 
         try:
             # Check if board supports impedance measurement
-            board_descr = BoardShim.get_board_descr(self.board_id)
+            # Board descriptor would be used here for real devices
+            # board_descr = BoardShim.get_board_descr(self.board_id)
 
             # For boards that support impedance measurement
             # This is a simplified implementation
             impedance_values = {}
 
             for i, channel in enumerate(self.eeg_channels):
-                channel_name = f"Ch{i+1}"
+                channel_name = f"Ch{i + 1}"
                 # Simulate impedance measurement or use actual BrainFlow method if available
                 # Real implementation would depend on specific board capabilities
                 impedance_values[channel_name] = 15.0 + (i % 10) * 2.0
@@ -310,7 +309,7 @@ class BrainFlowAdapter(BaseDevice):
             logger.error(f"Error getting impedance: {str(e)}")
             return {}
 
-    async def perform_self_test(self) -> Dict[str, Any]:
+    async def perform_self_test(self) -> Dict[str, Any]:  # noqa: C901
         """Perform BrainFlow device self-test.
 
         Returns:
@@ -513,7 +512,8 @@ class BrainFlowAdapter(BaseDevice):
             self.device_info.channel_count = len(self.eeg_channels)
 
             # Update capabilities based on board
-            board_descr = BoardShim.get_board_descr(self.board_id)
+            # Board descriptor would be used here for real devices
+            # board_descr = BoardShim.get_board_descr(self.board_id)
 
             capabilities = ["streaming"]
             if len(self.aux_channels) > 0:
@@ -575,7 +575,7 @@ class BrainFlowAdapter(BaseDevice):
 
         logger.debug("BrainFlow data thread stopped")
 
-    def _process_board_data(self, data: np.ndarray) -> None:
+    def _process_board_data(self, data: np.ndarray) -> None:  # noqa: C901
         """Process board data from BrainFlow.
 
         Args:

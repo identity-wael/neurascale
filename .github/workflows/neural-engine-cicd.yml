@@ -197,7 +197,7 @@ jobs:
   # Build Docker images only if tests pass
   build:
     needs: [setup, test]
-    if: success() && false  # Temporarily skip builds for Terraform-only fix
+    if: success()
     runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -370,7 +370,7 @@ jobs:
 
   # Deploy infrastructure
   deploy:
-    needs: [setup, test, package-functions]  # Temporarily removed build dependency
+    needs: [setup, test, build, package-functions]
     if: |
       success() &&
       (github.event_name == 'push' ||

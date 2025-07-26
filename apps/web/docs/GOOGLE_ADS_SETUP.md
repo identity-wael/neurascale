@@ -88,17 +88,14 @@ Add this to your landing pages:
 
 ```html
 <!-- Google Ads Conversion Tracking -->
-<script
-  async
-  src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX"
-></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag() {
     dataLayer.push(arguments);
   }
-  gtag("js", new Date());
-  gtag("config", "AW-XXXXXXXXX");
+  gtag('js', new Date());
+  gtag('config', 'AW-XXXXXXXXX');
 </script>
 ```
 

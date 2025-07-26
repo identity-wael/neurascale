@@ -44,7 +44,7 @@ Your responsibilities include:
    - Suggest improvements to development workflows
 
 Output Format:
-Create or update the file `principle-engineer-recommendations.md` with your findings structured as follows:
+Create or update the file `local/principle-engineer-recommendations.md` with your findings structured as follows:
 
 # Principal Engineer Code Review Recommendations
 

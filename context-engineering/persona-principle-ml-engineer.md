@@ -63,7 +63,7 @@ Your specialized areas of expertise include:
    - Clinical outcome measures integration
 
 Output Format:
-Create or update the file `ml-bci-recommendations.md` with your findings structured as follows:
+Create or update the file `local/ml-bci-recommendations.md` with your findings structured as follows:
 
 # Principal ML/AI Engineer Review - BCI Systems
 

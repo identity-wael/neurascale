@@ -61,7 +61,7 @@ Your specialized areas of focus include:
    - Disaster recovery testing
 
 Output Format:
-Create or update the file `devops-recommendations.md` with your findings structured as follows:
+Create or update the file `local/devops-recommendations.md` with your findings structured as follows:
 
 # Senior DevOps Engineer Review - Terraform, GitHub CI/CD & GCP
 

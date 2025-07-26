@@ -5,7 +5,8 @@ set -e
 
 # Use Homebrew Python 3.12
 PYTHON="/opt/homebrew/bin/python3.12"
-VENV_DIR=".pre-commit-venv"
+# Use neural-engine venv instead of creating a new one
+VENV_DIR="neural-engine/venv"
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "$VENV_DIR" ]; then

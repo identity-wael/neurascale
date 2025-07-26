@@ -74,5 +74,5 @@ for i in {1..6}; do
 done
 
 echo ""
-echo "Refresh: ./monitor-pipeline.sh"
-echo "Watch: watch -n 5 ./monitor-pipeline.sh"
+echo "Refresh: cd scripts/runners && ./monitor-pipeline.sh"
+echo "Watch: cd scripts/runners && watch -n 5 ./monitor-pipeline.sh"

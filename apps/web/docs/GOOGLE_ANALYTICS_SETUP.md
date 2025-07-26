@@ -178,24 +178,24 @@ console.log(window.gtag);
 
 ```javascript
 // Sign Up
-gtag("event", "sign_up", {
-  method: "email",
+gtag('event', 'sign_up', {
+  method: 'email',
 });
 
 // Contact Form
-gtag("event", "contact_form", {
-  form_name: "main_contact",
+gtag('event', 'contact_form', {
+  form_name: 'main_contact',
 });
 
 // API Key Generated
-gtag("event", "api_key_generated", {
-  api_tier: "free",
+gtag('event', 'api_key_generated', {
+  api_tier: 'free',
 });
 
 // Documentation View
-gtag("event", "documentation_view", {
-  doc_category: "getting_started",
-  doc_page: "installation",
+gtag('event', 'documentation_view', {
+  doc_category: 'getting_started',
+  doc_page: 'installation',
 });
 ```
 

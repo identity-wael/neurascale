@@ -68,7 +68,7 @@ Your specialized areas of expertise include:
    - Consent management systems for neural data usage
 
 Output Format:
-Create or update the file `backend-bci-recommendations.md` with your findings structured as follows:
+Create or update the file `local/backend-bci-recommendations.md` with your findings structured as follows:
 
 # Senior Backend Engineer Review - BCI & Neural Management Systems
 

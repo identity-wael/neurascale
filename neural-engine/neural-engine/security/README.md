@@ -5,17 +5,20 @@ This module provides comprehensive encryption and security features for protecti
 ## Features
 
 ### 1. **Neural Data Encryption**
+
 - Envelope encryption using Google Cloud KMS
 - High-performance encryption optimized for real-time neural data
 - Automatic key rotation with KMS
 - DEK caching for improved performance
 
 ### 2. **Field-Level Encryption**
+
 - Granular encryption for sensitive fields (PII/PHI)
 - Support for nested field paths
 - Separate DEKs per field for enhanced security
 
 ### 3. **Performance Optimization**
+
 - DEK caching with configurable TTL
 - Batch encryption support for streaming data
 - Minimal latency for real-time processing
@@ -117,12 +120,14 @@ for chunk in neural_data_stream:
 ## Security Best Practices
 
 1. **Key Management**
+
    - Never store plaintext DEKs
    - Use separate DEKs for different data types
    - Enable automatic key rotation in KMS
    - Store encrypted DEKs alongside encrypted data
 
 2. **Performance Optimization**
+
    - Enable DEK caching for frequently accessed data
    - Use batch encryption for streaming data
    - Monitor encryption metrics for bottlenecks
@@ -143,6 +148,7 @@ python benchmark_encryption.py
 ```
 
 Expected performance metrics:
+
 - Neural array encryption: <10ms for typical EEG data (32 channels, 1 second)
 - Field-level encryption: <5ms for typical metadata
 - Batch encryption: ~1ms per chunk for streaming data
@@ -165,6 +171,7 @@ pytest test_encryption.py -v
 ### KMS Setup
 
 1. Create a key ring:
+
    ```bash
    gcloud kms keyrings create neural-data-keyring \
        --location=us-central1
@@ -191,6 +198,7 @@ print(json.dumps(metrics, indent=2))
 ```
 
 Metrics include:
+
 - Operation count and success rate
 - Average duration per operation
 - Data throughput statistics

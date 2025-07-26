@@ -1,34 +1,38 @@
 # NeuraScale Documentation
 
-Welcome to the NeuraScale documentation! This directory contains all technical documentation for the project.
+This directory contains platform-wide documentation for the NeuraScale project.
 
-## 📚 Documentation Structure
+## 📚 Platform Documentation
 
-### 🎉 Latest Updates
+### Core Documentation
 
-- **[Neural Engine Phase 2 Complete](NEURAL_ENGINE_PHASE2.md)** - Core Neural Data Ingestion System ✅
+- **[Platform Overview](OVERVIEW.md)** - High-level platform overview and architecture
+- **[Developer Guide](DEVELOPER_GUIDE.md)** - General development guidelines and best practices
+- **[Deployment Guide](DEPLOYMENT.md)** - Platform deployment strategies and infrastructure
 
-### Getting Started
+## 📁 Project-Specific Documentation
 
-- [Environment Variables](ENVIRONMENT_VARIABLES.md) - Configure your development environment
-- [Deployment Guide](DEPLOYMENT.md) - Deploy to production with Vercel
+Project-specific documentation has been organized into respective project directories:
 
-### Neural Engine
+### Marketing Website (`apps/web/`)
 
-- [Neural Engine Phase 2](NEURAL_ENGINE_PHASE2.md) - Core data ingestion system
-- [Neural Management System](../neural-engine/Neural-Management-System.md) - Complete architecture
-- [Implementation Summary](../neural-engine/IMPLEMENTATION_SUMMARY.md) - Technical details
+- [Environment Variables](../apps/web/docs/ENVIRONMENT_VARIABLES.md)
+- [Google Analytics Setup](../apps/web/docs/GOOGLE_ANALYTICS_SETUP.md)
+- [Google Ads Setup](../apps/web/docs/GOOGLE_ADS_SETUP.md)
+- [Sanity CMS Integration](../apps/web/docs/SANITY_INTEGRATION.md)
 
-### Core Integrations
+### Console Application (`console/`)
 
-- [Sanity CMS Integration](SANITY_INTEGRATION.md) - Content management system setup
-- [Neon Database](NEON_DATABASE.md) - Serverless Postgres with branching
+- [Environment Variables](../console/docs/ENVIRONMENT_VARIABLES.md)
+- [Neon Database Setup](../console/docs/NEON_DATABASE.md)
+- [Stripe Billing Integration](../console/docs/STRIPE_BILLING.md)
+- [Console README](../console/README.md)
 
-### Google Services
+### Neural Engine (`neural-engine/`)
 
-- [Google Analytics Setup](GOOGLE_ANALYTICS_SETUP.md) - GA4 tracking and analytics
-- [Google Ads Setup](GOOGLE_ADS_SETUP.md) - Advertising platform integration
-- [Google Maps Troubleshooting](fix-google-maps.md) - Fix common Maps API issues
+- [Phase 2 Documentation](../neural-engine/docs/NEURAL_ENGINE_PHASE2.md)
+- [Neural Engine README](../neural-engine/README.md)
+- [API Documentation](../neural-engine/docs/)
 
 ## 🔗 Quick Links
 

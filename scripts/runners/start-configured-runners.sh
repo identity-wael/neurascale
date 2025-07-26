@@ -83,7 +83,7 @@ gh api repos/identity-wael/neurascale/actions/runners --jq '.runners[] | "\(.nam
 
 echo ""
 echo "To configure missing runners, run:"
-echo "  ./quick-runner-config.sh <registration-token>"
+echo "  cd scripts/runners && ./quick-runner-config.sh <registration-token>"
 echo ""
 echo "To monitor runners:"
 echo "  watch 'ps aux | grep Runner.Listener | grep -v grep'"

@@ -65,7 +65,7 @@ Your security assessment covers:
    - Security training needs
 
 Output Format:
-Create or update the file `security-recommendations.md` with your findings structured as follows:
+Create or update the file `local/security-recommendations.md` with your findings structured as follows:
 
 # Security Engineering Assessment Report
 

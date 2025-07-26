@@ -179,19 +179,19 @@ npx tsx scripts/check-sanity-content.ts
 
 ```typescript
 // scripts/migrate-new-section.ts
-import { createClient } from "@sanity/client";
+import { createClient } from '@sanity/client';
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2024-01-01",
+  dataset: 'production',
+  apiVersion: '2024-01-01',
   token: process.env.SANITY_API_TOKEN,
   useCdn: false,
 });
 
 const content = {
-  _type: "section",
-  _id: "section-main",
+  _type: 'section',
+  _id: 'section-main',
   // ... your content
 };
 
@@ -209,11 +209,11 @@ await client.createOrReplace(content);
 
 ```typescript
 defineField({
-  name: "title",
-  title: "Title",
-  type: "string",
+  name: 'title',
+  title: 'Title',
+  type: 'string',
   validation: (Rule) => Rule.required().max(80),
-  description: "Main heading (max 80 characters)",
+  description: 'Main heading (max 80 characters)',
 });
 ```
 
@@ -235,7 +235,7 @@ defineField({
 // Enable CDN for production
 const client = createClient({
   // ...
-  useCdn: process.env.NODE_ENV === "production",
+  useCdn: process.env.NODE_ENV === 'production',
 });
 ```
 
@@ -263,8 +263,8 @@ const client = createClient({
 
 ```typescript
 solutionPoints: [
-  { _key: "point1", text: "...", highlight: "..." },
-  { _key: "point2", text: "...", highlight: "..." },
+  { _key: 'point1', text: '...', highlight: '...' },
+  { _key: 'point2', text: '...', highlight: '...' },
 ];
 ```
 
@@ -295,9 +295,9 @@ curl "https://vvsy01fb.api.sanity.io/v2024-01-01/data/query/production?query=*[_
 ```typescript
 // Create custom input component
 export default {
-  name: "colorPicker",
-  title: "Color",
-  type: "string",
+  name: 'colorPicker',
+  title: 'Color',
+  type: 'string',
   inputComponent: ColorPickerInput,
 };
 ```
@@ -312,7 +312,7 @@ export async function POST(req: Request) {
   const { _type } = await req.json();
 
   // Revalidate specific paths
-  revalidatePath("/");
+  revalidatePath('/');
 
   return Response.json({ revalidated: true });
 }
@@ -326,10 +326,10 @@ Enable live preview for editors:
 // app/api/preview/route.ts
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const secret = searchParams.get("secret");
+  const secret = searchParams.get('secret');
 
   if (secret !== process.env.SANITY_PREVIEW_SECRET) {
-    return new Response("Invalid token", { status: 401 });
+    return new Response('Invalid token', { status: 401 });
   }
 
   // Enable preview mode

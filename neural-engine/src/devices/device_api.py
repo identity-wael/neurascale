@@ -8,7 +8,6 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, De
 from pydantic import BaseModel
 
 from .device_manager import DeviceManager
-from .interfaces.base_device import DeviceState
 
 logger = logging.getLogger(__name__)
 

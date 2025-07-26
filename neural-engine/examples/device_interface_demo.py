@@ -3,7 +3,6 @@
 import asyncio
 import logging
 from datetime import datetime
-import numpy as np
 
 from src.devices.device_manager import DeviceManager
 from src.devices.device_api import router, initialize_device_manager
@@ -32,14 +31,14 @@ async def impedance_check_demo(manager: DeviceManager, device_id: str):
             quality = (
                 "Good" if impedance < 10000 else "Fair" if impedance < 20000 else "Poor"
             )
-            logger.info(f"  Channel {channel_id}: {impedance/1000:.1f} kΩ ({quality})")
+            logger.info(f"  Channel {channel_id}: {impedance / 1000:.1f} kΩ ({quality})")
 
         # Check specific channels
         logger.info("\nChecking impedance for channels 0-3...")
         specific_results = await manager.check_device_impedance(device_id, [0, 1, 2, 3])
 
         avg_impedance = sum(specific_results.values()) / len(specific_results)
-        logger.info(f"Average impedance for channels 0-3: {avg_impedance/1000:.1f} kΩ")
+        logger.info(f"Average impedance for channels 0-3: {avg_impedance / 1000:.1f} kΩ")
 
     except Exception as e:
         logger.error(f"Impedance check failed: {e}")
@@ -135,7 +134,7 @@ async def websocket_client_demo():
                     message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
                     notification = json.loads(message)
 
-                    logger.info(f"Notification received:")
+                    logger.info("Notification received:")
                     logger.info(f"  Type: {notification.get('type')}")
                     logger.info(f"  Device: {notification.get('device_id')}")
                     logger.info(f"  Severity: {notification.get('severity')}")
@@ -188,7 +187,7 @@ async def main():
 
                 # Get device capabilities
                 capabilities = device.get_capabilities()
-                logger.info(f"Device capabilities:")
+                logger.info("Device capabilities:")
                 logger.info(f"  Max channels: {capabilities.max_channels}")
                 logger.info(
                     f"  Sampling rates: {capabilities.supported_sampling_rates}"

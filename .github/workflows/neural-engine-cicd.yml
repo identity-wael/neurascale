@@ -362,6 +362,8 @@ jobs:
         with:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+        continue-on-error: true
+        id: gcp_auth
 
       - name: Upload functions artifact
         uses: actions/upload-artifact@v4

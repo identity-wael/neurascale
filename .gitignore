@@ -54,3 +54,4 @@ scripts/google/ga4-config.json
 
 # Project management
 tasks.md
+venv/

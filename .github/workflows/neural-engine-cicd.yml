@@ -156,9 +156,11 @@ jobs:
         run: |
           source ../venv/bin/activate
           echo "Python version: $(python --version)"
+          # Ensure black and flake8 are installed
+          pip install black flake8
           # Run Black and Flake8
-          python -m black --check src/ tests/ examples/
-          python -m flake8 src/ tests/ examples/ --config=.flake8
+          python -m black --check src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/
+          python -m flake8 src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/ --config=.flake8
 
       - name: Run type checking
         if: steps.test-cache.outputs.cache-hit != 'true'

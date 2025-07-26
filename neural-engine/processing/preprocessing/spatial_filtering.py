@@ -311,7 +311,7 @@ class SpatialFilters:
 
         return laplacian_data
 
-    async def _compute_laplacian_matrix(
+    async def _compute_laplacian_matrix(  # noqa: C901
         self, n_channels: int, montage: Optional[Any] = None
     ) -> Optional[np.ndarray]:
         """Compute Laplacian transformation matrix.

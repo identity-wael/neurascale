@@ -57,7 +57,7 @@ class ChannelRepair:
 
         logger.info("Channel repair initialization complete")
 
-    async def detect_bad_channels(
+    async def detect_bad_channels(  # noqa: C901
         self,
         data: np.ndarray,
         quality_metrics: Optional[Any] = None,

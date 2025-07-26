@@ -168,7 +168,7 @@ class SystemMetricsCollector:
         except Exception as e:
             logger.warning(f"Could not find Neural Engine process: {str(e)}")
 
-    async def collect_system_metrics(self) -> Optional[SystemMetrics]:
+    async def collect_system_metrics(self) -> Optional[SystemMetrics]:  # noqa: C901
         """Collect current system metrics.
 
         Returns:
@@ -507,9 +507,9 @@ class SystemMetricsCollector:
                 return {"message": "Insufficient data for trend analysis"}
 
             values = [metric[metric_name] for metric in recent_metrics]
-            timestamps = [
-                datetime.fromisoformat(metric["timestamp"]) for metric in recent_metrics
-            ]
+            # timestamps = [
+            #     datetime.fromisoformat(metric["timestamp"]) for metric in recent_metrics
+            # ]  # Not used currently
 
             # Simple trend analysis
             first_half = values[: len(values) // 2]

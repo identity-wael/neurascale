@@ -417,7 +417,7 @@ class QualityMonitor:
         # Check for resolved alerts
         await self._check_resolved_alerts(session_id, metrics)
 
-    async def _check_thresholds(
+    async def _check_thresholds(  # noqa: C901
         self, session_id: str, metrics: QualityMetrics
     ) -> List[QualityAlert]:  # noqa: C901
         """Check quality metrics against thresholds.

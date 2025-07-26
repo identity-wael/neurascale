@@ -410,6 +410,25 @@ jobs:
             -upgrade \
             -lock=false
 
+      - name: Import existing resources (staging only)
+        if: needs.setup.outputs.environment == 'staging'
+        working-directory: neural-engine/terraform
+        run: |
+          # Import resources that already exist in staging
+          terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+            -var="environment=${{ needs.setup.outputs.environment }}" \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            module.neural_ingestion.google_artifact_registry_repository.neural_engine \
+            "projects/${{ needs.setup.outputs.project_id }}/locations/${{ env.GCP_REGION }}/repositories/neural-engine-${{ needs.setup.outputs.environment }}" || true
+
+          terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+            -var="environment=${{ needs.setup.outputs.environment }}" \
+            -var="project_id=${{ needs.setup.outputs.project_id }}" \
+            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+            module.neural_ingestion.google_service_account.ingestion \
+            "neural-ingestion-stag" || true
+
       - name: Terraform Plan and Apply
         working-directory: neural-engine/terraform
         timeout-minutes: 25

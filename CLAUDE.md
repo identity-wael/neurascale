@@ -84,3 +84,93 @@ npm run typecheck # For frontend type checking
 3. Run linting/formatting before committing
 
 4. If CI/CD fails with Python version issues, check and fix local venvs first
+
+## Letta Memory System Integration
+
+**IMPORTANT**: This project uses Letta for persistent memory and context management. All Claude agents should connect to mindmeld (the memory agent) to maintain project continuity.
+
+### Quick Connection Guide
+
+1. **Check if Letta is running**:
+
+   ```bash
+   docker ps | grep letta
+   ```
+
+2. **Start Letta if needed**:
+
+   ```bash
+   cd letta-memory
+   ./scripts/start-letta.sh
+   ```
+
+3. **Update the memory agent**:
+
+   ```bash
+   # Log code changes
+   python3 letta-memory/agents/quick_update.py code "Your code change description"
+
+   # Log documentation updates
+   python3 letta-memory/agents/quick_update.py doc "Your documentation update"
+
+   # Log decisions
+   python3 letta-memory/agents/quick_update.py decision "Your project decision"
+
+   # Log tasks
+   python3 letta-memory/agents/quick_update.py task "Task or TODO description"
+
+   # Query the agent
+   python3 letta-memory/agents/quick_update.py "Your question about the project"
+   ```
+
+### Agent Configuration
+
+- **Agent ID**: `agent-e9d89542-b2f9-4bb8-9fdf-03babee87e83`
+- **Server URL**: `http://localhost:8283/v1`
+- **MCP Server**: `http://localhost:3001`
+- **Password**: `neurascale-letta-2025` (from `.env.letta`)
+
+### Memory Agent Commands
+
+When using the interactive mode (`python3 letta-memory/agents/interact_with_agent.py`):
+
+- `/code` - Log code changes
+- `/doc` - Log documentation updates
+- `/decision` - Log project decisions
+- `/task` - Log tasks and TODOs
+- `/quit` - Exit interactive mode
+
+### What to Log
+
+Always update the memory agent when:
+
+- Making significant code changes
+- Updating documentation
+- Making architectural decisions
+- Creating or completing tasks
+- Encountering important bugs or issues
+- Learning new project context
+
+### Accessing Project Context
+
+To get comprehensive project context:
+
+```bash
+python3 letta-memory/agents/quick_update.py "What is the current status of [component/feature]?"
+```
+
+### Full Re-indexing
+
+If the agent needs updated project information:
+
+```bash
+python3 letta-memory/agents/index_neurascale_project.py
+```
+
+This will re-index:
+
+- Project structure
+- Documentation files
+- Technology stack
+- Recent git commits
+- Current project phase

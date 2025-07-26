@@ -304,6 +304,7 @@ class TestBaseDataset:
 
     def test_dataset_transforms(self, temp_dir):
         """Test dataset transforms."""
+
         # Define simple transforms
         def data_transform(x):
             return x * 2.0

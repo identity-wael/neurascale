@@ -78,7 +78,9 @@ class SyntheticNeuralDataset(BaseDataset):
             label = i % self.n_classes
 
             # Generate base signal based on class
-            t = np.linspace(0, self.sample_length / self.sampling_rate, self.sample_length)
+            t = np.linspace(
+                0, self.sample_length / self.sampling_rate, self.sample_length
+            )
 
             # Create different patterns for different classes
             signal = np.zeros((self.n_channels, self.sample_length))
@@ -111,31 +113,36 @@ class SyntheticNeuralDataset(BaseDataset):
                     freq2 = 15 + 10 * np.random.rand()
                     phase1 = np.random.rand() * 2 * np.pi
                     phase2 = np.random.rand() * 2 * np.pi
-                    signal[ch] = (
-                        0.7 * np.sin(2 * np.pi * freq1 * t + phase1) +
-                        0.3 * np.sin(2 * np.pi * freq2 * t + phase2)
-                    )
+                    signal[ch] = 0.7 * np.sin(
+                        2 * np.pi * freq1 * t + phase1
+                    ) + 0.3 * np.sin(2 * np.pi * freq2 * t + phase2)
 
             # Add noise
-            noise = np.random.randn(self.n_channels, self.sample_length) * self.noise_level
+            noise = (
+                np.random.randn(self.n_channels, self.sample_length) * self.noise_level
+            )
             signal += noise
 
             # Add artifacts to some channels randomly
             if np.random.rand() < 0.1:  # 10% chance of artifacts
                 artifact_ch = np.random.randint(0, self.n_channels)
                 artifact_time = np.random.randint(0, self.sample_length - 100)
-                signal[artifact_ch, artifact_time:artifact_time + 100] += np.random.randn() * 5
+                signal[artifact_ch, artifact_time : artifact_time + 100] += (
+                    np.random.randn() * 5
+                )
 
             data.append(signal)
             labels.append(label)
 
             # Generate metadata
-            metadata.append({
-                "subject_id": f"S{i // 100:03d}",
-                "session_id": f"sess_{i // 10:04d}",
-                "trial_id": i,
-                "has_artifact": np.any(np.abs(signal) > 3),
-            })
+            metadata.append(
+                {
+                    "subject_id": f"S{i // 100:03d}",
+                    "session_id": f"sess_{i // 10:04d}",
+                    "trial_id": i,
+                    "has_artifact": np.any(np.abs(signal) > 3),
+                }
+            )
 
         # Convert to arrays
         data = np.array(data, dtype=np.float32)
@@ -152,7 +159,7 @@ class SyntheticNeuralDataset(BaseDataset):
         }
 
         config_file = self.data_dir / "config.json"
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
 
         # Save data
@@ -171,7 +178,7 @@ class SyntheticNeuralDataset(BaseDataset):
         # Load configuration
         config_file = self.data_dir / "config.json"
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 config = json.load(f)
         else:
             config = {
@@ -196,7 +203,12 @@ class SyntheticNeuralDataset(BaseDataset):
             task_type="multiclass_classification",
             n_classes=config["n_classes"],
             class_names=[f"class_{i}" for i in range(config["n_classes"])],
-            total_size_mb=config["n_samples"] * config["n_channels"] * config["sample_length"] * 4 / 1024 / 1024,
+            total_size_mb=config["n_samples"]
+            * config["n_channels"]
+            * config["sample_length"]
+            * 4
+            / 1024
+            / 1024,
             format="npz",
             metadata=config,
         )
@@ -290,7 +302,9 @@ class SyntheticNeuralDataset(BaseDataset):
 class SyntheticNeuralDatasetSubset(SyntheticNeuralDataset):
     """Subset of synthetic neural dataset."""
 
-    def __init__(self, parent: SyntheticNeuralDataset, indices: list, split: DatasetSplit):
+    def __init__(
+        self, parent: SyntheticNeuralDataset, indices: list, split: DatasetSplit
+    ):
         """Initialize subset."""
         self.parent = parent
         self.indices = indices
@@ -330,4 +344,6 @@ class SyntheticNeuralDatasetSubset(SyntheticNeuralDataset):
         if split == self.split or split == DatasetSplit.ALL:
             return self
         else:
-            raise ValueError(f"Cannot get split '{split.value}' from subset '{self.split.value}'")
+            raise ValueError(
+                f"Cannot get split '{split.value}' from subset '{self.split.value}'"
+            )

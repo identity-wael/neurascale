@@ -28,14 +28,16 @@ def main():
         metadata={
             "description": "Synthetic EEG dataset for testing",
             "created_by": "NeuraScale Team",
-        }
+        },
     )
 
     # 3. List available datasets
     print("\n3. Available datasets:")
     datasets = manager.list_available_datasets()
     for dataset in datasets:
-        print(f"   - {dataset['registered_name']}: {dataset.get('description', 'No description')}")
+        print(
+            f"   - {dataset['registered_name']}: {dataset.get('description', 'No description')}"
+        )
 
     # 4. Load the dataset
     print("\n4. Loading synthetic dataset...")
@@ -43,7 +45,7 @@ def main():
         "synthetic",
         n_samples=500,  # Generate 500 samples
         n_channels=16,  # 16 EEG channels
-        n_classes=3,    # 3 different brain states
+        n_classes=3,  # 3 different brain states
         download=True,
     )
 
@@ -103,7 +105,9 @@ def main():
 
     def normalize_transform(data):
         """Normalize each channel to zero mean and unit variance."""
-        return (data - data.mean(axis=1, keepdims=True)) / (data.std(axis=1, keepdims=True) + 1e-8)
+        return (data - data.mean(axis=1, keepdims=True)) / (
+            data.std(axis=1, keepdims=True) + 1e-8
+        )
 
     normalized_dataset = manager.load_dataset(
         "synthetic",
@@ -135,6 +139,7 @@ def main():
 
     # Plot power spectrum
     from scipy import signal
+
     for ch in range(min(4, sample.n_channels)):
         freqs, psd = signal.welch(sample.data[ch], fs=sample.sampling_rate, nperseg=256)
         axes[1].semilogy(freqs, psd, label=f"Ch {ch}")

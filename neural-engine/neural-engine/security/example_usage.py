@@ -31,7 +31,7 @@ def main():
         key_ring="neural-data-keyring",
         key_name="neural-data-key",
         enable_caching=True,
-        cache_ttl_seconds=3600
+        cache_ttl_seconds=3600,
     )
     print("   ✓ Encryption service initialized")
 
@@ -67,24 +67,20 @@ def main():
             "name": "John Doe",
             "date_of_birth": "1990-01-15",
             "ssn": "123-45-6789",
-            "medical_record_number": "MRN-98765"
+            "medical_record_number": "MRN-98765",
         },
         "device": {
             "id": "DEV-001",
             "serial_number": "SN-ABC123",
             "type": "OpenBCI-32",
-            "location": {
-                "room": "Lab-101",
-                "lat": 37.7749,
-                "lon": -122.4194
-            }
+            "location": {"room": "Lab-101", "lat": 37.7749, "lon": -122.4194},
         },
         "recording": {
             "duration_seconds": 300,
             "sampling_rate": 256,
             "channels": 32,
-            "reference": "Cz"
-        }
+            "reference": "Cz",
+        },
     }
 
     # Define sensitive fields to encrypt
@@ -96,18 +92,18 @@ def main():
         "patient.medical_record_number",
         "device.serial_number",
         "device.location.lat",
-        "device.location.lon"
+        "device.location.lon",
     ]
 
     print("   Original patient name:", session_data["patient"]["name"])
 
     # Encrypt sensitive fields
-    encrypted_session = field_encryption.encrypt_fields(
-        session_data, sensitive_fields
-    )
+    encrypted_session = field_encryption.encrypt_fields(session_data, sensitive_fields)
     print("   ✓ Sensitive fields encrypted")
-    print("   Encrypted patient name:",
-          encrypted_session["patient"]["name"].get("encrypted", "")[:20] + "...")
+    print(
+        "   Encrypted patient name:",
+        encrypted_session["patient"]["name"].get("encrypted", "")[:20] + "...",
+    )
 
     # Decrypt fields
     decrypted_session = field_encryption.decrypt_fields(

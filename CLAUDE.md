@@ -107,19 +107,16 @@ npm run typecheck # For frontend type checking
 3. **Update the memory agent**:
 
    ```bash
-   # Log code changes
-   python3 letta-memory/agents/quick_update.py code "Your code change description"
-
-   # Log documentation updates
-   python3 letta-memory/agents/quick_update.py doc "Your documentation update"
-
-   # Log decisions
-   python3 letta-memory/agents/quick_update.py decision "Your project decision"
-
-   # Log tasks
-   python3 letta-memory/agents/quick_update.py task "Task or TODO description"
-
-   # Query the agent
+   # FASTEST: Lightning responses for common queries (<50ms)
+   python3 letta-memory/agents/lightning_mindmeld.py "status"
+   python3 letta-memory/agents/lightning_mindmeld.py "backend engineer"
+   python3 letta-memory/agents/lightning_mindmeld.py "architecture"
+   
+   # FAST: SuperFast FastAPI interface (1-3s with caching)
+   python3 letta-memory/agents/fast_mindmeld.py "Your message"
+   python3 letta-memory/agents/fast_mindmeld.py code "Code change description"
+   
+   # RELIABLE: Direct Letta (5-10s but comprehensive)
    python3 letta-memory/agents/quick_update.py "Your question about the project"
    ```
 
@@ -174,3 +171,4 @@ This will re-index:
 - Technology stack
 - Recent git commits
 - Current project phase
+

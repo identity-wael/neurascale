@@ -5,10 +5,9 @@ measures, complexity metrics, and amplitude-based features.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Any
 import numpy as np
 from scipy import stats, signal
-from sklearn.preprocessing import StandardScaler
 import warnings
 
 logger = logging.getLogger(__name__)
@@ -433,7 +432,7 @@ class TimeDomainFeatures:
                 k_values.append(k)
 
             # Linear fit in log-log space
-            if len(L) > 2 and all(l > 0 for l in L):
+            if len(L) > 2 and all(val > 0 for val in L):
                 poly = np.polyfit(np.log(k_values), np.log(L), 1)
                 fractal_dim[ch] = -poly[0]
             else:

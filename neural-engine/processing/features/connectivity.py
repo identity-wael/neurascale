@@ -5,9 +5,9 @@ and other connectivity measures for neural signals.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Any, Tuple
 import numpy as np
-from scipy import signal, stats
+from scipy import signal
 from scipy.stats import entropy
 import warnings
 
@@ -429,13 +429,13 @@ class ConnectivityFeatures:
 
         for t in range(self.te_history, n_samples - 1):
             # Target future
-            y_future = target[t + 1]
+            # y_future = target[t + 1]
 
             # Target history
-            y_past = tuple(target[t - self.te_history + 1 : t + 1])
+            # y_past = tuple(target[t - self.te_history + 1 : t + 1])
 
             # Source history
-            x_past = tuple(source[t - self.te_history + 1 : t + 1])
+            # x_past = tuple(source[t - self.te_history + 1 : t + 1])
 
             # Estimate probabilities (simplified)
             # In practice, would use more sophisticated estimation

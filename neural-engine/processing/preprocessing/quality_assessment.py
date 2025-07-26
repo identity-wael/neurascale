@@ -7,7 +7,7 @@ and recommendations for neural signals.
 import logging
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
-from scipy import signal, stats
+from scipy import signal
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -399,7 +399,7 @@ class QualityAssessment:
         Returns:
             Line noise amplitude in microvolts
         """
-        line_freq = self.config.notch_frequencies[0]  # Primary line frequency
+        # line_freq = self.config.notch_frequencies[0]  # Primary line frequency
 
         # Calculate power at line frequency
         freqs, psd = signal.periodogram(data, sampling_rate, axis=1)

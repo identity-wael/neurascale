@@ -31,14 +31,18 @@ async def impedance_check_demo(manager: DeviceManager, device_id: str):
             quality = (
                 "Good" if impedance < 10000 else "Fair" if impedance < 20000 else "Poor"
             )
-            logger.info(f"  Channel {channel_id}: {impedance / 1000:.1f} kΩ ({quality})")
+            logger.info(
+                f"  Channel {channel_id}: {impedance / 1000:.1f} kΩ ({quality})"
+            )
 
         # Check specific channels
         logger.info("\nChecking impedance for channels 0-3...")
         specific_results = await manager.check_device_impedance(device_id, [0, 1, 2, 3])
 
         avg_impedance = sum(specific_results.values()) / len(specific_results)
-        logger.info(f"Average impedance for channels 0-3: {avg_impedance / 1000:.1f} kΩ")
+        logger.info(
+            f"Average impedance for channels 0-3: {avg_impedance / 1000:.1f} kΩ"
+        )
 
     except Exception as e:
         logger.error(f"Impedance check failed: {e}")

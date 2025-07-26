@@ -414,7 +414,11 @@ jobs:
         if: needs.setup.outputs.environment == 'staging'
         working-directory: neural-engine/terraform
         run: |
-          # Import resources that already exist in staging
+          # Remove and re-import resources that already exist in staging
+          terraform state rm module.neural_ingestion.google_artifact_registry_repository.neural_engine || true
+          terraform state rm module.neural_ingestion.google_service_account.ingestion || true
+
+          # Import existing resources
           terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
             -var="environment=${{ needs.setup.outputs.environment }}" \
             -var="project_id=${{ needs.setup.outputs.project_id }}" \

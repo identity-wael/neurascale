@@ -7,7 +7,7 @@ for real-time data streaming and device integration.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np
@@ -23,7 +23,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("pylsl not available, LSL integration disabled")
 
-from .base import DeviceInfo, DeviceType, DeviceStatus, DataSample, DeviceEvent
+from .base import DeviceInfo, DataSample, DeviceEvent
 
 logger = logging.getLogger(__name__)
 
@@ -615,12 +615,12 @@ class LSLIntegration:
                         label = channels.child("label").first_child().value()
                         unit = channels.child("unit").first_child().value()
 
-                        lsl_info.channel_labels.append(label or f"Ch{i+1}")
+                        lsl_info.channel_labels.append(label or f"Ch{i + 1}")
                         lsl_info.channel_units.append(unit or "uV")
 
                         channels = channels.next_sibling()
                     else:
-                        lsl_info.channel_labels.append(f"Ch{i+1}")
+                        lsl_info.channel_labels.append(f"Ch{i + 1}")
                         lsl_info.channel_units.append("uV")
 
                 streams.append(lsl_info)

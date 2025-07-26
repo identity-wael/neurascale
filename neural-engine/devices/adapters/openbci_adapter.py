@@ -6,8 +6,8 @@ for Cyton, Ganglion, and other OpenBCI board variants.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Union
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 import numpy as np
 import struct
 import time
@@ -18,9 +18,7 @@ from ..base import (
     DeviceType,
     DeviceStatus,
     ConnectionType,
-    SignalQuality,
     DataSample,
-    DeviceEvent,
 )
 from ..protocols.serial_protocol import SerialProtocol, SerialConfig
 
@@ -387,7 +385,7 @@ class OpenBCIAdapter(BaseDevice):
             logger.error(f"Error stopping OpenBCI streaming: {str(e)}")
             return False
 
-    async def configure(self, config: Dict[str, Any]) -> bool:
+    async def configure(self, config: Dict[str, Any]) -> bool:  # noqa: C901
         """Configure OpenBCI device parameters.
 
         Args:
@@ -477,7 +475,7 @@ class OpenBCIAdapter(BaseDevice):
             self.impedance_testing = False
             return {}
 
-    async def perform_self_test(self) -> Dict[str, Any]:
+    async def perform_self_test(self) -> Dict[str, Any]:  # noqa: C901
         """Perform OpenBCI device self-test.
 
         Returns:
@@ -715,7 +713,7 @@ class OpenBCIAdapter(BaseDevice):
         # Process complete packets
         self._process_packet_buffer()
 
-    def _process_packet_buffer(self) -> None:
+    def _process_packet_buffer(self) -> None:  # noqa: C901
         """Process accumulated packet data."""
         if self.board_type == "Cyton":
             packet_size = OpenBCIPacketParser.PACKET_SIZE_CYTON

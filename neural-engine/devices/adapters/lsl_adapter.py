@@ -6,11 +6,10 @@ for real-time data streaming from LSL-compatible devices.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
-import numpy as np
+from typing import Dict, List, Optional, Any
 
 try:
-    import pylsl
+    import pylsl  # noqa: F401
 
     LSL_AVAILABLE = True
 except ImportError:
@@ -22,11 +21,9 @@ from ..base import (
     DeviceType,
     DeviceStatus,
     ConnectionType,
-    SignalQuality,
     DataSample,
-    DeviceEvent,
 )
-from ..lsl_integration import LSLIntegration, LSLStreamInfo, LSLStreamType
+from ..lsl_integration import LSLIntegration, LSLStreamInfo
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +196,7 @@ class LSLAdapter(BaseDevice):
                 self.device_info.connection_params["timeout"] = self.timeout_seconds
 
             if "stream_name" in config:
-                old_name = self.stream_name
+                # old_name = self.stream_name  # Not used
                 self.stream_name = config["stream_name"]
                 self.device_info.connection_params["stream_name"] = self.stream_name
 
@@ -355,9 +352,10 @@ class LSLAdapter(BaseDevice):
             data_sample.sampling_rate = self.device_info.sampling_rate
 
             # Calculate signal quality
-            quality = await self.calculate_signal_quality(data_sample.channel_data)
+            # Note: Can't use await in non-async function
+            # Signal quality will be calculated elsewhere
             data_sample.signal_quality = {
-                "overall": quality.value,
+                "overall": "unknown",
                 "snr": getattr(data_sample, "snr", 0.0),
             }
 

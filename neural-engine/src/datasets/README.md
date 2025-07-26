@@ -1,6 +1,16 @@
 # NeuraScale Dataset Management System
 
-This module provides a comprehensive dataset management system for neural data, with special support for PhysioNet datasets and data quality validation.
+This module provides a comprehensive dataset management system for neural data, with special support for PhysioNet datasets, custom dataset formats, and data quality validation.
+
+## Table of Contents
+- [Features](#features)
+- [Supported Formats](#supported-formats)
+- [Quick Start](#quick-start)
+- [Custom Dataset Support](#custom-dataset-support)
+- [Data Quality Validation](#data-quality-validation)
+- [Dataset Conversion](#dataset-conversion)
+- [Examples](#examples)
+- [API Reference](#api-reference)
 
 ## Features
 
@@ -43,6 +53,41 @@ This module provides a comprehensive dataset management system for neural data, 
   - Excellent, Good, Fair, Poor, Unusable
 
 - Report generation and visualization
+
+### 4. **Custom Dataset Support**
+
+- Load data from multiple formats:
+  - CSV files
+  - EDF (European Data Format)
+  - FIF (Neuromag/MNE format)
+  - HDF5
+  - MATLAB (.mat)
+  - BrainVision (.vhdr)
+  - NumPy arrays
+  - Custom formats via user-defined loaders
+
+- Flexible configuration for any data structure
+- Built-in preprocessing pipeline
+- Automatic epoching for continuous data
+
+### 5. **Dataset Conversion**
+
+- Convert between any supported formats
+- Batch conversion for multiple files
+- Data integrity validation
+- Metadata preservation
+
+## Supported Formats
+
+| Format | Extension | Read | Write | Notes |
+|--------|-----------|------|-------|-------|
+| CSV | .csv | ✅ | ✅ | Flexible column mapping |
+| EDF | .edf | ✅ | ✅ | European Data Format |
+| FIF | .fif | ✅ | ✅ | MNE/Neuromag format |
+| HDF5 | .h5/.hdf5 | ✅ | ✅ | Hierarchical data |
+| MATLAB | .mat | ✅ | ✅ | MATLAB v5-v7.3 |
+| BrainVision | .vhdr | ✅ | ❌ | Header/data/marker files |
+| NumPy | .npy | ✅ | ✅ | Native Python arrays |
 
 ## Installation
 
@@ -142,6 +187,154 @@ for batch_data, batch_labels in loader.get_batch_iterator(data, labels, shuffle=
 # Export dataset as LSL stream for real-time testing
 loader.export_to_lsl(data, labels)
 ```
+
+## Custom Dataset Support
+
+### Loading CSV Data
+
+```python
+from src.datasets import CustomDatasetLoader, CustomDatasetConfig, DataFormat
+
+# Configure CSV loader
+config = CustomDatasetConfig(
+    name="my_eeg_data",
+    data_format=DataFormat.CSV,
+    data_path="path/to/data.csv",
+    
+    # CSV structure
+    csv_time_column="timestamp",
+    csv_label_column="event",
+    csv_channel_columns=["Fp1", "Fp2", "C3", "C4", "O1", "O2"],
+    
+    # Signal properties
+    sampling_rate=500.0,
+    
+    # Preprocessing
+    filter_low=1.0,
+    filter_high=45.0,
+    notch_freq=60.0,
+    reference="average",
+    
+    # Epoching
+    epoch_length=2.0,      # 2-second epochs
+    epoch_overlap=0.5      # 50% overlap
+)
+
+loader = CustomDatasetLoader(config)
+data, labels = loader.load()
+```
+
+### Loading EDF/FIF Files
+
+```python
+# Load EDF file
+config = CustomDatasetConfig(
+    name="clinical_eeg",
+    data_format=DataFormat.EDF,
+    data_path="path/to/recording.edf",
+    sampling_rate=256.0,
+    filter_low=0.5,
+    filter_high=70.0
+)
+
+# Load FIF file (MNE format)
+config = CustomDatasetConfig(
+    name="meg_data",
+    data_format=DataFormat.FIF,
+    data_path="path/to/raw.fif"
+)
+```
+
+### Loading HDF5/MATLAB Files
+
+```python
+# HDF5 with custom structure
+config = CustomDatasetConfig(
+    name="research_data",
+    data_format=DataFormat.HDF5,
+    data_path="path/to/data.h5",
+    data_key="neural_signals",      # Key containing data array
+    labels_key="trial_labels",      # Key containing labels
+    metadata_key="recording_info"   # Key containing metadata
+)
+
+# MATLAB file
+config = CustomDatasetConfig(
+    name="matlab_export",
+    data_format=DataFormat.MAT,
+    data_path="path/to/data.mat",
+    data_key="EEG"  # MATLAB variable name
+)
+```
+
+### Custom Loader Function
+
+```python
+def my_custom_loader(config: CustomDatasetConfig):
+    """Load data from proprietary format."""
+    # Your custom loading logic here
+    data = load_my_format(config.data_path)
+    labels = extract_labels(data)
+    
+    return {
+        'data': data,
+        'labels': labels,
+        'channel_names': ['Ch1', 'Ch2', 'Ch3'],
+        'sampling_rate': 1000.0,
+        'metadata': {'experiment': 'my_experiment'}
+    }
+
+# Use custom loader
+config = CustomDatasetConfig(
+    name="proprietary_format",
+    data_format=DataFormat.CUSTOM,
+    custom_loader=my_custom_loader
+)
+```
+
+## Dataset Conversion
+
+### Convert Between Formats
+
+```python
+from src.datasets.dataset_converter import DatasetConverter
+
+# Convert EDF to HDF5
+DatasetConverter.convert(
+    input_path="data.edf",
+    output_path="data.h5",
+    input_format=DataFormat.EDF,
+    output_format=DataFormat.HDF5
+)
+
+# Batch convert all CSV files to HDF5
+DatasetConverter.batch_convert(
+    input_dir=Path("raw_data"),
+    output_dir=Path("processed_data"),
+    input_format=DataFormat.CSV,
+    output_format=DataFormat.HDF5,
+    pattern="subject_*.csv"
+)
+
+# Validate conversion
+is_valid = DatasetConverter.validate_conversion(
+    original_path="data.edf",
+    converted_path="data.h5",
+    original_format=DataFormat.EDF,
+    converted_format=DataFormat.HDF5
+)
+```
+
+### Export to MNE Format
+
+```python
+# Convert custom data to MNE Raw object
+raw = loader.convert_to_mne(data, labels)
+
+# Use MNE functionality
+raw.plot()
+raw.filter(1.0, 40.0)
+raw.save("processed_raw.fif")
 
 ## Configuration Options
 

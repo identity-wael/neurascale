@@ -6,7 +6,7 @@ workflows across multiple services and components.
 
 import functools
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Union
+from typing import Dict, Optional, Any, Callable
 from dataclasses import dataclass
 import logging
 

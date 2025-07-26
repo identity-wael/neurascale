@@ -32,6 +32,26 @@ This script will:
    - Activate: `source neural-engine/venv/bin/activate`
    - Used by pre-commit hooks for black formatting
 
+## How to Activate the Correct Virtual Environment
+
+Always check which code you're working on to determine the correct venv:
+
+```bash
+# For main project code (frontend, general tasks)
+cd /Users/weg/NeuraScale/neurascale
+source venv/bin/activate
+
+# For neural-engine code (backend, Python development)
+cd /Users/weg/NeuraScale/neurascale
+source neural-engine/venv/bin/activate
+
+# To verify you're in the correct venv
+python --version  # Should show Python 3.12.11
+which python      # Should show path within the venv directory
+```
+
+**Important**: If you see "Python 3.12.5" or any version other than 3.12.11, the venv is incorrect. Run `./scripts/dev-tools/setup-venvs.sh` to fix it.
+
 ## Pre-commit Hooks
 
 The project uses pre-commit hooks that require specific Python versions:
@@ -56,6 +76,26 @@ source venv/bin/activate
 npm run lint      # For frontend code
 npm run typecheck # For frontend type checking
 ```
+
+## Update Mindmeld Before Committing
+
+**IMPORTANT**: Always update mindmeld with your changes before committing:
+
+```bash
+# Quick update for simple changes
+cd /Users/weg/NeuraScale/neurascale
+python3 letta-memory/agents/fast_mindmeld.py code "Brief description of what you implemented"
+
+# Examples:
+python3 letta-memory/agents/fast_mindmeld.py code "Added device interface API endpoints"
+python3 letta-memory/agents/fast_mindmeld.py code "Fixed CI/CD test cache to include all directories"
+python3 letta-memory/agents/fast_mindmeld.py doc "Updated CLAUDE.md with venv instructions"
+
+# For complex changes requiring detailed context
+python3 letta-memory/agents/quick_update.py "Detailed description of implementation, challenges, and decisions"
+```
+
+This ensures project continuity and helps future Claude sessions understand the codebase state.
 
 ## Common Issues and Solutions
 

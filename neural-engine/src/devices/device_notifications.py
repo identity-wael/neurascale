@@ -5,7 +5,7 @@ import logging
 import json
 from typing import Dict, Set, Optional, Any, List
 from datetime import datetime, timezone
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 
 from fastapi import WebSocket, WebSocketDisconnect

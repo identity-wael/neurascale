@@ -10,6 +10,10 @@ resource "google_artifact_registry_repository" "neural_engine" {
   repository_id = "neural-engine-${var.environment}"
   description   = "Neural Engine Docker images for ${var.environment}"
   format        = "DOCKER"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Storage bucket for Cloud Functions source code
@@ -160,6 +164,10 @@ resource "google_service_account" "ingestion" {
   display_name = "Neural Ingestion Service Account"
   description  = "Service account for neural data ingestion"
   project      = var.project_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # IAM permissions for the ingestion service account (legacy - for state compatibility)

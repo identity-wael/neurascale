@@ -4,7 +4,6 @@ This adapter provides native Lab Streaming Layer (LSL) device support
 for real-time data streaming from LSL-compatible devices.
 """
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable

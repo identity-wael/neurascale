@@ -46,7 +46,7 @@ class EncryptionBenchmark:
         """Benchmark encryption of neural signal arrays."""
         print("Benchmarking neural array encryption...")
 
-        # Test different array sizes (simulating different sampling rates/channels)
+        # Test different array sizes (simulating different sampling rates / channels)
         test_configs = [
             (1, 256, 1000),  # 1 channel, 256Hz, 1 second
             (8, 256, 1000),  # 8 channels, 256Hz, 1 second
@@ -294,7 +294,7 @@ class EncryptionBenchmark:
 
         # 4. Metrics summary
         ax = axes[1, 1]
-        ax.axis("of")
+        ax.axis("o")
         metrics = self.encryption.get_metrics_summary()
         summary_text = "Encryption Metrics Summary\n\n"
 

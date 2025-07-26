@@ -4,7 +4,6 @@ This module handles the export of collected metrics to Prometheus
 format and serves them via HTTP endpoint.
 """
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -121,7 +120,7 @@ class PrometheusExporter:
                 return web.Response(
                     text="No metrics registry configured",
                     status=503,
-                    content_type="text/plain",
+                    content_type="text / plain",
                 )
 
             # Generate metrics text
@@ -129,14 +128,14 @@ class PrometheusExporter:
 
             # Add exporter metadata
             metadata = [
-                f"# HELP neurascale_exporter_info Information about the NeuraScale Prometheus exporter",
-                f"# TYPE neurascale_exporter_info gauge",
+                "# HELP neurascale_exporter_info Information about the NeuraScale Prometheus exporter",
+                "# TYPE neurascale_exporter_info gauge",
                 f'neurascale_exporter_info{{version="1.0.0"}} 1',
-                f"# HELP neurascale_exporter_requests_total Total number of requests to metrics endpoint",
-                f"# TYPE neurascale_exporter_requests_total counter",
+                "# HELP neurascale_exporter_requests_total Total number of requests to metrics endpoint",
+                "# TYPE neurascale_exporter_requests_total counter",
                 f"neurascale_exporter_requests_total {self.total_requests}",
-                f"# HELP neurascale_exporter_last_export_timestamp Unix timestamp of last export",
-                f"# TYPE neurascale_exporter_last_export_timestamp gauge",
+                "# HELP neurascale_exporter_last_export_timestamp Unix timestamp of last export",
+                "# TYPE neurascale_exporter_last_export_timestamp gauge",
             ]
 
             if self.last_export_time:
@@ -145,7 +144,7 @@ class PrometheusExporter:
                     f"neurascale_exporter_last_export_timestamp {timestamp}"
                 )
             else:
-                metadata.append(f"neurascale_exporter_last_export_timestamp 0")
+                metadata.append("neurascale_exporter_last_export_timestamp 0")
 
             # Combine metadata and metrics
             full_metrics = "\n".join(metadata) + "\n\n" + metrics_text
@@ -160,7 +159,7 @@ class PrometheusExporter:
             return web.Response(
                 text=f"Error generating metrics: {str(e)}",
                 status=500,
-                content_type="text/plain",
+                content_type="text / plain",
             )
 
     async def _handle_health_request(self, request: web.Request) -> web.Response:
@@ -195,7 +194,7 @@ class PrometheusExporter:
             return web.Response(
                 text=f"Health check failed: {str(e)}",
                 status=500,
-                content_type="text/plain",
+                content_type="text / plain",
             )
 
     async def push_metrics_to_gateway(
@@ -223,7 +222,7 @@ class PrometheusExporter:
             metrics_data = generate_latest(self.registry)
 
             # Construct push URL
-            push_url = f"{gateway_url}/metrics/job/{job_name}/instance/{instance}"
+            push_url = f"{gateway_url}/metrics / job/{job_name}/instance/{instance}"
 
             # Push to gateway
             async with ClientSession() as session:

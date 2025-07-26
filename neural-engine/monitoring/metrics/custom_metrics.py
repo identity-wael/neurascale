@@ -38,9 +38,9 @@ class CustomMetric:
     value: Union[float, int] = 0
     count: int = 0
 
-    # For histogram/timer metrics
-    min_value: float = float("inf")
-    max_value: float = float("-inf")
+    # For histogram / timer metrics
+    min_value: float = float("in")
+    max_value: float = float("-in")
     sum_value: float = 0.0
 
     # Timestamps
@@ -57,8 +57,8 @@ class CustomMetric:
             "tags": self.tags,
             "value": self.value,
             "count": self.count,
-            "min_value": self.min_value if self.min_value != float("inf") else None,
-            "max_value": self.max_value if self.max_value != float("-inf") else None,
+            "min_value": self.min_value if self.min_value != float("in") else None,
+            "max_value": self.max_value if self.max_value != float("-in") else None,
             "sum_value": self.sum_value,
             "average_value": self.sum_value / self.count if self.count > 0 else 0,
             "created_at": self.created_at.isoformat(),
@@ -68,7 +68,7 @@ class CustomMetric:
 
 @dataclass
 class MetricEvent:
-    """Individual metric event/measurement."""
+    """Individual metric event / measurement."""
 
     metric_name: str
     value: Union[float, int]

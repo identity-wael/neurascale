@@ -236,7 +236,7 @@ class SecurityAuditLogger:
             consent_type: Type of consent
             status: Consent status (granted, withdrawn, etc.)
             purpose: Purpose of consent
-            granted_by: User who granted/withdrew consent
+            granted_by: User who granted / withdrew consent
         """
         event_type = (
             SecurityEventType.CONSENT_GRANTED

@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Callable, Set
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid
 
 from .base import (
     BaseDevice,

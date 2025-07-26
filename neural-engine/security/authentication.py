@@ -32,7 +32,7 @@ class TokenClaims:
     sub: str  # Subject (user ID)
     role: str  # User role
     tenant_id: Optional[str] = None
-    type: str = "access"  # Token type (access/refresh)
+    type: str = "access"  # Token type (access / refresh)
     iat: Optional[datetime] = None  # Issued at
     exp: Optional[datetime] = None  # Expires at
     jti: Optional[str] = None  # JWT ID
@@ -120,7 +120,7 @@ class JWTManager:
             user_id: User identifier
             role: User role
             tenant_id: Optional tenant identifier
-            token_type: Type of token (access/refresh)
+            token_type: Type of token (access / refresh)
             expires_delta: Token expiration time
 
         Returns:

@@ -20,27 +20,27 @@ class MetricType(Enum):
     """Custom metric types for Neural Ledger monitoring."""
 
     # Performance metrics
-    EVENT_PROCESSING_LATENCY = "neural_ledger/event_processing_latency"
-    STORAGE_WRITE_LATENCY = "neural_ledger/storage_write_latency"
-    SIGNATURE_VERIFICATION_TIME = "neural_ledger/signature_verification_time"
+    EVENT_PROCESSING_LATENCY = "neural_ledger / event_processing_latency"
+    STORAGE_WRITE_LATENCY = "neural_ledger / storage_write_latency"
+    SIGNATURE_VERIFICATION_TIME = "neural_ledger / signature_verification_time"
 
     # Throughput metrics
-    EVENTS_PROCESSED = "neural_ledger/events_processed"
-    EVENTS_FAILED = "neural_ledger/events_failed"
-    STORAGE_WRITES = "neural_ledger/storage_writes"
+    EVENTS_PROCESSED = "neural_ledger / events_processed"
+    EVENTS_FAILED = "neural_ledger / events_failed"
+    STORAGE_WRITES = "neural_ledger / storage_writes"
 
     # Integrity metrics
-    CHAIN_VIOLATIONS = "neural_ledger/chain_violations"
-    SIGNATURE_FAILURES = "neural_ledger/signature_failures"
+    CHAIN_VIOLATIONS = "neural_ledger / chain_violations"
+    SIGNATURE_FAILURES = "neural_ledger / signature_failures"
 
     # Compliance metrics
-    COMPLIANCE_EVENTS = "neural_ledger/compliance_events"
-    AUDIT_REQUESTS = "neural_ledger/audit_requests"
-    DATA_EXPORTS = "neural_ledger/data_exports"
+    COMPLIANCE_EVENTS = "neural_ledger / compliance_events"
+    AUDIT_REQUESTS = "neural_ledger / audit_requests"
+    DATA_EXPORTS = "neural_ledger / data_exports"
 
     # Resource metrics
-    STORAGE_SIZE_BYTES = "neural_ledger/storage_size_bytes"
-    ACTIVE_SESSIONS = "neural_ledger/active_sessions"
+    STORAGE_SIZE_BYTES = "neural_ledger / storage_size_bytes"
+    ACTIVE_SESSIONS = "neural_ledger / active_sessions"
 
 
 class LedgerMonitoring:
@@ -370,7 +370,7 @@ def create_monitoring_dashboard(project_id: str, dashboard_name: str = "neural-l
                         time_series_query=monitoring_v3.Dashboard.MqlDashboard.Tile.Widget.TimeSeriesQuery(
                             query="""
                         fetch cloud_function
-                        | metric 'custom.googleapis.com/neural_ledger/event_processing_latency'
+                        | metric 'custom.googleapis.com / neural_ledger / event_processing_latency'
                         | group_by 1m, [value_percentile99: percentile(value.event_processing_latency, 99)]
                         | every 1m
                         """
@@ -391,7 +391,7 @@ def create_monitoring_dashboard(project_id: str, dashboard_name: str = "neural-l
                         time_series_query=monitoring_v3.Dashboard.MqlDashboard.Tile.Widget.TimeSeriesQuery(
                             query="""
                         fetch cloud_function
-                        | metric 'custom.googleapis.com/neural_ledger/events_processed'
+                        | metric 'custom.googleapis.com / neural_ledger / events_processed'
                         | group_by 1m, [value_sum: sum(value.events_processed)]
                         | every 1m
                         """
@@ -409,7 +409,7 @@ def create_monitoring_dashboard(project_id: str, dashboard_name: str = "neural-l
                         time_series_query=monitoring_v3.Dashboard.MqlDashboard.Tile.Widget.TimeSeriesQuery(
                             query="""
                         fetch cloud_function
-                        | metric 'custom.googleapis.com/neural_ledger/chain_violations'
+                        | metric 'custom.googleapis.com / neural_ledger / chain_violations'
                         | group_by 1h, [value_sum: sum(value.chain_violations)]
                         | every 1h
                         """
@@ -433,7 +433,7 @@ def create_monitoring_dashboard(project_id: str, dashboard_name: str = "neural-l
                         time_series_query=monitoring_v3.Dashboard.MqlDashboard.Tile.Widget.TimeSeriesQuery(
                             query="""
                         fetch cloud_function
-                        | metric 'custom.googleapis.com/neural_ledger/storage_write_latency'
+                        | metric 'custom.googleapis.com / neural_ledger / storage_write_latency'
                         | group_by 1m, [storage_tier], [value_mean: mean(value.storage_write_latency)]
                         | every 1m
                         """

@@ -150,7 +150,7 @@ class HashChain:
     def repair_chain(events: List[NeuralLedgerEvent]) -> List[NeuralLedgerEvent]:
         """Attempt to repair a broken chain by recomputing hashes.
 
-        This should only be used in development/testing. In production,
+        This should only be used in development / testing. In production,
         a broken chain indicates tampering and should be investigated.
 
         Args:

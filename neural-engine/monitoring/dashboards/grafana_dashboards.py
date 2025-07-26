@@ -4,7 +4,6 @@ This module provides automated Grafana dashboard creation and management
 for neural processing, system monitoring, and alerting visualizations.
 """
 
-import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -475,7 +474,7 @@ class GrafanaDashboardManager:
             Creation result
         """
         try:
-            url = f"{self.grafana_url}/api/dashboards/db"
+            url = f"{self.grafana_url}/api / dashboards / db"
 
             # For now, simulate dashboard creation
             # In a real implementation, this would POST to Grafana API
@@ -485,7 +484,7 @@ class GrafanaDashboardManager:
                 "status": "success",
                 "id": 123,  # Simulated dashboard ID
                 "uid": "neural-dashboard-123",
-                "url": f"{self.grafana_url}/d/neural-dashboard-123",
+                "url": f"{self.grafana_url}/d / neural-dashboard-123",
                 "version": 1,
             }
 

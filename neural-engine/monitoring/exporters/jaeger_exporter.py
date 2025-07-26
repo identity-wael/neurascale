@@ -4,11 +4,9 @@ This module handles the export of distributed traces to Jaeger
 for trace visualization and analysis.
 """
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +22,7 @@ class JaegerExporter:
         """
         self.config = config
         self.jaeger_endpoint = getattr(
-            config, "jaeger_endpoint", "http://localhost:14268/api/traces"
+            config, "jaeger_endpoint", "http://localhost:14268 / api / traces"
         )
         self.service_name = "neurascale-neural-engine"
 
@@ -189,7 +187,7 @@ class JaegerExporter:
             else:
                 duration_us = 0
 
-            # Convert tags/attributes
+            # Convert tags / attributes
             tags = []
             attributes = span_data.get("attributes", {})
             for key, value in attributes.items():
@@ -208,7 +206,7 @@ class JaegerExporter:
                 "process": {"serviceName": self.service_name, "tags": []},
             }
 
-            # Add logs/events
+            # Add logs / events
             events = span_data.get("events", [])
             for event in events:
                 log_entry = {
@@ -235,7 +233,7 @@ class JaegerExporter:
             }
 
     def _generate_id(self) -> str:
-        """Generate a unique ID for traces/spans.
+        """Generate a unique ID for traces / spans.
 
         Returns:
             Hexadecimal ID string

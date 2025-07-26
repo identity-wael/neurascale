@@ -4,13 +4,12 @@ This module implements distributed tracing to track neural processing
 workflows across multiple services and components.
 """
 
-import time
 import functools
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable, Union
 from dataclasses import dataclass
 import logging
-import asyncio
+
 from contextlib import asynccontextmanager, contextmanager
 
 # OpenTelemetry imports (these would be added to requirements)
@@ -36,7 +35,7 @@ class TraceConfig:
 
     service_name: str = "neurascale-neural-engine"
     service_version: str = "1.0.0"
-    jaeger_endpoint: str = "http://localhost:14268/api/traces"
+    jaeger_endpoint: str = "http://localhost:14268 / api / traces"
     sampling_ratio: float = 1.0  # Sample all traces initially
     batch_export_timeout: int = 30000  # milliseconds
     max_export_batch_size: int = 512
@@ -469,7 +468,7 @@ def trace_neural_processing(
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            # Get global tracer instance (this would be injected/configured)
+            # Get global tracer instance (this would be injected / configured)
             tracer = getattr(wrapper, "_neural_tracer", None)
             if not tracer:
                 return func(*args, **kwargs)
@@ -518,7 +517,7 @@ def trace_async_neural_processing(
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
-            # Get global tracer instance (this would be injected/configured)
+            # Get global tracer instance (this would be injected / configured)
             tracer = getattr(wrapper, "_neural_tracer", None)
             if not tracer:
                 return await func(*args, **kwargs)

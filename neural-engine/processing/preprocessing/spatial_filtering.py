@@ -389,7 +389,7 @@ class SpatialFilters:
             for j in range(n):
                 if i != j:
                     r = np.linalg.norm(positions[i] - positions[j])
-                    G[i, j] = r * np.log(r + 1e-10)  # g(r) = r*log(r)
+                    G[i, j] = r * np.log(r + 1e-10)  # g(r) = r * log(r)
 
         return csr_matrix(G)
 
@@ -411,7 +411,7 @@ class SpatialFilters:
             for j in range(n):
                 if i != j:
                     r = np.linalg.norm(positions[i] - positions[j])
-                    # Laplacian of g(r) = r*log(r) is proportional to 1/r
+                    # Laplacian of g(r) = r * log(r) is proportional to 1 / r
                     H[i, j] = 1.0 / (r + 1e-10)
 
         # Normalize rows

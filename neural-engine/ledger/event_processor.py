@@ -1,6 +1,6 @@
 """Event processor for Neural Ledger with multi-tier storage.
 
-This module handles the processing of events from Pub/Sub and writes them
+This module handles the processing of events from Pub / Sub and writes them
 to multiple storage systems in parallel for durability and performance.
 """
 
@@ -73,7 +73,7 @@ class EventProcessor:
         self.bigquery_dataset_id = "neural_ledger"
         self.bigquery_table_id = "events"
 
-        # Thread pool for I/O operations
+        # Thread pool for I / O operations
         self.executor = ThreadPoolExecutor(max_workers=10)
 
         # Metrics
@@ -230,7 +230,7 @@ class EventProcessor:
             table = instance.table(self.bigtable_table_id)
 
             # Create row key: reversed timestamp + event_id for time-based sorting
-            timestamp_str = event.timestamp.strftime("%Y%m%d%H%M%S%f")
+            timestamp_str = event.timestamp.strftime("%Y%m%d%H%M%S%")
             reversed_timestamp = str(9999999999999999 - int(timestamp_str))
             row_key = f"{reversed_timestamp}#{event.event_id}"
 

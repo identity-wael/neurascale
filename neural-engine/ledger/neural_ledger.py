@@ -30,7 +30,7 @@ class NeuralLedger:
     """Main Neural Ledger implementation with multi-tier storage.
 
     This class coordinates the entire ledger system, managing:
-    - Event ingestion through Pub/Sub
+    - Event ingestion through Pub / Sub
     - Multi-tier storage (Bigtable, Firestore, BigQuery)
     - Hash chain integrity
     - Digital signatures for critical events
@@ -56,9 +56,9 @@ class NeuralLedger:
         self.kms_client = kms.KeyManagementServiceClient()
 
         # Configuration
-        self.topic_name = f"projects/{project_id}/topics/neural-ledger-events"
+        self.topic_name = f"projects/{project_id}/topics / neural-ledger-events"
         self.subscription_name = (
-            f"projects/{project_id}/subscriptions/neural-ledger-processor"
+            f"projects/{project_id}/subscriptions / neural-ledger-processor"
         )
         self.bigtable_instance_id = "neural-ledger"
         self.bigtable_table_id = "events"
@@ -81,7 +81,7 @@ class NeuralLedger:
         """Initialize all GCP resources for the ledger."""
         logger.info("Initializing Neural Ledger infrastructure...")
 
-        # Create Pub/Sub topic and subscription
+        # Create Pub / Sub topic and subscription
         await self._ensure_pubsub_resources()
 
         # Initialize storage systems
@@ -108,7 +108,7 @@ class NeuralLedger:
         This is the main entry point for logging events. The event will be:
         1. Added to the hash chain
         2. Digitally signed if critical
-        3. Published to Pub/Sub for processing
+        3. Published to Pub / Sub for processing
         4. Written to multi-tier storage
 
         Args:
@@ -140,7 +140,7 @@ class NeuralLedger:
         if requires_signature(event_type):
             await self._sign_event(event)
 
-        # Publish to Pub/Sub for processing
+        # Publish to Pub / Sub for processing
         await self._publish_event(event)
 
         # Update chain state
@@ -249,7 +249,7 @@ class NeuralLedger:
             True if chain is valid, False if compromised
         """
         # Query events from BigQuery for the time range
-        query = f"""
+        query = """
         SELECT *
         FROM `{self.project_id}.{self.bigquery_dataset_id}.events`
         WHERE timestamp BETWEEN @start_time AND @end_time
@@ -312,11 +312,11 @@ class NeuralLedger:
     # Private methods
 
     async def _ensure_pubsub_resources(self):
-        """Ensure Pub/Sub topic and subscription exist."""
+        """Ensure Pub / Sub topic and subscription exist."""
         # Create topic if not exists
         try:
             self.publisher.create_topic(request={"name": self.topic_name})
-            logger.info(f"Created Pub/Sub topic: {self.topic_name}")
+            logger.info(f"Created Pub / Sub topic: {self.topic_name}")
         except Exception as e:
             if "already exists" not in str(e):
                 raise
@@ -333,7 +333,7 @@ class NeuralLedger:
                     },  # 7 days
                 }
             )
-            logger.info(f"Created Pub/Sub subscription: {self.subscription_name}")
+            logger.info(f"Created Pub / Sub subscription: {self.subscription_name}")
         except Exception as e:
             if "already exists" not in str(e):
                 raise
@@ -394,7 +394,7 @@ class NeuralLedger:
 
     async def _load_chain_state(self):
         """Load the last event hash for chain continuity."""
-        query = f"""
+        query = """
         SELECT event_hash
         FROM `{self.project_id}.{self.bigquery_dataset_id}.events`
         ORDER BY timestamp DESC
@@ -420,10 +420,10 @@ class NeuralLedger:
         # TODO: Implement actual KMS signing
         # For now, use a placeholder
         event.signature = f"SIGNATURE_{event.event_hash[:16]}"
-        event.signing_key_id = f"projects/{self.project_id}/locations/{self.location}/keyRings/neural-ledger/cryptoKeys/signing-key/cryptoKeyVersions/1"
+        event.signing_key_id = f"projects/{self.project_id}/locations/{self.location}/keyRings / neural-ledger / cryptoKeys / signing-key / cryptoKeyVersions / 1"
 
     async def _publish_event(self, event: NeuralLedgerEvent):
-        """Publish event to Pub/Sub for processing."""
+        """Publish event to Pub / Sub for processing."""
         import json
 
         # Convert event to JSON
@@ -441,7 +441,7 @@ class NeuralLedger:
     ) -> Dict[str, Any]:
         """Generate HIPAA compliance report."""
         # Query all access events
-        query = f"""
+        query = """
         SELECT
             DATE(timestamp) as date,
             user_id,

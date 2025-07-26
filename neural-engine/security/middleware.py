@@ -28,7 +28,7 @@ class SecurityHeaders:
     def get_headers() -> Dict[str, str]:
         """Get security headers for responses."""
         return {
-            "X-Content-Type-Options": "nosniff",
+            "X-Content-Type-Options": "nosnif",
             "X-Frame-Options": "DENY",
             "X-XSS-Protection": "1; mode=block",
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -57,12 +57,12 @@ class RateLimiter:
 
         # Role-based rate limits
         self.role_limits = {
-            Role.DEVICE: {"requests": 1000, "window": 60},  # 1000/min
-            Role.SERVICE: {"requests": 10000, "window": 60},  # 10k/min
-            Role.ADMIN: {"requests": 500, "window": 60},  # 500/min
-            Role.CLINICIAN: {"requests": 300, "window": 60},  # 300/min
-            Role.RESEARCHER: {"requests": 100, "window": 60},  # 100/min
-            Role.PATIENT: {"requests": 60, "window": 60},  # 60/min
+            Role.DEVICE: {"requests": 1000, "window": 60},  # 1000 / min
+            Role.SERVICE: {"requests": 10000, "window": 60},  # 10k / min
+            Role.ADMIN: {"requests": 500, "window": 60},  # 500 / min
+            Role.CLINICIAN: {"requests": 300, "window": 60},  # 300 / min
+            Role.RESEARCHER: {"requests": 100, "window": 60},  # 100 / min
+            Role.PATIENT: {"requests": 60, "window": 60},  # 60 / min
         }
 
     async def check_rate_limit(
@@ -196,7 +196,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         Args:
             request: HTTP request
-            call_next: Next middleware/handler
+            call_next: Next middleware / handler
 
         Returns:
             HTTP response with security headers

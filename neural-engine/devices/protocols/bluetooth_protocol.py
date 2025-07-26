@@ -4,7 +4,6 @@ This module provides Bluetooth communication capabilities for devices
 that connect via Bluetooth Low Energy (BLE) or Classic Bluetooth.
 """
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable, Union
@@ -12,7 +11,6 @@ from dataclasses import dataclass
 from enum import Enum
 import threading
 import queue
-import time
 
 try:
     import bluetooth

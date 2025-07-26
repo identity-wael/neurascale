@@ -625,7 +625,7 @@ class OpenBCIAdapter(BaseDevice):
             await self._send_command(OpenBCICommands.SAMPLE_RATE_250)
 
     async def _set_channel_state(self, channel: int, enabled: bool) -> None:
-        """Set channel on/off state.
+        """Set channel on / off state.
 
         Args:
             channel: Channel number (1-8)
@@ -813,7 +813,7 @@ class OpenBCIAdapter(BaseDevice):
             )
             data_sample.signal_quality = {"overall": quality.value}
             self.device_info.signal_quality = quality
-        except:
+        except Exception:
             # Fallback if async call fails in sync context
             data_sample.signal_quality = {"overall": "unknown"}
 

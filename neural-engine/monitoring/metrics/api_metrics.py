@@ -540,7 +540,7 @@ class APIMetricsCollector:
             "response_time_buffers": len(self.response_times),
         }
 
-    def _update_endpoint_metrics(self, event: RequestEvent) -> None:
+    def _update_endpoint_metrics(self, event: RequestEvent) -> None:  # noqa: C901
         """Update metrics for an endpoint based on a request event."""
         endpoint_key = f"{event.method} {event.endpoint}"
 

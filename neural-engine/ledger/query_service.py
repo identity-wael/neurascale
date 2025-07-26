@@ -54,7 +54,7 @@ class LedgerQueryService:
         Returns:
             List of events in chronological order
         """
-        query = f"""
+        query = """
         SELECT *
         FROM `{self.project_id}.{self.dataset_id}.{self.table_id}`
         WHERE session_id = @session_id
@@ -92,7 +92,7 @@ class LedgerQueryService:
         Returns:
             List of access events with details
         """
-        query = f"""
+        query = """
         SELECT
             timestamp,
             event_type,
@@ -153,7 +153,7 @@ class LedgerQueryService:
             Integrity verification result
         """
         # Query for the original ingestion event
-        query = f"""
+        query = """
         SELECT *
         FROM `{self.project_id}.{self.dataset_id}.{self.table_id}`
         WHERE session_id = @session_id
@@ -184,7 +184,7 @@ class LedgerQueryService:
         ingestion_event = dict(results[0])
 
         # Get all events in the chain after this ingestion
-        chain_query = f"""
+        chain_query = """
         SELECT event_hash, previous_hash, timestamp
         FROM `{self.project_id}.{self.dataset_id}.{self.table_id}`
         WHERE session_id = @session_id
@@ -232,7 +232,7 @@ class LedgerQueryService:
             HIPAA audit report data
         """
         # Query for all PHI access events
-        access_query = f"""
+        access_query = """
         SELECT
             DATE(timestamp) as access_date,
             user_id,
@@ -248,7 +248,7 @@ class LedgerQueryService:
         """
 
         # Query for authorization failures
-        auth_failures_query = f"""
+        auth_failures_query = """
         SELECT
             DATE(timestamp) as failure_date,
             user_id,
@@ -264,7 +264,7 @@ class LedgerQueryService:
         """
 
         # Query for data exports
-        export_query = f"""
+        export_query = """
         SELECT
             timestamp,
             user_id,
@@ -381,7 +381,7 @@ class LedgerQueryService:
         Returns:
             Session metrics and statistics
         """
-        query = f"""
+        query = """
         SELECT
             COUNT(*) as total_events,
             MIN(timestamp) as session_start,

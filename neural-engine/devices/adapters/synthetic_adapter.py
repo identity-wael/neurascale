@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Callable
 import numpy as np
-import math
+
 import random
 
 from ..base import (
@@ -519,7 +519,7 @@ class SyntheticAdapter(BaseDevice):
                     )
                 )
 
-                # Add 1/f noise (pink noise approximation)
+                # Add 1 / f noise (pink noise approximation)
                 low_freq_noise = (
                     0.2
                     * self.channel_amplitudes[i]

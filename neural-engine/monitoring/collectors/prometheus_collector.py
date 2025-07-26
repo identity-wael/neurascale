@@ -15,7 +15,7 @@ from prometheus_client import (
     CONTENT_TYPE_LATEST,
 )
 import time
-import asyncio
+
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union
 import logging
@@ -309,7 +309,7 @@ class PrometheusCollector:
         Args:
             device_type: Type of device
             duration_seconds: Processing duration
-            status: Processing status (success/failure)
+            status: Processing status (success / failure)
         """
         try:
             # Increment counter
@@ -379,7 +379,7 @@ class PrometheusCollector:
         """Record neural session event.
 
         Args:
-            status: Session status (started/completed/failed)
+            status: Session status (started / completed / failed)
         """
         try:
             self.counters["neural_sessions_total"].labels(status=status).inc()

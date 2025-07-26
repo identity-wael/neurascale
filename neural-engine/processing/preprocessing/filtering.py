@@ -103,7 +103,7 @@ class AdvancedFilters:
             signal_data: Signal data (channels x samples)
             frequency: Frequency to remove (Hz)
             sampling_rate: Sampling rate (Hz)
-            quality_factor: Q factor (bandwidth = frequency/Q)
+            quality_factor: Q factor (bandwidth = frequency / Q)
 
         Returns:
             Filtered signal
@@ -214,7 +214,7 @@ class AdvancedFilters:
             signal_data: Signal data (channels x samples)
             filter_params: Dictionary with filter parameters:
                 - filter_type: 'lowpass', 'highpass', 'bandpass', 'bandstop'
-                - cutoff: Cutoff frequency/frequencies
+                - cutoff: Cutoff frequency / frequencies
                 - order: Filter order
                 - ripple_pass: Passband ripple (dB)
                 - ripple_stop: Stopband attenuation (dB)
@@ -267,7 +267,7 @@ class AdvancedFilters:
         Args:
             signal_data: Signal data (channels x samples)
             filter_type: 'lowpass', 'highpass', 'bandpass', 'bandstop'
-            cutoff: Cutoff frequency/frequencies (Hz)
+            cutoff: Cutoff frequency / frequencies (Hz)
             order: Filter order
             ripple: Ripple in dB (passband for Type I, stopband for Type II)
             cheby_type: 1 or 2 for Chebyshev Type I or II
@@ -312,7 +312,7 @@ class AdvancedFilters:
         Args:
             signal_data: Signal data (channels x samples)
             filter_type: 'lowpass', 'highpass', 'bandpass', 'bandstop'
-            cutoff: Cutoff frequency/frequencies (Hz)
+            cutoff: Cutoff frequency / frequencies (Hz)
             order: Filter order
 
         Returns:

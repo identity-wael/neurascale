@@ -414,7 +414,7 @@ async def configure_device(device_id: str, config: DeviceConfigRequest):
         raise HTTPException(status_code=500, detail=f"Configuration failed: {str(e)}")
 
 
-@router.post("/{device_id}/stream/start")
+@router.post("/{device_id}/stream / start")
 async def start_streaming(device_id: str):
     """Start data streaming from a device."""
     if not device_manager:
@@ -438,7 +438,7 @@ async def start_streaming(device_id: str):
         raise HTTPException(status_code=500, detail=f"Stream start failed: {str(e)}")
 
 
-@router.post("/{device_id}/stream/stop")
+@router.post("/{device_id}/stream / stop")
 async def stop_streaming(device_id: str):
     """Stop data streaming from a device."""
     if not device_manager:
@@ -516,7 +516,7 @@ async def perform_device_test(device_id: str):
         raise HTTPException(status_code=500, detail=f"Device test failed: {str(e)}")
 
 
-@router.get("/health/status", response_model=HealthCheckResponse)
+@router.get("/health / status", response_model=HealthCheckResponse)
 async def get_health_status():
     """Get overall system health status."""
     if not health_monitor or not device_manager:
@@ -552,7 +552,7 @@ async def get_health_status():
         raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
 
 
-@router.get("/lsl/streams", response_model=List[LSLStreamResponse])
+@router.get("/lsl / streams", response_model=List[LSLStreamResponse])
 async def list_lsl_streams():
     """List available LSL streams."""
     if not lsl_integration:
@@ -584,7 +584,7 @@ async def list_lsl_streams():
         )
 
 
-@router.post("/lsl/streams/{stream_name}/connect")
+@router.post("/lsl / streams/{stream_name}/connect")
 async def connect_lsl_stream(stream_name: str, buffer_size: int = 1000):
     """Connect to an LSL stream as inlet."""
     if not lsl_integration:

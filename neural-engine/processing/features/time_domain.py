@@ -365,7 +365,7 @@ class TimeDomainFeatures:
         return approx_entropy
 
     async def _compute_hurst_exponent(self, data: np.ndarray) -> np.ndarray:
-        """Compute Hurst exponent using R/S analysis.
+        """Compute Hurst exponent using R / S analysis.
 
         Args:
             data: Signal data (channels x samples)
@@ -379,7 +379,7 @@ class TimeDomainFeatures:
         for ch in range(n_channels):
             ch_data = data[ch, :]
 
-            # R/S analysis
+            # R / S analysis
             lags = range(2, min(100, len(ch_data) // 2))
             tau = [
                 np.sqrt(np.std(np.subtract(ch_data[lag:], ch_data[:-lag])))

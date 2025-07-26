@@ -4,8 +4,6 @@ This module monitors BCI device performance including connection stability,
 data rates, signal quality, and error rates.
 """
 
-import time
-import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
@@ -556,7 +554,7 @@ class DeviceMetricsCollector:
             # Error rate (15% weight)
             error_factor = max(
                 0.0, 1.0 - (metrics.error_rate / 10.0)
-            )  # 10 errors/min = 0 health
+            )  # 10 errors / min = 0 health
             health_factors.append(error_factor * 0.15)
             if metrics.error_rate > 1.0:
                 issues.append("High error rate")

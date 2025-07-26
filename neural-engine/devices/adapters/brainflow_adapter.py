@@ -484,12 +484,12 @@ class BrainFlowAdapter(BaseDevice):
             # Get special channels
             try:
                 self.timestamp_channel = BoardShim.get_timestamp_channel(self.board_id)
-            except:
+            except Exception:
                 self.timestamp_channel = -1
 
             try:
                 self.marker_channel = BoardShim.get_marker_channel(self.board_id)
-            except:
+            except Exception:
                 self.marker_channel = -1
 
             logger.debug(
@@ -636,7 +636,7 @@ class BrainFlowAdapter(BaseDevice):
                 )
                 data_sample.signal_quality = {"overall": quality.value}
                 self.device_info.signal_quality = quality
-            except:
+            except Exception:
                 # Fallback if async call fails in sync context
                 data_sample.signal_quality = {"overall": "unknown"}
 

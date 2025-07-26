@@ -28,7 +28,7 @@ class APIMetrics:
 
     # Response time metrics (milliseconds)
     avg_response_time: float = 0.0
-    min_response_time: float = float("inf")
+    min_response_time: float = float("in")
     max_response_time: float = 0.0
     p50_response_time: float = 0.0
     p95_response_time: float = 0.0
@@ -58,7 +58,7 @@ class APIMetrics:
             "requests_per_minute": self.requests_per_minute,
             "avg_response_time_ms": self.avg_response_time,
             "min_response_time_ms": (
-                self.min_response_time if self.min_response_time != float("inf") else 0
+                self.min_response_time if self.min_response_time != float("in") else 0
             ),
             "max_response_time_ms": self.max_response_time,
             "p50_response_time_ms": self.p50_response_time,

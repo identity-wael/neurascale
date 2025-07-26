@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import asyncio
+
 from collections import defaultdict, deque
 
 logger = logging.getLogger(__name__)
@@ -96,8 +96,8 @@ class MetricAggregation:
 
     count: int = 0
     sum: float = 0.0
-    min: float = float("inf")
-    max: float = float("-inf")
+    min: float = float("in")
+    max: float = float("-in")
     mean: float = 0.0
     p50: float = 0.0
     p95: float = 0.0
@@ -520,7 +520,7 @@ class NeuralMetricsCollector:
         )
 
         if feature_time > 0:
-            return throughput * (1000.0 / feature_time)  # Convert ms to features/sec
+            return throughput * (1000.0 / feature_time)  # Convert ms to features / sec
         return 0.0
 
     def _calculate_prediction_throughput(self, session_id: str) -> float:

@@ -28,7 +28,7 @@ class QualityMetrics:
 
     # Noise estimates
     noise_level_rms: float = 0.0  # RMS noise in microvolts
-    line_noise_amplitude: float = 0.0  # 50/60 Hz noise
+    line_noise_amplitude: float = 0.0  # 50 / 60 Hz noise
 
     # Artifact detection
     artifacts_detected: Dict[str, float] = field(default_factory=dict)
@@ -36,7 +36,7 @@ class QualityMetrics:
 
     # Signal characteristics
     amplitude_range: Tuple[float, float] = (0.0, 0.0)  # Min, max in microvolts
-    baseline_drift: float = 0.0  # Drift in microvolts/second
+    baseline_drift: float = 0.0  # Drift in microvolts / second
 
     # Data quality indicators
     flatline_channels: List[int] = field(default_factory=list)
@@ -67,7 +67,7 @@ class QualityAssessment:
         self.good_snr_threshold = 10.0  # dB
         self.acceptable_snr_threshold = 5.0  # dB
         self.max_noise_level = 50.0  # microvolts RMS
-        self.max_drift_rate = 10.0  # microvolts/second
+        self.max_drift_rate = 10.0  # microvolts / second
 
         # Artifact thresholds
         self.amplitude_threshold = 200.0  # microvolts
@@ -467,7 +467,7 @@ class QualityAssessment:
             sampling_rate: Sampling rate
 
         Returns:
-            Drift rate in microvolts/second
+            Drift rate in microvolts / second
         """
         # Use low-pass filtered signal to estimate baseline
         b, a = signal.butter(4, 0.5 / (sampling_rate / 2), "low")
@@ -479,7 +479,7 @@ class QualityAssessment:
             # Fit linear trend
             time_axis = np.arange(len(baseline)) / sampling_rate
             coeffs = np.polyfit(time_axis, baseline, 1)
-            drift_rate = abs(coeffs[0])  # Slope in uV/s
+            drift_rate = abs(coeffs[0])  # Slope in uV / s
 
             drift_rates.append(drift_rate)
 
@@ -677,7 +677,7 @@ class QualityAssessment:
             )
 
         if metrics.baseline_drift > self.max_drift_rate:
-            issues.append(f"Baseline drift: {metrics.baseline_drift:.1f} µV/s")
+            issues.append(f"Baseline drift: {metrics.baseline_drift:.1f} µV / s")
 
         return issues
 

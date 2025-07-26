@@ -48,7 +48,7 @@ class SerialConfig:
     """Serial port configuration."""
 
     # Connection parameters
-    port: str = ""  # e.g., "/dev/ttyUSB0", "COM3"
+    port: str = ""  # e.g., "/dev / ttyUSB0", "COM3"
     baudrate: int = 115200
     bytesize: int = 8
     parity: SerialParity = SerialParity.NONE
@@ -266,7 +266,7 @@ class SerialProtocol:
             timeout: Read timeout in seconds
 
         Returns:
-            Received data or None if timeout/error
+            Received data or None if timeout / error
         """
         try:
             # Use provided timeout or default
@@ -288,7 +288,7 @@ class SerialProtocol:
             timeout: Read timeout in seconds
 
         Returns:
-            Received message or None if timeout/error
+            Received message or None if timeout / error
         """
         data = await self.read_data(timeout)
         if data:
@@ -557,10 +557,9 @@ class SerialProtocol:
         if self.is_connected:
             # Use asyncio.run for cleanup if in sync context
             try:
-                import asyncio
 
                 asyncio.run(self.disconnect())
-            except:
+            except Exception:
                 # Fallback to direct disconnection
                 self._stop_communication_threads()
                 if self.serial_port and self.serial_port.is_open:

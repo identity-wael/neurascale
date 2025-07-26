@@ -157,7 +157,7 @@ def main():
 
     # Example 6: Best practices summary
     print("\n7. Best Practices:")
-    print("   • Use field-level encryption for PII/PHI")
+    print("   • Use field-level encryption for PII / PHI")
     print("   • Generate session-specific DEKs for neural data")
     print("   • Enable caching for better performance")
     print("   • Monitor encryption metrics for performance")

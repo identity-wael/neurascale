@@ -53,7 +53,7 @@ class MonitoringConfig:
     prometheus_enabled: bool = True
     prometheus_port: int = 8000
     jaeger_enabled: bool = True
-    jaeger_endpoint: str = "http://localhost:14268/api/traces"
+    jaeger_endpoint: str = "http://localhost:14268 / api / traces"
 
     # Neural Ledger integration
     ledger_logging_enabled: bool = True

@@ -6,7 +6,7 @@ disk, network utilization, and application metrics.
 
 import psutil
 import time
-import asyncio
+
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
@@ -194,7 +194,7 @@ class SystemMetricsCollector:
             # Disk metrics
             disk_usage = psutil.disk_usage("/")
 
-            # Disk I/O metrics
+            # Disk I / O metrics
             disk_io_read_mb = 0.0
             disk_io_write_mb = 0.0
             try:
@@ -210,7 +210,7 @@ class SystemMetricsCollector:
                         disk_io_write_mb = (write_delta / time_delta) / (1024 * 1024)
                 self._prev_disk_io = disk_io
             except Exception as e:
-                logger.debug(f"Could not get disk I/O metrics: {str(e)}")
+                logger.debug(f"Could not get disk I / O metrics: {str(e)}")
 
             # Network metrics
             network_bytes_sent = 0.0
@@ -230,7 +230,7 @@ class SystemMetricsCollector:
                         network_bytes_recv = recv_delta / time_delta
                 self._prev_network_io = network_io
             except Exception as e:
-                logger.debug(f"Could not get network I/O metrics: {str(e)}")
+                logger.debug(f"Could not get network I / O metrics: {str(e)}")
 
             # Network connections
             network_connections = len(psutil.net_connections())
@@ -304,7 +304,7 @@ class SystemMetricsCollector:
                 error_rate_percent=0.0,  # Would be calculated from error logs
                 db_connections_active=0,  # Would be provided by database pool
                 db_connections_max=100,  # Configuration value
-                db_query_avg_time_ms=0.0,  # Would be tracked by ORM/database
+                db_query_avg_time_ms=0.0,  # Would be tracked by ORM / database
                 db_slow_queries=0,  # Would be tracked by database monitoring
                 cache_hit_rate=0.0,  # Would be provided by cache layer
                 cache_size_mb=0.0,  # Would be provided by cache layer

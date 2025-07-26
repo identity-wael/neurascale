@@ -234,7 +234,7 @@ class RBACManager:
     ) -> bool:
         """Check if resource belongs to tenant."""
         if not self.db:
-            return True  # Allow in testing/development
+            return True  # Allow in testing / development
 
         # Query database to check resource tenant
         # This would be implemented based on your database schema
@@ -248,7 +248,7 @@ class RBACManager:
     ) -> bool:
         """Check if resource belongs to patient."""
         if not self.db:
-            return True  # Allow in testing/development
+            return True  # Allow in testing / development
 
         # Check if resource is owned by patient
         logger.info(
@@ -261,7 +261,7 @@ class RBACManager:
     ) -> bool:
         """Check if resource is available in anonymized form."""
         if not self.db:
-            return True  # Allow in testing/development
+            return True  # Allow in testing / development
 
         # Check if resource has been anonymized for research
         logger.info(f"Checking anonymized access to {resource_type}/{resource_id}")
@@ -272,7 +272,7 @@ class RBACManager:
     ) -> bool:
         """Check if clinician has access to patient resource."""
         if not self.db:
-            return True  # Allow in testing/development
+            return True  # Allow in testing / development
 
         # Check patient-clinician relationship
         logger.info(
@@ -285,7 +285,7 @@ class RBACManager:
     ) -> bool:
         """Check if service account has access to resource."""
         if not self.db:
-            return True  # Allow in testing/development
+            return True  # Allow in testing / development
 
         # Check service account permissions
         logger.info(

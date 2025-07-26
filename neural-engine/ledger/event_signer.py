@@ -56,7 +56,7 @@ class EventSigner:
         # Build key name
         self.key_name = (
             f"projects/{project_id}/locations/{location}/"
-            f"keyRings/{keyring}/cryptoKeys/{key}/cryptoKeyVersions/1"
+            f"keyRings/{keyring}/cryptoKeys/{key}/cryptoKeyVersions / 1"
         )
 
         logger.info(f"Initialized EventSigner with key: {self.key_name}")
@@ -169,7 +169,7 @@ class EventSigner:
             except InvalidSignature:
                 logger.error(
                     f"Invalid signature for event {event.event_id}: "
-                    f"signature does not match message"
+                    "signature does not match message"
                 )
                 return False
 

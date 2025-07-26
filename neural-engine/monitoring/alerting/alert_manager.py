@@ -4,14 +4,12 @@ This module provides comprehensive alert management including rule evaluation,
 alert triggering, suppression, and integration with notification services.
 """
 
-import asyncio
-import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Callable, Set
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import json
+
 from collections import defaultdict, deque
 
 logger = logging.getLogger(__name__)
@@ -505,7 +503,7 @@ class AlertManager:
         """Trigger a manual alert.
 
         Args:
-            alert_type: Type/category of alert
+            alert_type: Type / category of alert
             message: Alert message
             severity: Alert severity level
             details: Optional additional details

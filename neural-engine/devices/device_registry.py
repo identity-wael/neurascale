@@ -8,7 +8,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Set
-import asyncio
+
 import uuid
 
 try:
@@ -29,7 +29,7 @@ class DeviceRegistry:
     """Registry for managing BCI device metadata and state."""
 
     def __init__(
-        self, redis_url: str = "redis://localhost:6379/0", use_redis: bool = True
+        self, redis_url: str = "redis://localhost:6379 / 0", use_redis: bool = True
     ):
         """Initialize DeviceRegistry.
 

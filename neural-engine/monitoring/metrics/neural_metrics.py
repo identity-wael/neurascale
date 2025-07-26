@@ -7,7 +7,7 @@ including signal processing latency, data quality, and throughput.
 import time
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
@@ -146,7 +146,7 @@ class NeuralMetricsCollector:
             metric_type: Type of metric being timed
         """
         current_time = time.perf_counter()
-        timer_key = f"{session_id}_{metric_type.value}"
+        # timer_key = f"{session_id}_{metric_type.value}"  # Not used currently
         self._session_timers[session_id][metric_type.value] = current_time
 
     def end_timing(self, session_id: str, metric_type: MetricType) -> float:

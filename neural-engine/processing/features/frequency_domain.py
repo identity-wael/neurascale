@@ -46,7 +46,7 @@ class FrequencyDomainFeatures:
 
         logger.info("FrequencyDomainFeatures initialized")
 
-    async def extract_power_spectral_density(
+    async def extract_power_spectral_density(  # noqa: C901
         self,
         data: np.ndarray,
         freq_bands: Optional[Dict[str, Tuple[float, float]]] = None,

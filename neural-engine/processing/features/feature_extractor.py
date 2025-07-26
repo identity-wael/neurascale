@@ -55,7 +55,7 @@ class FeatureExtractor:
 
         logger.info("Feature extractor initialization complete")
 
-    async def extract_features(
+    async def extract_features(  # noqa: C901
         self, data: np.ndarray, quality_score: float = 1.0
     ) -> Dict[str, np.ndarray]:
         """Extract all enabled features from signal data.

@@ -13,7 +13,7 @@ resource "google_bigtable_app_profile" "autoscaling" {
   app_profile_id = "autoscaling-profile"
 
   single_cluster_routing {
-    cluster_id                 = "${module.neural_ingestion.bigtable_instance_id}-cluster"
+    cluster_id                 = "neural-data-cluster-${local.env_short}"
     allow_transactional_writes = false
   }
 }
@@ -30,7 +30,7 @@ resource "google_cloud_scheduler_job" "scale_down_dev" {
 
   http_target {
     http_method = "POST"
-    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/${module.neural_ingestion.bigtable_instance_id}-cluster"
+    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/neural-data-cluster-${local.env_short}"
 
     body = base64encode(jsonencode({
       serveNodes = var.bigtable_min_nodes_dev
@@ -54,7 +54,7 @@ resource "google_cloud_scheduler_job" "scale_up_dev" {
 
   http_target {
     http_method = "POST"
-    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/${module.neural_ingestion.bigtable_instance_id}-cluster"
+    uri         = "https://bigtableadmin.googleapis.com/v2/projects/${var.project_id}/instances/${module.neural_ingestion.bigtable_instance_id}/clusters/neural-data-cluster-${local.env_short}"
 
     body = base64encode(jsonencode({
       serveNodes = var.bigtable_nodes_dev

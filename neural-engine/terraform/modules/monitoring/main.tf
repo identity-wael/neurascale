@@ -321,7 +321,7 @@ resource "google_monitoring_notification_channel" "pagerduty" {
   type         = "pagerduty"
 
   labels = {
-    "servicekey" = "YOUR_PAGERDUTY_INTEGRATION_KEY" # TODO: Use Secret Manager
+    "service_key" = "YOUR_PAGERDUTY_INTEGRATION_KEY" # TODO: Use Secret Manager
   }
 
   enabled = true

@@ -197,7 +197,7 @@ jobs:
   # Build Docker images only if tests pass
   build:
     needs: [setup, test]
-    if: success() && false  # Temporarily skip builds for Terraform-only fix
+    if: success()
     runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -370,7 +370,7 @@ jobs:
 
   # Deploy infrastructure
   deploy:
-    needs: [setup, test, package-functions]  # Temporarily removed build dependency
+    needs: [setup, test, build, package-functions]
     if: |
       success() &&
       (github.event_name == 'push' ||
@@ -410,11 +410,18 @@ jobs:
             -upgrade \
             -lock=false
 
-      - name: Import existing resources (staging only)
-        if: needs.setup.outputs.environment == 'staging'
+      - name: Import existing resources
+        if: needs.setup.outputs.environment == 'staging' || needs.setup.outputs.environment == 'production'
         working-directory: neural-engine/terraform
         run: |
-          # Remove and re-import resources that already exist in staging
+          # Determine the service account suffix based on environment
+          if [[ "${{ needs.setup.outputs.environment }}" == "production" ]]; then
+            SA_SUFFIX="prod"
+          else
+            SA_SUFFIX="stag"
+          fi
+
+          # Remove and re-import resources that already exist
           terraform state rm module.neural_ingestion.google_artifact_registry_repository.neural_engine || true
           terraform state rm module.neural_ingestion.google_service_account.ingestion || true
 
@@ -431,7 +438,7 @@ jobs:
             -var="project_id=${{ needs.setup.outputs.project_id }}" \
             -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
             module.neural_ingestion.google_service_account.ingestion \
-            "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-stag@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
+            "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-${SA_SUFFIX}@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
 
       - name: Terraform Plan and Apply
         working-directory: neural-engine/terraform

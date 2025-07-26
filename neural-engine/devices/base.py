@@ -9,7 +9,7 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable, AsyncIterator
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 import numpy as np
 

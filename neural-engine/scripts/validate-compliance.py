@@ -9,16 +9,13 @@ the required compliance frameworks: HIPAA, GDPR, and FDA 21 CFR Part 11.
 
 import asyncio
 import uuid
-import json
 import hashlib
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from unittest.mock import Mock
 
 # Import ledger components
 from ledger.neural_ledger import NeuralLedger
-from ledger.event_schema import EventType, NeuralLedgerEvent
-from ledger.event_signer import EventSigner
-from ledger.query_service import LedgerQueryService
+from ledger.event_schema import EventType
 
 
 class ComplianceValidator:

@@ -7,7 +7,7 @@ and configurations to ensure real-time processing capability.
 import time
 import numpy as np
 import pandas as pd
-from typing import List, Dict, Any
+from typing import List
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import os
@@ -68,7 +68,7 @@ class EncryptionBenchmark:
 
             # Benchmark decryption
             start_time = time.time()
-            decrypted_data = self.encryption.decrypt_neural_data(
+            _decrypted_data = self.encryption.decrypt_neural_data(
                 encrypted_data, encrypted_dek
             )
             decrypt_duration = (time.time() - start_time) * 1000
@@ -142,7 +142,7 @@ class EncryptionBenchmark:
 
         # Benchmark decryption
         start_time = time.time()
-        decrypted_data = self.field_encryption.decrypt_fields(
+        _decrypted_data = self.field_encryption.decrypt_fields(
             encrypted_data, fields_to_encrypt
         )
         decrypt_duration = (time.time() - start_time) * 1000
@@ -213,7 +213,7 @@ class EncryptionBenchmark:
 
             print(
                 f"  Batch size {batch_size}: {encrypt_duration:.2f}ms "
-                f"({encrypt_duration/batch_size:.2f}ms per chunk)"
+                f"({encrypt_duration / batch_size:.2f}ms per chunk)"
             )
 
     def benchmark_key_operations(self):
@@ -239,7 +239,7 @@ class EncryptionBenchmark:
 
         # Benchmark key rotation
         start_time = time.time()
-        new_encrypted_dek = self.encryption.rotate_dek(encrypted_dek)
+        _new_encrypted_dek = self.encryption.rotate_dek(encrypted_dek)
         rotate_duration = (time.time() - start_time) * 1000
 
         print(f"  DEK generation: {gen_duration:.2f}ms avg")
@@ -294,7 +294,7 @@ class EncryptionBenchmark:
 
         # 4. Metrics summary
         ax = axes[1, 1]
-        ax.axis("off")
+        ax.axis("of")
         metrics = self.encryption.get_metrics_summary()
         summary_text = "Encryption Metrics Summary\n\n"
 
@@ -328,7 +328,7 @@ class EncryptionBenchmark:
         fast_ops = df[df["duration_ms"] < real_time_threshold_ms]
         print(
             f"\n  Operations under {real_time_threshold_ms}ms: "
-            f"{len(fast_ops)}/{len(df)} ({len(fast_ops)/len(df)*100:.1f}%)"
+            f"{len(fast_ops)}/{len(df)} ({len(fast_ops) / len(df) * 100:.1f}%)"
         )
 
     def run_all_benchmarks(self):

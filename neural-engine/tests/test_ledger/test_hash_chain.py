@@ -25,7 +25,7 @@ class TestHashChain:
 
         # Verify hash is 64 characters (SHA-256)
         assert len(hash_result) == 64
-        assert all(c in "0123456789abcdef" for c in hash_result)
+        assert all(c in "0123456789abcde" for c in hash_result)
 
     def test_compute_data_hash(self):
         """Test data hash computation."""

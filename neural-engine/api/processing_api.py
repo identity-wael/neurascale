@@ -14,16 +14,12 @@ from fastapi import (
 )
 from typing import Dict, List, Optional, Any
 import numpy as np
-import json
-import asyncio
-from datetime import datetime
 from pydantic import BaseModel, Field
 import logging
 
-from ..processing.signal_processor import AdvancedSignalProcessor, ProcessingConfig
-from ..processing.stream_processor import StreamProcessor, StreamConfig
-from ..processing.quality_monitor import QualityMonitor, QualityThresholds
-from ..processing.preprocessing.quality_assessment import QualityAssessment
+from ..processing.signal_processor import AdvancedSignalProcessor
+from ..processing.stream_processor import StreamProcessor
+from ..processing.quality_monitor import QualityMonitor
 from ..core.dependencies import get_processor, get_stream_processor, get_quality_monitor
 
 logger = logging.getLogger(__name__)
@@ -346,7 +342,7 @@ async def stream_websocket(
     finally:
         try:
             await websocket.close()
-        except:
+        except Exception:
             pass
 
 

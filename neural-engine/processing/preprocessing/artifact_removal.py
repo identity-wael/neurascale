@@ -84,8 +84,8 @@ class ArtifactRemover:
                     ch_data = eog_data[i, :]
 
                     # Calculate moving standard deviation
-                    window_size = int(0.5 * self.config.sampling_rate)  # 500ms window
-                    rolling_std = self._moving_std(ch_data, window_size)
+                    # window_size = int(0.5 * self.config.sampling_rate)  # 500ms window
+                    # rolling_std = self._moving_std(ch_data, window_size)
 
                     # Find periods where amplitude exceeds threshold
                     artifact_mask = np.abs(ch_data) > self.eog_threshold

@@ -5,9 +5,9 @@ and other frequency-domain features for neural signals.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Any, Optional, Tuple
 import numpy as np
-from scipy import signal, stats
+from scipy import signal
 from scipy.integrate import simps
 import warnings
 

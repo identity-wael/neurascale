@@ -5,11 +5,10 @@ notch filters, and advanced digital filter designs.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
+from typing import Dict, List, Any, Tuple, Union
 import numpy as np
 from scipy import signal
 from scipy.signal import butter, ellip, cheby1, cheby2, bessel, filtfilt
-import warnings
 
 logger = logging.getLogger(__name__)
 

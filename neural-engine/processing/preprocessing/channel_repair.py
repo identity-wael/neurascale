@@ -5,12 +5,11 @@ through various interpolation techniques.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.interpolate import griddata
 from sklearn.covariance import EllipticEnvelope
-import warnings
 
 logger = logging.getLogger(__name__)
 

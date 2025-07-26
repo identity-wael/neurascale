@@ -5,7 +5,7 @@ Morlet wavelets, and Hilbert-Huang transform for time-frequency feature extracti
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 import numpy as np
 from scipy import signal
 import pywt
@@ -669,6 +669,8 @@ class TimeFrequencyFeatures:
             for i in range(data.shape[0]):
                 row_data = data[i, :] if axis == 1 else data[:, i]
                 if np.std(row_data) > 0:
+                    from scipy import stats
+
                     skew_values[i] = stats.skew(row_data)
             return skew_values
 

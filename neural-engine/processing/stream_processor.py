@@ -6,7 +6,7 @@ sliding windows, and continuous feature extraction.
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Callable
 import numpy as np
 from collections import deque
 from datetime import datetime
@@ -14,8 +14,8 @@ import time
 from dataclasses import dataclass, field
 import threading
 
-from .buffer_manager import BufferManager, StreamBuffer
-from .signal_processor import AdvancedSignalProcessor, ProcessedSignal
+from .buffer_manager import BufferManager
+from .signal_processor import AdvancedSignalProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -302,7 +302,7 @@ class StreamProcessor:
             # Add processing request to queue
             if not self.processing_queue.full():
                 await self.processing_queue.put(time.time())
-        except:
+        except Exception:
             pass
 
     async def _process_windows(self) -> None:

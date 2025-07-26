@@ -5,12 +5,11 @@ spatial complexity measures, and topographical patterns.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Any, Optional
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 from scipy import stats
 from sklearn.decomposition import PCA
-import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -186,8 +185,8 @@ class SpatialFeatures:
 
             # Statistics of principal components
             for i in range(pc_data.shape[0]):
-                features[f"pc{i+1}_variance"] = np.array([np.var(pc_data[i, :])])
-                features[f"pc{i+1}_kurtosis"] = np.array(
+                features[f"pc{i + 1}_variance"] = np.array([np.var(pc_data[i, :])])
+                features[f"pc{i + 1}_kurtosis"] = np.array(
                     [stats.kurtosis(pc_data[i, :])]
                 )
 
@@ -269,8 +268,8 @@ class SpatialFeatures:
                 # Count connections between neighbors
                 neighbor_connections = 0
                 for j in range(len(neighbors)):
-                    for l in range(j + 1, len(neighbors)):
-                        if adj_matrix[neighbors[j], neighbors[l]]:
+                    for k_idx in range(j + 1, len(neighbors)):
+                        if adj_matrix[neighbors[j], neighbors[k_idx]]:
                             neighbor_connections += 1
 
                 # Clustering coefficient

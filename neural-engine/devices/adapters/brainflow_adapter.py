@@ -19,7 +19,11 @@ try:
         BoardIds,
         BrainFlowPresets,
     )
-    from brainflow.data_filter import DataFilter, FilterTypes, AggOperations  # noqa: F401
+    from brainflow.data_filter import (  # noqa: F401
+        DataFilter,
+        FilterTypes,
+        AggOperations,
+    )
 
     BRAINFLOW_AVAILABLE = True
 except ImportError:

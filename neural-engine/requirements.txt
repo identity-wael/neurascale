@@ -40,7 +40,7 @@ google-cloud-scheduler==2.16.0   # Cron jobs
 
 # API Framework (Cloud Run compatible)
 flask==3.1.1
-flask-cors==5.0.0
+flask-cors==6.0.1  # Updated to fix security vulnerabilities (CVE-2024-12866, CVE-2024-13011, CVE-2025-0189)
 gunicorn==23.0.0
 # google-cloud-endpoints         # Deprecated, use Cloud Run/API Gateway instead
 
@@ -54,14 +54,14 @@ msgpack==1.0.8
 lz4==4.3.3
 
 # Deep Learning
-torch==2.5.1  # PyTorch for Python 3.12
+torch==2.7.1  # Updated to fix security vulnerabilities
 
 # API Framework additions
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 pydantic==2.10.0
 websockets==11.0.3
-python-multipart==0.0.6
+python-multipart==0.0.18  # Updated to fix security vulnerabilities
 
 # Cloud Functions
 functions-framework==3.8.2
@@ -76,7 +76,7 @@ tqdm==4.67.0
 statsmodels==0.14.4
 
 # Async support
-aiohttp==3.10.11
+aiohttp==3.12.14  # Updated to fix security vulnerability
 aiokafka==0.11.0
 asyncpg==0.30.0
 
@@ -85,8 +85,8 @@ redis==5.2.0
 pymemcache==4.0.0
 
 # Security
-cryptography==44.0.0
-pyjwt==2.10.0
+cryptography==44.0.1  # Updated to fix security vulnerability
+pyjwt==2.10.1  # Updated to fix security vulnerability
 
 # Google Cloud Error Reporting (missing from original)
 google-cloud-error-reporting==1.12.0

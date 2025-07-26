@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import statistics
 
-from .base import DeviceInfo, DeviceStatus, DeviceEvent, SignalQuality
+from .base import SignalQuality
 
 logger = logging.getLogger(__name__)
 

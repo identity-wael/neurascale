@@ -56,6 +56,17 @@ navigation:
     url: /
   - title: Neural Management System
     url: /neural-management-system/
+    sublinks:
+      - title: Overview
+        url: /neural-management-system/
+      - title: Dataset Management
+        url: /dataset-management/
+      - title: Security & Encryption
+        url: /security-encryption/
+      - title: API Documentation
+        url: /api-documentation/
+  - title: Architecture
+    url: /architecture/
   - title: Getting Started
     sublinks:
       - title: Overview

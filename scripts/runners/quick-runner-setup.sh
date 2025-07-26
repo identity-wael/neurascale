@@ -9,6 +9,15 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
+# Install GPG if not already installed (for Codecov)
+echo "Checking GPG installation..."
+if ! command -v gpg &> /dev/null; then
+    echo "Installing GPG via Homebrew..."
+    brew install gnupg
+else
+    echo "GPG is already installed: $(gpg --version | head -n 1)"
+fi
+
 # Runner 2
 cd /Users/weg
 mkdir -p actions-runner-2 && cd actions-runner-2

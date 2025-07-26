@@ -124,12 +124,13 @@ class EventSigner:
             True if signature is valid, False otherwise
         """
         try:
+            from cryptography.hazmat.primitives import hashes, serialization
+            from cryptography.hazmat.primitives.asymmetric import padding, utils
+            from cryptography.exceptions import InvalidSignature
+
             # Create the same payload that was signed
             payload = self._create_signing_payload(event)
             message = json.dumps(payload, sort_keys=True).encode()
-
-            # Create digest
-            digest = {"sha256": hashlib.sha256(message).digest()}
 
             # Decode signature
             signature_bytes = base64.b64decode(signature)
@@ -139,31 +140,38 @@ class EventSigner:
                 request={"name": self.key_name}
             )
 
-            # TODO: Implement actual cryptographic verification using public key
-            # For now, we validate that we can get the public key and the signature format is valid
-            # In production, use cryptography library to verify:
-            # from cryptography.hazmat.primitives import hashes, serialization
-            # from cryptography.hazmat.primitives.asymmetric import padding, utils
-            # public_key = serialization.load_pem_public_key(public_key_response.pem.encode())
-            # public_key.verify(signature_bytes, message, padding.PSS(...), hashes.SHA256())
-
-            # Basic validation checks
             if not public_key_response.pem:
                 raise ValueError("No public key returned from KMS")
 
-            if len(signature_bytes) < 64:  # Basic signature length check
-                raise ValueError(f"Invalid signature length: {len(signature_bytes)}")
-
-            # Verify digest format
-            if "sha256" not in digest or len(digest["sha256"]) != 32:
-                raise ValueError("Invalid digest format")
-
-            logger.info(
-                f"Signature validation passed for event {event.event_id} "
-                f"(signature: {signature[:16]}..., key: {public_key_response.name})"
+            # Load the public key
+            public_key = serialization.load_pem_public_key(
+                public_key_response.pem.encode()
             )
 
-            return True
+            # Verify the signature using RSA PSS padding with SHA-256
+            try:
+                public_key.verify(
+                    signature_bytes,
+                    message,
+                    padding.PSS(
+                        mgf=padding.MGF1(hashes.SHA256()),
+                        salt_length=padding.PSS.MAX_LENGTH,
+                    ),
+                    hashes.SHA256(),
+                )
+
+                logger.info(
+                    f"Signature verified successfully for event {event.event_id} "
+                    f"(signature: {signature[:16]}..., key: {self.key_name})"
+                )
+                return True
+
+            except InvalidSignature:
+                logger.error(
+                    f"Invalid signature for event {event.event_id}: "
+                    f"signature does not match message"
+                )
+                return False
 
         except Exception as e:
             logger.error(

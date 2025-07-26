@@ -15,6 +15,7 @@ from google.cloud import bigtable, firestore, bigquery
 from google.cloud import kms
 from .event_schema import NeuralLedgerEvent, EventType, requires_signature
 from .event_signer import EventSigner
+from .monitoring import LedgerMonitoring, MetricType
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,9 @@ class EventProcessor:
             "storage_failures": 0,
             "signature_verifications": 0,
         }
+
+        # Initialize monitoring
+        self.monitoring = LedgerMonitoring(project_id=project_id, location=location)
 
     async def process_event(self, event_data: Dict[str, Any]) -> bool:
         """Process a single event with parallel storage writes.
@@ -194,8 +198,23 @@ class EventProcessor:
             logger.error(f"Critical event {event.event_id} missing signature")
             return False
 
+        # Time the verification
+        verification_start = datetime.now(timezone.utc)
+
         # Verify signature using KMS
         is_valid = await self.event_signer.verify_signature(event, event.signature)
+
+        # Calculate verification time
+        verification_time_ms = (
+            datetime.now(timezone.utc) - verification_start
+        ).total_seconds() * 1000
+
+        # Record metrics
+        self.monitoring.record_signature_verification(
+            event_type=event.event_type.value,
+            verification_time_ms=verification_time_ms,
+            success=is_valid,
+        )
 
         self.metrics["signature_verifications"] += 1
 
@@ -336,8 +355,11 @@ class EventProcessor:
         # Calculate processing latency
         latency_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
-        # Log to Cloud Monitoring (placeholder)
-        # TODO: Implement actual Cloud Monitoring integration
+        # Record metrics using monitoring service
+        self.monitoring.record_event_processing(
+            event_type=event.event_type.value, latency_ms=latency_ms, success=True
+        )
+
         logger.debug(f"Event processing latency: {latency_ms:.2f}ms")
 
     def _is_compliance_event(self, event_type: EventType) -> bool:

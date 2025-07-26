@@ -263,7 +263,7 @@ class PhysioNetLoader(BaseDataset):
             return subject_dir.exists() and any(subject_dir.glob("*.edf"))
         return self.dataset_dir.exists() and any(self.dataset_dir.rglob("*.edf"))
 
-    def _load_eegmmidb(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _load_eegmmidb(self) -> Tuple[np.ndarray, np.ndarray]:  # noqa: C901
         """Load EEG Motor Movement/Imagery Database."""
         subjects = self.config.subjects
         if subjects is None:

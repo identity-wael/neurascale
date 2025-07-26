@@ -382,7 +382,7 @@ class DataQualityValidator:
 
         return channel_quality
 
-    def _assess_overall_quality(
+    def _assess_overall_quality(  # noqa: C901
         self,
         snr_db: float,
         correlations: np.ndarray,

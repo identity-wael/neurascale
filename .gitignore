@@ -67,3 +67,5 @@ scripts/google/ga4-config.json
 # Project management
 tasks.md
 venv/
+# Letta memory (contains passwords)
+letta-memory/

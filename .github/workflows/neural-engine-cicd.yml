@@ -51,7 +51,7 @@ jobs:
         id: cache-check
         run: |
           # Create a hash of all test-related files
-          CACHE_KEY=$(find neural-engine/src neural-engine/tests neural-engine/requirements*.txt .github/workflows/neural-engine-cicd.yml -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
+          CACHE_KEY=$(find neural-engine/src neural-engine/api neural-engine/devices neural-engine/ledger neural-engine/monitoring neural-engine/security neural-engine/tests neural-engine/requirements*.txt .github/workflows/neural-engine-cicd.yml -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
           echo "cache-key=test-$CACHE_KEY-py3.12.11" >> $GITHUB_OUTPUT
 
       - name: Cache test results
@@ -176,8 +176,8 @@ jobs:
         run: |
           source ../venv/bin/activate
           # Run tests that don't require external dependencies (LSL, hardware devices)
-          # Device tests are skipped in CI as they require Lab Streaming Layer binaries
-          pytest tests/unit/test_ingestion/ tests/unit/test_project_structure.py tests/test_basic.py -v --cov=src --cov-report=xml
+          # Device tests that require Lab Streaming Layer binaries are skipped
+          pytest tests/unit/test_ingestion/ tests/unit/test_project_structure.py tests/test_basic.py tests/test_device_interface_enhancements.py -v --cov=src --cov-report=xml
 
       - name: Upload coverage
         if: steps.test-cache.outputs.cache-hit != 'true'

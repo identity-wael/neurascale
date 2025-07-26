@@ -868,7 +868,7 @@ class TestFDA21CFRPart11Compliance:
             event_type=EventType.ACCESS_GRANTED,
             user_id=investigator_id,
             metadata={
-                "document_accessed": "PROTOCOL_VERSION_2.1.pdf",
+                "document_accessed": "PROTOCOL_VERSION_2.1.pd",
                 "access_purpose": "PROTOCOL_REVIEW",
                 "document_version": "2.1",
                 "document_hash": "sha256:protocol_hash_456",

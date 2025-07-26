@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-from neural_engine.datasets import DatasetManager, DatasetRegistry
+from neural_engine.datasets import DatasetManager
 from neural_engine.datasets.synthetic_dataset import SyntheticNeuralDataset
 from neural_engine.datasets.base_dataset import DatasetSplit
 

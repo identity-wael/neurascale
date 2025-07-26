@@ -9,7 +9,6 @@ This script demonstrates how to:
 
 import os
 import numpy as np
-import json
 from datetime import datetime
 
 from encryption import NeuralDataEncryption, FieldLevelEncryption
@@ -45,12 +44,12 @@ def main():
 
     # Encrypt the data
     encrypted_data, encrypted_dek = encryption.encrypt_neural_data(neural_data)
-    print(f"   ✓ Data encrypted")
+    print("   ✓ Data encrypted")
     print(f"   Encrypted size: {len(encrypted_data) / 1024:.2f} KB")
 
     # Decrypt to verify
     decrypted_data = encryption.decrypt_neural_data(encrypted_data, encrypted_dek)
-    print(f"   ✓ Data decrypted")
+    print("   ✓ Data decrypted")
     print(f"   Decryption verified: {np.array_equal(neural_data, decrypted_data)}")
 
     # Example 2: Field-level encryption for patient data
@@ -121,7 +120,7 @@ def main():
 
     # Generate a single DEK for the stream
     stream_dek = encryption.generate_dek()
-    print(f"   ✓ Generated stream DEK")
+    print("   ✓ Generated stream DEK")
 
     encrypted_chunks = []
     for i in range(num_chunks):
@@ -139,7 +138,7 @@ def main():
 
     # Rotate the stream DEK
     try:
-        new_stream_dek = encryption.rotate_dek(stream_dek)
+        _new_stream_dek = encryption.rotate_dek(stream_dek)
         print("   ✓ DEK rotated successfully")
     except Exception as e:
         print(f"   ! Key rotation skipped (requires KMS): {e}")
@@ -154,7 +153,7 @@ def main():
             print(f"     - Total operations: {stats['total_operations']}")
             print(f"     - Success rate: {stats['success_rate']:.1%}")
             print(f"     - Avg duration: {stats['average_duration_ms']:.2f}ms")
-            print(f"     - Avg data size: {stats['average_size_bytes']/1024:.2f}KB")
+            print(f"     - Avg data size: {stats['average_size_bytes'] / 1024:.2f}KB")
 
     # Example 6: Best practices summary
     print("\n7. Best Practices:")

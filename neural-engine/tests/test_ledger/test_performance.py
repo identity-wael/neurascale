@@ -102,7 +102,7 @@ class TestNeuralLedgerPerformance:
             stats["mean"] < 0.5
         ), f"Event creation mean latency {stats['mean']:.2f}ms exceeds 0.5ms"
 
-        print(f"\nEvent Creation Performance:")
+        print("\nEvent Creation Performance:")
         print(f"  Mean: {stats['mean']:.3f}ms")
         print(f"  P95: {stats['p95']:.3f}ms")
         print(f"  P99: {stats['p99']:.3f}ms")
@@ -131,7 +131,7 @@ class TestNeuralLedgerPerformance:
             stats["mean"] < 2.0
         ), f"Hash computation mean latency {stats['mean']:.2f}ms exceeds 2ms"
 
-        print(f"\nHash Computation Performance:")
+        print("\nHash Computation Performance:")
         print(f"  Mean: {stats['mean']:.3f}ms")
         print(f"  P95: {stats['p95']:.3f}ms")
         print(f"  P99: {stats['p99']:.3f}ms")
@@ -164,7 +164,7 @@ class TestNeuralLedgerPerformance:
             stats["mean"] < 50.0
         ), f"Event logging mean latency {stats['mean']:.2f}ms exceeds 50ms"
 
-        print(f"\nEvent Logging Performance:")
+        print("\nEvent Logging Performance:")
         print(f"  Mean: {stats['mean']:.3f}ms")
         print(f"  P95: {stats['p95']:.3f}ms")
         print(f"  P99: {stats['p99']:.3f}ms")
@@ -235,7 +235,7 @@ class TestNeuralLedgerPerformance:
 
         computation_time_ms = (end - start) * 1000
 
-        print(f"\nMerkle Tree Performance (1000 events):")
+        print("\nMerkle Tree Performance (1000 events):")
         print(f"  Computation time: {computation_time_ms:.2f}ms")
 
         # Merkle tree computation should be efficient
@@ -290,7 +290,7 @@ class TestNeuralLedgerPerformance:
 
         stats = await self._measure_latency(process_event, iterations=100)
 
-        print(f"\nEvent Processor Performance:")
+        print("\nEvent Processor Performance:")
         print(f"  Mean: {stats['mean']:.3f}ms")
         print(f"  P95: {stats['p95']:.3f}ms")
         print(f"  P99: {stats['p99']:.3f}ms")
@@ -341,7 +341,7 @@ class TestNeuralLedgerPerformance:
         processing_time_s = end - start
         throughput = batch_size / processing_time_s
 
-        print(f"\nBatch Processing Performance:")
+        print("\nBatch Processing Performance:")
         print(f"  Batch size: {batch_size}")
         print(f"  Processing time: {processing_time_s:.2f}s")
         print(f"  Throughput: {throughput:.0f} events/second")
@@ -368,7 +368,7 @@ class TestNeuralLedgerPerformance:
         event_size = sys.getsizeof(event)
         dict_size = sys.getsizeof(event.to_dict())
 
-        print(f"\nMemory Efficiency:")
+        print("\nMemory Efficiency:")
         print(f"  Event object size: {event_size} bytes")
         print(f"  Event dict size: {dict_size} bytes")
 
@@ -434,7 +434,7 @@ class TestPerformanceUnderLoad:
             errors / (events_logged + errors) if (events_logged + errors) > 0 else 0
         )
 
-        print(f"\nSustained Load Test Results:")
+        print("\nSustained Load Test Results:")
         print(f"  Duration: {target_duration}s")
         print(f"  Events logged: {events_logged}")
         print(f"  Errors: {errors}")

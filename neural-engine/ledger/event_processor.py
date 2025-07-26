@@ -15,7 +15,7 @@ from google.cloud import bigtable, firestore, bigquery
 from google.cloud import kms
 from .event_schema import NeuralLedgerEvent, EventType, requires_signature
 from .event_signer import EventSigner
-from .monitoring import LedgerMonitoring, MetricType
+from .monitoring import LedgerMonitoring
 
 logger = logging.getLogger(__name__)
 

@@ -204,7 +204,7 @@ class TestDatasetManager:
     def test_delete_dataset(self, manager):
         """Test deleting dataset."""
         # Load dataset first
-        dataset = manager.load_dataset("mock")
+        _dataset = manager.load_dataset("mock")
         assert manager.is_downloaded("mock")
 
         # Delete it
@@ -215,7 +215,7 @@ class TestDatasetManager:
         """Test clearing cache."""
         # Load datasets
         dataset1 = manager.load_dataset("mock")
-        dataset2 = manager.load_dataset("another")
+        _dataset2 = manager.load_dataset("another")
 
         # Clear all caches
         manager.clear_cache()
@@ -252,7 +252,7 @@ class TestDatasetManager:
         # Disable lazy loading
         manager.disable_lazy_loading()
 
-        dataset = manager.load_dataset("mock")
+        _dataset = manager.load_dataset("mock")
 
         # Should not be cached
         assert len(manager._loaded_datasets) == 0
@@ -268,7 +268,7 @@ class TestDatasetManager:
     def test_metadata_persistence(self, manager):
         """Test metadata persistence."""
         # Load dataset to generate metadata
-        info = manager.get_dataset_info("mock")
+        _info = manager.get_dataset_info("mock")
 
         # Check metadata file exists
         assert manager._metadata_file.exists()

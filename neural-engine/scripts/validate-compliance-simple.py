@@ -8,9 +8,10 @@ This script validates the compliance testing structure without requiring GCP dep
 
 import os
 import sys
+from typing import Dict, List
 
 
-def validate_compliance_test_structure():
+def validate_compliance_test_structure() -> bool:
     """Validate that compliance tests are properly structured."""
     print("Neural Ledger Compliance Test Validation")
     print("=" * 40)
@@ -156,7 +157,7 @@ def validate_compliance_test_structure():
     return overall_compliant
 
 
-def validate_deployment_scripts():
+def validate_deployment_scripts() -> Dict[str, List[str]]:
     """Validate that deployment scripts support compliance requirements."""
     print("\n" + "=" * 40)
     print("DEPLOYMENT COMPLIANCE VALIDATION")
@@ -193,7 +194,7 @@ def validate_deployment_scripts():
     return script_compliance
 
 
-def main():
+def main() -> None:
     """Main validation function."""
     # Validate compliance test structure
     compliance_valid = validate_compliance_test_structure()

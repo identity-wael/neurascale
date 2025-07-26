@@ -125,7 +125,7 @@ class EventSigner:
         """
         try:
             from cryptography.hazmat.primitives import hashes, serialization
-            from cryptography.hazmat.primitives.asymmetric import padding, utils
+            from cryptography.hazmat.primitives.asymmetric import padding
             from cryptography.exceptions import InvalidSignature
 
             # Create the same payload that was signed

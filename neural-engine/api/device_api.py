@@ -126,7 +126,7 @@ router = APIRouter(prefix="/devices", tags=["devices"])
 @router.on_event("startup")
 async def startup_device_services():
     """Initialize device management services on API startup."""
-    global device_manager, device_registry, health_monitor, lsl_integration
+    global device_manager, device_registry, health_monitor, lsl_integration  # noqa: F824
 
     try:
         # Initialize registry
@@ -158,7 +158,7 @@ async def startup_device_services():
 @router.on_event("shutdown")
 async def shutdown_device_services():
     """Cleanup device management services on API shutdown."""
-    global device_manager, device_registry, health_monitor, lsl_integration
+    global device_manager, device_registry, health_monitor, lsl_integration  # noqa: F824
 
     try:
         if device_manager:
@@ -364,7 +364,7 @@ async def disconnect_device(device_id: str):
 
 
 @router.post("/{device_id}/configure")
-async def configure_device(device_id: str, config: DeviceConfigRequest):
+async def configure_device(device_id: str, config: DeviceConfigRequest):  # noqa: C901
     """Configure device parameters."""
     if not device_manager:
         raise HTTPException(status_code=503, detail="Device manager not available")
@@ -608,7 +608,7 @@ async def connect_lsl_stream(stream_name: str, buffer_size: int = 1000):
 
 
 @router.websocket("/{device_id}/stream")
-async def device_stream_websocket(websocket: WebSocket, device_id: str):
+async def device_stream_websocket(websocket: WebSocket, device_id: str):  # noqa: C901
     """WebSocket endpoint for real-time device data streaming."""
     await websocket.accept()
 

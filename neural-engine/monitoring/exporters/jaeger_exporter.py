@@ -240,7 +240,7 @@ class JaegerExporter:
         """
         import random
 
-        return f"{random.randint(1, 2**63-1):016x}"
+        return f"{random.randint(1, 2**63 - 1):016x}"
 
     async def create_neural_trace(
         self,

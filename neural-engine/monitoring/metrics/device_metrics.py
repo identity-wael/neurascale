@@ -5,7 +5,7 @@ data rates, signal quality, and error rates.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
@@ -507,7 +507,7 @@ class DeviceMetricsCollector:
             self.collection_errors += 1
             return None
 
-    async def assess_device_health(
+    async def assess_device_health(  # noqa: C901
         self, device_id: str
     ) -> Optional[DeviceHealthStatus]:
         """Assess overall device health.

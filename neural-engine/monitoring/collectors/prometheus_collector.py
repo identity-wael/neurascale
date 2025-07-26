@@ -12,12 +12,11 @@ from prometheus_client import (
     CollectorRegistry,
     generate_latest,
     start_http_server,
-    CONTENT_TYPE_LATEST,
 )
 import time
 
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
+# from datetime import datetime
+from typing import Dict, List, Any
 import logging
 from dataclasses import dataclass
 

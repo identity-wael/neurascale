@@ -585,7 +585,7 @@ class CustomMetricsCollector:
             logger.error(f"Failed to get metric summary for {name}: {str(e)}")
             return {"error": str(e)}
 
-    def get_business_dashboard_data(self) -> Dict[str, Any]:
+    def get_business_dashboard_data(self) -> Dict[str, Any]:  # noqa: C901
         """Get key business metrics for dashboard display.
 
         Returns:

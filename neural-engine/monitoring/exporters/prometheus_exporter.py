@@ -6,15 +6,13 @@ format and serves them via HTTP endpoint.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 from prometheus_client import (
     CollectorRegistry,
     generate_latest,
-    start_http_server,
     CONTENT_TYPE_LATEST,
 )
 from aiohttp import web, ClientSession
-import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +128,7 @@ class PrometheusExporter:
             metadata = [
                 "# HELP neurascale_exporter_info Information about the NeuraScale Prometheus exporter",
                 "# TYPE neurascale_exporter_info gauge",
-                f'neurascale_exporter_info{{version="1.0.0"}} 1',
+                'neurascale_exporter_info{version="1.0.0"} 1',
                 "# HELP neurascale_exporter_requests_total Total number of requests to metrics endpoint",
                 "# TYPE neurascale_exporter_requests_total counter",
                 f"neurascale_exporter_requests_total {self.total_requests}",

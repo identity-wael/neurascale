@@ -4,15 +4,13 @@ import pytest
 import numpy as np
 import base64
 import time
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
 from neural_engine.security.encryption import (
     NeuralDataEncryption,
     FieldLevelEncryption,
     EncryptionError,
-    KeyRotationError,
-    EncryptionMetrics
 )
 
 
@@ -22,7 +20,9 @@ class TestNeuralDataEncryption:
     @pytest.fixture
     def mock_kms_client(self):
         """Create a mock KMS client."""
-        with patch('neural_engine.security.encryption.kms.KeyManagementServiceClient') as mock:
+        with patch(
+            "neural_engine.security.encryption.kms.KeyManagementServiceClient"
+        ) as mock:
             mock_instance = Mock()
             mock.return_value = mock_instance
 
@@ -32,9 +32,7 @@ class TestNeuralDataEncryption:
             mock_instance.get_crypto_key.return_value = Mock()
 
             # Mock encryption/decryption
-            mock_instance.encrypt.return_value = Mock(
-                ciphertext=b"encrypted_dek_data"
-            )
+            mock_instance.encrypt.return_value = Mock(ciphertext=b"encrypted_dek_data")
             mock_instance.decrypt.return_value = Mock(
                 plaintext=b"gAAAAABhdjJf_example_fernet_key_data_here_1234567890"  # Valid Fernet key format
             )
@@ -44,7 +42,9 @@ class TestNeuralDataEncryption:
     @pytest.fixture
     def mock_secret_client(self):
         """Create a mock Secret Manager client."""
-        with patch('neural_engine.security.encryption.secretmanager.SecretManagerServiceClient') as mock:
+        with patch(
+            "neural_engine.security.encryption.secretmanager.SecretManagerServiceClient"
+        ) as mock:
             yield mock.return_value
 
     @pytest.fixture
@@ -56,7 +56,7 @@ class TestNeuralDataEncryption:
             key_ring="test-ring",
             key_name="test-key",
             enable_caching=True,
-            cache_ttl_seconds=60
+            cache_ttl_seconds=60,
         )
         return service
 
@@ -102,7 +102,9 @@ class TestNeuralDataEncryption:
         neural_data = np.random.randn(32, 1000).astype(np.float32)
 
         # Encrypt
-        encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(neural_data)
+        encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(
+            neural_data
+        )
 
         # Verify
         assert isinstance(encrypted_data, bytes)
@@ -120,11 +122,14 @@ class TestNeuralDataEncryption:
 
         # Mock Fernet key for consistent testing
         from cryptography.fernet import Fernet
+
         test_key = Fernet.generate_key()
 
-        with patch.object(encryption_service, 'decrypt_dek', return_value=test_key):
+        with patch.object(encryption_service, "decrypt_dek", return_value=test_key):
             # Encrypt
-            encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(original_array)
+            encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(
+                original_array
+            )
 
             # Decrypt
             decrypted_array = encryption_service.decrypt_neural_data(
@@ -141,18 +146,21 @@ class TestNeuralDataEncryption:
             "session_id": "test-123",
             "metadata": {
                 "timestamp": "2024-01-01T12:00:00Z",
-                "device_id": "device-456"
+                "device_id": "device-456",
             },
-            "values": [1, 2, 3, 4, 5]
+            "values": [1, 2, 3, 4, 5],
         }
 
         # Mock Fernet key
         from cryptography.fernet import Fernet
+
         test_key = Fernet.generate_key()
 
-        with patch.object(encryption_service, 'decrypt_dek', return_value=test_key):
+        with patch.object(encryption_service, "decrypt_dek", return_value=test_key):
             # Encrypt
-            encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(original_data)
+            encrypted_data, encrypted_dek = encryption_service.encrypt_neural_data(
+                original_data
+            )
 
             # Decrypt
             decrypted_data = encryption_service.decrypt_neural_data(
@@ -176,13 +184,12 @@ class TestNeuralDataEncryption:
 
     def test_cache_expiration(self, encryption_service):
         """Test DEK cache expiration."""
-        encrypted_dek = b"test_dek"
-
         # Add to cache with expired timestamp
         cache_key = "test_key"
         encryption_service._dek_cache[cache_key] = (
             b"cached_dek",
-            datetime.now() - timedelta(seconds=encryption_service.cache_ttl_seconds + 1)
+            datetime.now()
+            - timedelta(seconds=encryption_service.cache_ttl_seconds + 1),
         )
 
         # Clean cache
@@ -210,17 +217,11 @@ class TestNeuralDataEncryption:
         """Test performance metrics collection."""
         # Record some test metrics
         encryption_service._record_metric(
-            "test_operation",
-            duration_ms=10.5,
-            data_size_bytes=1024,
-            success=True
+            "test_operation", duration_ms=10.5, data_size_bytes=1024, success=True
         )
 
         encryption_service._record_metric(
-            "test_operation",
-            duration_ms=15.2,
-            data_size_bytes=2048,
-            success=True
+            "test_operation", duration_ms=15.2, data_size_bytes=2048, success=True
         )
 
         encryption_service._record_metric(
@@ -228,7 +229,7 @@ class TestNeuralDataEncryption:
             duration_ms=0,
             data_size_bytes=0,
             success=False,
-            error_message="Test error"
+            error_message="Test error",
         )
 
         # Get summary
@@ -239,7 +240,7 @@ class TestNeuralDataEncryption:
         assert summary["test_operation"]["total_operations"] == 3
         assert summary["test_operation"]["successful"] == 2
         assert summary["test_operation"]["failed"] == 1
-        assert summary["test_operation"]["success_rate"] == 2/3
+        assert summary["test_operation"]["success_rate"] == 2 / 3
 
 
 class TestFieldLevelEncryption:
@@ -268,7 +269,7 @@ class TestFieldLevelEncryption:
             "patient_id": "12345",
             "name": "John Doe",
             "age": 30,
-            "session_id": "session-123"
+            "session_id": "session-123",
         }
 
         fields_to_encrypt = ["patient_id", "name"]
@@ -293,25 +294,15 @@ class TestFieldLevelEncryption:
         data = {
             "patient": {
                 "id": "patient-123",
-                "personal": {
-                    "name": "Jane Doe",
-                    "ssn": "123-45-6789"
-                }
+                "personal": {"name": "Jane Doe", "ssn": "123-45-6789"},
             },
             "device": {
                 "id": "device-456",
-                "location": {
-                    "lat": 37.7749,
-                    "lon": -122.4194
-                }
-            }
+                "location": {"lat": 37.7749, "lon": -122.4194},
+            },
         }
 
-        fields_to_encrypt = [
-            "patient.id",
-            "patient.personal.ssn",
-            "device.location"
-        ]
+        fields_to_encrypt = ["patient.id", "patient.personal.ssn", "device.location"]
 
         # Encrypt fields
         encrypted_data = field_encryption.encrypt_fields(data, fields_to_encrypt)
@@ -331,21 +322,18 @@ class TestFieldLevelEncryption:
             "patient_id": {
                 "encrypted": base64.b64encode(b"encrypted_patient_id").decode(),
                 "dek_field": "patient_id",
-                "algorithm": "AES-256-GCM"
+                "algorithm": "AES-256-GCM",
             },
             "name": {
                 "encrypted": base64.b64encode(b"encrypted_name").decode(),
                 "dek_field": "name",
-                "algorithm": "AES-256-GCM"
+                "algorithm": "AES-256-GCM",
             },
-            "age": 30
+            "age": 30,
         }
 
         # Set up DEKs
-        field_encryption._field_deks = {
-            "patient_id": b"dek1",
-            "name": b"dek2"
-        }
+        field_encryption._field_deks = {"patient_id": b"dek1", "name": b"dek2"}
 
         fields_to_decrypt = ["patient_id", "name"]
 
@@ -376,7 +364,7 @@ class TestFieldLevelEncryption:
             "field": {
                 "encrypted": base64.b64encode(b"encrypted").decode(),
                 "dek_field": "field",
-                "algorithm": "AES-256-GCM"
+                "algorithm": "AES-256-GCM",
             }
         }
 
@@ -391,13 +379,7 @@ class TestFieldLevelEncryption:
 
     def test_nested_value_operations(self, field_encryption):
         """Test nested value getter/setter methods."""
-        data = {
-            "level1": {
-                "level2": {
-                    "level3": "deep_value"
-                }
-            }
-        }
+        data = {"level1": {"level2": {"level3": "deep_value"}}}
 
         # Test getter
         value = field_encryption._get_nested_value(data, "level1.level2.level3")
@@ -422,15 +404,17 @@ class TestEncryptionIntegration:
     @pytest.fixture
     def real_encryption_service(self):
         """Create encryption service with real Fernet encryption."""
-        with patch('neural_engine.security.encryption.kms.KeyManagementServiceClient'):
-            with patch('neural_engine.security.encryption.secretmanager.SecretManagerServiceClient'):
+        with patch("neural_engine.security.encryption.kms.KeyManagementServiceClient"):
+            with patch(
+                "neural_engine.security.encryption.secretmanager.SecretManagerServiceClient"
+            ):
                 service = NeuralDataEncryption(
-                    project_id="test-project",
-                    enable_caching=True
+                    project_id="test-project", enable_caching=True
                 )
 
                 # Mock KMS operations but use real Fernet
                 from cryptography.fernet import Fernet
+
                 real_key = Fernet.generate_key()
 
                 # Override methods to use real encryption
@@ -446,7 +430,9 @@ class TestEncryptionIntegration:
 
         # Encrypt
         start_time = time.time()
-        encrypted_data, encrypted_dek = real_encryption_service.encrypt_neural_data(large_array)
+        encrypted_data, encrypted_dek = real_encryption_service.encrypt_neural_data(
+            large_array
+        )
         encrypt_time = time.time() - start_time
 
         # Decrypt
@@ -463,7 +449,9 @@ class TestEncryptionIntegration:
         assert encrypt_time < 1.0  # Less than 1 second
         assert decrypt_time < 1.0  # Less than 1 second
 
-        print(f"Large array encryption: {encrypt_time:.3f}s, decryption: {decrypt_time:.3f}s")
+        print(
+            f"Large array encryption: {encrypt_time:.3f}s, decryption: {decrypt_time:.3f}s"
+        )
 
     def test_batch_encryption_performance(self, real_encryption_service):
         """Test batch encryption performance."""
@@ -472,8 +460,7 @@ class TestEncryptionIntegration:
         chunk_shape = (32, 256)  # 32 channels, 256 samples
 
         batch_data = [
-            np.random.randn(*chunk_shape).astype(np.float32)
-            for _ in range(batch_size)
+            np.random.randn(*chunk_shape).astype(np.float32) for _ in range(batch_size)
         ]
 
         # Encrypt batch
@@ -493,8 +480,10 @@ class TestEncryptionIntegration:
         avg_time_per_chunk = batch_time / batch_size
         assert avg_time_per_chunk < 0.01  # Less than 10ms per chunk
 
-        print(f"Batch encryption ({batch_size} chunks): {batch_time:.3f}s "
-              f"({avg_time_per_chunk*1000:.2f}ms per chunk)")
+        print(
+            f"Batch encryption ({batch_size} chunks): {batch_time:.3f}s "
+            f"({avg_time_per_chunk * 1000:.2f}ms per chunk)"
+        )
 
     def test_concurrent_encryption(self, real_encryption_service):
         """Test concurrent encryption operations."""

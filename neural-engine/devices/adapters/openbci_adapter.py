@@ -422,7 +422,7 @@ class OpenBCIAdapter(BaseDevice):
 
             # Configure serial parameters
             if "serial_config" in config:
-                serial_config = config["serial_config"]
+                # serial_config = config["serial_config"]
                 # Note: Would need to reconnect to apply serial changes
                 logger.info("Serial configuration changes require reconnection")
 
@@ -463,7 +463,7 @@ class OpenBCIAdapter(BaseDevice):
             # Real implementation would parse actual impedance data
             impedance_values = {}
             for i in range(self.device_info.channel_count):
-                channel_name = f"Ch{i+1}"
+                channel_name = f"Ch{i + 1}"
                 # Simulate realistic impedance values (5-50 kOhms)
                 impedance_values[channel_name] = 15.0 + (i % 10) * 2.0
 

@@ -702,7 +702,7 @@ class LSLIntegration:
                     (
                         stream_info.channel_labels[i]
                         if i < len(stream_info.channel_labels)
-                        else f"Ch{i+1}"
+                        else f"Ch{i + 1}"
                     ),
                 )
                 ch.append_child_value(
@@ -784,7 +784,8 @@ class LSLIntegration:
 
             if samples:
                 # Convert to numpy array
-                data = np.array(samples).T  # Transpose to get channels x samples
+                # data = np.array(samples).T  # Transpose to get channels x samples
+                # Process samples directly without intermediate variable
 
                 # Process each sample
                 for i, sample in enumerate(samples):

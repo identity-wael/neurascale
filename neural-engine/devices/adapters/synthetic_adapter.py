@@ -6,8 +6,8 @@ of BCI devices without requiring actual hardware.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 import numpy as np
 
 import random
@@ -20,7 +20,6 @@ from ..base import (
     ConnectionType,
     SignalQuality,
     DataSample,
-    DeviceEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -203,7 +202,7 @@ class SyntheticAdapter(BaseDevice):
             logger.error(f"Error stopping synthetic streaming: {str(e)}")
             return False
 
-    async def configure(self, config: Dict[str, Any]) -> bool:
+    async def configure(self, config: Dict[str, Any]) -> bool:  # noqa: C901
         """Configure synthetic adapter parameters.
 
         Args:
@@ -287,7 +286,7 @@ class SyntheticAdapter(BaseDevice):
         # Convert to channel names
         impedance_dict = {}
         for i, impedance in enumerate(self.impedance_values):
-            channel_name = f"Ch{i+1}"
+            channel_name = f"Ch{i + 1}"
             impedance_dict[channel_name] = impedance
 
         # Update device info
@@ -449,7 +448,7 @@ class SyntheticAdapter(BaseDevice):
                 f"Simulated electrode displacement on channel {channel_idx + 1}"
             )
 
-    def _generate_sample_data(self) -> np.ndarray:
+    def _generate_sample_data(self) -> np.ndarray:  # noqa: C901
         """Generate a single sample of synthetic data."""
         current_time = self.sample_counter / self.device_info.sampling_rate
         data = np.zeros(self.device_info.channel_count)
@@ -707,11 +706,11 @@ class SyntheticAdapter(BaseDevice):
 
         for i, config in enumerate(device_configs):
             device_info = DeviceInfo(
-                device_id=f"synthetic_{i+1}",
+                device_id=f"synthetic_{i + 1}",
                 device_type=DeviceType.SYNTHETIC,
                 model=config["name"],
                 firmware_version="Synthetic_v1.0",
-                serial_number=f"SYN{i+1:03d}",
+                serial_number=f"SYN{i + 1:03d}",
                 channel_count=config["channels"],
                 sampling_rate=config["sampling_rate"],
                 supported_sampling_rates=[125.0, 250.0, 500.0, 1000.0],

@@ -5,7 +5,7 @@ and recommendations for neural signals.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 from scipy import signal
 from dataclasses import dataclass, field
@@ -642,7 +642,9 @@ class QualityAssessment:
 
         return np.clip(base_score * penalties, 0.0, 1.0)
 
-    async def _identify_quality_issues(self, metrics: QualityMetrics) -> List[str]:
+    async def _identify_quality_issues(
+        self, metrics: QualityMetrics
+    ) -> List[str]:  # noqa: C901
         """Identify specific quality issues.
 
         Args:
@@ -681,7 +683,9 @@ class QualityAssessment:
 
         return issues
 
-    async def _generate_recommendations(self, metrics: QualityMetrics) -> List[str]:
+    async def _generate_recommendations(
+        self, metrics: QualityMetrics
+    ) -> List[str]:  # noqa: C901
         """Generate recommendations based on quality assessment.
 
         Args:

@@ -48,6 +48,16 @@ fi
 
 echo "Got token: ${TOKEN:0:10}..."
 
+# Install GPG if not already installed (for Codecov)
+echo ""
+echo "Checking GPG installation..."
+if ! command -v gpg &> /dev/null; then
+    echo "Installing GPG via Homebrew..."
+    brew install gnupg
+else
+    echo "GPG is already installed: $(gpg --version | head -n 1)"
+fi
+
 # Setup each runner
 for i in {2..6}; do
     RUNNER_DIR="/Users/weg/actions-runner-${i}"

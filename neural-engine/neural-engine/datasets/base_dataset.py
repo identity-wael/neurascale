@@ -299,10 +299,11 @@ class BaseDataset(abc.ABC):
 
         if shuffle:
             import random
+
             random.shuffle(indices)
 
         for i in range(0, len(indices), batch_size):
-            batch_indices = indices[i:i + batch_size]
+            batch_indices = indices[i : i + batch_size]
 
             if len(batch_indices) < batch_size and drop_last:
                 break

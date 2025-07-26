@@ -77,7 +77,7 @@ resource "google_pubsub_subscription" "neural_data" {
 # Bigtable instance with autoscaling
 resource "google_bigtable_instance" "neural_data" {
   name         = "neural-data-${var.environment}"
-  display_name = "Neural Data Storage - ${var.environment}"
+  display_name = "Neural Data - ${var.environment}"
 
   deletion_protection = var.enable_deletion_protection && var.environment == "production"
 

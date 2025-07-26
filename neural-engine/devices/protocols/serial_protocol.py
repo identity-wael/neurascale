@@ -7,7 +7,7 @@ for devices that connect via RS-232, USB-Serial, or other serial interfaces.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Union
+from typing import Dict, List, Optional, Callable, Union
 from dataclasses import dataclass
 from enum import Enum
 import threading
@@ -439,7 +439,7 @@ class SerialProtocol:
 
         logger.debug("Stopped serial communication threads")
 
-    def _read_thread_worker(self) -> None:
+    def _read_thread_worker(self) -> None:  # noqa: C901
         """Worker thread for reading serial data."""
         logger.debug("Serial read thread started")
 

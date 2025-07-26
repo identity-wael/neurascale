@@ -5,7 +5,7 @@ alert triggering, suppression, and integration with notification services.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
@@ -389,7 +389,7 @@ class AlertManager:
             logger.error(f"Failed to unregister rule {rule_id}: {str(e)}")
             return False
 
-    async def evaluate_rule(
+    async def evaluate_rule(  # noqa: C901
         self, rule_id: str, current_metrics: Dict[str, float]
     ) -> bool:
         """Evaluate a specific alert rule.

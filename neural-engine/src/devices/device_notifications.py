@@ -288,9 +288,14 @@ class DeviceNotificationService:
                 except asyncio.TimeoutError:
                     # Timeout is normal, just continue
                     continue
+                except asyncio.CancelledError:
+                    # Task is being cancelled, break the loop
+                    break
 
             except Exception as e:
                 logger.error(f"Error in broadcast loop: {e}")
+                # Small delay to prevent tight loop on persistent errors
+                await asyncio.sleep(0.1)
 
     async def _broadcast_notification(self, notification: DeviceNotification):
         """Broadcast notification to all connected clients."""

@@ -268,7 +268,9 @@ class TestDeviceNotifications:
         mock_websocket.send_text.assert_called()
         sent_data = json.loads(mock_websocket.send_text.call_args[0][0])
         assert sent_data["type"] == NotificationType.IMPEDANCE_CHECK_COMPLETE.value
-        assert sent_data["data"]["impedance_values"] == impedance_results
+        # JSON serialization converts integer keys to strings
+        expected_impedance = {str(k): v for k, v in impedance_results.items()}
+        assert sent_data["data"]["impedance_values"] == expected_impedance
 
         # Clean up
         await notification_service.stop()

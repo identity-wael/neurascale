@@ -78,12 +78,23 @@ class DeviceNotificationService:
         """Stop the notification service."""
         self._is_running = False
 
-        if self._broadcast_task:
+        if self._broadcast_task and not self._broadcast_task.done():
             self._broadcast_task.cancel()
             try:
                 await self._broadcast_task
             except asyncio.CancelledError:
                 pass
+            except RuntimeError:
+                # Task might have already finished
+                pass
+
+        # Clear the queue if it exists
+        if self._notification_queue:
+            while not self._notification_queue.empty():
+                try:
+                    self._notification_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
 
         # Close all connections
         for websocket in list(self._connections):
@@ -295,7 +306,11 @@ class DeviceNotificationService:
             except Exception as e:
                 logger.error(f"Error in broadcast loop: {e}")
                 # Small delay to prevent tight loop on persistent errors
-                await asyncio.sleep(0.1)
+                try:
+                    await asyncio.sleep(0.1)
+                except RuntimeError:
+                    # Event loop might be closing
+                    break
 
     async def _broadcast_notification(self, notification: DeviceNotification):
         """Broadcast notification to all connected clients."""

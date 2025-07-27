@@ -8,7 +8,7 @@ permalink: /api-documentation/
 
 ## Overview
 
-The NeuraScale API provides programmatic access to neural data processing capabilities, device management, and machine learning models. The API follows REST principles and supports both JSON and WebSocket protocols for real-time streaming.
+The NeuraScale API provides comprehensive access to neural data acquisition, processing, and analysis capabilities. Built on FastAPI with WebSocket support, it offers both RESTful endpoints and real-time streaming interfaces.
 
 ## Base URL
 
@@ -16,132 +16,359 @@ The NeuraScale API provides programmatic access to neural data processing capabi
 https://api.neurascale.io/v1
 ```
 
+For local development:
+
+```
+http://localhost:8000/api/v1
+```
+
 ## Authentication
 
-All API requests require authentication using JWT tokens:
+All API requests require authentication via Bearer token:
 
-```bash
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     https://api.neurascale.io/v1/devices
+```http
+Authorization: Bearer YOUR_API_TOKEN
 ```
 
-### Obtaining a Token
-
-```bash
-POST /auth/token
-Content-Type: application/json
-
-{
-  "client_id": "your_client_id",
-  "client_secret": "your_client_secret",
-  "grant_type": "client_credentials"
-}
-```
-
-## Current Endpoints
+## REST API Reference
 
 ### Device Management
 
-#### List Devices
+#### List All Devices
 
-```bash
-GET /devices
+```http
+GET /api/v1/devices
 ```
-
-Returns all registered BCI devices.
 
 **Response:**
 
 ```json
-{
-  "devices": [
-    {
-      "device_id": "dev_123",
-      "name": "OpenBCI Cyton",
-      "type": "openbci",
-      "status": "connected",
-      "channels": 8,
-      "sample_rate": 250
+[
+  {
+    "device_id": "openbci_cyton_1",
+    "device_name": "OpenBCI Cyton",
+    "device_type": "openbci",
+    "state": "connected",
+    "streaming": false,
+    "capabilities": {
+      "max_channels": 8,
+      "supported_sampling_rates": [250],
+      "has_impedance_check": true,
+      "has_battery_monitor": true
     }
-  ]
+  }
+]
+```
+
+#### Get Device Information
+
+```http
+GET /api/v1/devices/{device_id}
+```
+
+**Parameters:**
+
+- `device_id` (string): Unique device identifier
+
+**Response:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "device_name": "OpenBCI Cyton",
+  "state": "connected",
+  "connected": true,
+  "streaming": false,
+  "session_id": "session_2025_01_27_123456",
+  "capabilities": {
+    "supported_sampling_rates": [250],
+    "max_channels": 8,
+    "signal_types": ["EEG", "EMG", "ECG"],
+    "has_impedance_check": true,
+    "has_battery_monitor": true
+  },
+  "telemetry": {
+    "battery_level": 85,
+    "temperature": 32.5,
+    "uptime_seconds": 3600
+  }
 }
 ```
 
-#### Get Device Status
+#### Add New Device
 
-```bash
-GET /devices/{device_id}/status
+```http
+POST /api/v1/devices
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "custom_device_1",
+  "device_type": "openbci",
+  "device_config": {
+    "port": "/dev/ttyUSB0",
+    "board_name": "cyton"
+  }
+}
 ```
 
 **Response:**
 
 ```json
 {
-  "device_id": "dev_123",
-  "connected": true,
-  "battery_level": 85,
-  "signal_quality": {
-    "overall": "good",
-    "channels": [
-      { "channel": 1, "impedance": 5.2, "quality": "excellent" },
-      { "channel": 2, "impedance": 7.8, "quality": "good" }
-    ]
-  },
-  "streaming": true,
-  "uptime_seconds": 3600
+  "device_id": "custom_device_1",
+  "device_name": "OpenBCI Cyton",
+  "state": "disconnected",
+  "message": "Device custom_device_1 added successfully"
 }
 ```
 
-#### Connect Device
+### Device Control
 
-```bash
-POST /devices/{device_id}/connect
+#### Connect to Device
+
+```http
+POST /api/v1/devices/{device_id}/connect
 ```
 
-Establishes connection to a BCI device.
+**Request Body (optional):**
+
+```json
+{
+  "connection_params": {
+    "timeout": 30,
+    "retry_count": 3
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "connected": true,
+  "message": "Device openbci_cyton_1 connected successfully"
+}
+```
 
 #### Start Streaming
 
-```bash
-POST /devices/{device_id}/stream/start
+```http
+POST /api/v1/devices/{device_id}/stream/start
 ```
 
-**Request:**
+**Response:**
 
 ```json
 {
-  "channels": [1, 2, 3, 4],
-  "sample_rate": 250,
-  "filters": {
-    "notch": 60,
-    "bandpass": [1, 50]
-  }
+  "device_id": "openbci_cyton_1",
+  "streaming": true,
+  "session_id": "session_2025_01_27_123456",
+  "message": "Device openbci_cyton_1 started streaming"
 }
 ```
 
-### Data Ingestion
+### Device Operations
 
-#### Ingest Neural Data
+#### Check Impedance
 
-```bash
-POST /ingest/neural-data
+```http
+GET /api/v1/devices/{device_id}/impedance
 ```
 
-**Request:**
+**Query Parameters:**
+
+- `channels` (string, optional): Comma-separated channel IDs (e.g., "0,1,2")
+
+**Response:**
 
 ```json
 {
-  "device_id": "dev_123",
-  "session_id": "sess_456",
-  "timestamp": "2025-07-26T10:30:00Z",
-  "data": {
-    "eeg": [[0.1, 0.2, ...], [0.15, 0.25, ...]],
-    "sample_rate": 250,
-    "channels": 8
+  "device_id": "openbci_cyton_1",
+  "impedances": {
+    "0": { "value_ohms": 5000, "value_kohms": 5.0 },
+    "1": { "value_ohms": 8000, "value_kohms": 8.0 },
+    "2": { "value_ohms": 12000, "value_kohms": 12.0 }
   },
+  "quality_summary": {
+    "excellent": 1,
+    "good": 1,
+    "fair": 1,
+    "poor": 0,
+    "bad": 0
+  },
+  "timestamp": "2025-01-27T10:30:00Z"
+}
+```
+
+#### Get Signal Quality
+
+```http
+GET /api/v1/devices/{device_id}/signal-quality
+```
+
+**Query Parameters:**
+
+- `channels` (string, optional): Comma-separated channel IDs
+
+**Response:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "signal_quality": {
+    "0": {
+      "snr_db": 15.2,
+      "quality_level": "GOOD",
+      "is_acceptable": true,
+      "rms_amplitude": 45.3,
+      "line_noise_power": 0.12,
+      "artifacts_detected": []
+    },
+    "1": {
+      "snr_db": 12.8,
+      "quality_level": "FAIR",
+      "is_acceptable": true,
+      "rms_amplitude": 38.7,
+      "line_noise_power": 0.18,
+      "artifacts_detected": ["EOG"]
+    }
+  },
+  "timestamp": "2025-01-27T10:31:00Z"
+}
+```
+
+### Device Discovery
+
+#### Discover Available Devices
+
+```http
+GET /api/v1/devices/discover
+```
+
+**Query Parameters:**
+
+- `timeout` (float, optional): Discovery timeout in seconds (default: 10)
+- `protocols` (string, optional): Comma-separated protocols (serial,bluetooth,wifi,lsl)
+
+**Response:**
+
+```json
+[
+  {
+    "device_type": "openbci",
+    "device_name": "OpenBCI Cyton",
+    "protocol": "serial",
+    "connection_info": {
+      "port": "/dev/ttyUSB0",
+      "description": "OpenBCI Cyton",
+      "vid": 1027,
+      "pid": 24597
+    },
+    "discovered_at": "2025-01-27T10:30:00Z"
+  },
+  {
+    "device_type": "lsl",
+    "device_name": "LSL Stream: EEG",
+    "protocol": "lsl",
+    "connection_info": {
+      "name": "EEG",
+      "type": "EEG",
+      "hostname": "lab-pc.local",
+      "uid": "myuid123"
+    },
+    "metadata": {
+      "channel_count": 32,
+      "sampling_rate": 1000.0,
+      "channel_format": "float32"
+    }
+  }
+]
+```
+
+### Health & Telemetry
+
+#### Get Device Health
+
+```http
+GET /api/v1/devices/health
+```
+
+**Query Parameters:**
+
+- `device_id` (string, optional): Specific device ID
+
+**Response:**
+
+```json
+{
+  "overall_status": "healthy",
+  "devices": {
+    "openbci_cyton_1": {
+      "status": "healthy",
+      "uptime_seconds": 3600,
+      "metrics": {
+        "data_rate_hz": 250,
+        "dropped_samples": 0,
+        "buffer_usage": 0.15,
+        "cpu_usage": 0.05
+      },
+      "last_error": null
+    }
+  },
+  "system": {
+    "cpu_percent": 15.2,
+    "memory_mb": 1024,
+    "active_streams": 1,
+    "total_channels": 8
+  }
+}
+```
+
+#### Get Health Alerts
+
+```http
+GET /api/v1/devices/health/alerts
+```
+
+**Response:**
+
+```json
+[
+  {
+    "device_id": "openbci_cyton_1",
+    "alert_type": "high_impedance",
+    "severity": "warning",
+    "message": "Channel 3 impedance above threshold (>25kΩ)",
+    "timestamp": "2025-01-27T10:30:00Z",
+    "data": {
+      "channel": 3,
+      "impedance_ohms": 28000
+    }
+  }
+]
+```
+
+### Session Management
+
+#### Start Recording Session
+
+```http
+POST /api/v1/session/start
+```
+
+**Request Body (optional):**
+
+```json
+{
+  "session_id": "experiment_001",
   "metadata": {
-    "task": "motor_imagery",
-    "subject_id": "encrypted_id"
+    "subject_id": "S001",
+    "experiment": "motor_imagery",
+    "notes": "Baseline recording"
   }
 }
 ```
@@ -150,291 +377,305 @@ POST /ingest/neural-data
 
 ```json
 {
-  "status": "accepted",
-  "ingestion_id": "ing_789",
-  "processing_time_ms": 45
-}
-```
-
-### Sessions
-
-#### Create Session
-
-```bash
-POST /sessions
-```
-
-**Request:**
-
-```json
-{
-  "device_id": "dev_123",
-  "subject_id": "encrypted_subject_id",
-  "experiment_type": "motor_imagery",
-  "duration_minutes": 30
-}
-```
-
-#### Get Session Data
-
-```bash
-GET /sessions/{session_id}
-```
-
-**Response:**
-
-```json
-{
-  "session_id": "sess_456",
-  "status": "active",
-  "start_time": "2025-07-26T10:00:00Z",
-  "duration_seconds": 1800,
-  "data_points": 450000,
-  "quality_metrics": {
-    "artifact_percentage": 2.5,
-    "signal_quality": "good"
-  }
+  "session_id": "experiment_001",
+  "started_at": "2025-01-27T10:30:00Z",
+  "message": "Session started successfully"
 }
 ```
 
 ## WebSocket API
 
-For real-time streaming, connect to:
-
-```
-wss://api.neurascale.io/v1/stream
-```
-
-### Streaming Neural Data
+### Connection
 
 ```javascript
-const ws = new WebSocket("wss://api.neurascale.io/v1/stream");
-
-ws.on("open", () => {
-  ws.send(
-    JSON.stringify({
-      type: "subscribe",
-      device_id: "dev_123",
-      channels: [1, 2, 3, 4],
-    }),
-  );
-});
-
-ws.on("message", (data) => {
-  const packet = JSON.parse(data);
-  // Process neural data packet
-  console.log(`Timestamp: ${packet.timestamp}`);
-  console.log(`Samples: ${packet.samples}`);
-});
+const ws = new WebSocket("ws://localhost:8000/ws");
 ```
 
 ### Message Types
 
-#### Data Packet
+#### Subscribe to Channels
 
 ```json
 {
-  "type": "data",
-  "device_id": "dev_123",
-  "timestamp": 1627394400000,
-  "samples": [[0.1, 0.2, 0.3, 0.4], ...],
-  "sequence": 12345
+  "type": "subscribe",
+  "channels": ["device_events", "data_stream", "telemetry"]
 }
 ```
 
-#### Status Update
+#### Device Events
 
 ```json
 {
-  "type": "status",
-  "device_id": "dev_123",
-  "event": "impedance_check",
+  "type": "device_connected",
+  "device_id": "openbci_cyton_1",
+  "timestamp": "2025-01-27T10:30:00Z",
   "data": {
-    "channel": 1,
-    "impedance": 5.2,
-    "quality": "excellent"
+    "device_name": "OpenBCI Cyton",
+    "capabilities": {...}
   }
 }
 ```
 
-## Planned Endpoints (Coming Soon)
-
-### Machine Learning
-
-#### Run Inference
-
-```bash
-POST /models/{model_id}/predict
-```
-
-**Request:**
+#### Streaming Data
 
 ```json
 {
-  "input_data": {
-    "eeg": [[...]],
-    "duration_ms": 1000
-  },
-  "model_version": "v2.1"
-}
-```
-
-**Response:**
-
-```json
-{
-  "predictions": {
-    "class": "left_hand_movement",
-    "confidence": 0.89,
-    "probabilities": {
-      "left_hand": 0.89,
-      "right_hand": 0.08,
-      "rest": 0.03
-    }
-  },
-  "inference_time_ms": 23
-}
-```
-
-### Signal Processing
-
-#### Apply Filters
-
-```bash
-POST /processing/filter
-```
-
-**Request:**
-
-```json
-{
-  "data": [[...]],
-  "filters": [
-    {"type": "bandpass", "low": 8, "high": 12},
-    {"type": "notch", "frequency": 60}
-  ]
-}
-```
-
-### Dataset Management
-
-#### List Datasets
-
-```bash
-GET /datasets
-```
-
-#### Create Dataset
-
-```bash
-POST /datasets
-```
-
-**Request:**
-
-```json
-{
-  "name": "motor_imagery_study",
-  "type": "eeg",
-  "metadata": {
-    "subjects": 20,
-    "sessions_per_subject": 5,
+  "type": "data",
+  "device_id": "openbci_cyton_1",
+  "timestamp": "2025-01-27T10:30:00.123Z",
+  "sequence": 12345,
+  "data": {
+    "channels": [
+      [1.2, 2.3, 3.4, ...],  // Channel 0
+      [2.1, 3.2, 4.3, ...],  // Channel 1
+      ...
+    ],
+    "samples": 250,
     "sampling_rate": 250
   }
 }
 ```
 
-## Error Handling
-
-The API uses standard HTTP status codes:
-
-- `200 OK` - Request succeeded
-- `201 Created` - Resource created
-- `400 Bad Request` - Invalid request
-- `401 Unauthorized` - Authentication required
-- `403 Forbidden` - Access denied
-- `404 Not Found` - Resource not found
-- `429 Too Many Requests` - Rate limit exceeded
-- `500 Internal Server Error` - Server error
-
-### Error Response Format
+#### Impedance Results
 
 ```json
 {
-  "error": {
-    "code": "INVALID_DEVICE_ID",
-    "message": "Device with ID 'dev_999' not found",
-    "details": {
-      "device_id": "dev_999",
-      "suggestion": "Check device ID or register device first"
+  "type": "impedance_check_complete",
+  "device_id": "openbci_cyton_1",
+  "timestamp": "2025-01-27T10:30:00Z",
+  "data": {
+    "impedance_values": {
+      "0": 5000,
+      "1": 8000,
+      "2": 12000
+    },
+    "quality_summary": {
+      "total_channels": 3,
+      "good_channels": 2,
+      "fair_channels": 1,
+      "poor_channels": 0
     }
   }
 }
 ```
 
+#### Error Notifications
+
+```json
+{
+  "type": "device_error",
+  "device_id": "openbci_cyton_1",
+  "severity": "error",
+  "timestamp": "2025-01-27T10:30:00Z",
+  "data": {
+    "error_type": "ConnectionError",
+    "message": "Device disconnected unexpectedly",
+    "context": {
+      "during": "streaming",
+      "samples_lost": 250
+    }
+  }
+}
+```
+
+### Binary Protocol
+
+For high-frequency data streaming, use the binary WebSocket protocol:
+
+```javascript
+ws.binaryType = "arraybuffer";
+
+// Send binary subscription
+const encoder = new TextEncoder();
+ws.send(
+  encoder.encode(
+    JSON.stringify({
+      type: "subscribe_binary",
+      device_id: "openbci_cyton_1",
+    }),
+  ),
+);
+
+// Receive binary data
+ws.onmessage = (event) => {
+  if (event.data instanceof ArrayBuffer) {
+    // Parse binary header (16 bytes)
+    const header = new DataView(event.data, 0, 16);
+    const timestamp = header.getBigUint64(0, true);
+    const sequence = header.getUint32(8, true);
+    const channels = header.getUint16(12, true);
+    const samples = header.getUint16(14, true);
+
+    // Parse channel data (float32 array)
+    const data = new Float32Array(event.data, 16);
+    // Process data...
+  }
+};
+```
+
+## Error Handling
+
+### Error Response Format
+
+```json
+{
+  "error": "DeviceNotFound",
+  "message": "Device with ID 'unknown_device' not found",
+  "detail": {
+    "device_id": "unknown_device",
+    "available_devices": ["openbci_cyton_1", "synthetic_1"]
+  },
+  "timestamp": "2025-01-27T10:30:00Z"
+}
+```
+
+### HTTP Status Codes
+
+| Code | Description           |
+| ---- | --------------------- |
+| 200  | Success               |
+| 201  | Created               |
+| 400  | Bad Request           |
+| 404  | Not Found             |
+| 409  | Conflict              |
+| 500  | Internal Server Error |
+| 501  | Not Implemented       |
+| 503  | Service Unavailable   |
+
+### Common Error Types
+
+- `DeviceNotFound`: Requested device doesn't exist
+- `DeviceNotConnected`: Operation requires connected device
+- `DeviceAlreadyStreaming`: Device is already streaming
+- `InvalidConfiguration`: Invalid device configuration
+- `OperationNotSupported`: Device doesn't support operation
+- `ConnectionTimeout`: Connection attempt timed out
+
 ## Rate Limiting
 
-API requests are rate limited per client:
+API requests are rate limited to ensure fair usage:
 
-- **Standard**: 1000 requests per hour
-- **Streaming**: 100 concurrent connections
-- **Bulk Operations**: 100 requests per hour
+- **REST API**: 1000 requests per minute per API key
+- **WebSocket**: 10 connections per API key
+- **Data streaming**: Unlimited once connected
 
 Rate limit headers:
 
-```
+```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
-X-RateLimit-Reset: 1627398000
+X-RateLimit-Reset: 1706354400
 ```
 
-## SDK Support
+## SDK Examples
 
-Official SDKs are available for:
-
-- **Python**: `pip install neurascale`
-- **JavaScript**: `npm install @neurascale/sdk`
-- **Go**: `go get github.com/neurascale/go-sdk`
-
-### Python Example
+### Python
 
 ```python
-from neurascale import Client
+import neurascale
 
-client = Client(api_key="your_api_key")
+# Initialize client
+client = neurascale.Client(api_key="YOUR_API_KEY")
 
 # List devices
 devices = client.devices.list()
 
-# Start streaming
-stream = client.devices.stream("dev_123", channels=[1, 2, 3, 4])
-for packet in stream:
-    print(f"Received {len(packet.samples)} samples")
+# Connect to device
+device = client.devices.get("openbci_cyton_1")
+device.connect()
+
+# Stream data
+def on_data(data):
+    print(f"Received {data.samples} samples from {data.channels} channels")
+
+device.start_streaming(callback=on_data)
+```
+
+### JavaScript/TypeScript
+
+```typescript
+import { NeuraScale } from "@neurascale/sdk";
+
+// Initialize client
+const client = new NeuraScale({ apiKey: "YOUR_API_KEY" });
+
+// Connect to device
+const device = await client.devices.get("openbci_cyton_1");
+await device.connect();
+
+// Stream data
+device.on("data", (data) => {
+  console.log(`Received ${data.samples} samples`);
+});
+
+await device.startStreaming();
+```
+
+### MATLAB
+
+```matlab
+% Initialize client
+client = neurascale.Client('YOUR_API_KEY');
+
+% List devices
+devices = client.listDevices();
+
+% Connect and stream
+device = client.getDevice('openbci_cyton_1');
+device.connect();
+
+% Set up callback
+device.setDataCallback(@(data) processData(data));
+device.startStreaming();
+
+function processData(data)
+    fprintf('Received %d samples\n', data.samples);
+end
 ```
 
 ## Best Practices
 
-1. **Use Compression**: Enable gzip for large payloads
-2. **Batch Operations**: Group multiple operations when possible
-3. **Handle Reconnection**: Implement exponential backoff for WebSocket
-4. **Cache Responses**: Use ETags for conditional requests
-5. **Monitor Rate Limits**: Track usage to avoid throttling
+### Connection Management
 
-## API Changelog
+1. **Reuse connections**: Keep WebSocket connections open for streaming
+2. **Handle reconnection**: Implement exponential backoff for reconnection
+3. **Monitor health**: Use health endpoints to detect issues early
 
-### v1.0.0 (Current)
+### Data Handling
 
-- Initial release with device management
-- Basic data ingestion endpoints
+1. **Buffer appropriately**: Use ring buffers for real-time processing
+2. **Process asynchronously**: Don't block on data processing
+3. **Handle gaps**: Detect and handle missing samples gracefully
+
+### Error Recovery
+
+1. **Retry with backoff**: Implement exponential backoff for failures
+2. **Cache state**: Maintain device state locally for recovery
+3. **Log comprehensively**: Log all errors with context for debugging
+
+## Changelog
+
+### v1.7.0 (2025-01-27)
+
+- Added multi-device concurrent streaming
+- Implemented real-time impedance checking
+- Added automatic device discovery
+- Enhanced WebSocket notification system
+- Improved performance to <100ms latency
+
+### v1.6.0 (2024-12-15)
+
+- Added signal quality monitoring
+- Implemented health monitoring system
+- Added telemetry collection
+- Enhanced error reporting
+
+### v1.5.0 (2024-11-01)
+
+- Initial REST API release
 - WebSocket streaming support
-
-### v1.1.0 (Planned)
-
-- Machine learning endpoints
-- Advanced signal processing
-- Dataset management API
-- GraphQL support
+- Basic device management
 
 ---
 
-_For integration examples and tutorials, see our [Developer Guide](/developer-guide/)_
+For more information, visit our [GitHub repository](https://github.com/identity-wael/neurascale) or contact [support@neurascale.io](mailto:support@neurascale.io).

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/processing", tags=["signal_processing"])
 
 
-# Request / Response models
+# Request/Response models
 class ProcessBatchRequest(BaseModel):
     """Request model for batch processing."""
 
@@ -224,7 +224,7 @@ async def start_stream(
             session_id=request.session_id,
             success=True,
             message="Stream started successfully",
-            websocket_url=f"/api / v1 / processing / stream / ws/{request.session_id}",
+            websocket_url=f"/api/v1/processing/stream/ws/{request.session_id}",
         )
 
     except HTTPException:

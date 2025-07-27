@@ -197,19 +197,21 @@ class TestDeviceNotifications:
     @pytest.mark.asyncio
     async def test_notification_service_lifecycle(self, notification_service):
         """Test notification service start/stop."""
-        # Start the service
-        await notification_service.start()
+        # Service is already started by fixture
         assert notification_service._is_running
         assert notification_service._broadcast_task is not None
 
+        # Test stop/restart
         await notification_service.stop()
         assert not notification_service._is_running
+
+        await notification_service.start()
+        assert notification_service._is_running
 
     @pytest.mark.asyncio
     async def test_device_state_notifications(self, notification_service):
         """Test device state change notifications."""
-        # Start the service first
-        await notification_service.start()
+        # Service is already started by fixture
 
         # Mock WebSocket
         mock_websocket = AsyncMock()
@@ -229,14 +231,12 @@ class TestDeviceNotifications:
         assert sent_data["type"] == NotificationType.DEVICE_CONNECTED.value
         assert sent_data["device_id"] == "test_device"
 
-        # Clean up
-        await notification_service.stop()
+        # No need to stop - fixture handles cleanup
 
     @pytest.mark.asyncio
     async def test_impedance_notification(self, notification_service):
         """Test impedance check completion notification."""
-        # Start the service first
-        await notification_service.start()
+        # Service is already started by fixture
 
         mock_websocket = AsyncMock()
         await notification_service.connect(mock_websocket)
@@ -260,14 +260,12 @@ class TestDeviceNotifications:
         assert sent_data["type"] == NotificationType.IMPEDANCE_CHECK_COMPLETE.value
         assert sent_data["data"]["impedance_values"] == impedance_results
 
-        # Clean up
-        await notification_service.stop()
+        # No need to stop - fixture handles cleanup
 
     @pytest.mark.asyncio
     async def test_error_notifications(self, notification_service):
         """Test error notifications."""
-        # Start the service first
-        await notification_service.start()
+        # Service is already started by fixture
 
         mock_websocket = AsyncMock()
         await notification_service.connect(mock_websocket)
@@ -286,8 +284,7 @@ class TestDeviceNotifications:
         assert sent_data["severity"] == "error"
         assert "RuntimeError" in sent_data["data"]["error_type"]
 
-        # Clean up
-        await notification_service.stop()
+        # No need to stop - fixture handles cleanup
 
 
 class TestDeviceDiscoveryEnhancements:
@@ -333,10 +330,8 @@ class TestDeviceDiscoveryEnhancements:
 
         # Mock Bluetooth discovery
         with patch("src.devices.device_discovery.BLUETOOTH_AVAILABLE", True):
-            with patch(
-                "src.devices.device_discovery.bluetooth.discover_devices"
-            ) as mock_discover:
-                mock_discover.return_value = [
+            with patch("src.devices.device_discovery.bluetooth") as mock_bluetooth:
+                mock_bluetooth.discover_devices.return_value = [
                     ("00:11:22:33:44:55", "Ganglion-1234"),
                     ("AA:BB:CC:DD:EE:FF", "Muse-5678"),
                 ]
@@ -478,7 +473,7 @@ class TestDeviceManagerIntegration:
         mock_device.set_session_id = MagicMock()
         mock_device.get_capabilities = MagicMock()
         mock_device.get_capabilities.return_value = DeviceCapabilities(
-            sampling_rates=[250],
+            supported_sampling_rates=[250],
             channel_count=8,
             has_impedance_check=True,
             has_battery_monitor=True,

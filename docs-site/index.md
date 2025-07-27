@@ -149,6 +149,7 @@ NeuraScale is a cloud-native BCI platform that enables:
 ### 🏗️ Infrastructure
 
 - **[Architecture Overview](/architecture/)** - System design and components
+- **[Architecture Diagrams](/architecture-diagrams/)** - Visual system representations
 - **[Deployment Guide](/docs/deployment/)** - Production deployment
 - **[Scaling Guide](/docs/scaling/)** - Handle enterprise workloads
 - **[Security & Compliance](/security/)** - HIPAA/GDPR implementation

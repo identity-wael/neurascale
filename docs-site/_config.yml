@@ -67,6 +67,11 @@ navigation:
         url: /api-documentation/
   - title: Architecture
     url: /architecture/
+    sublinks:
+      - title: Technical Architecture
+        url: /architecture/
+      - title: Architecture Diagrams
+        url: /architecture-diagrams/
   - title: Getting Started
     sublinks:
       - title: Overview

@@ -52,12 +52,12 @@ class VertexAIModelServer(BaseModelServer):
         # Performance tracking
         self.prediction_count = 0
         self.error_count = 0
-        self.latency_buffer = []
+        self.latency_buffer: List[float] = []
 
         # Initialize client (would be actual Vertex AI client in production)
         self._init_client()
 
-    def _init_client(self):
+    def _init_client(self) -> None:
         """Initialize Vertex AI client"""
         # In production, this would initialize the actual Vertex AI client
         # For now, we'll simulate the client

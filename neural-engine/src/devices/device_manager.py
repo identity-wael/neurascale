@@ -687,7 +687,11 @@ class DeviceManager:
                     "status": status.value,
                     "metrics": (
                         device_metrics.to_dict()
-                        if (device_metrics := self.health_monitor.get_device_metrics(device_id))
+                        if (
+                            device_metrics := self.health_monitor.get_device_metrics(
+                                device_id
+                            )
+                        )
                         else None
                     ),
                 }

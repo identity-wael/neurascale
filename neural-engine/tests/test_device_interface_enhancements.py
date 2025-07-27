@@ -515,6 +515,7 @@ class TestDeviceManagerIntegration:
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(30)  # 30 second timeout
 async def test_full_device_lifecycle():
     """Test complete device lifecycle with all enhancements."""
     async with DeviceManager() as manager:

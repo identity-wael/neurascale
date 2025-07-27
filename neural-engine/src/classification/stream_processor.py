@@ -42,11 +42,11 @@ class RealtimeClassificationProcessor(BaseStreamProcessor):
         self._running = False
 
         # Performance tracking
-        self.latency_buffer = deque(maxlen=1000)
+        self.latency_buffer: deque[float] = deque(maxlen=1000)
         self.classification_count = 0
         self.error_count = 0
 
-    async def process_stream(
+    async def process_stream(  # noqa: C901
         self, stream: AsyncIterator[NeuralData]
     ) -> AsyncIterator[ClassificationResult]:
         """
@@ -234,7 +234,7 @@ class RealtimeClassificationProcessor(BaseStreamProcessor):
             / max(1, self.classification_count + self.error_count),
         }
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         """Gracefully shutdown the processor"""
         logger.info("Shutting down stream processor")
 

@@ -4,7 +4,7 @@ Circular buffer implementation for real-time data streaming
 
 import asyncio
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 import numpy as np
 
 from ..types import NeuralData
@@ -43,9 +43,9 @@ class CircularBuffer:
         self._lock = asyncio.Lock()
 
         # Metadata
-        self.device_id = None
-        self.channel_names = None
-        self.last_update = None
+        self.device_id: Optional[str] = None
+        self.channel_names: Optional[List[str]] = None
+        self.last_update: Optional[datetime] = None
 
     async def add_data(self, data: NeuralData) -> None:
         """

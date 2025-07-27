@@ -177,7 +177,7 @@ class SleepStageClassifier(BaseClassifier):
             self.error_count += 1
             raise
 
-    async def _calculate_stage_probabilities(
+    async def _calculate_stage_probabilities(  # noqa: C901
         self, features: Dict[str, np.ndarray]
     ) -> Dict[SleepStage, float]:
         """Calculate probability for each sleep stage"""
@@ -533,9 +533,9 @@ class SleepStageClassifier(BaseClassifier):
         if self.accuracy_buffer:
             accuracy = sum(self.accuracy_buffer) / len(self.accuracy_buffer)
 
-        error_rate = 0.0
-        if self.classification_count > 0:
-            error_rate = self.error_count / self.classification_count
+        # error_rate = 0.0
+        # if self.classification_count > 0:
+        #     error_rate = self.error_count / self.classification_count
 
         return ModelMetrics(
             model_name="SleepStageClassifier",

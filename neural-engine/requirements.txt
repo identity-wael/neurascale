@@ -55,7 +55,7 @@ msgpack==1.0.8
 lz4==4.3.3
 
 # Deep Learning
-torch==2.7.1  # Updated to fix security vulnerabilities
+torch==2.7.1  # CVE-2025-3730 fixed in 2.7.0+ (we're using 2.7.1, latest available)
 
 # API Framework additions
 fastapi==0.115.5

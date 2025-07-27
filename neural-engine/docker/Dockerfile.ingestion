@@ -19,9 +19,8 @@ FROM base AS dependencies
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies with cache mount
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+# Install Python dependencies (BuildKit cache mount may not work on all runners)
+RUN pip install -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app

@@ -150,6 +150,19 @@ jobs:
           pip install -r requirements-dev.txt
           pip install -e .
 
+          # Install LSL binary libraries for macOS
+          echo "Installing LSL binary libraries..."
+          if ! brew list --versions labstreaminglayer/tap/lsl > /dev/null; then
+            brew tap labstreaminglayer/tap
+            brew install labstreaminglayer/tap/lsl
+          else
+            echo "LSL already installed via homebrew"
+          fi
+
+          # Set DYLD_LIBRARY_PATH for macOS as required
+          export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
+          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Run linting
         if: steps.test-cache.outputs.cache-hit != 'true'
         working-directory: neural-engine
@@ -186,6 +199,8 @@ jobs:
         working-directory: neural-engine
         run: |
           source ../venv/bin/activate
+          # Ensure DYLD_LIBRARY_PATH is set for LSL on macOS
+          export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
           # Run tests that don't require external dependencies (LSL, hardware devices)
           # Device tests that require Lab Streaming Layer binaries are skipped
           pytest tests/unit/test_ingestion/ tests/unit/test_project_structure.py tests/test_basic.py tests/test_device_interface_enhancements.py -v --cov=src --cov-report=xml

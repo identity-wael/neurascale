@@ -7,7 +7,11 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import json
 
 from src.devices.device_manager import DeviceManager
-from src.devices.interfaces.base_device import DeviceState, DeviceCapabilities
+from src.devices.interfaces.base_device import (
+    DeviceState,
+    DeviceCapabilities,
+    NeuralSignalType,
+)
 from src.devices.implementations.brainflow_device import BrainFlowDevice
 from src.devices.device_notifications import (
     DeviceNotificationService,
@@ -50,12 +54,11 @@ def mock_brainflow():
 
 
 @pytest.fixture
-async def notification_service():
+def notification_service():
     """Create a notification service instance."""
     service = DeviceNotificationService()
-    await service.start()
-    yield service
-    await service.stop()
+    # Service will be started in tests that need it
+    return service
 
 
 @pytest.fixture
@@ -197,7 +200,8 @@ class TestDeviceNotifications:
     @pytest.mark.asyncio
     async def test_notification_service_lifecycle(self, notification_service):
         """Test notification service start/stop."""
-        # Service is already started by fixture
+        # Start the service
+        await notification_service.start()
         assert notification_service._is_running
         assert notification_service._broadcast_task is not None
 
@@ -208,10 +212,14 @@ class TestDeviceNotifications:
         await notification_service.start()
         assert notification_service._is_running
 
+        # Clean up
+        await notification_service.stop()
+
     @pytest.mark.asyncio
     async def test_device_state_notifications(self, notification_service):
         """Test device state change notifications."""
-        # Service is already started by fixture
+        # Start the service
+        await notification_service.start()
 
         # Mock WebSocket
         mock_websocket = AsyncMock()
@@ -231,12 +239,14 @@ class TestDeviceNotifications:
         assert sent_data["type"] == NotificationType.DEVICE_CONNECTED.value
         assert sent_data["device_id"] == "test_device"
 
-        # No need to stop - fixture handles cleanup
+        # Clean up
+        await notification_service.stop()
 
     @pytest.mark.asyncio
     async def test_impedance_notification(self, notification_service):
         """Test impedance check completion notification."""
-        # Service is already started by fixture
+        # Start the service
+        await notification_service.start()
 
         mock_websocket = AsyncMock()
         await notification_service.connect(mock_websocket)
@@ -260,12 +270,14 @@ class TestDeviceNotifications:
         assert sent_data["type"] == NotificationType.IMPEDANCE_CHECK_COMPLETE.value
         assert sent_data["data"]["impedance_values"] == impedance_results
 
-        # No need to stop - fixture handles cleanup
+        # Clean up
+        await notification_service.stop()
 
     @pytest.mark.asyncio
     async def test_error_notifications(self, notification_service):
         """Test error notifications."""
-        # Service is already started by fixture
+        # Start the service
+        await notification_service.start()
 
         mock_websocket = AsyncMock()
         await notification_service.connect(mock_websocket)
@@ -284,7 +296,8 @@ class TestDeviceNotifications:
         assert sent_data["severity"] == "error"
         assert "RuntimeError" in sent_data["data"]["error_type"]
 
-        # No need to stop - fixture handles cleanup
+        # Clean up
+        await notification_service.stop()
 
 
 class TestDeviceDiscoveryEnhancements:
@@ -474,12 +487,10 @@ class TestDeviceManagerIntegration:
         mock_device.get_capabilities = MagicMock()
         mock_device.get_capabilities.return_value = DeviceCapabilities(
             supported_sampling_rates=[250],
-            channel_count=8,
+            max_channels=8,
+            signal_types=[NeuralSignalType.EEG],
             has_impedance_check=True,
             has_battery_monitor=True,
-            supported_data_types=["eeg"],
-            max_sampling_rate=250,
-            resolution_bits=24,
         )
 
         with patch(

@@ -16,9 +16,8 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
 FROM base AS dependencies
 # Copy only requirements to cache dependencies
 COPY requirements.txt .
-# Use BuildKit cache mount for pip packages
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt --progress-bar off
+# Install dependencies (BuildKit cache mount may not work on all runners)
+RUN pip install -r requirements.txt --progress-bar off
 
 # Second stage: Application
 FROM dependencies AS app

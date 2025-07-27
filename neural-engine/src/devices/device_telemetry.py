@@ -361,7 +361,7 @@ class DeviceTelemetryCollector:
         device_id: str,
         event: str,
         details: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         """Collect connection event telemetry."""
         await self.collect_event(
             device_id=device_id,
@@ -379,7 +379,7 @@ class DeviceTelemetryCollector:
         packets_dropped: int,
         data_rate_hz: float,
         latency_ms: float,
-    ):
+    ) -> None:
         """Collect data flow telemetry."""
         await self.collect_event(
             device_id=device_id,
@@ -399,7 +399,7 @@ class DeviceTelemetryCollector:
         snr_db: float,
         quality_level: str,
         impedance_ohms: Optional[float] = None,
-    ):
+    ) -> None:
         """Collect signal quality telemetry."""
         await self.collect_event(
             device_id=device_id,
@@ -418,7 +418,7 @@ class DeviceTelemetryCollector:
         error_type: str,
         error_message: str,
         stack_trace: Optional[str] = None,
-    ):
+    ) -> None:
         """Collect error telemetry."""
         await self.collect_event(
             device_id=device_id,
@@ -435,7 +435,7 @@ class DeviceTelemetryCollector:
         device_id: str,
         action: str,
         parameters: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         """Collect user action telemetry."""
         await self.collect_event(
             device_id=device_id,

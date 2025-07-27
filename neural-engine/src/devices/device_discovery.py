@@ -148,7 +148,8 @@ class DeviceDiscoveryService:
             tasks.append(self._discover_brainflow_devices())
 
         # Run all discovery tasks
-        self._scan_task = asyncio.create_task(self._run_discovery(tasks))
+        discovery_tasks = [asyncio.create_task(task) for task in tasks]
+        self._scan_task = asyncio.create_task(self._run_discovery(discovery_tasks))
 
     async def stop_discovery(self) -> None:
         """Stop device discovery."""
@@ -352,7 +353,7 @@ class DeviceDiscoveryService:
             logger.error(f"Error scanning WiFi devices: {e}")
 
     def _on_service_state_change(
-        self, zeroconf, service_type, name, state_change
+        self, zeroconf: Any, service_type: str, name: str, state_change: str
     ) -> None:
         """Handle mDNS service discovery."""
         if state_change == "added":

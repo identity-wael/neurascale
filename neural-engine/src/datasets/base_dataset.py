@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Any, Tuple
+from typing import Dict, Optional, Any, Tuple, Generator
 import numpy as np
 from pathlib import Path
 import logging
@@ -132,7 +132,7 @@ class BaseDataset(ABC):
 
     def get_batch_iterator(
         self, data: np.ndarray, labels: np.ndarray, shuffle: bool = True
-    ):
+    ) -> Generator[Tuple[np.ndarray, np.ndarray], None, None]:
         """
         Create batch iterator for data.
 

@@ -242,7 +242,7 @@ async def get_device_health(
 @router.websocket("/notifications")
 async def device_notifications_websocket(
     websocket: WebSocket, manager: DeviceManager = Depends(get_device_manager)
-):
+) -> None:
     """WebSocket endpoint for real-time device notifications."""
     # Accept connection
     await manager.notification_service.connect(websocket)
@@ -263,7 +263,7 @@ async def device_notifications_websocket(
         await manager.notification_service.disconnect(websocket)
 
 
-def initialize_device_manager(manager: DeviceManager):
+def initialize_device_manager(manager: DeviceManager) -> None:
     """Initialize the global device manager instance."""
     global device_manager
     device_manager = manager

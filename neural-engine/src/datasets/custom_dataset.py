@@ -442,6 +442,8 @@ class CustomDatasetLoader(BaseDataset):
 
     def _load_npy(self) -> Tuple[np.ndarray, np.ndarray]:
         """Load data from NumPy file."""
+        if self.config.data_path is None:
+            raise ValueError("data_path must be specified for NPY format")
         data = np.load(self.config.data_path)
 
         # Load labels
@@ -521,6 +523,8 @@ class CustomDatasetLoader(BaseDataset):
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Convert continuous data to epochs."""
         sampling_rate = self._original_sampling_rate or self.config.sampling_rate
+        if self.config.epoch_length is None:
+            raise ValueError("epoch_length must be specified for continuous data")
         epoch_samples = int(self.config.epoch_length * sampling_rate)
         overlap_samples = int(epoch_samples * self.config.epoch_overlap)
         step_samples = epoch_samples - overlap_samples
@@ -619,7 +623,7 @@ class CustomDatasetLoader(BaseDataset):
 
         return processed_data
 
-    def _preprocess_continuous(self, data: np.ndarray) -> np.ndarray:
+    def _preprocess_continuous(self, data: np.ndarray) -> np.ndarray:  # noqa: C901
         """Apply preprocessing to continuous data."""
         from scipy import signal
 
@@ -640,6 +644,8 @@ class CustomDatasetLoader(BaseDataset):
                 b, a = signal.butter(4, low, btype="high")
             else:
                 # Lowpass filter
+                if self.config.filter_high is None:
+                    raise ValueError("filter_high must be specified for lowpass filter")
                 high = self.config.filter_high / nyquist
                 b, a = signal.butter(4, high, btype="low")
 

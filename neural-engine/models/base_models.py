@@ -353,7 +353,8 @@ class PyTorchBaseModel(BaseNeuralModel):
             outputs = self.model(X_tensor)
             # Convert to probabilities
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
-            return probabilities.cpu().numpy()
+            result: np.ndarray = probabilities.cpu().numpy()
+            return result
 
     def save(self, filepath: str) -> None:
         """Save PyTorch model."""

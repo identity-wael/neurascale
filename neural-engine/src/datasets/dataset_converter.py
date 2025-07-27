@@ -24,7 +24,7 @@ class DatasetConverter:
         output_path: Path,
         input_format: DataFormat,
         output_format: DataFormat,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Convert dataset from one format to another.

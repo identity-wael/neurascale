@@ -227,6 +227,7 @@ jobs:
     if: success()
     runs-on: self-hosted
     environment: ${{ needs.setup.outputs.environment }}
+    timeout-minutes: 45  # Overall job timeout
     permissions:
       contents: read
       id-token: write
@@ -284,6 +285,7 @@ jobs:
       - name: Build and push Docker image
         if: steps.check_docker.outputs.docker_available == 'true'
         uses: docker/build-push-action@v5
+        timeout-minutes: 30
         with:
           context: neural-engine
           file: neural-engine/docker/Dockerfile.${{ matrix.service }}

@@ -478,7 +478,7 @@ class DeviceManager:
         self._discovered_devices.clear()
 
         # Set up callback to track discoveries
-        def on_device_discovered(device: DiscoveredDevice):
+        def on_device_discovered(device: DiscoveredDevice) -> None:
             self._discovered_devices[device.unique_id] = device
             logger.info(f"Discovered: {device.device_name} ({device.device_type})")
 
@@ -636,7 +636,7 @@ class DeviceManager:
         self,
         output_dir: Optional[Path] = None,
         enable_cloud: bool = False,
-    ):
+    ) -> None:
         """
         Start telemetry collection.
 
@@ -676,8 +676,8 @@ class DeviceManager:
             return {
                 "status": self.health_monitor.get_device_health(device_id).value,
                 "metrics": (
-                    self.health_monitor.get_device_metrics(device_id).to_dict()
-                    if self.health_monitor.get_device_metrics(device_id)
+                    metrics.to_dict()
+                    if (metrics := self.health_monitor.get_device_metrics(device_id))
                     else None
                 ),
             }
@@ -686,8 +686,8 @@ class DeviceManager:
                 device_id: {
                     "status": status.value,
                     "metrics": (
-                        self.health_monitor.get_device_metrics(device_id).to_dict()
-                        if self.health_monitor.get_device_metrics(device_id)
+                        device_metrics.to_dict()
+                        if (device_metrics := self.health_monitor.get_device_metrics(device_id))
                         else None
                     ),
                 }

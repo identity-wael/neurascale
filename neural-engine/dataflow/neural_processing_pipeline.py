@@ -94,10 +94,10 @@ class ExtractBandPowers(beam.DoFn):
 
             for band_name, (low_freq, high_freq) in self.bands.items():
                 idx_band = np.logical_and(freqs >= low_freq, freqs < high_freq)
-                band_power = np.trapz(psd[idx_band], freqs[idx_band])
-                band_powers[f"{band_name}_power"] = float(band_power)
+                band_power = float(np.trapz(psd[idx_band], freqs[idx_band]))
+                band_powers[f"{band_name}_power"] = band_power
                 band_powers[f"{band_name}_relative_power"] = (
-                    float(band_power / total_power) if total_power > 0 else 0.0
+                    band_power / float(total_power) if float(total_power) > 0 else 0.0
                 )
 
             element["band_powers"] = band_powers

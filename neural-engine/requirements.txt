@@ -1,6 +1,7 @@
 # Neural Signal Processing
 pylsl==1.16.2
 brainflow==5.14.0
+pyserial==3.5  # For OpenBCI serial communication
 numpy==1.26.4  # Latest stable
 scipy==1.14.1  # Latest stable
 scikit-learn==1.5.2  # Latest stable

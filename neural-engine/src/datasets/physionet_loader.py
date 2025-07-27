@@ -591,7 +591,7 @@ class PhysioNetLoader(BaseDataset):
         duration = raw.times[-1]
 
         # Create events for epoching
-        events = []
+        events_list: List[List[int]] = []
         event_id = {"normal": 0, "seizure": 1}
 
         # Generate events every window_size seconds
@@ -606,9 +606,9 @@ class PhysioNetLoader(BaseDataset):
                     break
 
             label = 1 if is_seizure else 0
-            events.append([sample, 0, label])
+            events_list.append([sample, 0, label])
 
-        events = np.array(events)
+        events = np.array(events_list)
 
         # Create epochs
         epochs = mne.Epochs(
@@ -624,15 +624,15 @@ class PhysioNetLoader(BaseDataset):
 
         # Get data and labels
         epochs_data = epochs.get_data()
-        labels = events[: len(epochs_data), 2]
+        labels_array = events[: len(epochs_data), 2]
 
-        return epochs_data, labels.tolist()
+        return epochs_data, labels_array.tolist()
 
     def _parse_chbmit_summary(
         self, summary_file: Path
     ) -> Dict[str, List[Tuple[float, float]]]:
         """Parse CHB-MIT summary file for seizure annotations."""
-        seizure_info = {}
+        seizure_info: Dict[str, List[Tuple[float, float]]] = {}
 
         if not summary_file.exists():
             return seizure_info
@@ -669,7 +669,8 @@ class PhysioNetLoader(BaseDataset):
                         end_line = lines[i].strip()
                         end_time = float(end_line.split(":")[1].strip().split()[0])
 
-                        seizure_info[current_file].append((start_time, end_time))
+                        if current_file is not None:
+                            seizure_info[current_file].append((start_time, end_time))
 
             i += 1
 

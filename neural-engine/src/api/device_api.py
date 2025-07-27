@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Dict, Any
 from datetime import datetime
 from pathlib import Path
 from flask import Blueprint, jsonify, request, Response
@@ -85,7 +85,7 @@ def get_device(device_id: str) -> Response:
         if not device:
             return jsonify({"error": "Device not found"}), 404
 
-        device_info = {
+        device_info: Dict[str, Any] = {
             "device_id": device_id,
             "device_name": device.device_name,
             "state": device.state.value,

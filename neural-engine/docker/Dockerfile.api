@@ -8,16 +8,26 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Set pip to use more parallel downloads
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+# Set pip to use more parallel downloads and increase timeout
+ENV PIP_DEFAULT_TIMEOUT=300 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_RETRIES=3
 
 # First stage: Dependencies
 FROM base AS dependencies
 # Copy only requirements to cache dependencies
 COPY requirements.txt .
-# Install dependencies (BuildKit cache mount may not work on all runners)
-RUN pip install -r requirements.txt --progress-bar off
+# Install dependencies in chunks to avoid timeout
+RUN pip install --upgrade pip setuptools wheel && \
+    # Install core dependencies first
+    grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
+    pip install -r /dev/stdin --progress-bar off && \
+    # Install Google Cloud dependencies
+    grep -E '^google-cloud-' requirements.txt | \
+    pip install -r /dev/stdin --progress-bar off && \
+    # Install remaining dependencies
+    pip install -r requirements.txt --progress-bar off
 
 # Second stage: Application
 FROM dependencies AS app

@@ -1,5 +1,5 @@
 # Neural Engine Processor Dockerfile
-FROM python:3.12-slim
+FROM python:3.12-slim AS base
 
 WORKDIR /app
 
@@ -10,10 +10,20 @@ RUN apt-get update && apt-get install -y \
     libatlas-base-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Set pip environment
+ENV PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# First stage: Dependencies
+FROM base AS dependencies
 # Copy requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Use BuildKit cache mount for pip packages
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 
+# Second stage: Application
+FROM dependencies AS app
 # Copy source code
 COPY src/ ./src/
 COPY setup.py .

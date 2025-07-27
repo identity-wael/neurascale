@@ -10,14 +10,15 @@ RUN apt-get update && apt-get install -y \
 
 # Set pip to use more parallel downloads
 ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # First stage: Dependencies
 FROM base AS dependencies
 # Copy only requirements to cache dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt --progress-bar off
+# Use BuildKit cache mount for pip packages
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt --progress-bar off
 
 # Second stage: Application
 FROM dependencies AS app

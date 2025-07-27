@@ -60,7 +60,7 @@ class DeviceNotificationService:
         """Initialize notification service."""
         self._connections: Set[WebSocket] = set()
         self._connection_info: Dict[WebSocket, Dict[str, Any]] = {}
-        self._notification_queue: asyncio.Queue[DeviceNotification] = asyncio.Queue()
+        self._notification_queue: Optional[asyncio.Queue[DeviceNotification]] = None
         self._broadcast_task: Optional[asyncio.Task] = None
         self._is_running = False
 
@@ -70,6 +70,7 @@ class DeviceNotificationService:
             return
 
         self._is_running = True
+        self._notification_queue = asyncio.Queue()
         self._broadcast_task = asyncio.create_task(self._broadcast_loop())
         logger.info("Device notification service started")
 
@@ -261,6 +262,9 @@ class DeviceNotificationService:
 
     async def _queue_notification(self, notification: DeviceNotification):
         """Queue a notification for broadcast."""
+        if not self._notification_queue:
+            logger.warning("Notification service not started, dropping notification")
+            return
         try:
             await self._notification_queue.put(notification)
         except Exception as e:
@@ -270,6 +274,10 @@ class DeviceNotificationService:
         """Main loop for broadcasting notifications."""
         while self._is_running:
             try:
+                if not self._notification_queue:
+                    await asyncio.sleep(0.1)
+                    continue
+
                 # Wait for notification with timeout
                 notification = await asyncio.wait_for(
                     self._notification_queue.get(), timeout=1.0

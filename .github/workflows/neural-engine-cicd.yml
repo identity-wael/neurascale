@@ -188,7 +188,7 @@ jobs:
           source ../venv/bin/activate
           # Run tests that don't require external dependencies (LSL, hardware devices)
           # Device tests that require Lab Streaming Layer binaries are skipped
-          pytest tests/unit/test_ingestion/ tests/unit/test_project_structure.py tests/test_basic.py -v --cov=src --cov-report=xml
+          pytest tests/unit/test_ingestion/ tests/unit/test_project_structure.py tests/test_basic.py tests/test_device_interface_enhancements.py -v --cov=src --cov-report=xml
 
       - name: Upload coverage
         if: steps.test-cache.outputs.cache-hit != 'true'

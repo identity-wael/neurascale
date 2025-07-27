@@ -39,9 +39,13 @@ RUN pip install --upgrade pip setuptools wheel && \
 FROM dependencies AS app
 # Copy source code
 COPY src/ ./src/
+COPY processing/ ./processing/
+COPY devices/ ./devices/
+COPY api/ ./api/
+COPY monitoring/ ./monitoring/
+COPY security/ ./security/
+COPY ledger/ ./ledger/
 COPY examples/ ./examples/
-COPY tests/ ./tests/
-COPY pytest.ini .
 COPY setup.py .
 COPY README.md .
 

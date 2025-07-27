@@ -38,19 +38,45 @@ The built site will be in the `_site` directory.
 
 ```
 docs-site/
-├── _config.yml          # Jekyll configuration
-├── _docs/               # Documentation collection
-├── _console/            # Console documentation collection
-├── _layouts/            # Page layouts
-├── _includes/           # Reusable components
-├── assets/              # CSS, JS, images
+├── _config.yml              # Jekyll configuration
+├── _docs/                   # Documentation collection
+├── _console/                # Console documentation collection
+├── _layouts/                # Page layouts
+├── _includes/               # Reusable components
+├── assets/                  # CSS, JS, images
 │   └── css/
-│       └── style.scss   # Custom styles
-├── index.md             # Homepage
-├── contributing.md      # Contributing guide
-├── security.md          # Security policy
-└── Gemfile              # Ruby dependencies
+│       └── style.scss       # Custom styles
+├── index.md                 # Homepage
+├── architecture.md          # Technical architecture
+├── architecture-diagrams.md # Visual architecture diagrams
+├── api-documentation.md     # API reference
+├── neural-management-system.md
+├── dataset-management.md
+├── security-encryption.md
+├── contributing.md          # Contributing guide
+├── security.md              # Security policy
+└── Gemfile                  # Ruby dependencies
 ```
+
+## Key Documentation Pages
+
+### Architecture Documentation
+
+- `/architecture/` - Technical architecture overview with system design principles
+- `/architecture-diagrams/` - Comprehensive visual diagrams including:
+  - System Architecture Overview
+  - Device Data Flow
+  - Real-Time Processing Pipeline
+  - Multi-Device Synchronization
+  - Security Architecture
+  - Deployment Architecture
+  - Database Architecture
+  - API Gateway Architecture
+  - Performance Monitoring Dashboard
+
+### API Documentation
+
+- `/api-documentation/` - Complete REST and WebSocket API reference with examples
 
 ## Deployment
 

@@ -15,7 +15,7 @@
     "@react-google-maps/api": "^2.20.7",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
-    "@sanity/vision": "^3.99.0",
+    "@sanity/vision": "^4.1.1",
     "@stripe/stripe-js": "^7.5.0",
     "@studio-freight/lenis": "^1.0.42",
     "@types/nodemailer": "^6.4.17",

@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@babylonjs/core": "^8.17.0",
+    "@babylonjs/core": "^8.18.0",
     "@babylonjs/gui": "^8.17.0",
     "@prisma/client": "^6.12.0",
     "@react-google-maps/api": "^2.20.7",

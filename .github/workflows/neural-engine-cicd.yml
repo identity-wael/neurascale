@@ -284,7 +284,7 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.check_docker.outputs.docker_available == 'true'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         timeout-minutes: 30
         with:
           context: neural-engine

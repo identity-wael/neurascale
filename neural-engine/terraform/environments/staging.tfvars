@@ -19,12 +19,9 @@ enable_monitoring_alerts    = true
 alert_notification_channels = [] # Add Slack channel IDs here
 
 # Cost optimization
-enable_scheduled_scaling    = true # Scale down during off-hours
 enable_bigtable_autoscaling = false
 bigtable_nodes_dev          = 2
 bigtable_min_nodes_dev      = 1
-budget_amount               = "2000"
-cost_center                 = "neural-research-staging"
 
 # Temporarily disable cloud functions to debug timeout
 enable_cloud_functions = false
@@ -55,3 +52,20 @@ db_disk_size                = 200
 redis_memory_gb             = 8
 redis_tier                  = "STANDARD_HA"
 enable_db_high_availability = true
+
+# Storage configuration
+storage_location                  = "US"
+backup_location                   = "EUROPE-WEST1" # Different continent for DR
+enable_storage_lifecycle_policies = true
+data_retention_days               = 365 # 1 year for staging
+
+# Security configuration
+enable_enhanced_security    = true # Enhanced security for staging
+enable_kms_encryption       = true
+enable_binary_authorization = false
+
+# Cost optimization
+enable_scheduled_scaling   = true # Auto scale down after hours
+budget_amount              = "2000"
+cost_center                = "neural-research-staging"
+budget_notification_emails = [] # Add team emails here

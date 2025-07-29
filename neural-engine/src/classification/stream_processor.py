@@ -79,34 +79,38 @@ class StreamProcessor(BaseStreamProcessor):
                     logger.info(f"Started processing stream {stream_id}")
 
                 # Add data to buffer
-                await buffer.add_data(data)
+                if buffer is not None:
+                    await buffer.add_data(data)
 
-                # Check if it's time to classify
-                if await self._should_classify(buffer):
-                    # Run all classifiers concurrently
-                    classification_tasks = []
+                    # Check if it's time to classify
+                    if await self._should_classify(buffer):
+                        # Run all classifiers concurrently
+                        classification_tasks = []
 
-                    for name, classifier in self.classifiers.items():
-                        if name in self.feature_extractors:
-                            task = self._classify_with_timing(
-                                classifier, self.feature_extractors[name], buffer, name
+                        for name, classifier in self.classifiers.items():
+                            if name in self.feature_extractors:
+                                task = self._classify_with_timing(
+                                    classifier,
+                                    self.feature_extractors[name],
+                                    buffer,
+                                    name,
+                                )
+                                classification_tasks.append(task)
+
+                        if classification_tasks:
+                            # Wait for all classifications to complete
+                            results = await asyncio.gather(
+                                *classification_tasks, return_exceptions=True
                             )
-                            classification_tasks.append(task)
 
-                    if classification_tasks:
-                        # Wait for all classifications to complete
-                        results = await asyncio.gather(
-                            *classification_tasks, return_exceptions=True
-                        )
-
-                        # Yield valid results
-                        for result in results:
-                            if isinstance(result, ClassificationResult):
-                                self.classification_count += 1
-                                yield result
-                            elif isinstance(result, Exception):
-                                self.error_count += 1
-                                logger.error(f"Classification error: {result}")
+                            # Yield valid results
+                            for result in results:
+                                if isinstance(result, ClassificationResult):
+                                    self.classification_count += 1
+                                    yield result
+                                elif isinstance(result, Exception):
+                                    self.error_count += 1
+                                    logger.error(f"Classification error: {result}")
 
         except Exception as e:
             logger.error(f"Stream processing error: {e}")
@@ -157,11 +161,11 @@ class StreamProcessor(BaseStreamProcessor):
             return False
 
         # Check if we have classified recently
-        last_classification = getattr(buffer, "last_classification_time", 0)
+        last_classification = getattr(buffer, "_last_classification_time", 0)
         current_time = time.time() * 1000  # Convert to ms
 
         if current_time - last_classification >= self.classification_interval_ms:
-            buffer.last_classification_time = current_time
+            setattr(buffer, "_last_classification_time", current_time)
             return True
 
         return False

@@ -4,9 +4,8 @@ Motor imagery classifier for brain-computer interface control
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 import numpy as np
-from scipy import signal
 
 from ..interfaces import BaseClassifier
 from ..types import (
@@ -147,7 +146,7 @@ class MotorImageryClassifier(BaseClassifier):
             self.error_count += 1
             raise
 
-    async def _calculate_class_probabilities(
+    async def _calculate_class_probabilities(  # noqa: C901
         self, features: Dict[str, np.ndarray]
     ) -> Dict[MotorIntent, float]:
         """Calculate probability for each motor imagery class"""
@@ -370,8 +369,7 @@ class MotorImageryClassifier(BaseClassifier):
 
         # Apply CSP filters (simplified)
         if "raw_data" in features:
-            data = features["raw_data"]
-            # In practice, apply actual CSP transformation
+            # In practice, apply actual CSP transformation using features["raw_data"]
             pattern = np.random.randn(self.n_components * 2) * 0.1
             pattern[filter_idx * 2 : (filter_idx + 1) * 2] += 0.5
             return pattern

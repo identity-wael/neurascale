@@ -8,12 +8,10 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 import numpy as np
-import asyncio
 import json
 
 from .stream_processor import StreamProcessor
 from .types import (
-    ClassificationResult,
     NeuralData,
     StreamMetadata,
     MentalStateResult,
@@ -287,7 +285,7 @@ async def submit_feedback(model_name: str, feedback: Dict[str, Any]) -> Dict[str
 
 # WebSocket Endpoint
 @router.websocket("/stream/{stream_id}")
-async def websocket_stream(websocket: WebSocket, stream_id: str):
+async def websocket_stream(websocket: WebSocket, stream_id: str):  # noqa: C901
     """
     WebSocket endpoint for real-time classification streaming
 

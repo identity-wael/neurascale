@@ -149,7 +149,7 @@ class SeizurePredictor(BaseClassifier):
             self.error_count += 1
             raise
 
-    async def _calculate_seizure_probability(
+    async def _calculate_seizure_probability(  # noqa: C901
         self, features: Dict[str, np.ndarray], patient_id: str
     ) -> float:
         """Calculate probability of seizure occurrence"""

@@ -5,7 +5,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://docs.neurascale.io" # the base hostname & protocol for your site
 
 # Theme settings
-theme: jekyll-theme-minimal
+theme: jekyll-theme-cayman
 # Alternative themes that work well for documentation:
 # theme: jekyll-theme-cayman
 # theme: jekyll-theme-slate

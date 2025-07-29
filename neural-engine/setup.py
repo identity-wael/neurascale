@@ -1,9 +1,13 @@
 """Setup configuration for NeuraScale Neural Engine."""
 
 from setuptools import setup, find_packages
+import os
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+# Read long description from README.md if it exists
+long_description = ""
+if os.path.exists("README.md"):
+    with open("README.md", "r", encoding="utf-8") as fh:
+        long_description = fh.read()
 
 setup(
     name="neurascale-neural-engine",
@@ -12,7 +16,7 @@ setup(
     author_email="dev@neurascale.io",
     description="Neural Engine for real-time brain signal processing",
     long_description=long_description,
-    long_description_content_type="text / markdown",
+    long_description_content_type="text/markdown",
     url="https://github.com/identity-wael/neurascale",
     packages=find_packages(where="src"),
     package_dir={"": "src"},

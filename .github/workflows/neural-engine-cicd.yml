@@ -395,6 +395,12 @@ jobs:
               done
           fi
 
+          # Remove existing Cloud Run service from state if it exists
+          if terraform state list | grep -q "module.mcp_server.google_cloud_run_v2_service.mcp_server"; then
+              echo "Removing existing Cloud Run service from state to reimport..."
+              terraform state rm 'module.mcp_server.google_cloud_run_v2_service.mcp_server[0]' 2>/dev/null || echo "Failed to remove Cloud Run service"
+          fi
+
           echo "State cleanup complete!"
 
       - name: Terraform Plan and Apply

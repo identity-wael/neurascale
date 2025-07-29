@@ -287,6 +287,99 @@ docker-compose up -d
 docker-compose logs -f neural-engine
 ```
 
+## 🏗️ Infrastructure & Deployment
+
+### Terraform Infrastructure (Phase 14)
+
+The Neural Engine includes comprehensive Terraform modules for enterprise-grade cloud infrastructure:
+
+#### Core Modules
+
+1. **Networking** (`terraform/modules/networking/`)
+
+   - VPC with public/private subnets
+   - Cloud NAT for outbound connectivity
+   - Firewall rules for security
+   - Private service connections for managed services
+
+2. **GKE Cluster** (`terraform/modules/gke/`)
+
+   - HIPAA-compliant Kubernetes cluster
+   - Multiple node pools (general, neural compute, GPU)
+   - Workload Identity for pod-level IAM
+   - Binary authorization support
+
+3. **Database** (`terraform/modules/database/`)
+
+   - Cloud SQL PostgreSQL with HA
+   - Redis for caching and streaming
+   - BigQuery for analytics
+   - Automated backups and failover
+
+4. **Storage** (`terraform/modules/storage/`)
+
+   - Lifecycle policies for cost optimization
+   - HIPAA-compliant retention (7 years)
+   - Automated transitions: Standard → Nearline → Coldline → Archive
+   - Backup automation with cross-region replication
+
+5. **Security** (`terraform/modules/security/`)
+
+   - KMS encryption for data at rest
+   - Secret Manager for sensitive data
+   - VPC Service Controls (production)
+   - Binary Authorization for containers
+
+6. **Cost Optimization** (`terraform/cost-optimization.tf`)
+   - Budget alerts with thresholds
+   - Scheduled scaling for dev/staging
+   - Auto-scaler Cloud Function
+   - Cost analysis dashboards
+
+#### Environment Configurations
+
+```bash
+# Deploy to development
+cd terraform
+terraform workspace select development
+terraform plan -var-file=environments/development.tfvars
+terraform apply -var-file=environments/development.tfvars
+
+# Deploy to staging
+terraform workspace select staging
+terraform plan -var-file=environments/staging.tfvars
+terraform apply -var-file=environments/staging.tfvars
+
+# Deploy to production (requires additional approvals)
+terraform workspace select production
+terraform plan -var-file=environments/production.tfvars
+terraform apply -var-file=environments/production.tfvars
+```
+
+#### Key Features by Environment
+
+**Development:**
+
+- Minimal resources for cost savings
+- Auto-scaling down after hours
+- 90-day data retention
+- Basic tier services
+
+**Staging:**
+
+- Enhanced security controls
+- High availability for critical services
+- 1-year data retention
+- Performance testing capabilities
+
+**Production:**
+
+- Full security suite with KMS encryption
+- Multi-region backup strategy
+- 7-year HIPAA-compliant retention
+- 24/7 high availability
+- No auto-scaling (always on)
+
 ## 🔌 Device Integration
 
 ### Supported Devices
@@ -465,6 +558,14 @@ pre-commit run --all-files
 - **Phase 2**: Core Neural Processing
 - **Phase 8**: Real-time Classification & Prediction (implemented with extensions)
 - **Phase 10**: Security & Compliance Layer (implemented in Week 1)
+- **Phase 11**: NVIDIA Omniverse Integration
+- **Phase 12**: Complete REST & GraphQL API Implementation
+- **Phase 13**: MCP Server Implementation
+- **Phase 14**: Terraform Infrastructure Enhancement
+  - Enterprise-grade storage with lifecycle policies
+  - KMS encryption and security hardening
+  - Cost optimization with auto-scaling
+  - HIPAA-compliant configurations
 
 ### Specified but Not Implemented 📋
 

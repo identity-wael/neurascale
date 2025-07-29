@@ -340,27 +340,13 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (may require external dependencies)"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "unit: marks tests as unit tests"
-    )
-    config.addinivalue_line(
-        "markers", "api: marks tests as API tests"
-    )
-    config.addinivalue_line(
-        "markers", "graphql: marks tests as GraphQL specific"
-    )
-    config.addinivalue_line(
-        "markers", "rest: marks tests as REST API specific"
-    )
-    config.addinivalue_line(
-        "markers", "auth: marks tests as authentication related"
-    )
-    config.addinivalue_line(
-        "markers", "websocket: marks tests as WebSocket related"
-    )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "unit: marks tests as unit tests")
+    config.addinivalue_line("markers", "api: marks tests as API tests")
+    config.addinivalue_line("markers", "graphql: marks tests as GraphQL specific")
+    config.addinivalue_line("markers", "rest: marks tests as REST API specific")
+    config.addinivalue_line("markers", "auth: marks tests as authentication related")
+    config.addinivalue_line("markers", "websocket: marks tests as WebSocket related")
 
 
 # Skip tests that require external dependencies in CI

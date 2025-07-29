@@ -73,9 +73,7 @@ class TestDeviceEndpoints:
     def test_list_devices_with_filters(self, client, auth_headers):
         """Test listing devices with filters."""
         # Filter by status
-        response = client.get(
-            "/api/v2/devices?status=ONLINE", headers=auth_headers
-        )
+        response = client.get("/api/v2/devices?status=ONLINE", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         for device in data["items"]:
@@ -91,9 +89,7 @@ class TestDeviceEndpoints:
     def test_list_devices_pagination(self, client, auth_headers):
         """Test device listing pagination."""
         # First page
-        response = client.get(
-            "/api/v2/devices?page=1&size=2", headers=auth_headers
-        )
+        response = client.get("/api/v2/devices?page=1&size=2", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["page"] == 1
@@ -142,9 +138,7 @@ class TestDeviceEndpoints:
             "samplingRate": 256,
         }
 
-        response = client.post(
-            "/api/v2/devices", json=new_device, headers=auth_headers
-        )
+        response = client.post("/api/v2/devices", json=new_device, headers=auth_headers)
         assert response.status_code == 201
         device = response.json()
 

@@ -13,7 +13,9 @@ class TestJavaScriptSDK:
     @pytest.fixture
     def sdk_path(self):
         """Get SDK directory path."""
-        return Path(__file__).parent.parent.parent / "src" / "api" / "sdk" / "javascript"
+        return (
+            Path(__file__).parent.parent.parent / "src" / "api" / "sdk" / "javascript"
+        )
 
     def test_package_json_valid(self, sdk_path):
         """Test that package.json is valid."""
@@ -180,7 +182,9 @@ class TestJavaScriptSDK:
             )
 
             # Check if build succeeded
-            assert result.returncode == 0, f"TypeScript compilation failed: {result.stderr}"
+            assert (
+                result.returncode == 0
+            ), f"TypeScript compilation failed: {result.stderr}"
 
             # Check if output files were created
             dist_path = sdk_path / "dist"

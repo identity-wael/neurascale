@@ -30,8 +30,28 @@ cost_center                 = "neural-research-staging"
 enable_cloud_functions = false
 
 # MCP Server configuration
-enable_mcp_cloud_run     = false  # Disabled to prevent deployment conflicts
+enable_mcp_cloud_run     = false # Disabled to prevent deployment conflicts
 mcp_server_image         = "northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest"
 mcp_min_instances        = 1
 mcp_max_instances        = 5
 enable_mcp_public_access = false # Keep private, access via VPN/IAP
+
+# Networking configuration
+gke_subnet_cidr     = "10.0.0.0/20"
+private_subnet_cidr = "10.0.16.0/20"
+pods_cidr           = "10.1.0.0/16"
+services_cidr       = "10.2.0.0/20"
+
+# GKE configuration
+enable_gke_cluster       = true
+gke_general_machine_type = "n2-standard-4"
+gke_neural_machine_type  = "n2-highmem-8"
+enable_gpu_pool          = false # Can enable for ML testing
+gpu_type                 = "nvidia-tesla-t4"
+
+# Database configuration
+db_tier                     = "db-custom-2-7680"
+db_disk_size                = 200
+redis_memory_gb             = 8
+redis_tier                  = "STANDARD_HA"
+enable_db_high_availability = true

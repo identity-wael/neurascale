@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install --config.frozen-lockfile=false && cd apps/web",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile && cd apps/web",
   "buildCommand": "pnpm run build",
   "headers": [
     {

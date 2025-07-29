@@ -42,7 +42,8 @@ RUN pip install --no-cache-dir \
 
 # Copy source code
 COPY src/ /app/src/
-COPY setup.py pyproject.toml /app/
+COPY setup.py /app/
+COPY pyproject.toml /app/
 
 # Install the application
 WORKDIR /app
@@ -69,7 +70,8 @@ ENV PYTHONPATH="/app/src:$PYTHONPATH"
 
 # Copy application files
 COPY --from=builder /app/src /app/src
-COPY --chown=mcp:mcp src/mcp/config/server_config.yaml /app/config/server_config.yaml
+COPY --from=builder /app/src/mcp/config/server_config.yaml /app/config/server_config.yaml
+RUN chown -R mcp:mcp /app/config
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data && \

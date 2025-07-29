@@ -28,7 +28,7 @@ cost_center                 = "neural-research-dev"
 
 # MCP Server configuration
 enable_mcp_cloud_run     = true
-mcp_server_image         = "gcr.io/development-neurascale/mcp-server:latest"
+mcp_server_image         = "northamerica-northeast1-docker.pkg.dev/development-neurascale/neural-engine-development/mcp-server:latest"
 mcp_min_instances        = 0
 mcp_max_instances        = 3
 enable_mcp_public_access = false # Keep private in development

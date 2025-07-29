@@ -31,7 +31,7 @@ enable_cloud_functions = false
 
 # MCP Server configuration
 enable_mcp_cloud_run     = true
-mcp_server_image         = "gcr.io/staging-neurascale/mcp-server:latest"
+mcp_server_image         = "northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest"
 mcp_min_instances        = 1
 mcp_max_instances        = 5
 enable_mcp_public_access = false # Keep private, access via VPN/IAP

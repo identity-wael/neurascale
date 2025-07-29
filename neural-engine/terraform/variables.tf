@@ -324,12 +324,6 @@ variable "organization_id" {
   default     = ""
 }
 
-variable "enable_vpc_service_controls" {
-  description = "Enable VPC Service Controls"
-  type        = bool
-  default     = false
-}
-
 variable "access_policy_id" {
   description = "Access Context Manager policy ID"
   type        = string
@@ -342,19 +336,7 @@ variable "enable_binary_authorization" {
   default     = false
 }
 
-# Cost optimization variables
-variable "billing_account_id" {
-  description = "Billing account ID for budget alerts"
-  type        = string
-  default     = ""
-}
-
-variable "budget_amount" {
-  description = "Monthly budget amount in USD"
-  type        = string
-  default     = "5000"
-}
-
+# Additional cost optimization variables
 variable "budget_notification_emails" {
   description = "Email addresses for budget notifications"
   type        = list(string)
@@ -371,18 +353,6 @@ variable "budget_services" {
   description = "Services to include in budget (empty for all)"
   type        = list(string)
   default     = []
-}
-
-variable "cost_center" {
-  description = "Cost center label for budget tracking"
-  type        = string
-  default     = "neural-research"
-}
-
-variable "enable_scheduled_scaling" {
-  description = "Enable scheduled scaling for dev/staging environments"
-  type        = bool
-  default     = false
 }
 
 variable "enable_cost_analysis" {

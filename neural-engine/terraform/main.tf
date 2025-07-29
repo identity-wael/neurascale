@@ -390,11 +390,6 @@ module "monitoring" {
 # This is included directly rather than as a module since it needs access to other modules
 # and the billing_account_id may not be available in all environments
 
-# Data source for project information
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 # Outputs
 output "environment" {
   value = local.environment

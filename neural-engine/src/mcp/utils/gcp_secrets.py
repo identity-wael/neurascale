@@ -140,7 +140,7 @@ class GCPSecretManager:
                 }
             )
 
-            logger.info(f"Updated secret: {secret_name}")
+            logger.info(f"Updated secret: {secret_name} (version: {response.name})")
             return True
 
         except Exception as e:

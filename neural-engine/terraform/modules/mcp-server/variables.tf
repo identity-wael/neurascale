@@ -45,6 +45,12 @@ variable "github_actions_service_account" {
   default     = "github-actions@neurascale.iam.gserviceaccount.com"
 }
 
+variable "use_existing_secrets" {
+  type        = bool
+  description = "Whether to use existing secrets (true) or create new ones (false)"
+  default     = true
+}
+
 
 # Cloud Run Configuration
 variable "enable_cloud_run" {

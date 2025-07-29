@@ -222,7 +222,7 @@ resource "google_monitoring_alert_policy" "mcp_server_health" {
     condition_threshold {
       filter          = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\""
       duration        = "300s"
-      comparison      = "COMPARISON_LESS_THAN"
+      comparison      = "COMPARISON_LT"
       threshold_value = 1
 
       aggregations {

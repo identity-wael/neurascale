@@ -98,13 +98,13 @@ output "log_metric_name" {
 output "deployment_info" {
   description = "Complete deployment information for MCP server"
   value = {
-    project_id           = var.project_id
-    environment          = var.environment
-    region               = var.region
-    service_account      = google_service_account.mcp_server.email
-    secrets_created      = true
-    cloud_run_enabled    = var.enable_cloud_run
-    monitoring_enabled   = var.enable_monitoring
+    project_id            = var.project_id
+    environment           = var.environment
+    region                = var.region
+    service_account       = google_service_account.mcp_server.email
+    secrets_created       = true
+    cloud_run_enabled     = var.enable_cloud_run
+    monitoring_enabled    = var.enable_monitoring
     load_balancer_enabled = var.enable_load_balancer
   }
   sensitive = false
@@ -114,10 +114,10 @@ output "deployment_info" {
 output "security_info" {
   description = "Security configuration information"
   value = {
-    secrets_encrypted = true
-    iam_configured   = true
-    service_account_created = true
-    compute_access_granted = var.enable_compute_access
+    secrets_encrypted        = true
+    iam_configured           = true
+    service_account_created  = true
+    compute_access_granted   = var.enable_compute_access
     appengine_access_granted = var.enable_appengine_access
   }
   sensitive = false
@@ -127,9 +127,9 @@ output "security_info" {
 output "connection_info" {
   description = "Connection information for MCP server"
   value = {
-    service_url = var.enable_cloud_run ? google_cloud_run_v2_service.mcp_server[0].uri : null
-    port        = var.mcp_server_port
-    protocol    = "https"
+    service_url   = var.enable_cloud_run ? google_cloud_run_v2_service.mcp_server[0].uri : null
+    port          = var.mcp_server_port
+    protocol      = "https"
     public_access = var.enable_public_access
   }
   sensitive = false

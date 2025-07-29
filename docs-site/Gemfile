@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
-gem 'jekyll', '~> 4.3.0'
-gem 'jekyll-theme-minimal'
+# Use GitHub Pages gem for compatibility
+gem 'github-pages', group: :jekyll_plugins
+gem 'jekyll-theme-cayman'
 
 # GitHub Pages plugins
 group :jekyll_plugins do

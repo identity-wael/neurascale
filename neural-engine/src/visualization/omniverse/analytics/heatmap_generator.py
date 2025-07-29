@@ -391,59 +391,78 @@ class HeatmapGenerator:
         colors = np.zeros((n, 4))
 
         if self.colormap == "viridis":
-            # Simplified viridis colormap
-            for i, v in enumerate(values):
-                if v < 0.25:
-                    t = v * 4
-                    colors[i] = [0.267, 0.005, 0.329 + t * 0.129, 1.0]
-                elif v < 0.5:
-                    t = (v - 0.25) * 4
-                    colors[i] = [
-                        0.267 - t * 0.06,
-                        0.005 + t * 0.462,
-                        0.458 + t * 0.1,
-                        1.0,
-                    ]
-                elif v < 0.75:
-                    t = (v - 0.5) * 4
-                    colors[i] = [
-                        0.207 - t * 0.079,
-                        0.467 + t * 0.354,
-                        0.558 - t * 0.117,
-                        1.0,
-                    ]
-                else:
-                    t = (v - 0.75) * 4
-                    colors[i] = [
-                        0.128 + t * 0.865,
-                        0.821 + t * 0.085,
-                        0.441 - t * 0.297,
-                        1.0,
-                    ]
-
+            colors = self._apply_viridis_colormap(values)
         elif self.colormap == "jet":
-            # Simplified jet colormap
-            for i, v in enumerate(values):
-                if v < 0.125:
-                    colors[i] = [0, 0, 0.5 + v * 4, 1.0]
-                elif v < 0.375:
-                    t = (v - 0.125) / 0.25
-                    colors[i] = [0, t, 1.0, 1.0]
-                elif v < 0.625:
-                    t = (v - 0.375) / 0.25
-                    colors[i] = [t, 1.0, 1.0 - t, 1.0]
-                elif v < 0.875:
-                    t = (v - 0.625) / 0.25
-                    colors[i] = [1.0, 1.0 - t, 0, 1.0]
-                else:
-                    t = (v - 0.875) / 0.125
-                    colors[i] = [1.0 - t * 0.5, 0, 0, 1.0]
-
+            colors = self._apply_jet_colormap(values)
         else:
-            # Default grayscale
-            for i, v in enumerate(values):
-                colors[i] = [v, v, v, 1.0]
+            colors = self._apply_grayscale_colormap(values)
 
+        return colors
+
+    def _apply_viridis_colormap(self, values: np.ndarray) -> np.ndarray:
+        """Apply viridis colormap to values."""
+        n = len(values)
+        colors = np.zeros((n, 4))
+
+        for i, v in enumerate(values):
+            if v < 0.25:
+                t = v * 4
+                colors[i] = [0.267, 0.005, 0.329 + t * 0.129, 1.0]
+            elif v < 0.5:
+                t = (v - 0.25) * 4
+                colors[i] = [
+                    0.267 - t * 0.06,
+                    0.005 + t * 0.462,
+                    0.458 + t * 0.1,
+                    1.0,
+                ]
+            elif v < 0.75:
+                t = (v - 0.5) * 4
+                colors[i] = [
+                    0.207 - t * 0.079,
+                    0.467 + t * 0.354,
+                    0.558 - t * 0.117,
+                    1.0,
+                ]
+            else:
+                t = (v - 0.75) * 4
+                colors[i] = [
+                    0.128 + t * 0.865,
+                    0.821 + t * 0.085,
+                    0.441 - t * 0.297,
+                    1.0,
+                ]
+        return colors
+
+    def _apply_jet_colormap(self, values: np.ndarray) -> np.ndarray:
+        """Apply jet colormap to values."""
+        n = len(values)
+        colors = np.zeros((n, 4))
+
+        for i, v in enumerate(values):
+            if v < 0.125:
+                colors[i] = [0, 0, 0.5 + v * 4, 1.0]
+            elif v < 0.375:
+                t = (v - 0.125) / 0.25
+                colors[i] = [0, t, 1.0, 1.0]
+            elif v < 0.625:
+                t = (v - 0.375) / 0.25
+                colors[i] = [t, 1.0, 1.0 - t, 1.0]
+            elif v < 0.875:
+                t = (v - 0.625) / 0.25
+                colors[i] = [1.0, 1.0 - t, 0, 1.0]
+            else:
+                t = (v - 0.875) / 0.125
+                colors[i] = [1.0 - t * 0.5, 0, 0, 1.0]
+        return colors
+
+    def _apply_grayscale_colormap(self, values: np.ndarray) -> np.ndarray:
+        """Apply grayscale colormap to values."""
+        n = len(values)
+        colors = np.zeros((n, 4))
+
+        for i, v in enumerate(values):
+            colors[i] = [v, v, v, 1.0]
         return colors
 
     def _project_to_2d(

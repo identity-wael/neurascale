@@ -243,34 +243,7 @@ class AtlasMapper:
         # Simplified mapping based on spatial location
         # In production, would use actual atlas parcellation
         for i, vertex in enumerate(vertices):
-            x, y, z = vertex
-
-            # Determine hemisphere
-            hemisphere = "L" if x < 0 else "R"
-
-            # Determine lobe based on position
-            if y > 0.3:  # Frontal
-                if z > 0.7:
-                    region = f"Frontal_Sup_{hemisphere}"
-                elif z > 0.4:
-                    region = f"Frontal_Mid_{hemisphere}"
-                else:
-                    region = f"Frontal_Inf_Oper_{hemisphere}"
-            elif y < -0.3:  # Occipital
-                if z > 0.5:
-                    region = f"Occipital_Sup_{hemisphere}"
-                else:
-                    region = f"Occipital_Inf_{hemisphere}"
-            elif x < -0.5 or x > 0.5:  # Temporal
-                if z > 0.5:
-                    region = f"Temporal_Sup_{hemisphere}"
-                else:
-                    region = f"Temporal_Mid_{hemisphere}"
-            else:  # Parietal
-                if z > 0.7:
-                    region = f"Parietal_Sup_{hemisphere}"
-                else:
-                    region = f"Postcentral_{hemisphere}"
+            region = self._determine_region_for_vertex(vertex)
 
             # Check if region exists in atlas
             if region in self.atlases[atlas_name]:
@@ -279,6 +252,51 @@ class AtlasMapper:
                 vertex_regions[i] = "Unknown"
 
         return vertex_regions
+
+    def _determine_region_for_vertex(self, vertex: np.ndarray) -> str:
+        """Determine brain region for a single vertex."""
+        x, y, z = vertex
+        hemisphere = "L" if x < 0 else "R"
+
+        # Determine lobe based on position
+        if y > 0.3:  # Frontal
+            return self._get_frontal_region(z, hemisphere)
+        elif y < -0.3:  # Occipital
+            return self._get_occipital_region(z, hemisphere)
+        elif abs(x) > 0.5:  # Temporal
+            return self._get_temporal_region(z, hemisphere)
+        else:  # Parietal
+            return self._get_parietal_region(z, hemisphere)
+
+    def _get_frontal_region(self, z: float, hemisphere: str) -> str:
+        """Get frontal lobe region based on z coordinate."""
+        if z > 0.7:
+            return f"Frontal_Sup_{hemisphere}"
+        elif z > 0.4:
+            return f"Frontal_Mid_{hemisphere}"
+        else:
+            return f"Frontal_Inf_Oper_{hemisphere}"
+
+    def _get_occipital_region(self, z: float, hemisphere: str) -> str:
+        """Get occipital lobe region based on z coordinate."""
+        if z > 0.5:
+            return f"Occipital_Sup_{hemisphere}"
+        else:
+            return f"Occipital_Inf_{hemisphere}"
+
+    def _get_temporal_region(self, z: float, hemisphere: str) -> str:
+        """Get temporal lobe region based on z coordinate."""
+        if z > 0.5:
+            return f"Temporal_Sup_{hemisphere}"
+        else:
+            return f"Temporal_Mid_{hemisphere}"
+
+    def _get_parietal_region(self, z: float, hemisphere: str) -> str:
+        """Get parietal lobe region based on z coordinate."""
+        if z > 0.7:
+            return f"Parietal_Sup_{hemisphere}"
+        else:
+            return f"Postcentral_{hemisphere}"
 
     def get_region_info(
         self, region_name: str, atlas_name: Optional[str] = None

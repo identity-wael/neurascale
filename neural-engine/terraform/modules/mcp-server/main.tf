@@ -10,6 +10,11 @@ terraform {
   }
 }
 
+# Get project details for service account naming
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 # Secret values are generated and managed by the setup-mcp-secrets.sh script
 # This ensures secrets are created before Terraform runs and avoids
 # chicken-and-egg problems with permissions
@@ -113,7 +118,7 @@ resource "google_secret_manager_secret_iam_member" "compute_api_key_salt_access"
   project   = var.project_id
   secret_id = google_secret_manager_secret.mcp_api_key_salt.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_id}-compute@developer.gserviceaccount.com"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_secret_manager_secret_iam_member" "compute_jwt_secret_access" {
@@ -121,7 +126,7 @@ resource "google_secret_manager_secret_iam_member" "compute_jwt_secret_access" {
   project   = var.project_id
   secret_id = google_secret_manager_secret.mcp_jwt_secret.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_id}-compute@developer.gserviceaccount.com"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 # Grant App Engine service account access to secrets (if App Engine is used)

@@ -355,6 +355,18 @@ jobs:
               "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-${SA_SUFFIX}@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
           fi
 
+          # Import existing Cloud Run service if it exists
+          if gcloud run services describe ${{ needs.setup.outputs.environment }}-mcp-server --region=${{ env.GCP_REGION }} --project=${{ needs.setup.outputs.project_id }} &>/dev/null; then
+            echo "Importing existing Cloud Run service..."
+            terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+              -var="environment=${{ needs.setup.outputs.environment }}" \
+              -var="project_id=${{ needs.setup.outputs.project_id }}" \
+              -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+              -var="mcp_server_image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/mcp-server:latest" \
+              'module.mcp_server.google_cloud_run_v2_service.mcp_server[0]' \
+              "projects/${{ needs.setup.outputs.project_id }}/locations/${{ env.GCP_REGION }}/services/${{ needs.setup.outputs.environment }}-mcp-server" || true
+          fi
+
       - name: Clean up Terraform state
         working-directory: neural-engine/terraform
         run: |

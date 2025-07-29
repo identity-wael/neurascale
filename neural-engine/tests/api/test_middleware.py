@@ -191,17 +191,13 @@ class TestRateLimiter:
             assert reset_time > current_time
 
         # 6th request should be denied
-        allowed, remaining, reset_time = limiter.is_allowed(
-            client_id, current_time + 5
-        )
+        allowed, remaining, reset_time = limiter.is_allowed(client_id, current_time + 5)
         assert allowed is False
         assert remaining == 0
 
     def test_rate_limit_reset(self):
         """Test rate limit reset after window expires."""
-        limiter = SlidingWindowRateLimiter(
-            limit=2, window_size=1, redis_client=None
-        )
+        limiter = SlidingWindowRateLimiter(limit=2, window_size=1, redis_client=None)
 
         client_id = "test-client"
         current_time = time.time()
@@ -221,9 +217,7 @@ class TestRateLimiter:
 
     def test_different_clients_separate_limits(self):
         """Test that different clients have separate limits."""
-        limiter = SlidingWindowRateLimiter(
-            limit=1, window_size=60, redis_client=None
-        )
+        limiter = SlidingWindowRateLimiter(limit=1, window_size=60, redis_client=None)
 
         current_time = time.time()
 
@@ -242,9 +236,7 @@ class TestRateLimiter:
         """Test rate limit response headers."""
         app = FastAPI()
 
-        limiter = SlidingWindowRateLimiter(
-            limit=3, window_size=60, redis_client=None
-        )
+        limiter = SlidingWindowRateLimiter(limit=3, window_size=60, redis_client=None)
 
         @app.middleware("http")
         async def rate_limit_middleware(request: Request, call_next):
@@ -311,12 +303,19 @@ class TestRequestValidator:
         assert validator._match_pattern("/api/v2/sessions", "/api/v2/devices") is False
 
         # Test wildcard matching
-        assert validator._match_pattern("/api/v2/devices/123", "/api/v2/devices/*") is True
-        assert validator._match_pattern("/api/v2/devices/123/status", "/api/v2/devices/*") is False
+        assert (
+            validator._match_pattern("/api/v2/devices/123", "/api/v2/devices/*") is True
+        )
+        assert (
+            validator._match_pattern("/api/v2/devices/123/status", "/api/v2/devices/*")
+            is False
+        )
 
         # Test multiple wildcards
         assert (
-            validator._match_pattern("/api/v2/devices/123/sessions/456", "/api/v2/*/sessions/*")
+            validator._match_pattern(
+                "/api/v2/devices/123/sessions/456", "/api/v2/*/sessions/*"
+            )
             is True
         )
 
@@ -456,15 +455,11 @@ class TestGZipMiddleware:
         client = TestClient(app)
 
         # Large response should be compressed
-        response = client.get(
-            "/large-response", headers={"Accept-Encoding": "gzip"}
-        )
+        response = client.get("/large-response", headers={"Accept-Encoding": "gzip"})
         assert response.status_code == 200
         # Note: TestClient automatically decompresses, so we can't check encoding header
         # In real scenarios, the content-encoding header would be present
 
         # Small response should not be compressed
-        response = client.get(
-            "/small-response", headers={"Accept-Encoding": "gzip"}
-        )
+        response = client.get("/small-response", headers={"Accept-Encoding": "gzip"})
         assert response.status_code == 200

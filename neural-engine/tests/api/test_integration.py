@@ -136,9 +136,7 @@ class TestCompleteWorkflow:
         analysis_id = analysis["id"]
 
         # Step 7: Check analysis status
-        response = client.get(
-            f"/api/v2/analysis/{analysis_id}", headers=auth_headers
-        )
+        response = client.get(f"/api/v2/analysis/{analysis_id}", headers=auth_headers)
         assert response.status_code == 200
         analysis_status = response.json()
         assert analysis_status["sessionId"] == session_id
@@ -271,9 +269,7 @@ class TestCompleteWorkflow:
 
         # Verify all devices are online
         for device_id in created_device_ids:
-            response = client.get(
-                f"/api/v2/devices/{device_id}", headers=auth_headers
-            )
+            response = client.get(f"/api/v2/devices/{device_id}", headers=auth_headers)
             assert response.status_code == 200
             device = response.json()
             assert device["status"] == "ONLINE"
@@ -296,17 +292,13 @@ class TestCompleteWorkflow:
             assert response.status_code == 201
 
         # Test REST pagination
-        response = client.get(
-            "/api/v2/devices?page=1&size=5", headers=auth_headers
-        )
+        response = client.get("/api/v2/devices?page=1&size=5", headers=auth_headers)
         assert response.status_code == 200
         page1_data = response.json()
         assert len(page1_data["items"]) == 5
         assert page1_data["page"] == 1
 
-        response = client.get(
-            "/api/v2/devices?page=2&size=5", headers=auth_headers
-        )
+        response = client.get("/api/v2/devices?page=2&size=5", headers=auth_headers)
         assert response.status_code == 200
         page2_data = response.json()
         assert len(page2_data["items"]) == 5

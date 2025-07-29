@@ -7,6 +7,7 @@ The NeuraScale API provides comprehensive access to neural data processing, devi
 ## API Versions
 
 ### REST API v2 (`/api/v2/`)
+
 - **Base URL**: `https://api.neurascale.com/api/v2/`
 - **Authentication**: Bearer JWT tokens
 - **Content Type**: `application/json`
@@ -14,6 +15,7 @@ The NeuraScale API provides comprehensive access to neural data processing, devi
 - **HATEOAS**: All responses include navigation links
 
 ### GraphQL API (`/api/graphql`)
+
 - **Endpoint**: `https://api.neurascale.com/api/graphql`
 - **WebSocket**: `wss://api.neurascale.com/api/graphql` (subscriptions)
 - **Playground**: Available in development at `/api/graphql`
@@ -38,7 +40,7 @@ curl -X GET \
   -H "Authorization: Bearer YOUR_TOKEN" \
   https://api.neurascale.com/api/v2/devices
 
-# Create a new session  
+# Create a new session
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
@@ -63,31 +65,37 @@ curl -X POST \
 ### Core Endpoints
 
 #### 🔌 Device Management
+
 - **REST**: `/api/v2/devices/`
 - **GraphQL**: `devices`, `device(id)`
 - Manage neural acquisition devices, calibration, and status monitoring
 
-#### 📊 Session Recording  
+#### 📊 Session Recording
+
 - **REST**: `/api/v2/sessions/`
 - **GraphQL**: `sessions`, `session(id)`
 - Control recording sessions, real-time data streaming
 
 #### 🧠 Neural Data Access
+
 - **REST**: `/api/v2/neural-data/`
 - **GraphQL**: `neuralData(sessionId)`
 - Retrieve and stream neural signal data with filtering
 
 #### 👤 Patient Management
+
 - **REST**: `/api/v2/patients/`
 - **GraphQL**: `patients`, `patient(id)`
 - Patient records and clinical data integration
 
 #### 🔬 Analysis Pipeline
+
 - **REST**: `/api/v2/analysis/`
 - **GraphQL**: `analyses`, `startAnalysis`
 - Signal processing and machine learning inference
 
 #### 🤖 ML Models
+
 - **REST**: `/api/v2/ml-models/`
 - **GraphQL**: `mlModels`, `predict`
 - Neural network models for BCI applications
@@ -120,11 +128,11 @@ data = await client.get_neural_data(
 ### TypeScript/JavaScript SDK
 
 ```typescript
-import { NeuraScaleClient, StreamClient } from '@neurascale/sdk';
+import { NeuraScaleClient, StreamClient } from "@neurascale/sdk";
 
 // REST API client
 const client = new NeuraScaleClient({
-  apiKey: 'your-api-key'
+  apiKey: "your-api-key",
 });
 
 // List devices
@@ -132,11 +140,11 @@ const devices = await client.listDevices();
 
 // Real-time streaming
 const stream = new StreamClient({
-  url: 'wss://api.neurascale.com/ws/neural-data',
-  token: 'your-stream-token'
+  url: "wss://api.neurascale.com/ws/neural-data",
+  token: "your-stream-token",
 });
 
-stream.on('data', (frame) => {
+stream.on("data", (frame) => {
   console.log(`Received data: ${frame.channels.length} channels`);
 });
 ```
@@ -148,7 +156,7 @@ stream.on('data', (frame) => {
 Connect to real-time neural data streams:
 
 ```javascript
-const ws = new WebSocket('wss://api.neurascale.com/ws/neural-data');
+const ws = new WebSocket("wss://api.neurascale.com/ws/neural-data");
 
 ws.onmessage = (event) => {
   const frame = JSON.parse(event.data);
@@ -176,17 +184,17 @@ subscription {
 
 ### HTTP Status Codes
 
-| Code | Description | Action |
-|------|-------------|--------|
-| 200 | Success | Continue |
-| 201 | Created | Resource created successfully |
-| 400 | Bad Request | Check request format |
-| 401 | Unauthorized | Verify authentication token |
-| 403 | Forbidden | Check permissions |
-| 404 | Not Found | Resource doesn't exist |
-| 422 | Validation Error | Fix request data |
-| 429 | Rate Limited | Reduce request frequency |
-| 500 | Server Error | Retry or contact support |
+| Code | Description      | Action                        |
+| ---- | ---------------- | ----------------------------- |
+| 200  | Success          | Continue                      |
+| 201  | Created          | Resource created successfully |
+| 400  | Bad Request      | Check request format          |
+| 401  | Unauthorized     | Verify authentication token   |
+| 403  | Forbidden        | Check permissions             |
+| 404  | Not Found        | Resource doesn't exist        |
+| 422  | Validation Error | Fix request data              |
+| 429  | Rate Limited     | Reduce request frequency      |
+| 500  | Server Error     | Retry or contact support      |
 
 ### Error Response Format
 
@@ -255,7 +263,7 @@ GET /api/v2/devices?page=2&size=20
 ```graphql
 # Cursor-based pagination
 query {
-  devices(pagination: {first: 10, after: "cursor123"}) {
+  devices(pagination: { first: 10, after: "cursor123" }) {
     edges {
       node {
         id
@@ -320,15 +328,15 @@ query {
   },
   "_links": {
     "self": {
-      "href": "/api/v2/devices/dev_001", 
+      "href": "/api/v2/devices/dev_001",
       "method": "GET"
     },
     "update": {
-      "href": "/api/v2/devices/dev_001", 
+      "href": "/api/v2/devices/dev_001",
       "method": "PATCH"
     },
     "calibration": {
-      "href": "/api/v2/devices/dev_001/calibration", 
+      "href": "/api/v2/devices/dev_001/calibration",
       "method": "POST"
     }
   }
@@ -351,7 +359,7 @@ POST /api/v2/devices/batch
       "data": {"status": "ONLINE"}
     },
     {
-      "operation": "create", 
+      "operation": "create",
       "data": {
         "name": "New Device",
         "type": "EMG",
@@ -409,7 +417,7 @@ POST /api/v2/sessions/ses_001/export
 ### JavaScript SDK (`@neurascale/sdk`)
 
 - **Installation**: `npm install @neurascale/sdk`
-- **Documentation**: [JavaScript SDK Guide](./javascript-sdk.md)  
+- **Documentation**: [JavaScript SDK Guide](./javascript-sdk.md)
 - **Examples**: [JavaScript Examples](./examples/javascript/)
 
 ## OpenAPI Specification

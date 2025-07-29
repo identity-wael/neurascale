@@ -83,9 +83,7 @@ class TestSessionEndpoints:
         assert response.status_code == 200
 
         # Filter by status
-        response = client.get(
-            "/api/v2/sessions?status=RECORDING", headers=auth_headers
-        )
+        response = client.get("/api/v2/sessions?status=RECORDING", headers=auth_headers)
         assert response.status_code == 200
 
     def test_get_session(self, client, auth_headers):
@@ -153,9 +151,7 @@ class TestSessionEndpoints:
         client.post("/api/v2/sessions/ses_000001/start", headers=auth_headers)
 
         # Then stop it
-        response = client.post(
-            "/api/v2/sessions/ses_000001/stop", headers=auth_headers
-        )
+        response = client.post("/api/v2/sessions/ses_000001/stop", headers=auth_headers)
         assert response.status_code == 200
         session = response.json()
 
@@ -242,9 +238,7 @@ class TestSessionEndpoints:
     def test_invalid_session_state_transitions(self, client, auth_headers):
         """Test invalid state transitions."""
         # Try to stop a session that hasn't been started
-        response = client.post(
-            "/api/v2/sessions/ses_000002/stop", headers=auth_headers
-        )
+        response = client.post("/api/v2/sessions/ses_000002/stop", headers=auth_headers)
         assert response.status_code == 400
         error = response.json()
         assert "Cannot stop session" in error["error"]["message"]

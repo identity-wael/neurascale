@@ -45,11 +45,6 @@ variable "github_actions_service_account" {
   default     = "github-actions@neurascale.iam.gserviceaccount.com"
 }
 
-variable "create_secret_versions" {
-  type        = bool
-  description = "Whether to create secret versions (set to false if secrets already exist)"
-  default     = false
-}
 
 # Cloud Run Configuration
 variable "enable_cloud_run" {

@@ -7,23 +7,12 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.4"
-    }
   }
 }
 
-# Generate secure random values for MCP secrets
-resource "random_password" "mcp_api_key_salt" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "mcp_jwt_secret" {
-  length  = 64
-  special = true
-}
+# Secret values are generated and managed by the setup-mcp-secrets.sh script
+# This ensures secrets are created before Terraform runs and avoids
+# chicken-and-egg problems with permissions
 
 # MCP API Key Salt Secret
 resource "google_secret_manager_secret" "mcp_api_key_salt" {
@@ -47,16 +36,8 @@ resource "google_secret_manager_secret" "mcp_api_key_salt" {
   depends_on = [var.apis_enabled]
 }
 
-resource "google_secret_manager_secret_version" "mcp_api_key_salt" {
-  count       = var.create_secret_versions ? 1 : 0
-  secret      = google_secret_manager_secret.mcp_api_key_salt.id
-  secret_data = random_password.mcp_api_key_salt.result
-
-  lifecycle {
-    ignore_changes        = [secret_data]
-    create_before_destroy = true
-  }
-}
+# Secret versions are managed outside of Terraform by the setup script
+# This avoids permission issues when the secrets already exist
 
 # MCP JWT Secret
 resource "google_secret_manager_secret" "mcp_jwt_secret" {
@@ -80,16 +61,8 @@ resource "google_secret_manager_secret" "mcp_jwt_secret" {
   depends_on = [var.apis_enabled]
 }
 
-resource "google_secret_manager_secret_version" "mcp_jwt_secret" {
-  count       = var.create_secret_versions ? 1 : 0
-  secret      = google_secret_manager_secret.mcp_jwt_secret.id
-  secret_data = random_password.mcp_jwt_secret.result
-
-  lifecycle {
-    ignore_changes        = [secret_data]
-    create_before_destroy = true
-  }
-}
+# Secret versions are managed outside of Terraform by the setup script
+# This avoids permission issues when the secrets already exist
 
 # Service Account for MCP Server
 resource "google_service_account" "mcp_server" {

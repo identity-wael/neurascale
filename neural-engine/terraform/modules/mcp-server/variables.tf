@@ -39,6 +39,12 @@ variable "enable_appengine_access" {
   default     = false
 }
 
+variable "github_actions_service_account" {
+  type        = string
+  description = "Service account email used by GitHub Actions"
+  default     = "github-actions@neurascale.iam.gserviceaccount.com"
+}
+
 # Cloud Run Configuration
 variable "enable_cloud_run" {
   type        = bool

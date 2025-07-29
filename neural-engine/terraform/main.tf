@@ -217,17 +217,18 @@ module "neural_ingestion" {
 module "mcp_server" {
   source = "./modules/mcp-server"
 
-  project_id            = var.project_id
-  environment           = local.environment
-  region                = var.region
-  apis_enabled          = module.project_apis.apis_enabled
-  enable_cloud_run      = var.enable_mcp_cloud_run
-  enable_monitoring     = var.enable_monitoring_alerts
-  notification_channels = var.alert_notification_channels
-  mcp_server_image      = var.mcp_server_image
-  min_instances         = var.mcp_min_instances
-  max_instances         = var.mcp_max_instances
-  enable_public_access  = var.enable_mcp_public_access
+  project_id                     = var.project_id
+  environment                    = local.environment
+  region                         = var.region
+  apis_enabled                   = module.project_apis.apis_enabled
+  enable_cloud_run               = var.enable_mcp_cloud_run
+  enable_monitoring              = var.enable_monitoring_alerts
+  notification_channels          = var.alert_notification_channels
+  mcp_server_image               = var.mcp_server_image
+  min_instances                  = var.mcp_min_instances
+  max_instances                  = var.mcp_max_instances
+  enable_public_access           = var.enable_mcp_public_access
+  github_actions_service_account = var.github_actions_service_account
 
   depends_on = [
     module.project_apis,

@@ -3,7 +3,6 @@
 import pytest
 import numpy as np
 from unittest.mock import Mock, patch
-from typing import Dict, List, Tuple
 
 from src.visualization.omniverse.connectors.usd_generator import USDGenerator
 from src.visualization.omniverse.connectors.live_sync import LiveSync
@@ -14,10 +13,12 @@ from src.visualization.omniverse.models.animation_engine import (
     InterpolationType,
 )
 from src.visualization.omniverse.models.atlas_mapper import AtlasMapper
-from src.visualization.omniverse.rendering.particle_system import ParticleSystem, Particle
-from src.visualization.omniverse.rendering.volume_renderer import VolumeRenderer
+from src.visualization.omniverse.rendering.particle_system import ParticleSystem
 from src.visualization.omniverse.rendering.shader_manager import ShaderManager
-from src.visualization.omniverse.analytics.flow_visualizer import FlowVisualizer, FlowPath
+from src.visualization.omniverse.analytics.flow_visualizer import (
+    FlowVisualizer,
+    FlowPath,
+)
 from src.visualization.omniverse.interaction.gesture_recognition import (
     GestureRecognition,
     GestureType,
@@ -39,7 +40,7 @@ class TestUSDGenerator:
         with patch("pxr.Usd.Stage.CreateNew") as mock_create:
             mock_stage = Mock()
             mock_create.return_value = mock_stage
-            
+
             result = await usd_generator.create_stage()
             assert result is True
             assert usd_generator.stage is not None
@@ -49,11 +50,11 @@ class TestUSDGenerator:
         """Test adding brain mesh to USD."""
         # Mock stage
         usd_generator.stage = Mock()
-        
+
         # Create test mesh data
         vertices = np.random.randn(100, 3)
         faces = np.random.randint(0, 100, (200, 3))
-        
+
         with patch.object(usd_generator, "_create_mesh_prim", return_value=Mock()):
             result = await usd_generator.add_brain_mesh(vertices, faces)
             assert result is True
@@ -82,14 +83,14 @@ class TestLiveSync:
         live_sync.is_active = True
         live_sync.websocket = Mock()
         live_sync.websocket.send = Mock()
-        
+
         # Create test update
         update_data = {
             "type": "neural_activity",
             "timestamp": 123456789,
             "data": {"Fp1": 0.5},
         }
-        
+
         result = await live_sync.send_update(update_data)
         assert result is True
 
@@ -108,7 +109,7 @@ class TestMaterialLibrary:
             activity_level=0.8,
             frequency_band="alpha",
         )
-        
+
         assert material is not None
         assert "base_color" in material
         assert "metallic" in material
@@ -118,9 +119,9 @@ class TestMaterialLibrary:
         """Test material blending."""
         mat1 = {"base_color": (1.0, 0.0, 0.0), "metallic": 0.0}
         mat2 = {"base_color": (0.0, 0.0, 1.0), "metallic": 1.0}
-        
+
         blended = material_library.blend_materials([mat1, mat2], [0.7, 0.3])
-        
+
         assert "base_color" in blended
         assert blended["metallic"] == pytest.approx(0.3, rel=1e-3)
 
@@ -140,14 +141,14 @@ class TestAnimationEngine:
             AnimationKeyframe(time=1.0, value=1.0),
             AnimationKeyframe(time=2.0, value=0.0),
         ]
-        
+
         track = animation_engine.create_track(
             name="test_track",
             target_path="/Root/Object",
             property_name="scale",
             keyframes=keyframes,
         )
-        
+
         assert track is not None
         assert track.name == "test_track"
         assert len(track.keyframes) == 3
@@ -156,15 +157,11 @@ class TestAnimationEngine:
     def test_interpolation(self, animation_engine):
         """Test value interpolation."""
         # Test linear interpolation
-        result = animation_engine._interpolate(
-            0.0, 1.0, 0.5, InterpolationType.LINEAR
-        )
+        result = animation_engine._interpolate(0.0, 1.0, 0.5, InterpolationType.LINEAR)
         assert result == pytest.approx(0.5)
-        
+
         # Test ease in
-        result = animation_engine._interpolate(
-            0.0, 1.0, 0.5, InterpolationType.EASE_IN
-        )
+        result = animation_engine._interpolate(0.0, 1.0, 0.5, InterpolationType.EASE_IN)
         assert result == pytest.approx(0.25)
 
     def test_update_animation(self, animation_engine):
@@ -174,20 +171,20 @@ class TestAnimationEngine:
             AnimationKeyframe(time=0.0, value=0.0),
             AnimationKeyframe(time=1.0, value=1.0),
         ]
-        
+
         animation_engine.create_track(
             name="test",
             target_path="/Root/Object",
             property_name="x",
             keyframes=keyframes,
         )
-        
+
         # Start playback
         animation_engine.play()
-        
+
         # Update
         updates = animation_engine.update(0.5)
-        
+
         assert "/Root/Object" in updates
         assert "x" in updates["/Root/Object"]
         assert updates["/Root/Object"]["x"] == pytest.approx(0.5)
@@ -215,7 +212,7 @@ class TestAtlasMapper:
             1: {"name": "Frontal_Lobe", "color": (1.0, 0.0, 0.0)},
             2: {"name": "Temporal_Lobe", "color": (0.0, 1.0, 0.0)},
         }
-        
+
         info = atlas_mapper.get_region_info(1)
         assert info is not None
         assert info["name"] == "Frontal_Lobe"
@@ -237,7 +234,7 @@ class TestParticleSystem:
             radius=0.5,
             emission_rate=100,
         )
-        
+
         assert emitter_id is not None
         assert len(particle_system.emitters) == 1
 
@@ -245,14 +242,14 @@ class TestParticleSystem:
     async def test_emit_burst(self, particle_system):
         """Test particle burst emission."""
         initial_count = len(particle_system.particles)
-        
+
         await particle_system.emit_burst(
             position=(0, 0, 0),
             count=50,
             speed=1.0,
             lifetime=2.0,
         )
-        
+
         assert len(particle_system.particles) == initial_count + 50
 
     @pytest.mark.asyncio
@@ -260,12 +257,12 @@ class TestParticleSystem:
         """Test particle update."""
         # Add some particles
         await particle_system.emit_burst(position=(0, 0, 0), count=10)
-        
+
         initial_positions = [p.position.copy() for p in particle_system.particles]
-        
+
         # Update
         await particle_system.update(0.1)
-        
+
         # Positions should have changed
         for i, particle in enumerate(particle_system.particles):
             if particle.active:
@@ -284,22 +281,24 @@ class TestFlowVisualizer:
     async def test_create_connectivity_flow(self, flow_visualizer):
         """Test connectivity flow creation."""
         # Create test connectivity matrix
-        connectivity = np.array([
-            [1.0, 0.8, 0.3],
-            [0.8, 1.0, 0.5],
-            [0.3, 0.5, 1.0],
-        ])
-        
+        connectivity = np.array(
+            [
+                [1.0, 0.8, 0.3],
+                [0.8, 1.0, 0.5],
+                [0.3, 0.5, 1.0],
+            ]
+        )
+
         positions = {
             "A": (0, 0, 0),
             "B": (1, 0, 0),
             "C": (0, 1, 0),
         }
-        
+
         flows = await flow_visualizer.create_connectivity_flow(
             connectivity, positions, threshold=0.4
         )
-        
+
         assert len(flows) > 0
         assert all(isinstance(f, FlowPath) for f in flows)
 
@@ -307,9 +306,9 @@ class TestFlowVisualizer:
         """Test bezier curve calculation."""
         start = (0, 0, 0)
         end = (1, 0, 0)
-        
+
         waypoints = flow_visualizer._calculate_bezier_waypoints(start, end)
-        
+
         assert len(waypoints) == 5
         assert all(len(w) == 3 for w in waypoints)
 
@@ -337,9 +336,9 @@ class TestGestureRecognition:
             palm_center=(0, 0, 0),
             confidence=1.0,
         )
-        
+
         gesture = gesture_recognition._detect_pinch(pose)
-        
+
         assert gesture is not None
         assert gesture.type == GestureType.PINCH
 
@@ -358,9 +357,9 @@ class TestGestureRecognition:
             palm_center=(0, 0, 0),
             confidence=1.0,
         )
-        
+
         gesture = gesture_recognition._detect_grab(pose)
-        
+
         assert gesture is not None
         assert gesture.type == GestureType.GRAB
 
@@ -380,9 +379,9 @@ class TestGestureRecognition:
             palm_center=(0, 0, 0),
             confidence=1.0,
         )
-        
+
         gestures = await gesture_recognition.update(pose, None)
-        
+
         assert len(gestures) > 0
         assert any(g.type == GestureType.PINCH for g in gestures)
 
@@ -400,7 +399,7 @@ class TestShaderManager:
         """Test shader loading."""
         # Test loading built-in shader
         shader = await shader_manager.load_shader("neural_activity")
-        
+
         assert shader is not None
         assert "vertex" in shader
         assert "fragment" in shader
@@ -412,9 +411,9 @@ class TestShaderManager:
             "activity_level": 0.8,
             "pulse_frequency": 2.0,
         }
-        
+
         shader = shader_manager.create_neural_shader(params)
-        
+
         assert shader is not None
         assert "vertex" in shader
         assert "fragment" in shader

@@ -316,16 +316,24 @@ class AnimationEngine:
         if not self.is_playing:
             return {}
 
-        # Update current time
+        self._update_time(dt)
+
+        updates = {}
+        self._update_keyframe_animations(updates)
+        self._update_procedural_animations(updates, dt)
+        self._fire_update_callbacks(updates)
+
+        return updates
+
+    def _update_time(self, dt: float) -> None:
+        """Update current time and handle looping."""
         self.current_time += dt * self.playback_speed
 
-        # Handle timeline looping
         if self.timeline_loop and self.current_time > self.timeline_end:
             self.current_time = self.timeline_start
 
-        updates = {}
-
-        # Update keyframe animations
+    def _update_keyframe_animations(self, updates: Dict[str, Dict[str, Any]]) -> None:
+        """Update all keyframe animations."""
         for track_name, track in self.tracks.items():
             value = self._evaluate_track(track, self.current_time)
             if value is not None:
@@ -333,7 +341,10 @@ class AnimationEngine:
                     updates[track.target_path] = {}
                 updates[track.target_path][track.property_name] = value
 
-        # Update procedural animations
+    def _update_procedural_animations(
+        self, updates: Dict[str, Dict[str, Any]], dt: float
+    ) -> None:
+        """Update all procedural animations."""
         for anim_name, anim_func in self.procedural_animations.items():
             if anim_name in self.active_animations:
                 proc_updates = anim_func(self.current_time, dt)
@@ -342,11 +353,10 @@ class AnimationEngine:
                         updates[target_path] = {}
                     updates[target_path].update(properties)
 
-        # Call update callbacks
+    def _fire_update_callbacks(self, updates: Dict[str, Dict[str, Any]]) -> None:
+        """Fire all update callbacks."""
         for callback in self.update_callbacks:
             callback(self.current_time, updates)
-
-        return updates
 
     def _evaluate_track(self, track: AnimationTrack, time: float) -> Any:
         """Evaluate animation track at given time.

@@ -31,16 +31,16 @@ class DeviceResolver:
         devices = {}
 
         for i in range(25):
-            device_id = f"dev_{i+1:03d}"
+            device_id = f"dev_{i + 1:03d}"
             device_types = list(DeviceType)
             device_statuses = list(DeviceStatus)
 
             device = Device(
                 id=device_id,
-                name=f"Device {i+1}",
+                name=f"Device {i + 1}",
                 type=device_types[i % len(device_types)],
                 status=device_statuses[i % len(device_statuses)],
-                serial_number=f"SN{i+1:05d}",
+                serial_number=f"SN{i + 1:05d}",
                 firmware_version=f"{(i % 3) + 1}.{(i % 5)}.{i % 10}",
                 last_seen=datetime.utcnow(),
                 channel_count=32 if i % 2 == 0 else 64,

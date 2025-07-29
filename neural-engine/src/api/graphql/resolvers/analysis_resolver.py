@@ -32,7 +32,7 @@ class AnalysisResolver:
         ]
 
         for i in range(200):
-            analysis_id = f"ana_{i+1:06d}"
+            analysis_id = f"ana_{i + 1:06d}"
             session_id = f"ses_{(i % 100) + 1:06d}"
 
             # Generate timestamps

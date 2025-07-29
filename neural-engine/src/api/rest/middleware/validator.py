@@ -1,7 +1,7 @@
 """Request validation middleware."""
 
-from typing import Dict, Any, Callable, Optional
-from pydantic import BaseModel, ValidationError
+from typing import Dict, Callable
+from pydantic import ValidationError
 from fastapi import Request, HTTPException
 import logging
 

@@ -1,6 +1,6 @@
 """Batch loaders for GraphQL DataLoader pattern."""
 
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from strawberry.dataloader import DataLoader
 import logging
 

@@ -1,6 +1,6 @@
 """Response serialization middleware."""
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Optional
 from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum

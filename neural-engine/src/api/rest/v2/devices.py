@@ -8,7 +8,6 @@ import logging
 
 from ...rest.middleware.auth import get_current_user, check_permission
 from ...rest.utils.pagination import PaginationParams, PaginatedResponse, paginate
-from ...rest.utils.hypermedia import add_hateoas_links
 
 logger = logging.getLogger(__name__)
 

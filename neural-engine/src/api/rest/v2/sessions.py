@@ -1,6 +1,6 @@
 """Session management REST API endpoints."""
 
-from fastapi import APIRouter, Query, Depends, HTTPException, Response, BackgroundTasks
+from fastapi import APIRouter, Query, Depends, HTTPException, BackgroundTasks
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime

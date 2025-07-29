@@ -186,3 +186,96 @@ variable "mcp_server_port" {
   description = "Port for MCP server"
   default     = 8080
 }
+
+# Networking variables
+variable "gke_subnet_cidr" {
+  description = "CIDR range for GKE subnet"
+  type        = string
+  default     = "10.0.0.0/20"
+}
+
+variable "private_subnet_cidr" {
+  description = "CIDR range for private subnet"
+  type        = string
+  default     = "10.0.16.0/20"
+}
+
+variable "pods_cidr" {
+  description = "CIDR range for GKE pods"
+  type        = string
+  default     = "10.1.0.0/16"
+}
+
+variable "services_cidr" {
+  description = "CIDR range for GKE services"
+  type        = string
+  default     = "10.2.0.0/20"
+}
+
+# GKE variables
+variable "enable_gke_cluster" {
+  description = "Enable GKE cluster deployment"
+  type        = bool
+  default     = false
+}
+
+variable "gke_general_machine_type" {
+  description = "Machine type for general GKE node pool"
+  type        = string
+  default     = "n2-standard-4"
+}
+
+variable "gke_neural_machine_type" {
+  description = "Machine type for neural compute GKE node pool"
+  type        = string
+  default     = "n2-highmem-8"
+}
+
+variable "enable_gpu_pool" {
+  description = "Enable GPU node pool in GKE"
+  type        = bool
+  default     = false
+}
+
+variable "gpu_type" {
+  description = "Type of GPU for GKE nodes"
+  type        = string
+  default     = "nvidia-tesla-t4"
+}
+
+# Database variables
+variable "db_tier" {
+  description = "Cloud SQL instance tier"
+  type        = string
+  default     = "db-g1-small"
+}
+
+variable "db_disk_size" {
+  description = "Cloud SQL disk size in GB"
+  type        = number
+  default     = 100
+}
+
+variable "db_password" {
+  description = "Database password"
+  type        = string
+  sensitive   = true
+}
+
+variable "redis_memory_gb" {
+  description = "Redis memory size in GB"
+  type        = number
+  default     = 4
+}
+
+variable "redis_tier" {
+  description = "Redis tier (BASIC or STANDARD_HA)"
+  type        = string
+  default     = "BASIC"
+}
+
+variable "enable_db_high_availability" {
+  description = "Enable high availability for Cloud SQL"
+  type        = bool
+  default     = false
+}

@@ -60,6 +60,17 @@ resource "google_service_account" "neural_ingestion" {
   depends_on = [module.project_apis]
 }
 
+# Service account for GKE nodes (if GKE is enabled)
+resource "google_service_account" "gke_nodes" {
+  count        = var.enable_gke_cluster ? 1 : 0
+  account_id   = "gke-nodes-${local.env_short}"
+  display_name = "GKE Nodes Service Account"
+  description  = "Service account for GKE cluster nodes"
+  project      = var.project_id
+
+  depends_on = [module.project_apis]
+}
+
 # Grant necessary permissions to the service account
 resource "google_project_iam_member" "neural_ingestion_roles" {
   for_each = toset([
@@ -236,6 +247,77 @@ module "mcp_server" {
   ]
 }
 
+# Deploy networking infrastructure
+module "networking" {
+  source = "./modules/networking"
+
+  project_id          = var.project_id
+  environment         = local.environment
+  region              = var.region
+  gke_subnet_cidr     = var.gke_subnet_cidr
+  private_subnet_cidr = var.private_subnet_cidr
+  pods_cidr           = var.pods_cidr
+  services_cidr       = var.services_cidr
+
+  depends_on = [
+    module.project_apis
+  ]
+}
+
+# Deploy GKE cluster (if enabled)
+module "gke" {
+  count  = var.enable_gke_cluster ? 1 : 0
+  source = "./modules/gke"
+
+  project_id                    = var.project_id
+  environment                   = local.environment
+  region                        = var.region
+  vpc_id                        = module.networking.vpc_id
+  subnet_id                     = module.networking.gke_subnet_id
+  pods_secondary_range_name     = module.networking.pods_secondary_range_name
+  services_secondary_range_name = module.networking.services_secondary_range_name
+  node_service_account_email    = google_service_account.gke_nodes[0].email
+
+  # Node pool configurations from variables
+  general_pool_machine_type = var.gke_general_machine_type
+  neural_pool_machine_type  = var.gke_neural_machine_type
+  enable_gpu_pool           = var.enable_gpu_pool
+  gpu_type                  = var.gpu_type
+
+  depends_on = [
+    module.networking,
+    google_service_account.gke_nodes[0]
+  ]
+}
+
+# Deploy database infrastructure
+module "database" {
+  source = "./modules/database"
+
+  project_id                    = var.project_id
+  environment                   = local.environment
+  region                        = var.region
+  vpc_id                        = module.networking.vpc_id
+  vpc_self_link                 = module.networking.vpc_self_link
+  private_service_connection_id = module.networking.private_service_connection_id
+
+  # Database configurations
+  db_tier                  = var.db_tier
+  db_disk_size             = var.db_disk_size
+  db_password              = var.db_password
+  redis_memory_gb          = var.redis_memory_gb
+  redis_tier               = var.redis_tier
+  enable_high_availability = var.enable_db_high_availability
+
+  # Service accounts
+  dataset_owner_email          = google_service_account.neural_ingestion.email
+  neural_service_account_email = google_service_account.neural_ingestion.email
+
+  depends_on = [
+    module.networking
+  ]
+}
+
 # Deploy monitoring infrastructure
 module "monitoring" {
   source = "./modules/monitoring"
@@ -249,7 +331,9 @@ module "monitoring" {
   depends_on = [
     module.project_apis,
     module.neural_ingestion,
-    module.mcp_server
+    module.mcp_server,
+    module.gke,
+    module.database
   ]
 }
 
@@ -302,4 +386,49 @@ output "mcp_secret_uris" {
 output "mcp_server_url" {
   value       = module.mcp_server.cloud_run_service_url
   description = "MCP server Cloud Run service URL"
+}
+
+# Networking Outputs
+output "vpc_id" {
+  value       = module.networking.vpc_id
+  description = "VPC network ID"
+}
+
+output "gke_subnet_id" {
+  value       = module.networking.gke_subnet_id
+  description = "GKE subnet ID"
+}
+
+output "private_subnet_id" {
+  value       = module.networking.private_subnet_id
+  description = "Private subnet ID"
+}
+
+# GKE Outputs (if enabled)
+output "gke_cluster_endpoint" {
+  value       = var.enable_gke_cluster ? module.gke[0].cluster_endpoint : null
+  description = "GKE cluster endpoint"
+  sensitive   = true
+}
+
+output "gke_cluster_name" {
+  value       = var.enable_gke_cluster ? module.gke[0].cluster_name : null
+  description = "GKE cluster name"
+}
+
+# Database Outputs
+output "postgres_connection_name" {
+  value       = module.database.postgres_connection_name
+  description = "Cloud SQL PostgreSQL connection name"
+}
+
+output "redis_host" {
+  value       = module.database.redis_host
+  description = "Redis instance host"
+  sensitive   = true
+}
+
+output "bigquery_dataset_id" {
+  value       = module.database.bigquery_dataset_id
+  description = "BigQuery dataset ID for analytics"
 }

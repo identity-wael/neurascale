@@ -46,6 +46,10 @@ resource "google_secret_manager_secret" "mcp_api_key_salt" {
 resource "google_secret_manager_secret_version" "mcp_api_key_salt" {
   secret      = google_secret_manager_secret.mcp_api_key_salt.name
   secret_data = random_password.mcp_api_key_salt.result
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 # MCP JWT Secret
@@ -69,6 +73,10 @@ resource "google_secret_manager_secret" "mcp_jwt_secret" {
 resource "google_secret_manager_secret_version" "mcp_jwt_secret" {
   secret      = google_secret_manager_secret.mcp_jwt_secret.name
   secret_data = random_password.mcp_jwt_secret.result
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 # Service Account for MCP Server
@@ -126,6 +134,21 @@ resource "google_secret_manager_secret_iam_member" "appengine_jwt_secret_access"
   secret_id = google_secret_manager_secret.mcp_jwt_secret.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
+}
+
+# Grant GitHub Actions service account access to secrets
+resource "google_secret_manager_secret_iam_member" "github_actions_api_key_salt_access" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.mcp_api_key_salt.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.github_actions_service_account}"
+}
+
+resource "google_secret_manager_secret_iam_member" "github_actions_jwt_secret_access" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.mcp_jwt_secret.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.github_actions_service_account}"
 }
 
 # Cloud Run service for MCP Server (optional)

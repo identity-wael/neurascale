@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+"""Main entry point for NeuraScale MCP servers."""
+
+import asyncio
+import logging
+import argparse
+import signal
+import sys
+from typing import List
+import uvloop
+
+from .config import load_config
+from .servers.neural_data.server import NeuralDataMCPServer
+from .servers.device_control.server import DeviceControlMCPServer
+
+
+class MCPServerManager:
+    """Manages multiple MCP servers."""
+    
+    def __init__(self, config):
+        """Initialize server manager.
+        
+        Args:
+            config: Configuration dictionary
+        """
+        self.config = config
+        self.servers = {}
+        self.running = False
+        
+        # Setup logging
+        self._setup_logging()
+        self.logger = logging.getLogger(__name__)
+
+    def _setup_logging(self):
+        """Setup logging configuration."""
+        log_config = self.config.get("logging", {})
+        level = getattr(logging, log_config.get("level", "INFO"))
+        format_str = log_config.get("format", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        
+        logging.basicConfig(level=level, format=format_str)
+
+    async def start_servers(self, server_types: List[str] = None):
+        """Start MCP servers.
+        
+        Args:
+            server_types: List of server types to start (None for all)
+        """
+        if server_types is None:
+            server_types = ["neural_data", "device_control"]
+        
+        self.logger.info(f"Starting MCP servers: {server_types}")
+        
+        # Initialize servers
+        for server_type in server_types:
+            await self._start_server(server_type)
+        
+        self.running = True
+        self.logger.info("All MCP servers started successfully")
+
+    async def _start_server(self, server_type: str):
+        """Start a specific server type.
+        
+        Args:
+            server_type: Type of server to start
+        """
+        server_config = self.config["servers"].get(server_type)
+        if not server_config:
+            raise ValueError(f"No configuration found for server type: {server_type}")
+        
+        # Create server instance
+        if server_type == "neural_data":
+            server = NeuralDataMCPServer(self.config)
+        elif server_type == "device_control":
+            server = DeviceControlMCPServer(self.config)
+        else:
+            raise ValueError(f"Unknown server type: {server_type}")
+        
+        # Start server
+        port = server_config["port"]
+        await server.start(port)
+        
+        self.servers[server_type] = server
+        self.logger.info(f"Started {server_type} MCP server on port {port}")
+
+    async def stop_servers(self):
+        """Stop all MCP servers."""
+        self.logger.info("Stopping MCP servers")
+        
+        for server_type, server in self.servers.items():
+            try:
+                await server.stop()
+                self.logger.info(f"Stopped {server_type} MCP server")
+            except Exception as e:
+                self.logger.error(f"Error stopping {server_type} server: {e}")
+        
+        self.servers.clear()
+        self.running = False
+        self.logger.info("All MCP servers stopped")
+
+    async def run_forever(self):
+        """Run servers until interrupted."""
+        try:
+            while self.running:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            self.logger.info("Received interrupt signal")
+        finally:
+            await self.stop_servers()
+
+    def setup_signal_handlers(self):
+        """Setup signal handlers for graceful shutdown."""
+        def signal_handler(signame):
+            self.logger.info(f"Received {signame}")
+            self.running = False
+        
+        for signame in {'SIGINT', 'SIGTERM'}:
+            if hasattr(signal, signame):
+                loop = asyncio.get_event_loop()
+                loop.add_signal_handler(
+                    getattr(signal, signame),
+                    lambda: signal_handler(signame)
+                )
+
+
+async def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description="NeuraScale MCP Server Manager")
+    parser.add_argument(
+        "--config",
+        type=str,
+        help="Path to configuration file"
+    )
+    parser.add_argument(
+        "--servers",
+        nargs="+",
+        choices=["neural_data", "device_control", "clinical", "analysis"],
+        help="Server types to start (default: all)"
+    )
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Log level"
+    )
+    
+    args = parser.parse_args()
+    
+    # Load configuration
+    try:
+        config = load_config(args.config)
+        
+        # Override log level if specified
+        if args.log_level:
+            config.setdefault("logging", {})["level"] = args.log_level
+            
+    except Exception as e:
+        print(f"Error loading configuration: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    # Create server manager
+    manager = MCPServerManager(config)
+    
+    # Setup signal handlers for graceful shutdown
+    manager.setup_signal_handlers()
+    
+    try:
+        # Start servers
+        await manager.start_servers(args.servers)
+        
+        # Run until interrupted
+        await manager.run_forever()
+        
+    except Exception as e:
+        logging.error(f"Error running MCP servers: {e}")
+        sys.exit(1)
+
+
+def cli_neural_data():
+    """CLI entry point for neural data server only."""
+    async def run_neural_data():
+        config = load_config()
+        manager = MCPServerManager(config)
+        manager.setup_signal_handlers()
+        await manager.start_servers(["neural_data"])
+        await manager.run_forever()
+    
+    # Use uvloop for better performance
+    if hasattr(asyncio, 'set_event_loop_policy'):
+        try:
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+    
+    asyncio.run(run_neural_data())
+
+
+def cli_device_control():
+    """CLI entry point for device control server only."""
+    async def run_device_control():
+        config = load_config()
+        manager = MCPServerManager(config)
+        manager.setup_signal_handlers()
+        await manager.start_servers(["device_control"])
+        await manager.run_forever()
+    
+    # Use uvloop for better performance
+    if hasattr(asyncio, 'set_event_loop_policy'):
+        try:
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+    
+    asyncio.run(run_device_control())
+
+
+if __name__ == "__main__":
+    # Use uvloop for better performance
+    if hasattr(asyncio, 'set_event_loop_policy'):
+        try:
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+    
+    asyncio.run(main())

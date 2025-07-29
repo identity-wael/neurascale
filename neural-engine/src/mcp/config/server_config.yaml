@@ -1,0 +1,379 @@
+# NeuraScope MCP Server Configuration
+
+# Server Information
+servers:
+  neural_data:
+    name: "neurascale-neural-data"
+    version: "1.0.0"
+    description: "Neural data access and analysis MCP server"
+    port: 8100
+    host: "0.0.0.0"
+    
+  device_control:
+    name: "neurascale-device-control"
+    version: "1.0.0"
+    description: "BCI device control and monitoring MCP server"
+    port: 8101
+    host: "0.0.0.0"
+    
+  clinical:
+    name: "neurascale-clinical"
+    version: "1.0.0"
+    description: "Clinical workflow management MCP server"
+    port: 8102
+    host: "0.0.0.0"
+    
+  analysis:
+    name: "neurascale-analysis"
+    version: "1.0.0"
+    description: "Advanced neural data analysis MCP server"
+    port: 8103
+    host: "0.0.0.0"
+
+# Authentication Configuration
+auth:
+  jwt_secret: "${NEURASCALE_JWT_SECRET:-default-development-secret}"
+  jwt_algorithm: "HS256"
+  jwt_expiry_hours: 24
+  
+  # API Keys (in production, these would be managed securely)
+  api_keys:
+    neurascale_admin:
+      hash: "demo_hash_admin"
+      user_id: "admin"
+      user_name: "Administrator"
+      permissions: ["*"]  # All permissions
+      active: true
+      
+    neurascale_researcher:
+      hash: "demo_hash_researcher"
+      user_id: "researcher_001"
+      user_name: "Dr. Research"
+      permissions:
+        - "neural_data.*"
+        - "sessions.*"
+        - "analysis.*"
+        - "devices.read"
+        - "devices.list"
+      active: true
+      
+    neurascale_clinician:
+      hash: "demo_hash_clinician"
+      user_id: "clinician_001"
+      user_name: "Dr. Clinical"
+      permissions:
+        - "clinical.*"
+        - "patients.*"
+        - "protocols.*"
+        - "sessions.read"
+        - "sessions.create"
+        - "devices.read"
+        - "devices.connect"
+        - "recording.*"
+      active: true
+      
+  api_key_salt: "neurascale-mcp-2025"
+  session_timeout_minutes: 60
+
+# Permission System
+permissions:
+  # Permission definitions with descriptions
+  permissions:
+    # Neural Data Permissions
+    "neural_data.read":
+      description: "Read access to neural data"
+      category: "neural_data"
+    "neural_data.process":
+      description: "Process and filter neural data"
+      category: "neural_data"
+    "neural_data.analyze":
+      description: "Run analysis on neural data"
+      category: "neural_data"
+    "neural_data.export":
+      description: "Export neural data in various formats"
+      category: "neural_data"
+    "neural_data.visualize":
+      description: "Create visualizations of neural data"
+      category: "neural_data"
+      
+    # Session Permissions
+    "sessions.read":
+      description: "Read access to recording sessions"
+      category: "sessions"
+    "sessions.list":
+      description: "List recording sessions"
+      category: "sessions"
+    "sessions.create":
+      description: "Create new recording sessions"
+      category: "sessions"
+    "sessions.update":
+      description: "Update session metadata"
+      category: "sessions"
+    "sessions.delete":
+      description: "Delete recording sessions"
+      category: "sessions"
+      
+    # Device Permissions
+    "devices.read":
+      description: "Read device information"
+      category: "devices"
+    "devices.list":
+      description: "List available devices"
+      category: "devices"
+    "devices.connect":
+      description: "Connect to devices"
+      category: "devices"
+    "devices.disconnect":
+      description: "Disconnect from devices"
+      category: "devices"
+    "devices.control":
+      description: "Control device operations"
+      category: "devices"
+    "devices.configure":
+      description: "Configure device settings"
+      category: "devices"
+    "devices.calibrate":
+      description: "Calibrate devices"
+      category: "devices"
+    "devices.monitor":
+      description: "Monitor device status"
+      category: "devices"
+    "devices.diagnose":
+      description: "Run device diagnostics"
+      category: "devices"
+    "devices.test":
+      description: "Run device tests"
+      category: "devices"
+      
+    # Recording Permissions
+    "recording.start":
+      description: "Start data recording"
+      category: "recording"
+    "recording.stop":
+      description: "Stop data recording"
+      category: "recording"
+    "recording.pause":
+      description: "Pause data recording"
+      category: "recording"
+    "recording.resume":
+      description: "Resume data recording"
+      category: "recording"
+      
+    # Analysis Permissions
+    "analysis.spectral":
+      description: "Run spectral analysis"
+      category: "analysis"
+    "analysis.connectivity":
+      description: "Run connectivity analysis"
+      category: "analysis"
+    "analysis.artifact_detection":
+      description: "Detect artifacts in data"
+      category: "analysis"
+    "analysis.ml_models":
+      description: "Use ML models for analysis"
+      category: "analysis"
+      
+    # Clinical Permissions
+    "clinical.protocols":
+      description: "Access clinical protocols"
+      category: "clinical"
+    "clinical.execute":
+      description: "Execute clinical protocols"
+      category: "clinical"
+    "clinical.reports":
+      description: "Generate clinical reports"
+      category: "clinical"
+    "patients.read":
+      description: "Read patient information"
+      category: "patients"
+    "patients.create":
+      description: "Create patient records"
+      category: "patients"
+    "patients.update":
+      description: "Update patient information"
+      category: "patients"
+      
+    # System Permissions
+    "data.download":
+      description: "Download data files"
+      category: "system"
+    "plots.create":
+      description: "Create plots and visualizations"
+      category: "system"
+    "impedance.check":
+      description: "Check electrode impedances"
+      category: "system"
+    "signal_processing.apply":
+      description: "Apply signal processing filters"
+      category: "system"
+    "signal_quality.check":
+      description: "Check signal quality"
+      category: "system"
+      
+  # Role definitions
+  roles:
+    admin:
+      description: "Full system administrator"
+      permissions: ["*"]
+      
+    researcher:
+      description: "Research scientist with data access"
+      permissions:
+        - "neural_data.*"
+        - "sessions.*"
+        - "analysis.*"
+        - "devices.read"
+        - "devices.list"
+        - "devices.monitor"
+        - "data.download"
+        - "plots.create"
+        
+    clinician:
+      description: "Clinical practitioner"
+      permissions:
+        - "clinical.*"
+        - "patients.*"
+        - "sessions.read"
+        - "sessions.create"
+        - "sessions.update"
+        - "devices.read"
+        - "devices.list"
+        - "devices.connect"
+        - "devices.disconnect"
+        - "devices.configure"
+        - "devices.monitor"
+        - "recording.*"
+        - "impedance.check"
+        - "signal_quality.check"
+        
+    technician:
+      description: "Technical support and device maintenance"
+      permissions:
+        - "devices.*"
+        - "sessions.read"
+        - "impedance.check"
+        - "signal_quality.check"
+        - "neural_data.read"
+        
+    analyst:
+      description: "Data analyst with limited access"
+      permissions:
+        - "neural_data.read"
+        - "neural_data.analyze"
+        - "neural_data.visualize"
+        - "sessions.read"
+        - "sessions.list"
+        - "analysis.*"
+        - "plots.create"
+        
+  # Default permissions for new users
+  default_permissions:
+    - "sessions.read"
+    - "devices.read"
+    - "devices.list"
+
+# Rate Limiting Configuration
+rate_limits:
+  # Default limits
+  default:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    burst_limit: 10
+    
+  # Method-specific limits
+  methods:
+    # Data-intensive operations
+    get_neural_data:
+      requests_per_minute: 10
+      requests_per_hour: 100
+      burst_limit: 3
+      
+    export_neural_data:
+      requests_per_minute: 5
+      requests_per_hour: 20
+      burst_limit: 2
+      
+    run_spectral_analysis:
+      requests_per_minute: 15
+      requests_per_hour: 200
+      burst_limit: 5
+      
+    # Device control operations
+    start_recording:
+      requests_per_minute: 5
+      requests_per_hour: 50
+      burst_limit: 2
+      
+    connect_device:
+      requests_per_minute: 10
+      requests_per_hour: 100
+      burst_limit: 3
+      
+    # Query operations (more lenient)
+    query_sessions:
+      requests_per_minute: 30
+      requests_per_hour: 500
+      burst_limit: 10
+      
+    list_devices:
+      requests_per_minute: 20
+      requests_per_hour: 300
+      burst_limit: 5
+      
+  # User-specific limits (optional)
+  users:
+    admin:
+      requests_per_minute: 100
+      requests_per_hour: 2000
+      burst_limit: 20
+      
+  # Rate limit settings
+  cleanup_interval_seconds: 300
+
+# Neural Engine Integration
+neural_engine:
+  api_url: "${NEURAL_ENGINE_API_URL:-http://localhost:8000}"
+  timeout: 30
+  max_retries: 3
+  
+# Device Manager Integration  
+device_manager:
+  connection_timeout: 10
+  discovery_interval: 30
+  max_concurrent_connections: 10
+  
+# Logging Configuration
+logging:
+  level: "${LOG_LEVEL:-INFO}"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "/var/log/neurascale/mcp"
+    max_size_mb: 100
+    backup_count: 5
+    
+  # Structured logging for analytics
+  structured:
+    enabled: true
+    include_request_data: true
+    include_response_data: false  # Don't log large response data
+    max_message_length: 1000
+
+# Security Settings
+security:
+  require_auth: true
+  allowed_origins:
+    - "claude.ai"
+    - "*.anthropic.com"
+    - "localhost"
+    - "127.0.0.1"
+  audit_logging: true
+  encryption: "TLS 1.3"
+  
+# Development Settings
+development:
+  mock_data: true  # Use mock data for development
+  debug_mode: false
+  auto_reload: false

@@ -318,6 +318,54 @@ module "database" {
   ]
 }
 
+# Deploy storage infrastructure
+module "storage" {
+  source = "./modules/storage"
+
+  project_id                   = var.project_id
+  environment                  = local.environment
+  storage_location             = var.storage_location
+  backup_location              = var.backup_location
+  neural_service_account_email = google_service_account.neural_ingestion.email
+  storage_encryption_key       = var.enable_kms_encryption ? module.security[0].storage_key_id : ""
+
+  # Lifecycle policies
+  enable_lifecycle_policies = var.enable_storage_lifecycle_policies
+  retention_period_days     = var.data_retention_days
+
+  depends_on = [
+    module.project_apis,
+    google_service_account.neural_ingestion
+  ]
+}
+
+# Deploy security infrastructure
+module "security" {
+  count  = var.enable_enhanced_security ? 1 : 0
+  source = "./modules/security"
+
+  project_id                  = var.project_id
+  environment                 = local.environment
+  region                      = var.region
+  organization_id             = var.organization_id
+  database_service_account    = "service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
+  storage_service_account     = google_service_account.neural_ingestion.email
+  application_service_account = google_service_account.neural_ingestion.email
+
+  # VPC Service Controls
+  enable_vpc_service_controls = var.enable_vpc_service_controls
+  access_policy_id            = var.access_policy_id
+
+  # Binary Authorization
+  enable_binary_authorization = var.enable_binary_authorization
+  gke_cluster_name            = var.enable_gke_cluster ? module.gke[0].cluster_name : ""
+
+  depends_on = [
+    module.project_apis,
+    google_service_account.neural_ingestion
+  ]
+}
+
 # Deploy monitoring infrastructure
 module "monitoring" {
   source = "./modules/monitoring"
@@ -333,13 +381,19 @@ module "monitoring" {
     module.neural_ingestion,
     module.mcp_server,
     module.gke,
-    module.database
+    module.database,
+    module.storage
   ]
 }
 
 # Include cost optimization configuration
 # This is included directly rather than as a module since it needs access to other modules
 # and the billing_account_id may not be available in all environments
+
+# Data source for project information
+data "google_project" "project" {
+  project_id = var.project_id
+}
 
 # Outputs
 output "environment" {
@@ -431,4 +485,36 @@ output "redis_host" {
 output "bigquery_dataset_id" {
   value       = module.database.bigquery_dataset_id
   description = "BigQuery dataset ID for analytics"
+}
+
+# Storage Outputs
+output "neural_data_bucket" {
+  value       = module.storage.neural_data_bucket_name
+  description = "Neural data storage bucket name"
+}
+
+output "ml_models_bucket" {
+  value       = module.storage.ml_models_bucket_name
+  description = "ML models storage bucket name"
+}
+
+output "backups_bucket" {
+  value       = module.storage.backups_bucket_name
+  description = "Backups storage bucket name"
+}
+
+# Security Outputs (if enabled)
+output "kms_keyring_id" {
+  value       = var.enable_enhanced_security ? module.security[0].keyring_id : null
+  description = "KMS keyring ID"
+}
+
+output "database_key_id" {
+  value       = var.enable_enhanced_security ? module.security[0].database_key_id : null
+  description = "Database encryption key ID"
+}
+
+output "storage_key_id" {
+  value       = var.enable_enhanced_security ? module.security[0].storage_key_id : null
+  description = "Storage encryption key ID"
 }

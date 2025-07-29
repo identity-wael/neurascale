@@ -279,3 +279,126 @@ variable "enable_db_high_availability" {
   type        = bool
   default     = false
 }
+
+# Storage variables
+variable "storage_location" {
+  description = "Location for storage buckets"
+  type        = string
+  default     = "US"
+}
+
+variable "backup_location" {
+  description = "Location for backup buckets (different region for DR)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_storage_lifecycle_policies" {
+  description = "Enable lifecycle policies for storage cost optimization"
+  type        = bool
+  default     = true
+}
+
+variable "data_retention_days" {
+  description = "Data retention period in days (HIPAA requires 7 years)"
+  type        = number
+  default     = 2555
+}
+
+# Security variables
+variable "enable_enhanced_security" {
+  description = "Enable enhanced security features (KMS, Secret Manager)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_kms_encryption" {
+  description = "Enable KMS encryption for storage and databases"
+  type        = bool
+  default     = true
+}
+
+variable "organization_id" {
+  description = "GCP organization ID for org-level policies"
+  type        = string
+  default     = ""
+}
+
+variable "enable_vpc_service_controls" {
+  description = "Enable VPC Service Controls"
+  type        = bool
+  default     = false
+}
+
+variable "access_policy_id" {
+  description = "Access Context Manager policy ID"
+  type        = string
+  default     = ""
+}
+
+variable "enable_binary_authorization" {
+  description = "Enable Binary Authorization for container images"
+  type        = bool
+  default     = false
+}
+
+# Cost optimization variables
+variable "billing_account_id" {
+  description = "Billing account ID for budget alerts"
+  type        = string
+  default     = ""
+}
+
+variable "budget_amount" {
+  description = "Monthly budget amount in USD"
+  type        = string
+  default     = "5000"
+}
+
+variable "budget_notification_emails" {
+  description = "Email addresses for budget notifications"
+  type        = list(string)
+  default     = []
+}
+
+variable "budget_pubsub_topic" {
+  description = "Pub/Sub topic for budget notifications"
+  type        = string
+  default     = ""
+}
+
+variable "budget_services" {
+  description = "Services to include in budget (empty for all)"
+  type        = list(string)
+  default     = []
+}
+
+variable "cost_center" {
+  description = "Cost center label for budget tracking"
+  type        = string
+  default     = "neural-research"
+}
+
+variable "enable_scheduled_scaling" {
+  description = "Enable scheduled scaling for dev/staging environments"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cost_analysis" {
+  description = "Enable BigQuery cost analysis"
+  type        = bool
+  default     = false
+}
+
+variable "billing_export_dataset" {
+  description = "BigQuery dataset containing billing export"
+  type        = string
+  default     = ""
+}
+
+variable "bigquery_location" {
+  description = "Location for BigQuery datasets"
+  type        = string
+  default     = "US"
+}

@@ -19,10 +19,7 @@ enable_monitoring_alerts    = true
 alert_notification_channels = [] # Add PagerDuty channel IDs here
 
 # Cost optimization
-enable_scheduled_scaling    = false # Production runs 24/7
-enable_bigtable_autoscaling = true  # Enable autoscaling for production
-budget_amount               = "10000"
-cost_center                 = "neural-research-prod"
+enable_bigtable_autoscaling = true # Enable autoscaling for production
 
 # MCP Server configuration
 enable_mcp_cloud_run     = true
@@ -50,3 +47,22 @@ db_disk_size                = 1000
 redis_memory_gb             = 32
 redis_tier                  = "STANDARD_HA"
 enable_db_high_availability = true
+
+# Storage configuration
+storage_location                  = "US"
+backup_location                   = "ASIA-SOUTHEAST1" # Different continent for DR
+enable_storage_lifecycle_policies = true
+data_retention_days               = 2555 # 7 years for HIPAA compliance
+
+# Security configuration
+enable_enhanced_security    = true # Full security in production
+enable_kms_encryption       = true
+enable_binary_authorization = true
+
+# Cost optimization
+enable_scheduled_scaling   = false # No auto-scaling in production
+budget_amount              = "10000"
+cost_center                = "neural-research-prod"
+budget_notification_emails = [] # Add finance/ops team emails
+enable_cost_analysis       = true
+billing_export_dataset     = "billing_export" # Configure billing export

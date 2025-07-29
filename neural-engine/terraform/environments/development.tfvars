@@ -19,12 +19,9 @@ enable_monitoring_alerts    = false
 alert_notification_channels = []
 
 # Cost optimization
-enable_scheduled_scaling    = true # Scale down during off-hours
 enable_bigtable_autoscaling = false
 bigtable_nodes_dev          = 2
 bigtable_min_nodes_dev      = 1
-budget_amount               = "1000"
-cost_center                 = "neural-research-dev"
 
 # MCP Server configuration
 enable_mcp_cloud_run     = true
@@ -52,3 +49,19 @@ db_disk_size                = 50 # Smaller for dev
 redis_memory_gb             = 2  # Smaller for dev
 redis_tier                  = "BASIC"
 enable_db_high_availability = false
+
+# Storage configuration
+storage_location                  = "US"
+backup_location                   = "US-EAST1" # Different region for DR
+enable_storage_lifecycle_policies = true
+data_retention_days               = 90 # Shorter retention for dev
+
+# Security configuration
+enable_enhanced_security    = false # Minimal security in dev
+enable_kms_encryption       = false
+enable_binary_authorization = false
+
+# Cost optimization
+enable_scheduled_scaling = true # Auto scale down after hours
+budget_amount            = "500"
+cost_center              = "neural-research-dev"

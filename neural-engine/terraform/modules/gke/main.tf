@@ -251,12 +251,7 @@ resource "google_container_node_pool" "neural_compute" {
     }
 
     # Local SSD for high-performance data processing
-    dynamic "local_ssd_count" {
-      for_each = var.neural_pool_local_ssd_count > 0 ? [1] : []
-      content {
-        count = var.neural_pool_local_ssd_count
-      }
-    }
+    local_ssd_count = var.neural_pool_local_ssd_count
   }
 
   # Autoscaling

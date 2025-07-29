@@ -58,26 +58,14 @@ resource "google_billing_budget" "neural_engine" {
     spend_basis       = "FORECASTED_SPEND"
   }
 
-  # Email notifications
-  dynamic "notifications_rule" {
-    for_each = length(var.budget_notification_emails) > 0 ? [1] : []
-    content {
-      monitoring_notification_channels = []
-      schema_version                   = "1.0"
+  # All updates rule for notifications
+  all_updates_rule {
+    pubsub_topic                   = var.budget_pubsub_topic != "" ? var.budget_pubsub_topic : null
+    schema_version                 = "1.0"
+    disable_default_iam_recipients = var.budget_pubsub_topic != ""
 
-      # Send to specified email addresses
-      disable_default_iam_recipients = false
-    }
-  }
-
-  # Pub/Sub notifications for automated responses
-  dynamic "notifications_rule" {
-    for_each = var.budget_pubsub_topic != "" ? [1] : []
-    content {
-      pubsub_topic                   = var.budget_pubsub_topic
-      schema_version                 = "1.0"
-      disable_default_iam_recipients = true
-    }
+    # Note: For email notifications, use monitoring_notification_channels with email notification channels
+    # monitoring_notification_channels = var.budget_notification_channels
   }
 }
 

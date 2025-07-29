@@ -98,4 +98,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 8080
 
 # Command to run the MCP server
-CMD ["python", "-m", "src.mcp.main", "--config", "/app/config/server_config.yaml", "--port", "8080"]
+CMD ["sh", "-c", "python -m src.mcp.main --config /app/config/server_config.yaml --port ${PORT:-8080}"]

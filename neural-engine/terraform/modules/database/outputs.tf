@@ -27,6 +27,12 @@ output "postgres_user" {
   value       = google_sql_user.app_user.name
 }
 
+output "postgres_password" {
+  description = "The PostgreSQL password (generated if not provided)"
+  value       = var.db_password != "" ? var.db_password : (length(random_password.db_password) > 0 ? random_password.db_password[0].result : "")
+  sensitive   = true
+}
+
 output "postgres_readonly_user" {
   description = "The PostgreSQL readonly user name (if created)"
   value       = var.create_readonly_user ? google_sql_user.readonly_user[0].name : null

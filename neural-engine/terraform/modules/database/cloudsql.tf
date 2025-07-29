@@ -88,11 +88,25 @@ resource "google_sql_database" "neural_db" {
   collation = "en_US.UTF8"
 }
 
+# Generate random password if not provided
+resource "random_password" "db_password" {
+  count   = var.db_password == "" ? 1 : 0
+  length  = 32
+  special = true
+}
+
 # Database user
 resource "google_sql_user" "app_user" {
   name     = var.db_user
   instance = google_sql_database_instance.postgres.name
-  password = var.db_password
+  password = var.db_password != "" ? var.db_password : random_password.db_password[0].result
+}
+
+# Generate random readonly password if not provided
+resource "random_password" "db_readonly_password" {
+  count   = var.create_readonly_user && var.db_readonly_password == "" ? 1 : 0
+  length  = 32
+  special = true
 }
 
 # Additional read-only user for analytics
@@ -101,7 +115,7 @@ resource "google_sql_user" "readonly_user" {
 
   name     = "${var.db_user}_readonly"
   instance = google_sql_database_instance.postgres.name
-  password = var.db_readonly_password
+  password = var.db_readonly_password != "" ? var.db_readonly_password : random_password.db_readonly_password[0].result
 }
 
 # Database replica for read scaling (if enabled)

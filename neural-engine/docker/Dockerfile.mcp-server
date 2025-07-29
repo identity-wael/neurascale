@@ -40,10 +40,12 @@ RUN pip install --no-cache-dir \
     google-cloud-secret-manager==2.21.1 \
     aiohttp==3.9.1
 
-# Copy source code
+# Copy source code and build files
 COPY src/ /app/src/
 COPY setup.py /app/
 COPY pyproject.toml /app/
+# Copy README.md if it exists (optional for build)
+COPY README.md* /app/
 
 # Install the application
 WORKDIR /app
@@ -66,7 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy virtual environment from builder
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PYTHONPATH="/app/src:$PYTHONPATH"
+ENV PYTHONPATH="/app/src:${PYTHONPATH:-}"
 
 # Copy application files
 COPY --from=builder /app/src /app/src

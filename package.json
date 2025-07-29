@@ -5,7 +5,7 @@
     "build": "cd apps && pnpm run build",
     "dev": "cd apps && pnpm run dev"
   },
-  "packageManager": "pnpm@9",
+  "packageManager": "pnpm@10.1.0",
   "pnpm": {
     "overrides": {
       "prismjs": "^1.30.0"

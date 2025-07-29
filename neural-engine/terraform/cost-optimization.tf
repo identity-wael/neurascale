@@ -1,6 +1,11 @@
 # Cost Optimization Configuration for NeuraScale Neural Engine
 # This file contains budget alerts and cost management resources
 
+# Data source for project information
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 # Budget for the project
 resource "google_billing_budget" "neural_engine" {
   count = var.billing_account_id != "" ? 1 : 0

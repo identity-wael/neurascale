@@ -70,8 +70,8 @@ resource "google_storage_bucket" "neural_data" {
     for_each = var.version_retention_days > 0 ? [1] : []
     content {
       condition {
-        age     = var.version_retention_days
-        is_live = false
+        age                = var.version_retention_days
+        num_newer_versions = 1
       }
       action {
         type = "Delete"
@@ -143,7 +143,7 @@ resource "google_storage_bucket" "ml_models" {
   lifecycle_rule {
     condition {
       num_newer_versions = var.model_version_retention_count
-      is_live            = false
+      with_state         = "ARCHIVED"
     }
     action {
       type = "Delete"
@@ -339,7 +339,7 @@ resource "google_storage_bucket" "functions_source" {
   lifecycle_rule {
     condition {
       num_newer_versions = 10
-      is_live            = false
+      with_state         = "ARCHIVED"
     }
     action {
       type = "Delete"
@@ -411,23 +411,23 @@ resource "google_storage_transfer_job" "backup_transfer" {
       delete_objects_unique_in_sink              = false
       overwrite_objects_already_existing_in_sink = false
     }
+  }
 
-    schedule {
-      schedule_start_date {
-        year  = tonumber(formatdate("YYYY", timestamp()))
-        month = tonumber(formatdate("MM", timestamp()))
-        day   = tonumber(formatdate("DD", timestamp()))
-      }
-
-      start_time_of_day {
-        hours   = var.backup_hour
-        minutes = 0
-        seconds = 0
-        nanos   = 0
-      }
-
-      repeat_interval = "86400s" # Daily
+  schedule {
+    schedule_start_date {
+      year  = tonumber(formatdate("YYYY", timestamp()))
+      month = tonumber(formatdate("MM", timestamp()))
+      day   = tonumber(formatdate("DD", timestamp()))
     }
+
+    start_time_of_day {
+      hours   = var.backup_hour
+      minutes = 0
+      seconds = 0
+      nanos   = 0
+    }
+
+    repeat_interval = "86400s" # Daily
   }
 
   depends_on = [

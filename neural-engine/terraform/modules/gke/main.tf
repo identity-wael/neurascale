@@ -112,10 +112,8 @@ resource "google_container_cluster" "neural_engine" {
     key_name = var.database_encryption_key
   }
 
-  # Cluster telemetry
-  cluster_telemetry {
-    type = "ENABLED"
-  }
+  # Enable cluster telemetry via logging config
+  # Note: cluster_telemetry block was deprecated in favor of monitoring_config
 
   # Resource usage export to BigQuery
   resource_usage_export_config {

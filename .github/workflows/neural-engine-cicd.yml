@@ -355,6 +355,36 @@ jobs:
               "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-${SA_SUFFIX}@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
           fi
 
+      - name: Clean up Terraform state
+        working-directory: neural-engine/terraform
+        run: |
+          echo "Cleaning up orphaned resources from Terraform state..."
+
+          # List all resources in the state
+          echo "Current state resources:"
+          terraform state list | grep mcp_server || echo "No MCP server resources in state"
+
+          # Remove orphaned random_password resources if they exist
+          echo "Removing orphaned random_password resources..."
+          terraform state rm module.mcp_server.random_password.mcp_api_key_salt 2>/dev/null || echo "No mcp_api_key_salt random_password to remove"
+          terraform state rm module.mcp_server.random_password.mcp_jwt_secret 2>/dev/null || echo "No mcp_jwt_secret random_password to remove"
+
+          # Check for deposed resources
+          echo "Checking for deposed resources..."
+          terraform state list | grep deposed || echo "No deposed resources found"
+
+          # If there are deposed secret versions, we need to handle them
+          if terraform state list | grep -q "deposed"; then
+              echo "Found deposed resources. Removing them..."
+              # Get all deposed resources and remove them
+              terraform state list | grep deposed | while read -r resource; do
+                  echo "Removing deposed resource: $resource"
+                  terraform state rm "$resource" || echo "Failed to remove $resource"
+              done
+          fi
+
+          echo "State cleanup complete!"
+
       - name: Terraform Plan and Apply
         working-directory: neural-engine/terraform
         timeout-minutes: 25

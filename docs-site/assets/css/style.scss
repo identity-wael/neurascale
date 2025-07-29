@@ -61,15 +61,21 @@ section {
   width: 800px;
   float: right;
   padding-bottom: 50px;
-  
+
   // Improve readability
-  p, li {
+  p,
+  li {
     font-size: 16px;
     line-height: 1.8;
     margin-bottom: 16px;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
     margin-top: 32px;
     margin-bottom: 16px;

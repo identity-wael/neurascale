@@ -234,7 +234,7 @@ class LocalModelServer(BaseModelServer):
 
         return metrics
 
-    async def _load_model_from_disk(self, model_name: str):
+    async def _load_model_from_disk(self, model_name: str) -> Any:
         """Load model from disk if available"""
         # Find latest version
         model_files = [
@@ -277,7 +277,7 @@ class LocalModelServer(BaseModelServer):
 
             return np.array(features)
 
-    def _track_inference_time(self, model_name: str, latency_ms: float):
+    def _track_inference_time(self, model_name: str, latency_ms: float) -> None:
         """Track inference time for performance monitoring"""
         if model_name not in self.inference_times:
             self.inference_times[model_name] = []
@@ -288,7 +288,7 @@ class LocalModelServer(BaseModelServer):
         if len(self.inference_times[model_name]) > 10000:
             self.inference_times[model_name] = self.inference_times[model_name][-5000:]
 
-    async def update_model(self, model_name: str, new_model: Any):
+    async def update_model(self, model_name: str, new_model: Any) -> None:
         """Hot-swap model without downtime"""
         if model_name not in self.models:
             raise ValueError(f"Model {model_name} not deployed")
@@ -358,12 +358,14 @@ class LocalModelServer(BaseModelServer):
             latencies.append(latency)
 
         return {
-            "mean_latency_ms": np.mean(latencies),
-            "std_latency_ms": np.std(latencies),
-            "min_latency_ms": np.min(latencies),
-            "max_latency_ms": np.max(latencies),
-            "p50_latency_ms": np.percentile(latencies, 50),
-            "p95_latency_ms": np.percentile(latencies, 95),
-            "p99_latency_ms": np.percentile(latencies, 99),
-            "throughput_per_second": 1000.0 / np.mean(latencies) * len(test_instances),
+            "mean_latency_ms": float(np.mean(latencies)),
+            "std_latency_ms": float(np.std(latencies)),
+            "min_latency_ms": float(np.min(latencies)),
+            "max_latency_ms": float(np.max(latencies)),
+            "p50_latency_ms": float(np.percentile(latencies, 50)),
+            "p95_latency_ms": float(np.percentile(latencies, 95)),
+            "p99_latency_ms": float(np.percentile(latencies, 99)),
+            "throughput_per_second": float(
+                1000.0 / np.mean(latencies) * len(test_instances)
+            ),
         }

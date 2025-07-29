@@ -52,10 +52,10 @@ class MentalStateFeatureExtractor(BaseFeatureExtractor):
             "temporal": ["T3", "T4", "T5", "T6"],
         }
 
-        self.feature_names = []
+        self.feature_names: List[str] = []
         self._build_feature_names()
 
-    def _build_feature_names(self):
+    def _build_feature_names(self) -> None:
         """Build list of feature names"""
         # Band powers
         for band in self.bands:

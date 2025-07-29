@@ -3,7 +3,7 @@ Feature extraction for seizure prediction
 """
 
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 import numpy as np
 from scipy import signal
 from scipy.signal import hilbert
@@ -55,6 +55,9 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
         # Spike detection parameters
         self.spike_threshold = 3.5  # Standard deviations
         self.spike_min_distance_ms = 20
+
+        # Initialize previous features for velocity calculation
+        self._previous_features: Optional[Dict[str, np.ndarray]] = None
 
     async def extract_features(self, data: NeuralData) -> FeatureVector:
         """
@@ -349,10 +352,10 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
             m = 2
             r = 0.2 * np.std(channel)
 
-            def _maxdist(xi, xj, m):
+            def _maxdist(xi: np.ndarray, xj: np.ndarray, m: int) -> float:
                 return max([abs(float(xi[k]) - float(xj[k])) for k in range(m)])
 
-            def _phi(m):
+            def _phi(m: int) -> float:
                 patterns = np.array([channel[i : i + m] for i in range(N - m + 1)])
                 C = np.zeros(N - m + 1)
 

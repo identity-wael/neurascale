@@ -4,7 +4,8 @@ API endpoints for real-time classification
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from dataclasses import asdict
+from typing import Any, AsyncIterator, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 import numpy as np
@@ -136,13 +137,13 @@ async def classify_data(request: ClassificationRequest) -> ClassificationRespons
                 # Extract features
                 features = await sleep_extractor.extract_features(neural_data)
                 # Classify
-                result = await sleep_stage_classifier.classify(features)
+                sleep_result = await sleep_stage_classifier.classify(features)
                 results["sleep_stage"] = {
-                    "stage": result.stage.value,
-                    "confidence": result.confidence,
-                    "sleep_depth": result.sleep_depth,
-                    "transition_probability": result.transition_probability,
-                    "probabilities": result.probabilities,
+                    "stage": sleep_result.stage.value,
+                    "confidence": sleep_result.confidence,
+                    "sleep_depth": sleep_result.sleep_depth,
+                    "transition_probability": sleep_result.transition_probability,
+                    "probabilities": sleep_result.probabilities,
                 }
 
             elif classification_type == "seizure_prediction":
@@ -154,26 +155,30 @@ async def classify_data(request: ClassificationRequest) -> ClassificationRespons
                 # Extract features (using mental state extractor as base)
                 features = await mental_state_extractor.extract_features(neural_data)
                 # Classify
-                result = await seizure_predictor.classify(features)
+                seizure_result = await seizure_predictor.classify(features)
                 results["seizure_prediction"] = {
-                    "risk_level": result.risk_level.value,
-                    "probability": result.probability,
-                    "confidence": result.confidence,
-                    "time_to_seizure_minutes": result.time_to_seizure_minutes,
-                    "spatial_focus": result.spatial_focus,
+                    "risk_level": seizure_result.risk_level.value,
+                    "probability": seizure_result.probability,
+                    "confidence": seizure_result.confidence,
+                    "time_to_seizure_minutes": (
+                        seizure_result.time_to_seizure_minutes
+                        if seizure_result.time_to_seizure_minutes is not None
+                        else None
+                    ),
+                    "spatial_focus": seizure_result.spatial_focus,
                 }
 
             elif classification_type == "motor_imagery":
                 # Extract features
                 features = await mental_state_extractor.extract_features(neural_data)
                 # Classify
-                result = await motor_imagery_classifier.classify(features)
+                motor_result = await motor_imagery_classifier.classify(features)
                 results["motor_imagery"] = {
-                    "intent": result.intent.value,
-                    "confidence": result.confidence,
-                    "control_signal": result.control_signal.tolist(),
-                    "erd_ers_score": result.erd_ers_score,
-                    "probabilities": result.probabilities,
+                    "intent": motor_result.intent.value,
+                    "confidence": motor_result.confidence,
+                    "control_signal": motor_result.control_signal.tolist(),
+                    "erd_ers_score": motor_result.erd_ers_score,
+                    "probabilities": motor_result.probabilities,
                 }
 
             else:
@@ -244,19 +249,19 @@ async def get_models_status() -> Dict[str, Any]:
     return {
         "mental_state": {
             "status": "active",
-            "metrics": mental_state_classifier.get_metrics().dict(),
+            "metrics": asdict(mental_state_classifier.get_metrics()),
         },
         "sleep_stage": {
             "status": "active",
-            "metrics": sleep_stage_classifier.get_metrics().dict(),
+            "metrics": asdict(sleep_stage_classifier.get_metrics()),
         },
         "seizure_prediction": {
             "status": "active",
-            "metrics": seizure_predictor.get_metrics().dict(),
+            "metrics": asdict(seizure_predictor.get_metrics()),
         },
         "motor_imagery": {
             "status": "active",
-            "metrics": motor_imagery_classifier.get_metrics().dict(),
+            "metrics": asdict(motor_imagery_classifier.get_metrics()),
         },
     }
 
@@ -285,7 +290,7 @@ async def submit_feedback(model_name: str, feedback: Dict[str, Any]) -> Dict[str
 
 # WebSocket Endpoint
 @router.websocket("/stream/{stream_id}")
-async def websocket_stream(websocket: WebSocket, stream_id: str):  # noqa: C901
+async def websocket_stream(websocket: WebSocket, stream_id: str) -> None:  # noqa: C901
     """
     WebSocket endpoint for real-time classification streaming
 
@@ -311,7 +316,7 @@ async def websocket_stream(websocket: WebSocket, stream_id: str):  # noqa: C901
         logger.info(f"WebSocket connected for stream {stream_id}")
 
         # Create data generator
-        async def data_generator():
+        async def data_generator() -> AsyncIterator[NeuralData]:
             while True:
                 try:
                     message = await websocket.receive_text()
@@ -361,7 +366,11 @@ async def websocket_stream(websocket: WebSocket, stream_id: str):  # noqa: C901
                 formatted_result["seizure_prediction"] = {
                     "risk_level": result.risk_level.value,
                     "probability": result.probability,
-                    "time_to_seizure_minutes": result.time_to_seizure_minutes,
+                    "time_to_seizure_minutes": (
+                        result.time_to_seizure_minutes
+                        if result.time_to_seizure_minutes is not None
+                        else None
+                    ),
                 }
             elif isinstance(result, MotorImageryResult):
                 formatted_result["motor_imagery"] = {
@@ -391,7 +400,7 @@ async def websocket_stream(websocket: WebSocket, stream_id: str):  # noqa: C901
 
 
 @router.get("/streams/active")
-async def get_active_streams() -> Dict[str, List[str]]:
+async def get_active_streams() -> Dict[str, Any]:
     """Get list of active classification streams"""
     return {
         "active_streams": list(active_connections.keys()),

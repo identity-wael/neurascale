@@ -430,7 +430,7 @@ class MotorImageryClassifier(BaseClassifier):
             f"CSP training complete: {self.csp_filters.shape[0]} filters created"
         )
 
-    async def calibrate_baseline(self, rest_data: Dict[str, np.ndarray]):
+    async def calibrate_baseline(self, rest_data: Dict[str, np.ndarray]) -> None:
         """Calibrate baseline power levels during rest"""
         if "mu_power" in rest_data:
             baseline_mu = float(rest_data["mu_power"].mean())

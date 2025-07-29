@@ -13,6 +13,7 @@ google-cloud-firestore==2.19.0
 google-cloud-bigquery==3.27.0
 google-cloud-bigtable==2.27.0
 google-cloud-storage==2.19.0
+google-cloud-secret-manager==2.21.1  # For MCP server secrets
 apache-beam[gcp]==2.60.0
 
 # Google Cloud Services - AI/ML

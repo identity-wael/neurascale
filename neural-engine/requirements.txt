@@ -98,3 +98,14 @@ google-cloud-error-reporting==1.12.0
 # Signal processing additions
 mne==1.8.0  # For EEG/MEG processing
 pyedflib==0.1.38  # For EDF file format
+
+# Monitoring and observability
+prometheus-client==0.21.0  # Prometheus metrics
+opentelemetry-api==1.29.0  # OpenTelemetry tracing
+opentelemetry-sdk==1.29.0
+opentelemetry-instrumentation==0.50b0
+opentelemetry-exporter-jaeger-thrift==1.29.0
+opentelemetry-instrumentation-requests==0.50b0
+opentelemetry-instrumentation-sqlalchemy==0.50b0
+opentelemetry-instrumentation-redis==0.50b0
+psutil==6.1.0  # System metrics collection

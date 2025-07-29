@@ -105,7 +105,7 @@ class PerformanceMonitor:
         # Initialize OpenTelemetry tracer
         self.tracer = NeuralTracer(
             service_name="neural-engine",
-            jaeger_endpoint=f"{config.jaeger_agent_host}:{config.jaeger_agent_port}",
+            otlp_endpoint=f"http://{config.jaeger_agent_host}:4317",  # Use OTLP endpoint
         )
 
         # Initialize health checker

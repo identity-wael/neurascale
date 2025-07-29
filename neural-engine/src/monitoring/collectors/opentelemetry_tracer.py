@@ -8,7 +8,7 @@ from functools import wraps
 from contextlib import contextmanager
 
 from opentelemetry import trace
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -26,17 +26,17 @@ class NeuralTracer:
     def __init__(
         self,
         service_name: str = "neural-engine",
-        jaeger_endpoint: str = "localhost:6831",
+        otlp_endpoint: str = "http://localhost:4317",
     ):
         """
         Initialize OpenTelemetry tracer
 
         Args:
             service_name: Name of the service
-            jaeger_endpoint: Jaeger agent endpoint
+            otlp_endpoint: OTLP collector endpoint
         """
         self.service_name = service_name
-        self.jaeger_endpoint = jaeger_endpoint
+        self.otlp_endpoint = otlp_endpoint
 
         # Create resource
         resource = Resource.create(
@@ -50,15 +50,14 @@ class NeuralTracer:
         # Create tracer provider
         provider = TracerProvider(resource=resource)
 
-        # Configure Jaeger exporter
-        jaeger_exporter = JaegerExporter(
-            agent_host_name=jaeger_endpoint.split(":")[0],
-            agent_port=int(jaeger_endpoint.split(":")[1]),
-            udp_split_oversized_batches=True,
+        # Configure OTLP exporter
+        otlp_exporter = OTLPSpanExporter(
+            endpoint=self.otlp_endpoint,
+            insecure=True,  # Set to False for production with TLS
         )
 
         # Add span processor
-        span_processor = BatchSpanProcessor(jaeger_exporter)
+        span_processor = BatchSpanProcessor(otlp_exporter)
         provider.add_span_processor(span_processor)
 
         # Set global tracer provider

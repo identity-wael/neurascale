@@ -9,6 +9,7 @@ variable "apis" {
   description = "List of APIs to enable"
   default = [
     "compute.googleapis.com",
+    "container.googleapis.com", # For GKE clusters
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
     "pubsub.googleapis.com",
@@ -25,11 +26,18 @@ variable "apis" {
     "iamcredentials.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
-    "eventarc.googleapis.com",       # For Cloud Function triggers
-    "cloudscheduler.googleapis.com", # For scheduled functions
-    "secretmanager.googleapis.com",  # For secure credential storage
-    "billingbudgets.googleapis.com", # For budget alerts
-    "bigquery.googleapis.com",       # For cost export dataset
+    "eventarc.googleapis.com",            # For Cloud Function triggers
+    "cloudscheduler.googleapis.com",      # For scheduled functions
+    "secretmanager.googleapis.com",       # For secure credential storage
+    "billingbudgets.googleapis.com",      # For budget alerts
+    "bigquery.googleapis.com",            # For cost export dataset
+    "servicenetworking.googleapis.com",   # For VPC peering and private services
+    "dns.googleapis.com",                 # For Cloud DNS zones and records
+    "cloudkms.googleapis.com",            # For encryption keys
+    "sqladmin.googleapis.com",            # For Cloud SQL
+    "redis.googleapis.com",               # For Redis instances
+    "binaryauthorization.googleapis.com", # For Binary Authorization
+    "storagetransfer.googleapis.com",     # For Storage Transfer Service
   ]
 }
 

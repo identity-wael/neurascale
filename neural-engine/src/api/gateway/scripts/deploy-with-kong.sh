@@ -15,36 +15,36 @@ echo "🚀 Deploying NeuraScale API with Kong Gateway..."
 # Check prerequisites
 check_prerequisites() {
     echo "🔍 Checking prerequisites..."
-    
+
     if ! command -v docker &> /dev/null; then
         echo "❌ Docker is not installed"
         exit 1
     fi
-    
+
     if ! command -v docker-compose &> /dev/null; then
         echo "❌ Docker Compose is not installed"
         exit 1
     fi
-    
+
     if ! docker info >/dev/null 2>&1; then
         echo "❌ Docker is not running"
         exit 1
     fi
-    
+
     echo "✅ Prerequisites met"
 }
 
 # Set up environment
 setup_environment() {
     echo "🌍 Setting up environment..."
-    
+
     # Copy environment file if it doesn't exist
     if [ ! -f "$GATEWAY_DIR/.env" ]; then
         cp "$GATEWAY_DIR/.env.example" "$GATEWAY_DIR/.env"
         echo "📝 Created .env file from template"
         echo "⚠️  Please review and customize .env before production deployment"
     fi
-    
+
     # Generate SSL certificates if needed
     if [ ! -f "$GATEWAY_DIR/kong/ssl/kong.crt" ]; then
         echo "🔒 Generating SSL certificates..."
@@ -52,7 +52,7 @@ setup_environment() {
         ./generate-certs.sh
         cd "$SCRIPT_DIR"
     fi
-    
+
     # Create networks
     echo "🌐 Creating Docker networks..."
     docker network create neurascale-api-network 2>/dev/null || true
@@ -62,21 +62,21 @@ setup_environment() {
 # Build API Docker image
 build_api() {
     echo "🔨 Building Neural Engine API..."
-    
+
     cd "$NEURAL_ENGINE_DIR"
-    
+
     # Build API image
     docker build -t neurascale/neural-engine-api:latest -f Dockerfile .
-    
+
     echo "✅ API image built successfully"
 }
 
 # Start API services
 start_api() {
     echo "🌟 Starting Neural Engine API services..."
-    
+
     cd "$NEURAL_ENGINE_DIR"
-    
+
     # Check if there's a docker-compose file for the API
     if [ -f "docker-compose.yml" ]; then
         docker-compose up -d
@@ -89,31 +89,31 @@ start_api() {
             -e ENVIRONMENT=production \
             neurascale/neural-engine-api:latest
     fi
-    
+
     echo "✅ API services started"
 }
 
 # Start Kong Gateway
 start_kong() {
     echo "🐉 Starting Kong Gateway..."
-    
+
     cd "$GATEWAY_DIR"
-    
+
     # Source environment variables
     if [ -f ".env" ]; then
         set -a
         source .env
         set +a
     fi
-    
+
     # Start Kong services
     docker-compose -f docker-compose.kong.yml up -d
-    
+
     # Wait for Kong to be ready
     echo "⏳ Waiting for Kong Gateway to be ready..."
     timeout=120
     counter=0
-    
+
     while ! curl -f http://localhost:8001/status >/dev/null 2>&1; do
         if [ $counter -eq $timeout ]; then
             echo "❌ Kong Gateway failed to start within $timeout seconds"
@@ -124,7 +124,7 @@ start_kong() {
         sleep 2
         counter=$((counter + 1))
     done
-    
+
     echo ""
     echo "✅ Kong Gateway is ready!"
 }
@@ -132,25 +132,25 @@ start_kong() {
 # Verify deployment
 verify_deployment() {
     echo "🧪 Verifying deployment..."
-    
+
     # Test Kong status
     if ! curl -f http://localhost:8001/status >/dev/null 2>&1; then
         echo "❌ Kong Gateway is not responding"
         exit 1
     fi
-    
+
     # Test API through Kong
     if ! curl -f http://localhost:8000/api/v2/health >/dev/null 2>&1; then
         echo "❌ API is not accessible through Kong"
         exit 1
     fi
-    
+
     # Test GraphQL endpoint
     if ! curl -f http://localhost:8000/api/graphql -X POST -d '{"query":"query { __schema { types { name } } }"}' -H "Content-Type: application/json" >/dev/null 2>&1; then
         echo "❌ GraphQL endpoint is not accessible"
         exit 1
     fi
-    
+
     echo "✅ All services are responding correctly"
 }
 
@@ -199,7 +199,7 @@ main() {
     echo "════════════════════════════════════════════════════════════════"
     echo "🧠 NeuraScale Neural Engine - Kong Gateway Deployment"
     echo "════════════════════════════════════════════════════════════════"
-    
+
     check_prerequisites
     setup_environment
     build_api
@@ -207,7 +207,7 @@ main() {
     start_kong
     verify_deployment
     show_deployment_info
-    
+
     echo ""
     echo "✨ Deployment completed successfully!"
 }

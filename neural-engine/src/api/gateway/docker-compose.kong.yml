@@ -62,7 +62,7 @@ services:
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: ${KONG_PG_PASSWORD:-kong-neurascale-2025}
       KONG_PG_DATABASE: kong
-      
+
       # Gateway Configuration
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -70,29 +70,29 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
       KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
-      
+
       # Security Configuration
       KONG_TRUSTED_IPS: "0.0.0.0/0,::/0"
       KONG_REAL_IP_HEADER: "X-Forwarded-For"
       KONG_REAL_IP_RECURSIVE: "on"
-      
+
       # SSL Configuration
       KONG_SSL_CERT: /etc/kong/ssl/kong.crt
       KONG_SSL_CERT_KEY: /etc/kong/ssl/kong.key
       KONG_ADMIN_SSL_CERT: /etc/kong/ssl/admin.crt
       KONG_ADMIN_SSL_CERT_KEY: /etc/kong/ssl/admin.key
-      
+
       # Performance Tuning
       KONG_WORKER_PROCESSES: "auto"
       KONG_WORKER_CONNECTIONS: 4096
       KONG_UPSTREAM_KEEPALIVE_POOL_SIZE: 60
       KONG_UPSTREAM_KEEPALIVE_MAX_REQUESTS: 100
       KONG_UPSTREAM_KEEPALIVE_IDLE_TIMEOUT: 60
-      
+
       # Logging
       KONG_LOG_LEVEL: info
       KONG_PLUGINS: "bundled,circuit-breaker"
-      
+
       # Custom Configuration
       KONG_NGINX_WORKER_PROCESSES: "auto"
       KONG_NGINX_DAEMON: "off"

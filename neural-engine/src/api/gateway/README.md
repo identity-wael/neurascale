@@ -130,7 +130,7 @@ For production, replace with CA-signed certificates:
 # Replace these files:
 kong/ssl/kong.crt      # Proxy SSL certificate
 kong/ssl/kong.key      # Proxy SSL private key
-kong/ssl/admin.crt     # Admin API SSL certificate  
+kong/ssl/admin.crt     # Admin API SSL certificate
 kong/ssl/admin.key     # Admin API SSL private key
 ```
 
@@ -175,25 +175,25 @@ plugins:
 
 All Neural Engine endpoints are proxied through Kong with added security and monitoring:
 
-| Route Pattern | Service | Description |
-|---------------|---------|-------------|
-| `/api/v2/devices/*` | REST API | Device management |
-| `/api/v2/sessions/*` | REST API | Session recording |
-| `/api/v2/neural-data/*` | REST API | Neural data access |
-| `/api/v2/patients/*` | REST API | Patient management |
-| `/api/v2/analysis/*` | REST API | Analysis pipeline |
-| `/api/v2/ml-models/*` | REST API | ML model endpoints |
-| `/api/graphql` | GraphQL | GraphQL API |
-| `/ws/*` | WebSocket | Real-time streaming |
+| Route Pattern           | Service   | Description         |
+| ----------------------- | --------- | ------------------- |
+| `/api/v2/devices/*`     | REST API  | Device management   |
+| `/api/v2/sessions/*`    | REST API  | Session recording   |
+| `/api/v2/neural-data/*` | REST API  | Neural data access  |
+| `/api/v2/patients/*`    | REST API  | Patient management  |
+| `/api/v2/analysis/*`    | REST API  | Analysis pipeline   |
+| `/api/v2/ml-models/*`   | REST API  | ML model endpoints  |
+| `/api/graphql`          | GraphQL   | GraphQL API         |
+| `/ws/*`                 | WebSocket | Real-time streaming |
 
 ### Gateway Endpoints
 
-| Endpoint | Purpose | Authentication |
-|----------|---------|----------------|
-| `:8000/*` | API Proxy | JWT Required |
-| `:8001/*` | Admin API | IP Restricted |
-| `:8443/*` | API Proxy SSL | JWT Required |
-| `:8444/*` | Admin API SSL | IP Restricted |
+| Endpoint  | Purpose       | Authentication |
+| --------- | ------------- | -------------- |
+| `:8000/*` | API Proxy     | JWT Required   |
+| `:8001/*` | Admin API     | IP Restricted  |
+| `:8443/*` | API Proxy SSL | JWT Required   |
+| `:8444/*` | Admin API SSL | IP Restricted  |
 
 ## Authentication
 
@@ -224,6 +224,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ### SDK Configuration
 
 **Python SDK:**
+
 ```python
 from neurascale import NeuraScaleClient
 
@@ -234,12 +235,13 @@ client = NeuraScaleClient(
 ```
 
 **JavaScript SDK:**
+
 ```javascript
-import { NeuraScaleClient } from '@neurascale/sdk';
+import { NeuraScaleClient } from "@neurascale/sdk";
 
 const client = new NeuraScaleClient({
-  apiKey: 'your-jwt-token',
-  baseUrl: 'http://localhost:8000'  // Through Kong
+  apiKey: "your-jwt-token",
+  baseUrl: "http://localhost:8000", // Through Kong
 });
 ```
 
@@ -249,17 +251,17 @@ Kong implements sliding window rate limiting with Redis backend:
 
 ### Default Limits
 
-| Tier | Per Minute | Per Hour | Per Day |
-|------|------------|----------|---------|
-| Default | 1000 | 50,000 | 1,000,000 |
-| Premium | 5000 | 200,000 | 5,000,000 |
-| Enterprise | Unlimited | Unlimited | Unlimited |
+| Tier       | Per Minute | Per Hour  | Per Day   |
+| ---------- | ---------- | --------- | --------- |
+| Default    | 1000       | 50,000    | 1,000,000 |
+| Premium    | 5000       | 200,000   | 5,000,000 |
+| Enterprise | Unlimited  | Unlimited | Unlimited |
 
 ### Rate Limit Headers
 
 ```http
 X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 999  
+X-RateLimit-Remaining: 999
 X-RateLimit-Reset: 1642248660
 ```
 
@@ -340,6 +342,7 @@ curl http://localhost:8001/metrics
 ```
 
 Key metrics:
+
 - `kong_http_requests_total`
 - `kong_latency_ms`
 - `kong_upstream_health`
@@ -439,13 +442,13 @@ KONG_UPSTREAM_KEEPALIVE_MAX_REQUESTS: 100
 
 ### Resource Requirements
 
-| Component | CPU | Memory | Disk |
-|-----------|-----|--------|------|
-| Kong Gateway | 1 core | 1GB | 10GB |
-| PostgreSQL | 0.5 core | 512MB | 50GB |
-| Redis | 0.25 core | 256MB | 1GB |
-| Prometheus | 0.5 core | 512MB | 100GB |
-| Grafana | 0.25 core | 256MB | 10GB |
+| Component    | CPU       | Memory | Disk  |
+| ------------ | --------- | ------ | ----- |
+| Kong Gateway | 1 core    | 1GB    | 10GB  |
+| PostgreSQL   | 0.5 core  | 512MB  | 50GB  |
+| Redis        | 0.25 core | 256MB  | 1GB   |
+| Prometheus   | 0.5 core  | 512MB  | 100GB |
+| Grafana      | 0.25 core | 256MB  | 10GB  |
 
 ## Troubleshooting
 
@@ -558,6 +561,7 @@ kubectl apply -f https://bit.ly/k4k8s
 ### AWS/Cloud Deployment
 
 Use managed services:
+
 - **Database**: AWS RDS PostgreSQL
 - **Cache**: AWS ElastiCache Redis
 - **Load Balancer**: AWS Application Load Balancer

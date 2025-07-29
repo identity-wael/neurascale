@@ -40,15 +40,21 @@ resource "google_secret_manager_secret" "mcp_api_key_salt" {
     auto {}
   }
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   depends_on = [var.apis_enabled]
 }
 
 resource "google_secret_manager_secret_version" "mcp_api_key_salt" {
-  secret      = google_secret_manager_secret.mcp_api_key_salt.name
+  count       = var.create_secret_versions ? 1 : 0
+  secret      = google_secret_manager_secret.mcp_api_key_salt.id
   secret_data = random_password.mcp_api_key_salt.result
 
   lifecycle {
-    ignore_changes = [secret_data]
+    ignore_changes        = [secret_data]
+    create_before_destroy = true
   }
 }
 
@@ -67,15 +73,21 @@ resource "google_secret_manager_secret" "mcp_jwt_secret" {
     auto {}
   }
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   depends_on = [var.apis_enabled]
 }
 
 resource "google_secret_manager_secret_version" "mcp_jwt_secret" {
-  secret      = google_secret_manager_secret.mcp_jwt_secret.name
+  count       = var.create_secret_versions ? 1 : 0
+  secret      = google_secret_manager_secret.mcp_jwt_secret.id
   secret_data = random_password.mcp_jwt_secret.result
 
   lifecycle {
-    ignore_changes = [secret_data]
+    ignore_changes        = [secret_data]
+    create_before_destroy = true
   }
 }
 

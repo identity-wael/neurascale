@@ -5,19 +5,19 @@ Real-time stream processor for neural data classification
 import asyncio
 import time
 from collections import deque
-from typing import AsyncIterator, Dict, List, Set
+from typing import AsyncIterator, Dict, List, Optional, Set
 import logging
 
 import numpy as np
 
 from .interfaces import BaseClassifier, BaseFeatureExtractor, BaseStreamProcessor
-from .types import ClassificationResult, NeuralData
+from .types import ClassificationResult, NeuralData, StreamMetadata
 from .utils.buffer import CircularBuffer
 
 logger = logging.getLogger(__name__)
 
 
-class RealtimeClassificationProcessor(BaseStreamProcessor):
+class StreamProcessor(BaseStreamProcessor):
     """
     Main orchestrator for real-time classification pipeline.
     Manages multiple classifiers running concurrently on neural data streams.
@@ -45,6 +45,9 @@ class RealtimeClassificationProcessor(BaseStreamProcessor):
         self.latency_buffer: deque[float] = deque(maxlen=1000)
         self.classification_count = 0
         self.error_count = 0
+
+        # Stream configuration
+        self.stream_configs: Dict[str, StreamMetadata] = {}
 
     async def process_stream(  # noqa: C901
         self, stream: AsyncIterator[NeuralData]
@@ -246,3 +249,25 @@ class RealtimeClassificationProcessor(BaseStreamProcessor):
         self.active_streams.clear()
 
         logger.info("Stream processor shutdown complete")
+
+    async def configure_stream(
+        self,
+        metadata: StreamMetadata,
+        buffer_size_ms: float = 1000.0,
+        overlap_ms: float = 500.0,
+    ) -> None:
+        """Configure a new stream for processing"""
+        self.stream_configs[metadata.stream_id] = metadata
+        logger.info(f"Configured stream {metadata.stream_id}")
+
+    def get_stream_config(self, stream_id: str) -> Optional[StreamMetadata]:
+        """Get stream configuration"""
+        return self.stream_configs.get(stream_id)
+
+    async def cleanup_stream(self, stream_id: str) -> None:
+        """Clean up stream resources"""
+        if stream_id in self.stream_configs:
+            del self.stream_configs[stream_id]
+        if stream_id in self.buffers:
+            del self.buffers[stream_id]
+        self.active_streams.discard(stream_id)

@@ -23,3 +23,10 @@ enable_scheduled_scaling    = false # Production runs 24/7
 enable_bigtable_autoscaling = true  # Enable autoscaling for production
 budget_amount               = "10000"
 cost_center                 = "neural-research-prod"
+
+# MCP Server configuration
+enable_mcp_cloud_run    = true
+mcp_server_image        = "gcr.io/production-neurascale/mcp-server:latest"
+mcp_min_instances       = 2 # Always keep minimum instances for availability
+mcp_max_instances       = 20
+enable_mcp_public_access = true # Production may need public access with proper security

@@ -213,6 +213,28 @@ module "neural_ingestion" {
   ]
 }
 
+# Deploy MCP server infrastructure
+module "mcp_server" {
+  source = "./modules/mcp-server"
+
+  project_id           = var.project_id
+  environment          = local.environment
+  region               = var.region
+  apis_enabled         = module.project_apis.time_delay
+  enable_cloud_run     = var.enable_mcp_cloud_run
+  enable_monitoring    = var.enable_monitoring_alerts
+  notification_channels = var.alert_notification_channels
+  mcp_server_image     = var.mcp_server_image
+  min_instances        = var.mcp_min_instances
+  max_instances        = var.mcp_max_instances
+  enable_public_access = var.enable_mcp_public_access
+
+  depends_on = [
+    module.project_apis,
+    google_service_account.neural_ingestion
+  ]
+}
+
 # Deploy monitoring infrastructure
 module "monitoring" {
   source = "./modules/monitoring"
@@ -225,7 +247,8 @@ module "monitoring" {
 
   depends_on = [
     module.project_apis,
-    module.neural_ingestion
+    module.neural_ingestion,
+    module.mcp_server
   ]
 }
 
@@ -257,4 +280,25 @@ output "monitoring_dashboard" {
 
 output "function_topics" {
   value = module.neural_ingestion.function_topics
+}
+
+# MCP Server Outputs
+output "mcp_server_info" {
+  value = module.mcp_server.deployment_info
+  description = "MCP server deployment information"
+}
+
+output "mcp_server_service_account" {
+  value = module.mcp_server.mcp_server_service_account_email
+  description = "MCP server service account email"
+}
+
+output "mcp_secret_uris" {
+  value = module.mcp_server.secret_uris
+  description = "Secret Manager URIs for MCP server configuration"
+}
+
+output "mcp_server_url" {
+  value = module.mcp_server.cloud_run_service_url
+  description = "MCP server Cloud Run service URL"
 }

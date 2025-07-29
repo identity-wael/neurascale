@@ -257,9 +257,10 @@ variable "db_disk_size" {
 }
 
 variable "db_password" {
-  description = "Database password"
+  description = "Database password (if empty, a random password will be generated)"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "redis_memory_gb" {

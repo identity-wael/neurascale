@@ -124,7 +124,7 @@ resource "google_secret_manager_secret_iam_member" "appengine_jwt_secret_access"
   count     = var.enable_appengine_access ? 1 : 0
   project   = var.project_id
   secret_id = google_secret_manager_secret.mcp_jwt_secret.secret_id
-  role      = "roles/secretmanager.secretAccessor"  
+  role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_id}@appspot.gserviceaccount.com"
 }
 
@@ -175,8 +175,8 @@ resource "google_cloud_run_v2_service" "mcp_server" {
     }
 
     annotations = {
-      "autoscaling.knative.dev/minScale" = tostring(var.min_instances)
-      "autoscaling.knative.dev/maxScale" = tostring(var.max_instances)
+      "autoscaling.knative.dev/minScale"  = tostring(var.min_instances)
+      "autoscaling.knative.dev/maxScale"  = tostring(var.max_instances)
       "run.googleapis.com/cpu-throttling" = "false"
     }
   }
@@ -214,16 +214,17 @@ resource "google_monitoring_alert_policy" "mcp_server_health" {
   count        = var.enable_monitoring ? 1 : 0
   project      = var.project_id
   display_name = "${title(var.environment)} MCP Server Health Alert"
-  
+  combiner     = "OR"
+
   conditions {
     display_name = "MCP Server Down"
-    
+
     condition_threshold {
-      filter         = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\""
-      duration       = "300s"
-      comparison     = "COMPARISON_LESS_THAN"
+      filter          = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\""
+      duration        = "300s"
+      comparison      = "COMPARISON_LESS_THAN"
       threshold_value = 1
-      
+
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_RATE"
@@ -240,14 +241,14 @@ resource "google_monitoring_alert_policy" "mcp_server_health" {
 
 # Log-based metrics for MCP Server
 resource "google_logging_metric" "mcp_server_errors" {
-  count  = var.enable_monitoring ? 1 : 0
+  count   = var.enable_monitoring ? 1 : 0
   project = var.project_id
-  name   = "${var.environment}_mcp_server_errors"
-  filter = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\" AND severity>=ERROR"
-  
+  name    = "${var.environment}_mcp_server_errors"
+  filter  = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\" AND severity>=ERROR"
+
   metric_descriptor {
-    metric_kind = "DELTA"
-    value_type  = "INT64"
+    metric_kind  = "DELTA"
+    value_type   = "INT64"
     display_name = "${title(var.environment)} MCP Server Errors"
   }
 }

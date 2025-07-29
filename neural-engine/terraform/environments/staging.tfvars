@@ -30,8 +30,8 @@ cost_center                 = "neural-research-staging"
 enable_cloud_functions = false
 
 # MCP Server configuration
-enable_mcp_cloud_run    = true
-mcp_server_image        = "gcr.io/staging-neurascale/mcp-server:latest"
-mcp_min_instances       = 1
-mcp_max_instances       = 5
+enable_mcp_cloud_run     = true
+mcp_server_image         = "gcr.io/staging-neurascale/mcp-server:latest"
+mcp_min_instances        = 1
+mcp_max_instances        = 5
 enable_mcp_public_access = false # Keep private, access via VPN/IAP

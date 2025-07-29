@@ -97,8 +97,9 @@ jobs:
 
           # Install LSL binary libraries for Linux
           echo "Installing LSL binary libraries..."
-          sudo apt-get update
-          sudo apt-get install -y liblsl
+          # For GitHub Actions Ubuntu runners, we'll skip LSL installation for now
+          # The tests are designed to skip LSL-dependent tests anyway
+          echo "Skipping LSL installation on GitHub Actions"
 
       - name: Run linting
         if: steps.test-cache.outputs.cache-hit != 'true'

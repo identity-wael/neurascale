@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 interface AnimatedTextProps {
@@ -23,7 +23,7 @@ export default function AnimatedText({
 
   const words = text.split(' ');
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -34,7 +34,7 @@ export default function AnimatedText({
     },
   };
 
-  const child = {
+  const child: Variants = {
     hidden: {
       opacity: 0,
       y: 20,
@@ -44,7 +44,7 @@ export default function AnimatedText({
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.215, 0.61, 0.355, 1],
+        ease: 'easeOut',
       },
     },
   };

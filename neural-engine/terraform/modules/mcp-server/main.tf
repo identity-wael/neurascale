@@ -195,8 +195,8 @@ resource "google_cloud_run_v2_service" "mcp_server" {
   }
 
   depends_on = [
-    google_secret_manager_secret_version.mcp_api_key_salt,
-    google_secret_manager_secret_version.mcp_jwt_secret
+    google_secret_manager_secret.mcp_api_key_salt,
+    google_secret_manager_secret.mcp_jwt_secret
   ]
 }
 

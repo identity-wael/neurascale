@@ -22,7 +22,7 @@ class PatientResolver:
         patients = {}
 
         for i in range(50):
-            patient_id = f"pat_{i+1:03d}"
+            patient_id = f"pat_{i + 1:03d}"
 
             # Generate creation date
             days_ago = random.randint(0, 365)
@@ -30,7 +30,7 @@ class PatientResolver:
 
             patient = Patient(
                 id=patient_id,
-                external_id=f"EXT{i+1:05d}",
+                external_id=f"EXT{i + 1:05d}",
                 created_at=created_at,
                 metadata={
                     "age_group": random.choice(

@@ -1,6 +1,6 @@
 """Patient management REST API endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from typing import Dict, Any
 import logging
 

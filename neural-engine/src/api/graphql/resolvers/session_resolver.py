@@ -1,6 +1,6 @@
 """Session resolver implementation."""
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from datetime import datetime, timedelta
 import logging
 import random
@@ -31,7 +31,7 @@ class SessionResolver:
         statuses = list(SessionStatus)
 
         for i in range(100):
-            session_id = f"ses_{i+1:06d}"
+            session_id = f"ses_{i + 1:06d}"
 
             # Generate realistic timestamps
             days_ago = random.randint(0, 30)

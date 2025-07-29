@@ -5,7 +5,6 @@ import httpx
 import asyncio
 from datetime import datetime
 import logging
-from urllib.parse import urljoin
 
 from .models import (
     Device,
@@ -349,10 +348,9 @@ class NeuraScaleClient:
         if channels:
             params["channels"] = ",".join(map(str, channels))
 
-        response = await self._request(
+        await self._request(
             "GET", f"/api/v2/neural-data/sessions/{session_id}/stream", params=params
         )
-        stream_info = response.json()
 
         # In production, would connect to WebSocket
         # For now, mock implementation

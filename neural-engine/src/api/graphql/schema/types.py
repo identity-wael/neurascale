@@ -1,7 +1,7 @@
 """GraphQL type definitions."""
 
 import strawberry
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime
 from enum import Enum
 

@@ -1,6 +1,6 @@
 """Neural data access REST API endpoints."""
 
-from fastapi import APIRouter, Query, Depends, HTTPException, Response
+from fastapi import APIRouter, Query, Depends, HTTPException
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -164,7 +164,7 @@ async def get_channel_info(
         channels.append(
             ChannelInfo(
                 index=i,
-                name=f"CH{i+1:02d}",
+                name=f"CH{i + 1:02d}",
                 type=channel_types[i % len(channel_types)],
                 unit="µV",
                 sampling_rate=256,

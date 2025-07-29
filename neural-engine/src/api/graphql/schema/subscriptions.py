@@ -6,7 +6,7 @@ import asyncio
 from datetime import datetime
 import random
 
-from .types import Device, Session, NeuralData, Analysis
+from .types import Session
 
 
 @strawberry.type

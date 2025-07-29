@@ -2,8 +2,8 @@
 
 from typing import Optional, Dict, Any, List
 import httpx
-import json
-from .exceptions import NeuraScaleError, GraphQLError
+
+from .exceptions import NeuraScaleError
 
 
 class GraphQLError(NeuraScaleError):

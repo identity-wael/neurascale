@@ -13,7 +13,7 @@ google-cloud-firestore==2.19.0
 google-cloud-bigquery==3.27.0
 google-cloud-bigtable==2.27.0
 google-cloud-storage==2.19.0
-google-cloud-secret-manager==2.21.1  # For MCP server secrets
+google-cloud-secret-manager==2.21.1  # For MCP server secrets and general secrets management
 apache-beam[gcp]==2.60.0
 
 # Google Cloud Services - AI/ML
@@ -31,7 +31,7 @@ google-cloud-profiler==4.1.0     # Performance profiling
 
 # Google Cloud Services - Security
 google-cloud-kms==2.24.2         # Key Management Service
-google-cloud-secret-manager==2.21.0  # Secrets management
+# google-cloud-secret-manager==2.21.0  # Moved to line 16 to avoid duplicate
 google-cloud-iam==2.15.2         # IAM for access control
 
 # Google Cloud Services - Infrastructure

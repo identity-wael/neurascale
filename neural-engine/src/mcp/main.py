@@ -8,6 +8,7 @@ import signal
 import sys
 from typing import List
 import uvloop
+from aiohttp import web
 
 from .config import load_config
 from .servers.neural_data.server import NeuralDataMCPServer
@@ -26,6 +27,8 @@ class MCPServerManager:
         self.config = config
         self.servers = {}
         self.running = False
+        self.http_app = None
+        self.http_runner = None
 
         # Setup logging
         self._setup_logging()
@@ -41,16 +44,57 @@ class MCPServerManager:
 
         logging.basicConfig(level=level, format=format_str)
 
-    async def start_servers(self, server_types: List[str] = None):
+    async def health_check(self, request):
+        """Health check endpoint."""
+        status = {
+            "status": "healthy",
+            "servers": {},
+            "timestamp": asyncio.get_event_loop().time(),
+        }
+
+        for server_type, server in self.servers.items():
+            # Simple health check - server exists and is running
+            status["servers"][server_type] = {
+                "status": "running" if server else "stopped",
+                "port": self.config["servers"]
+                .get(server_type, {})
+                .get("port", "unknown"),
+            }
+
+        return web.json_response(status)
+
+    async def setup_http_server(self, port: int = 8080):
+        """Setup HTTP server for health checks."""
+        self.http_app = web.Application()
+        self.http_app.router.add_get("/health", self.health_check)
+        self.http_app.router.add_get(
+            "/healthz", self.health_check
+        )  # Alternative endpoint
+
+        self.http_runner = web.AppRunner(self.http_app)
+        await self.http_runner.setup()
+
+        site = web.TCPSite(self.http_runner, "0.0.0.0", port)
+        await site.start()
+
+        self.logger.info(f"HTTP health server started on port {port}")
+
+    async def start_servers(
+        self, server_types: List[str] = None, http_port: int = 8080
+    ):
         """Start MCP servers.
 
         Args:
             server_types: List of server types to start (None for all)
+            http_port: Port for HTTP health server
         """
         if server_types is None:
             server_types = ["neural_data", "device_control"]
 
         self.logger.info(f"Starting MCP servers: {server_types}")
+
+        # Start HTTP health server first
+        await self.setup_http_server(http_port)
 
         # Initialize servers
         for server_type in server_types:
@@ -94,6 +138,14 @@ class MCPServerManager:
                 self.logger.info(f"Stopped {server_type} MCP server")
             except Exception as e:
                 self.logger.error(f"Error stopping {server_type} server: {e}")
+
+        # Stop HTTP server
+        if self.http_runner:
+            try:
+                await self.http_runner.cleanup()
+                self.logger.info("Stopped HTTP health server")
+            except Exception as e:
+                self.logger.error(f"Error stopping HTTP server: {e}")
 
         self.servers.clear()
         self.running = False
@@ -140,6 +192,12 @@ async def main():
         default="INFO",
         help="Log level",
     )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="HTTP health check server port",
+    )
 
     args = parser.parse_args()
 
@@ -163,7 +221,7 @@ async def main():
 
     try:
         # Start servers
-        await manager.start_servers(args.servers)
+        await manager.start_servers(args.servers, args.port)
 
         # Run until interrupted
         await manager.run_forever()

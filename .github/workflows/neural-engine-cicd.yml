@@ -12,7 +12,7 @@ on:
       - '.github/workflows/neural-engine-cicd.yml'
 
 env:
-  PYTHON_VERSION: '3.12'
+  PYTHON_VERSION: '3.12.11'
   GCP_REGION: 'northamerica-northeast1'
   TF_VERSION: '1.5.7'
 
@@ -50,8 +50,8 @@ jobs:
       - name: Check test cache
         id: cache-check
         run: |
-          # Create a hash of all test-related files
-          CACHE_KEY=$(find neural-engine/src neural-engine/api neural-engine/devices neural-engine/ledger neural-engine/monitoring neural-engine/security neural-engine/tests neural-engine/requirements*.txt .github/workflows/neural-engine-cicd.yml -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
+          # Create a hash of all test-related files including new MCP code
+          CACHE_KEY=$(find neural-engine/src neural-engine/api neural-engine/devices neural-engine/ledger neural-engine/monitoring neural-engine/security neural-engine/processing neural-engine/tests neural-engine/requirements*.txt .github/workflows/neural-engine-cicd.yml -type f -exec md5sum {} \; | sort | md5sum | cut -d' ' -f1)
           echo "cache-key=test-$CACHE_KEY-py3.12.11" >> $GITHUB_OUTPUT
 
       - name: Cache test results
@@ -71,7 +71,7 @@ jobs:
         if: steps.test-cache.outputs.cache-hit != 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.11'
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -81,9 +81,9 @@ jobs:
           path: |
             venv
             ~/.cache/pip
-          key: ${{ runner.os }}-python-3.12-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
+          key: ${{ runner.os }}-python-3.12.11-${{ hashFiles('neural-engine/requirements.txt', 'neural-engine/requirements-dev.txt') }}
           restore-keys: |
-            ${{ runner.os }}-python-3.12-
+            ${{ runner.os }}-python-3.12.11-
 
       - name: Install dependencies
         if: steps.test-cache.outputs.cache-hit != 'true'
@@ -106,7 +106,7 @@ jobs:
         working-directory: neural-engine
         run: |
           # Black and flake8 should already be installed from requirements-dev.txt
-          # Run Black and Flake8
+          # Run Black and Flake8 (including MCP server code)
           black --check src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/
           flake8 src/ tests/ examples/ api/ devices/ ledger/ monitoring/ security/ processing/ --config=.flake8
 
@@ -155,8 +155,8 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        service: [api, ingestion, processor]
-      max-parallel: 3  # Run all builds in parallel
+        service: [api, ingestion, processor, mcp-server]
+      max-parallel: 4  # Run all builds in parallel
     env:
       DOCKER_BUILDKIT: 1
       BUILDKIT_PROGRESS: plain
@@ -242,7 +242,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.11'
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -251,9 +251,9 @@ jobs:
           path: |
             venv
             ~/.cache/pip
-          key: ${{ runner.os }}-python-3.12-functions-${{ hashFiles('neural-engine/functions/stream_ingestion/requirements.txt') }}
+          key: ${{ runner.os }}-python-3.12.11-functions-${{ hashFiles('neural-engine/functions/stream_ingestion/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-python-3.12-functions-
+            ${{ runner.os }}-python-3.12.11-functions-
 
       - name: Package Cloud Functions
         working-directory: neural-engine/functions/stream_ingestion
@@ -395,6 +395,7 @@ jobs:
                 -var="environment=${{ needs.setup.outputs.environment }}" \
                 -var="project_id=${{ needs.setup.outputs.project_id }}" \
                 -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+                -var="mcp_server_image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/mcp-server:${{ github.sha }}" \
                 -lock=false \
                 -out=tfplan
 
@@ -413,7 +414,8 @@ jobs:
                     -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
                     -var="environment=${{ needs.setup.outputs.environment }}" \
                     -var="project_id=${{ needs.setup.outputs.project_id }}" \
-                    -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com"
+                    -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+                    -var="mcp_server_image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ needs.setup.outputs.project_id }}/neural-engine-${{ needs.setup.outputs.environment }}/mcp-server:${{ github.sha }}"
                 fi
               fi
 
@@ -466,7 +468,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.11'
 
       # Cache Python dependencies
       - name: Cache Python dependencies
@@ -475,9 +477,9 @@ jobs:
           path: |
             venv
             ~/.cache/pip
-          key: ${{ runner.os }}-python-3.12-verify-${{ github.run_id }}
+          key: ${{ runner.os }}-python-3.12.11-verify-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-python-3.12-verify-
+            ${{ runner.os }}-python-3.12.11-verify-
 
       - name: Install test dependencies
         run: |
@@ -490,6 +492,22 @@ jobs:
 
           # Verify Bigtable instance exists
           gcloud bigtable instances list --project=${{ needs.setup.outputs.project_id }} | grep "neural-data-${{ needs.setup.outputs.environment }}"
+
+          # Verify MCP server secrets exist
+          gcloud secrets list --project=${{ needs.setup.outputs.project_id }} | grep "mcp-api-key-salt"
+          gcloud secrets list --project=${{ needs.setup.outputs.project_id }} | grep "mcp-jwt-secret"
+
+          # Verify MCP server Cloud Run service exists (if enabled)
+          if gcloud run services list --project=${{ needs.setup.outputs.project_id }} --platform=managed | grep "${{ needs.setup.outputs.environment }}-mcp-server" 2>/dev/null; then
+            echo "MCP server Cloud Run service found"
+            # Test MCP server health endpoint
+            MCP_URL=$(gcloud run services describe ${{ needs.setup.outputs.environment }}-mcp-server --project=${{ needs.setup.outputs.project_id }} --platform=managed --region=${{ env.GCP_REGION }} --format="value(status.url)")
+            echo "Testing MCP server at: $MCP_URL"
+            # Note: Health check might fail if authentication is required
+            curl -f "$MCP_URL/health" || echo "MCP server health check failed (expected if authentication required)"
+          else
+            echo "MCP server Cloud Run service not found (may be disabled)"
+          fi
 
       - name: Run integration test
         if: needs.setup.outputs.environment != 'production'

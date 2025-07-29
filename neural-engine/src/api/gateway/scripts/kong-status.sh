@@ -11,19 +11,19 @@ echo "════════════════════════�
 # Check if Kong is running
 if curl -f http://localhost:8001/status >/dev/null 2>&1; then
     echo "✅ Kong Gateway: RUNNING"
-    
+
     # Get detailed status
     STATUS=$(curl -s http://localhost:8001/status)
     echo "📊 Gateway Status: $(echo "$STATUS" | jq -r '.message // "Healthy"')"
-    
+
     # Check database connection
     DB_STATUS=$(echo "$STATUS" | jq -r '.database.reachable // "unknown"')
     echo "🗄️  Database: $DB_STATUS"
-    
+
     # Get configuration hash
     CONFIG_HASH=$(curl -s http://localhost:8001 | jq -r '.configuration.database // "unknown"' | head -c 8)
     echo "⚙️  Config Hash: $CONFIG_HASH..."
-    
+
 else
     echo "❌ Kong Gateway: NOT RUNNING"
 fi
@@ -89,15 +89,15 @@ if curl -f http://localhost:8001/status >/dev/null 2>&1; then
     # Get recent metrics
     CONNECTIONS=$(curl -s http://localhost:8001/status | jq -r '.server.connections_handled // 0')
     REQUESTS=$(curl -s http://localhost:8001/status | jq -r '.server.total_requests // 0')
-    
+
     echo "🔗 Total Connections: $CONNECTIONS"
     echo "📊 Total Requests: $REQUESTS"
-    
+
     # Get service status
     echo ""
     echo "🔧 Configured Services:"
     curl -s http://localhost:8001/services | jq -r '.data[] | "   \(.name): \(.host):\(.port)"' 2>/dev/null || echo "   Unable to fetch services"
-    
+
     echo ""
     echo "🛣️  Active Routes:"
     curl -s http://localhost:8001/routes | jq -r '.data[] | "   \(.name): \(.methods // ["ANY"] | join(",")) \(.paths[0] // "/")"' 2>/dev/null || echo "   Unable to fetch routes"

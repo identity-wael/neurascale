@@ -9,6 +9,7 @@ The NeuraScale API provides comprehensive access to neural data processing, devi
 **Phase 12 Complete** | **[Kong Gateway Documentation](../gateway/README.md)** | **[Admin Dashboard](http://localhost:8001)**
 
 Kong API Gateway now provides:
+
 - **🚀 Enterprise Performance**: Sub-10ms overhead, 10,000+ req/sec throughput
 - **🔒 Advanced Security**: JWT authentication, rate limiting, circuit breakers
 - **📊 Comprehensive Monitoring**: Prometheus metrics, Grafana dashboards

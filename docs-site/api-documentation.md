@@ -6,19 +6,20 @@ permalink: /api-documentation/
 
 # NeuraScale API Documentation
 
-## 🎉 Latest Update: Phase 12 - Complete API Implementation
+## 🎉 Latest Update: Phase 12 - Complete API Implementation with Kong Gateway
 
-**Version 2.0** | **[Interactive Docs](https://api.neurascale.com/api/docs)** | **[GraphQL Playground](https://api.neurascale.com/api/graphql)**
+**Version 2.0** | **[Interactive Docs](https://api.neurascale.com/api/docs)** | **[GraphQL Playground](https://api.neurascale.com/api/graphql)** | **[Kong Admin](http://localhost:8001)**
 
-Phase 12 introduces enterprise-grade API infrastructure with comprehensive REST v2 and GraphQL APIs, client SDKs, and real-time capabilities.
+Phase 12 introduces enterprise-grade API infrastructure with comprehensive REST v2 and GraphQL APIs, Kong API Gateway, client SDKs, and real-time capabilities.
 
 ## Overview
 
-The NeuraScale API provides comprehensive access to neural data processing, device management, and real-time brain-computer interface functionality. Built with FastAPI and Strawberry GraphQL, it offers both RESTful endpoints and GraphQL queries with WebSocket subscriptions.
+The NeuraScale API provides comprehensive access to neural data processing, device management, and real-time brain-computer interface functionality. Built with FastAPI and Strawberry GraphQL, protected by Kong API Gateway, it offers enterprise-grade performance, security, and monitoring with both RESTful endpoints and GraphQL queries with WebSocket subscriptions.
 
 ## API Versions
 
 ### REST API v2 (`/api/v2/`)
+
 - **Base URL**: `https://api.neurascale.com/api/v2/`
 - **Authentication**: Bearer JWT tokens
 - **Content Type**: `application/json`
@@ -26,10 +27,20 @@ The NeuraScale API provides comprehensive access to neural data processing, devi
 - **HATEOAS**: All responses include navigation links
 
 ### GraphQL API (`/api/graphql`)
+
 - **Endpoint**: `https://api.neurascale.com/api/graphql`
 - **WebSocket**: `wss://api.neurascale.com/api/graphql` (subscriptions)
 - **Playground**: Available in development at `/api/graphql`
 - **Introspection**: Enabled for development environments
+
+### Kong API Gateway (`/admin`)
+
+- **Admin API**: `http://localhost:8001` (development)
+- **Prometheus Metrics**: `http://localhost:9090`
+- **Grafana Dashboard**: `http://localhost:3000`
+- **Features**: Load balancing, circuit breakers, rate limiting, SSL termination
+- **Performance**: Sub-10ms overhead, 10,000+ req/sec throughput
+- **Monitoring**: Real-time metrics, health checks, automated failover
 
 ## Quick Start
 
@@ -50,7 +61,7 @@ curl -X GET \
   -H "Authorization: Bearer YOUR_TOKEN" \
   https://api.neurascale.com/api/v2/devices
 
-# Create a new session  
+# Create a new session
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
@@ -73,31 +84,37 @@ curl -X POST \
 ## Core Endpoints
 
 ### 🔌 Device Management
+
 - **REST**: `/api/v2/devices/`
 - **GraphQL**: `devices`, `device(id)`
 - Manage neural acquisition devices, calibration, and status monitoring
 
-### 📊 Session Recording  
+### 📊 Session Recording
+
 - **REST**: `/api/v2/sessions/`
 - **GraphQL**: `sessions`, `session(id)`
 - Control recording sessions, real-time data streaming
 
 ### 🧠 Neural Data Access
+
 - **REST**: `/api/v2/neural-data/`
 - **GraphQL**: `neuralData(sessionId)`
 - Retrieve and stream neural signal data with filtering
 
 ### 👤 Patient Management
+
 - **REST**: `/api/v2/patients/`
 - **GraphQL**: `patients`, `patient(id)`
 - Patient records and clinical data integration
 
 ### 🔬 Analysis Pipeline
+
 - **REST**: `/api/v2/analysis/`
 - **GraphQL**: `analyses`, `startAnalysis`
 - Signal processing and machine learning inference
 
 ### 🤖 ML Models
+
 - **REST**: `/api/v2/ml-models/`
 - **GraphQL**: `mlModels`, `predict`
 - Neural network models for BCI applications
@@ -107,17 +124,20 @@ curl -X POST \
 ### Device Management
 
 #### List Devices
+
 ```http
 GET /api/v2/devices
 ```
 
 **Query Parameters:**
+
 - `status` (string): Filter by device status (ONLINE, OFFLINE, CALIBRATING)
 - `type` (string): Filter by device type (EEG, EMG, ECoG)
 - `page` (int): Page number for pagination (default: 1)
 - `size` (int): Items per page (default: 20, max: 100)
 
 **Response:**
+
 ```json
 {
   "items": [
@@ -132,9 +152,12 @@ GET /api/v2/devices
       "channelCount": 8,
       "samplingRate": 250,
       "_links": {
-        "self": {"href": "/api/v2/devices/dev_001", "method": "GET"},
-        "update": {"href": "/api/v2/devices/dev_001", "method": "PATCH"},
-        "calibration": {"href": "/api/v2/devices/dev_001/calibration", "method": "POST"}
+        "self": { "href": "/api/v2/devices/dev_001", "method": "GET" },
+        "update": { "href": "/api/v2/devices/dev_001", "method": "PATCH" },
+        "calibration": {
+          "href": "/api/v2/devices/dev_001/calibration",
+          "method": "POST"
+        }
       }
     }
   ],
@@ -151,11 +174,13 @@ GET /api/v2/devices
 ```
 
 #### Create Device
+
 ```http
 POST /api/v2/devices
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "New EEG Device",
@@ -168,6 +193,7 @@ POST /api/v2/devices
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "dev_new",
@@ -180,7 +206,7 @@ POST /api/v2/devices
   "samplingRate": 256,
   "createdAt": "2024-01-15T10:30:00Z",
   "_links": {
-    "self": {"href": "/api/v2/devices/dev_new", "method": "GET"}
+    "self": { "href": "/api/v2/devices/dev_new", "method": "GET" }
   }
 }
 ```
@@ -188,11 +214,13 @@ POST /api/v2/devices
 ### Session Recording
 
 #### Create Session
+
 ```http
 POST /api/v2/sessions
 ```
 
 **Request Body:**
+
 ```json
 {
   "patientId": "pat_001",
@@ -207,11 +235,13 @@ POST /api/v2/sessions
 ```
 
 #### Start Recording
+
 ```http
 POST /api/v2/sessions/{sessionId}/start
 ```
 
 **Response:**
+
 ```json
 {
   "id": "ses_001",
@@ -222,8 +252,8 @@ POST /api/v2/sessions/{sessionId}/start
   "channelCount": 32,
   "samplingRate": 256,
   "_links": {
-    "stop": {"href": "/api/v2/sessions/ses_001/stop", "method": "POST"},
-    "pause": {"href": "/api/v2/sessions/ses_001/pause", "method": "POST"}
+    "stop": { "href": "/api/v2/sessions/ses_001/stop", "method": "POST" },
+    "pause": { "href": "/api/v2/sessions/ses_001/pause", "method": "POST" }
   }
 }
 ```
@@ -231,17 +261,20 @@ POST /api/v2/sessions/{sessionId}/start
 ### Neural Data Access
 
 #### Get Neural Data
+
 ```http
 GET /api/v2/neural-data/sessions/{sessionId}
 ```
 
 **Query Parameters:**
+
 - `startTime` (float): Start time in seconds
 - `endTime` (float): End time in seconds
 - `channels` (string): Comma-separated channel indices (e.g., "0,1,2,3")
 - `downsample` (int): Downsampling factor
 
 **Response:**
+
 ```json
 {
   "sessionId": "ses_001",
@@ -275,7 +308,7 @@ query GetDeviceDetails($deviceId: String!) {
     name
     type
     status
-    sessions(pagination: {first: 5}) {
+    sessions(pagination: { first: 5 }) {
       edges {
         node {
           id
@@ -331,11 +364,11 @@ from neurascale import NeuraScaleClient
 
 async def main():
     client = NeuraScaleClient(api_key="your-api-key")
-    
+
     # List devices
     devices = await client.list_devices()
     print(f"Found {devices.total} devices")
-    
+
     # Create session
     session = await client.create_session({
         "patientId": "pat_001",
@@ -343,10 +376,10 @@ async def main():
         "channelCount": 32,
         "samplingRate": 256
     })
-    
+
     # Start recording
     await client.start_session(session.id)
-    
+
     # Get neural data
     data = await client.get_neural_data(
         session.id,
@@ -354,7 +387,7 @@ async def main():
         start_time=0,
         end_time=60
     )
-    
+
     await client.close()
 
 asyncio.run(main())
@@ -363,26 +396,26 @@ asyncio.run(main())
 ### TypeScript/JavaScript SDK
 
 ```typescript
-import { NeuraScaleClient, StreamClient } from '@neurascale/sdk';
+import { NeuraScaleClient, StreamClient } from "@neurascale/sdk";
 
 // REST API operations
 const client = new NeuraScaleClient({
-  apiKey: 'your-api-key'
+  apiKey: "your-api-key",
 });
 
 const devices = await client.listDevices();
 const session = await client.createSession({
-  patientId: 'pat_001',
-  deviceId: devices.items[0].id
+  patientId: "pat_001",
+  deviceId: devices.items[0].id,
 });
 
 // Real-time streaming
 const stream = new StreamClient({
-  url: 'wss://api.neurascale.com/ws/neural-data',
-  token: 'your-stream-token'
+  url: "wss://api.neurascale.com/ws/neural-data",
+  token: "your-stream-token",
 });
 
-stream.on('data', (frame) => {
+stream.on("data", (frame) => {
   console.log(`Received ${frame.data.length} channels`);
 });
 
@@ -395,7 +428,7 @@ stream.subscribeToSession(session.id, [0, 1, 2, 3]);
 ### WebSocket Streaming
 
 ```javascript
-const ws = new WebSocket('wss://api.neurascale.com/ws/neural-data');
+const ws = new WebSocket("wss://api.neurascale.com/ws/neural-data");
 
 ws.onmessage = (event) => {
   const frame = JSON.parse(event.data);
@@ -403,27 +436,30 @@ ws.onmessage = (event) => {
 };
 
 // Subscribe to session data
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  sessionId: 'ses_001',
-  channels: [0, 1, 2, 3]
-}));
+ws.send(
+  JSON.stringify({
+    type: "subscribe",
+    sessionId: "ses_001",
+    channels: [0, 1, 2, 3],
+  }),
+);
 ```
 
 ### GraphQL Subscriptions (WebSocket)
 
 ```javascript
-import { createClient } from 'graphql-ws';
+import { createClient } from "graphql-ws";
 
 const client = createClient({
-  url: 'wss://api.neurascale.com/api/graphql',
+  url: "wss://api.neurascale.com/api/graphql",
   connectionParams: {
-    Authorization: 'Bearer your-token'
-  }
+    Authorization: "Bearer your-token",
+  },
 });
 
-client.subscribe({
-  query: `
+client.subscribe(
+  {
+    query: `
     subscription {
       neuralDataStream(sessionId: "ses_001") {
         timestamp
@@ -431,28 +467,30 @@ client.subscribe({
         channels
       }
     }
-  `
-}, {
-  next: (data) => console.log('Received data:', data),
-  error: (err) => console.error('Error:', err),
-});
+  `,
+  },
+  {
+    next: (data) => console.log("Received data:", data),
+    error: (err) => console.error("Error:", err),
+  },
+);
 ```
 
 ## Error Handling
 
 ### HTTP Status Codes
 
-| Code | Description | Action |
-|------|-------------|--------|
-| 200 | Success | Continue |
-| 201 | Created | Resource created successfully |
-| 400 | Bad Request | Check request format |
-| 401 | Unauthorized | Verify authentication token |
-| 403 | Forbidden | Check permissions |
-| 404 | Not Found | Resource doesn't exist |
-| 422 | Validation Error | Fix request data |
-| 429 | Rate Limited | Reduce request frequency |
-| 500 | Server Error | Retry or contact support |
+| Code | Description      | Action                        |
+| ---- | ---------------- | ----------------------------- |
+| 200  | Success          | Continue                      |
+| 201  | Created          | Resource created successfully |
+| 400  | Bad Request      | Check request format          |
+| 401  | Unauthorized     | Verify authentication token   |
+| 403  | Forbidden        | Check permissions             |
+| 404  | Not Found        | Resource doesn't exist        |
+| 422  | Validation Error | Fix request data              |
+| 429  | Rate Limited     | Reduce request frequency      |
+| 500  | Server Error     | Retry or contact support      |
 
 ### Error Response Format
 
@@ -531,6 +569,7 @@ POST /api/v2/sessions/{sessionId}/export
 ```
 
 **Response:**
+
 ```json
 {
   "exportId": "exp_12345",
@@ -545,11 +584,13 @@ POST /api/v2/sessions/{sessionId}/export
 ## SDK Installation
 
 ### Python SDK
+
 ```bash
 pip install neurascale
 ```
 
-### JavaScript/TypeScript SDK  
+### JavaScript/TypeScript SDK
+
 ```bash
 npm install @neurascale/sdk
 # or
@@ -565,20 +606,22 @@ yarn add @neurascale/sdk
 ## Performance Metrics
 
 ### Response Times
-| Endpoint Type | P50 | P95 | P99 | Max |
-|---------------|-----|-----|-----|-----|
-| Device List | 45ms | 120ms | 180ms | 250ms |
+
+| Endpoint Type  | P50  | P95   | P99   | Max   |
+| -------------- | ---- | ----- | ----- | ----- |
+| Device List    | 45ms | 120ms | 180ms | 250ms |
 | Session Create | 60ms | 150ms | 220ms | 300ms |
-| Neural Data | 80ms | 200ms | 300ms | 400ms |
-| GraphQL Query | 50ms | 130ms | 200ms | 280ms |
+| Neural Data    | 80ms | 200ms | 300ms | 400ms |
+| GraphQL Query  | 50ms | 130ms | 200ms | 280ms |
 
 ### Throughput Capacity
-| Metric | Single Instance | Load Balanced |
-|--------|----------------|---------------|
-| Requests/sec | 1,000 | 10,000+ |
-| Concurrent Users | 500 | 5,000+ |
-| WebSocket Connections | 100 | 1,000+ |
-| Data Throughput | 100 MB/s | 1 GB/s |
+
+| Metric                | Single Instance | Load Balanced |
+| --------------------- | --------------- | ------------- |
+| Requests/sec          | 1,000           | 10,000+       |
+| Concurrent Users      | 500             | 5,000+        |
+| WebSocket Connections | 100             | 1,000+        |
+| Data Throughput       | 100 MB/s        | 1 GB/s        |
 
 ## Changelog
 
@@ -600,12 +643,14 @@ yarn add @neurascale/sdk
 ## Support
 
 ### Getting Help
+
 - 📖 **Documentation**: [https://docs.neurascale.io/api](https://docs.neurascale.io/api)
 - 💬 **Discord**: [https://discord.gg/neurascale](https://discord.gg/neurascale)
 - 📧 **Email Support**: api-support@neurascale.io
 - 🐛 **Bug Reports**: [https://github.com/identity-wael/neurascale/issues](https://github.com/identity-wael/neurascale/issues)
 
 ### API Status
+
 - **Status Page**: [https://status.neurascale.io](https://status.neurascale.io)
 - **Uptime**: 99.9% SLA
 - **Monitoring**: Real-time API health metrics

@@ -179,10 +179,6 @@ resource "google_cloud_run_v2_service" "mcp_server" {
         value = var.project_id
       }
 
-      env {
-        name  = "PORT"
-        value = "8080"
-      }
 
       resources {
         limits = {
@@ -248,7 +244,7 @@ resource "google_monitoring_alert_policy" "mcp_server_health" {
     display_name = "MCP Server Down"
 
     condition_threshold {
-      filter          = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\""
+      filter          = "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${var.environment}-mcp-server\" AND metric.type=\"run.googleapis.com/request_count\""
       duration        = "300s"
       comparison      = "COMPARISON_LT"
       threshold_value = 1

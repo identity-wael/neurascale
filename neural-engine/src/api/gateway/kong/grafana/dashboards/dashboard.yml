@@ -1,0 +1,16 @@
+# Grafana Dashboard Provisioning Configuration
+# NeuraScale Kong Gateway Dashboard
+
+apiVersion: 1
+
+providers:
+  - name: 'kong-dashboards'
+    orgId: 1
+    folder: 'Kong Gateway'
+    folderUid: 'kong-folder'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/kong

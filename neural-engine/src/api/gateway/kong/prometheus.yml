@@ -1,0 +1,85 @@
+# Prometheus Configuration for Kong Gateway Monitoring
+# NeuraScale Neural Engine - Phase 12 API Implementation
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'neurascale-kong'
+    environment: 'development'
+
+rule_files:
+  - "kong_rules.yml"
+
+scrape_configs:
+  # Kong Gateway Metrics
+  - job_name: 'kong-gateway'
+    static_configs:
+      - targets: ['kong-gateway:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # Kong Proxy Metrics (via Status API)
+  - job_name: 'kong-proxy'
+    static_configs:
+      - targets: ['kong-gateway:8001']
+    metrics_path: '/status'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'kong_.*'
+        target_label: __name__
+        replacement: '${1}'
+
+  # NeuraScale API Backend Metrics
+  - job_name: 'neurascale-api'
+    static_configs:
+      - targets: ['neural-engine-api:8000']
+    metrics_path: '/api/v2/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    honor_labels: true
+    basic_auth:
+      username: 'prometheus'
+      password: 'neurascale-metrics-2025'
+
+  # Redis Metrics (for Kong rate limiting)
+  - job_name: 'kong-redis'
+    static_configs:
+      - targets: ['kong-redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # PostgreSQL Metrics (Kong database)
+  - job_name: 'kong-postgres'
+    static_configs:
+      - targets: ['kong-database:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+    scrape_timeout: 15s
+
+  # Docker Container Metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['host.docker.internal:9323']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Storage configuration
+storage:
+  tsdb:
+    retention_time: "15d"
+    retention_size: "10GB"

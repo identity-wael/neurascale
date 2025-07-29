@@ -1,0 +1,567 @@
+# Kong Gateway Configuration for NeuraScale API
+# Version: 3.4.x (Kong Open Source)
+
+_format_version: "3.0"
+_transform: true
+
+# Services - Backend API endpoints
+services:
+  - name: neurascale-api-rest
+    url: http://neural-engine-api:8000
+    protocol: http
+    host: neural-engine-api
+    port: 8000
+    path: /
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags:
+      - neurascale
+      - rest-api
+      - v2
+
+  - name: neurascale-graphql
+    url: http://neural-engine-api:8000/api/graphql
+    protocol: http
+    host: neural-engine-api
+    port: 8000
+    path: /api/graphql
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags:
+      - neurascale
+      - graphql
+      - subscriptions
+
+  - name: neurascale-websocket
+    url: http://neural-engine-api:8000/ws
+    protocol: http
+    host: neural-engine-api
+    port: 8000
+    path: /ws
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    tags:
+      - neurascale
+      - websocket
+      - streaming
+
+# Routes - API endpoints exposed through Kong
+routes:
+  # REST API v2 Routes
+  - name: api-v2-devices
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+    paths:
+      - "/api/v2/devices"
+      - "/api/v2/devices/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - devices
+
+  - name: api-v2-sessions
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+    paths:
+      - "/api/v2/sessions"
+      - "/api/v2/sessions/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - sessions
+
+  - name: api-v2-neural-data
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+    paths:
+      - "/api/v2/neural-data"
+      - "/api/v2/neural-data/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - neural-data
+
+  - name: api-v2-patients
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+    paths:
+      - "/api/v2/patients"
+      - "/api/v2/patients/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - patients
+
+  - name: api-v2-analysis
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+    paths:
+      - "/api/v2/analysis"
+      - "/api/v2/analysis/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - analysis
+
+  - name: api-v2-ml-models
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+    paths:
+      - "/api/v2/ml-models"
+      - "/api/v2/ml-models/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - rest
+      - ml-models
+
+  # GraphQL Route
+  - name: graphql-api
+    service: neurascale-graphql
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+      - POST
+    paths:
+      - "/api/graphql"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - graphql
+
+  # WebSocket Route
+  - name: websocket-streaming
+    service: neurascale-websocket
+    protocols:
+      - http
+      - https
+    paths:
+      - "/ws"
+      - "/ws/.*"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - websocket
+      - streaming
+
+  # API Documentation Routes
+  - name: api-docs
+    service: neurascale-api-rest
+    protocols:
+      - http
+      - https
+    methods:
+      - GET
+    paths:
+      - "/api/docs"
+      - "/api/redoc"
+      - "/api/openapi.json"
+    strip_path: false
+    preserve_host: false
+    tags:
+      - documentation
+
+# Plugins - Kong middleware and features
+plugins:
+  # Global Rate Limiting
+  - name: rate-limiting
+    config:
+      minute: 1000
+      hour: 50000
+      day: 1000000
+      policy: redis
+      redis_host: redis
+      redis_port: 6379
+      redis_database: 1
+      fault_tolerant: true
+      hide_client_headers: false
+    tags:
+      - rate-limiting
+      - global
+
+  # CORS Support
+  - name: cors
+    config:
+      origins:
+        - "https://neurascale.com"
+        - "https://app.neurascale.com"
+        - "https://docs.neurascale.com"
+        - "http://localhost:3000"
+        - "http://localhost:8080"
+      methods:
+        - GET
+        - POST
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Authorization
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - X-Auth-Token
+        - X-API-Key
+      exposed_headers:
+        - X-Auth-Token
+        - X-RateLimit-Limit
+        - X-RateLimit-Remaining
+        - X-RateLimit-Reset
+      credentials: true
+      max_age: 3600
+    tags:
+      - cors
+      - global
+
+  # Request/Response Logging
+  - name: http-log
+    config:
+      http_endpoint: http://log-collector:8080/kong-logs
+      method: POST
+      content_type: application/json
+      timeout: 10000
+      keepalive: 60000
+      flush_timeout: 2
+    tags:
+      - logging
+      - global
+
+  # Circuit Breaker for API Routes
+  - name: circuit-breaker
+    route: api-v2-devices
+    config:
+      window_size: 30
+      window_size_in_seconds: 30
+      minimum_request_threshold: 10
+      failure_threshold_percentage: 50
+      recovery_window_size_in_seconds: 30
+    tags:
+      - circuit-breaker
+      - devices
+
+  - name: circuit-breaker
+    route: api-v2-sessions
+    config:
+      window_size: 30
+      window_size_in_seconds: 30
+      minimum_request_threshold: 10
+      failure_threshold_percentage: 50
+      recovery_window_size_in_seconds: 30
+    tags:
+      - circuit-breaker
+      - sessions
+
+  # Authentication - JWT Plugin
+  - name: jwt
+    route: api-v2-devices
+    config:
+      uri_param_names:
+        - jwt
+      cookie_names:
+        - jwt
+      header_names:
+        - authorization
+      claims_to_verify:
+        - exp
+        - iat
+      key_claim_name: iss
+      secret_is_base64: false
+      run_on_preflight: true
+    tags:
+      - jwt
+      - auth
+
+  - name: jwt
+    route: api-v2-sessions
+    config:
+      uri_param_names:
+        - jwt
+      cookie_names:
+        - jwt
+      header_names:
+        - authorization
+      claims_to_verify:
+        - exp
+        - iat
+      key_claim_name: iss
+      secret_is_base64: false
+      run_on_preflight: true
+    tags:
+      - jwt
+      - auth
+
+  - name: jwt
+    route: api-v2-neural-data
+    config:
+      uri_param_names:
+        - jwt
+      cookie_names:
+        - jwt
+      header_names:
+        - authorization
+      claims_to_verify:
+        - exp
+        - iat
+      key_claim_name: iss
+      secret_is_base64: false
+      run_on_preflight: true
+    tags:
+      - jwt
+      - auth
+
+  - name: jwt
+    route: graphql-api
+    config:
+      uri_param_names:
+        - jwt
+      cookie_names:
+        - jwt
+      header_names:
+        - authorization
+      claims_to_verify:
+        - exp
+        - iat
+      key_claim_name: iss
+      secret_is_base64: false
+      run_on_preflight: true
+    tags:
+      - jwt
+      - auth
+
+  # Request Size Limiting
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 50
+      size_unit: megabytes
+      require_content_length: false
+    tags:
+      - security
+      - global
+
+  # Response Compression
+  - name: response-transformer
+    config:
+      add:
+        headers:
+          - "X-Powered-By: NeuraScale Kong Gateway"
+          - "X-API-Version: 2.0.0"
+      remove:
+        headers:
+          - "Server"
+      replace:
+        headers:
+          - "X-Kong-Response-Latency: $(kong.latency)"
+    tags:
+      - response-transform
+      - global
+
+  # IP Restriction for Admin Routes (if any)
+  - name: ip-restriction
+    route: api-docs
+    config:
+      allow:
+        - "10.0.0.0/8"
+        - "192.168.0.0/16"
+        - "172.16.0.0/12"
+        - "127.0.0.1"
+    tags:
+      - security
+      - docs
+
+# Consumers - API clients and their credentials
+consumers:
+  - username: neurascale-python-sdk
+    custom_id: python-sdk-v1
+    tags:
+      - sdk
+      - python
+
+  - username: neurascale-js-sdk
+    custom_id: javascript-sdk-v1
+    tags:
+      - sdk
+      - javascript
+
+  - username: neurascale-webapp
+    custom_id: webapp-frontend
+    tags:
+      - webapp
+      - frontend
+
+  - username: neurascale-mobile
+    custom_id: mobile-app
+    tags:
+      - mobile
+      - app
+
+# JWT Credentials for Consumers
+jwt_secrets:
+  - consumer: neurascale-python-sdk
+    key: python-sdk-issuer
+    secret: "neurascale-python-sdk-secret-key-2025"
+    algorithm: HS256
+    tags:
+      - jwt
+      - python-sdk
+
+  - consumer: neurascale-js-sdk
+    key: javascript-sdk-issuer
+    secret: "neurascale-js-sdk-secret-key-2025"
+    algorithm: HS256
+    tags:
+      - jwt
+      - javascript-sdk
+
+  - consumer: neurascale-webapp
+    key: webapp-issuer
+    secret: "neurascale-webapp-secret-key-2025"
+    algorithm: HS256
+    tags:
+      - jwt
+      - webapp
+
+  - consumer: neurascale-mobile
+    key: mobile-issuer
+    secret: "neurascale-mobile-secret-key-2025"
+    algorithm: HS256
+    tags:
+      - jwt
+      - mobile
+
+# Upstreams - Load balancing configuration
+upstreams:
+  - name: neural-engine-cluster
+    algorithm: round-robin
+    hash_on: none
+    hash_fallback: none
+    healthchecks:
+      active:
+        timeout: 1
+        concurrency: 10
+        http_path: "/api/v2/health"
+        https_verify_certificate: false
+        healthy:
+          interval: 5
+          http_statuses:
+            - 200
+            - 302
+          successes: 2
+        unhealthy:
+          interval: 5
+          http_statuses:
+            - 429
+            - 404
+            - 500
+            - 501
+            - 502
+            - 503
+            - 504
+            - 505
+          tcp_failures: 3
+          timeouts: 3
+          http_failures: 5
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+            - 201
+            - 202
+            - 203
+            - 204
+            - 205
+            - 206
+            - 207
+            - 208
+            - 226
+            - 300
+            - 301
+            - 302
+            - 303
+            - 304
+            - 305
+            - 306
+            - 307
+            - 308
+          successes: 5
+        unhealthy:
+          http_statuses:
+            - 429
+            - 500
+            - 503
+          tcp_failures: 3
+          timeouts: 3
+          http_failures: 3
+    tags:
+      - upstream
+      - load-balancer
+
+# Targets - Backend servers for load balancing
+targets:
+  - target: neural-engine-api-1:8000
+    upstream: neural-engine-cluster
+    weight: 100
+    tags:
+      - primary
+      - api-server
+
+  - target: neural-engine-api-2:8000
+    upstream: neural-engine-cluster
+    weight: 100
+    tags:
+      - secondary
+      - api-server

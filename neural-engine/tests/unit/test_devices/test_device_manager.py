@@ -2,6 +2,7 @@
 
 import pytest
 import asyncio
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 from src.devices.device_manager import DeviceManager
@@ -247,7 +248,8 @@ class TestDeviceManager:
         manager.end_session()
         assert manager.active_session_id is None
 
-    def test_callbacks(self, manager):
+    @pytest.mark.asyncio
+    async def test_callbacks(self, manager):
         """Test callback management."""
         data_callback = Mock()
         state_callback = Mock()
@@ -260,16 +262,19 @@ class TestDeviceManager:
         # Test data callback
         packet = Mock(spec=NeuralDataPacket)
         packet.metadata = {}
+        packet.timestamp = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         manager._handle_device_data("device1", packet)
         data_callback.assert_called_once_with("device1", packet)
 
         # Test state callback
         manager._handle_device_state("device1", DeviceState.CONNECTED)
+        await asyncio.sleep(0.01)  # Allow async task to complete
         state_callback.assert_called_once_with("device1", DeviceState.CONNECTED)
 
         # Test error callback
         error = ValueError("Test error")
         manager._handle_device_error("device1", error)
+        await asyncio.sleep(0.01)  # Allow async task to complete
         error_callback.assert_called_once_with("device1", error)
 
     @pytest.mark.asyncio

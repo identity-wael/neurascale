@@ -151,27 +151,15 @@ class BrainFlowDevice(BaseDevice):
             )
             self.n_channels = len(all_channels)
 
-            # Create channel info
+            # Create channel info only for EEG channels (primary signal type)
+            # This matches what we actually send in the data packets
             channels = []
-            for i, ch_idx in enumerate(all_channels):
-                if ch_idx in self.eeg_channels:
-                    signal_type = "EEG"
-                    unit = "microvolts"
-                elif ch_idx in self.emg_channels:
-                    signal_type = "EMG"
-                    unit = "microvolts"
-                elif ch_idx in self.accel_channels:
-                    signal_type = "Accel"
-                    unit = "g"
-                else:
-                    signal_type = "Other"
-                    unit = "unknown"
-
+            for i, ch_idx in enumerate(self.eeg_channels):
                 channels.append(
                     ChannelInfo(
                         channel_id=i,
-                        label=f"{signal_type}{ch_idx}",
-                        unit=unit,
+                        label=f"EEG{ch_idx}",
+                        unit="microvolts",
                         sampling_rate=self.sampling_rate,
                         hardware_id=str(ch_idx),
                     )
@@ -315,7 +303,7 @@ class BrainFlowDevice(BaseDevice):
                     )
                     timestamps = data[self.timestamp_channel, :]
 
-                    # Determine primary signal type
+                    # Determine primary signal type and send only that type
                     if eeg_data.size > 0:
                         primary_data = eeg_data
                         signal_type = NeuralSignalType.EEG

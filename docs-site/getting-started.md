@@ -12,6 +12,7 @@ This guide will help you get up and running with NeuraScale in minutes.
 
 Before you begin, ensure you have the following installed:
 
+- **Python** 3.12.11 (exact version required) ([Download](https://www.python.org/downloads/))
 - **Node.js** 18.x or higher ([Download](https://nodejs.org/))
 - **pnpm** 9.x or higher ([Installation guide](https://pnpm.io/installation))
 - **Git** ([Download](https://git-scm.com/))
@@ -72,16 +73,48 @@ EMAIL_USER=your-email@gmail.com
 # See docs for app-specific password setup
 ```
 
-### 5. Start the Development Server
+### 5. Set Up Neural Engine
+
+Navigate to the neural engine:
 
 ```bash
+cd neural-engine
+```
+
+Set up the Python virtual environment:
+
+```bash
+# Create virtual environment with Python 3.12.11
+python3.12 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+### 6. Start the Development Server
+
+For the web application:
+
+```bash
+cd apps/web
 pnpm dev
+```
+
+For the neural engine:
+
+```bash
+cd neural-engine
+source venv/bin/activate
+python -m src.main
 ```
 
 Your application will be available at:
 
 - Web App: [http://localhost:3000](http://localhost:3000)
 - Sanity Studio: [http://localhost:3000/studio](http://localhost:3000/studio)
+- Neural Engine API: [http://localhost:8000](http://localhost:8000)
 
 ## Project Structure
 
@@ -90,6 +123,11 @@ neurascale/
 ├── apps/
 │   ├── web/              # Main web application
 │   └── packages/         # Shared packages
+├── neural-engine/        # Neural data processing engine
+│   ├── src/
+│   │   ├── classification/  # Real-time ML classification
+│   │   ├── devices/        # Device interfaces
+│   │   └── processing/     # Signal processing
 ├── console/              # NeuraScale Console
 ├── docs/                 # Documentation
 ├── docs-site/           # GitHub Pages site
@@ -110,10 +148,19 @@ Now that you have NeuraScale running locally, explore these resources:
 Here are the most common commands you'll use:
 
 ```bash
-# Development
-pnpm dev              # Start dev server
+# Frontend Development
+pnpm dev              # Start web dev server
 pnpm build            # Build for production
 pnpm start            # Start production server
+
+# Neural Engine Development
+cd neural-engine
+source venv/bin/activate
+python -m src.main    # Start neural engine
+pytest tests/         # Run tests
+black .               # Format code
+flake8 .              # Lint code
+mypy .                # Type checking
 
 # Code Quality
 pnpm lint             # Run ESLint
@@ -145,6 +192,25 @@ PORT=3001 pnpm dev
 # Clear cache and reinstall
 rm -rf node_modules pnpm-lock.yaml
 pnpm install
+```
+
+**Python version issues**
+
+```bash
+# Check Python version (must be 3.12.11)
+python --version
+
+# If wrong version, use setup script
+./scripts/dev-tools/setup-venvs.sh
+```
+
+**Neural Engine import errors**
+
+```bash
+# Ensure you're in the correct virtual environment
+cd neural-engine
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 **Environment variables not loading**

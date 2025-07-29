@@ -99,10 +99,15 @@ ProcessingPipeline
 │   ├── SpectralFeatures   # FFT, PSD, wavelets
 │   ├── TemporalFeatures   # Statistics, entropy
 │   └── ConnectivityMetrics # Coherence, PLV, PAC
-└── MLInference
-    ├── ONNXRuntime        # Optimized inference
-    ├── TensorRT           # GPU acceleration
-    └── EdgeTPU            # Edge deployment
+├── MLInference
+│   ├── ONNXRuntime        # Optimized inference
+│   ├── TensorRT           # GPU acceleration
+│   └── EdgeTPU            # Edge deployment
+└── Classification
+    ├── MentalState        # Focus, relaxation, stress
+    ├── SleepStage         # Wake, N1-N3, REM
+    ├── MotorImagery       # BCI control signals
+    └── SeizurePredictor   # 10-30min warning
 ```
 
 **Processing Modes:**
@@ -155,7 +160,9 @@ Driver     Handler     Zero-Copy   Pipeline  Database   Endpoint
 | Device Acquisition | 20ms   | 10-15ms | Hardware dependent  |
 | Network Transfer   | 15ms   | 5-10ms  | Optimized protocols |
 | Buffering          | 5ms    | <2ms    | Lock-free queues    |
-| Processing         | 40ms   | 20-30ms | Parallel pipelines  |
+| Feature Extraction | 15ms   | 10-15ms | SIMD optimized      |
+| ML Classification  | 15ms   | 5-10ms  | TensorRT/ONNX       |
+| Processing         | 10ms   | 5-10ms  | Parallel pipelines  |
 | Storage Write      | 10ms   | 5-8ms   | Async writes        |
 | API Response       | 10ms   | 5-8ms   | Cached responses    |
 
@@ -251,16 +258,18 @@ DataService:
 
 ### Core Technologies
 
-| Component    | Technology            | Justification                |
-| ------------ | --------------------- | ---------------------------- |
-| Backend      | Python 3.12 + FastAPI | Async performance, ecosystem |
-| Real-time    | WebSocket + gRPC      | Low latency, bidirectional   |
-| Message Bus  | Kafka + Redis Pub/Sub | Scalability, persistence     |
-| Time Series  | TimescaleDB           | PostgreSQL compatibility     |
-| Object Store | S3/MinIO              | Standard API, scalability    |
-| Search       | Elasticsearch         | Full-text, aggregations      |
-| Monitoring   | Prometheus + Grafana  | Industry standard            |
-| Tracing      | OpenTelemetry         | Distributed tracing          |
+| Component    | Technology              | Justification                |
+| ------------ | ----------------------- | ---------------------------- |
+| Backend      | Python 3.12 + FastAPI   | Async performance, ecosystem |
+| Real-time    | WebSocket + gRPC        | Low latency, bidirectional   |
+| Message Bus  | Kafka + Redis Pub/Sub   | Scalability, persistence     |
+| Time Series  | TimescaleDB             | PostgreSQL compatibility     |
+| Object Store | S3/MinIO                | Standard API, scalability    |
+| Search       | Elasticsearch           | Full-text, aggregations      |
+| ML Inference | ONNX Runtime + TensorRT | Optimized inference          |
+| ML Platform  | Google Vertex AI        | Scalable training/serving    |
+| Monitoring   | Prometheus + Grafana    | Industry standard            |
+| Tracing      | OpenTelemetry           | Distributed tracing          |
 
 ### Infrastructure
 
@@ -407,6 +416,15 @@ Metrics:
    - Cost metrics
 
 ## Future Architecture Enhancements
+
+### Recent Implementations
+
+1. **Real-time Classification** (Phase 8 - Completed)
+   - Mental state classification with <100ms latency
+   - Sleep stage detection (Wake, N1-N3, REM)
+   - Motor imagery for BCI control
+   - Seizure prediction with 10-30min warning
+   - Google Vertex AI integration
 
 ### Planned Improvements
 

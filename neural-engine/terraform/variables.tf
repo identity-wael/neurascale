@@ -149,3 +149,40 @@ variable "enable_cloud_functions" {
   description = "Enable Cloud Functions deployment"
   default     = false
 }
+
+# MCP Server Configuration
+variable "enable_mcp_cloud_run" {
+  type        = bool
+  description = "Deploy MCP server as Cloud Run service"
+  default     = false
+}
+
+variable "mcp_server_image" {
+  type        = string
+  description = "Container image for MCP server"
+  default     = "gcr.io/PROJECT_ID/mcp-server:latest"
+}
+
+variable "mcp_min_instances" {
+  type        = number
+  description = "Minimum number of MCP server instances"
+  default     = 0
+}
+
+variable "mcp_max_instances" {
+  type        = number
+  description = "Maximum number of MCP server instances"
+  default     = 10
+}
+
+variable "enable_mcp_public_access" {
+  type        = bool
+  description = "Allow public access to MCP server"
+  default     = false
+}
+
+variable "mcp_server_port" {
+  type        = number
+  description = "Port for MCP server"
+  default     = 8080
+}

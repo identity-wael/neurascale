@@ -25,3 +25,10 @@ bigtable_nodes_dev          = 2
 bigtable_min_nodes_dev      = 1
 budget_amount               = "1000"
 cost_center                 = "neural-research-dev"
+
+# MCP Server configuration
+enable_mcp_cloud_run    = true
+mcp_server_image        = "gcr.io/development-neurascale/mcp-server:latest"
+mcp_min_instances       = 0
+mcp_max_instances       = 3
+enable_mcp_public_access = false # Keep private in development

@@ -653,7 +653,246 @@ end
 2. **Cache state**: Maintain device state locally for recovery
 3. **Log comprehensively**: Log all errors with context for debugging
 
+## Classification API
+
+### Real-time Classification Endpoints
+
+#### Mental State Classification
+
+```http
+POST /api/v1/classification/mental-state
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "window_size_ms": 2000,
+  "features": {
+    "include_spectral": true,
+    "include_temporal": true,
+    "frequency_bands": ["alpha", "beta", "theta"]
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "timestamp": "2025-01-29T10:30:00Z",
+  "confidence": 0.87,
+  "label": "focus",
+  "probabilities": {
+    "focus": 0.87,
+    "relaxation": 0.08,
+    "stress": 0.04,
+    "neutral": 0.01
+  },
+  "latency_ms": 45.2,
+  "arousal_level": 0.72,
+  "valence": 0.65,
+  "attention_score": 0.89,
+  "metadata": {
+    "classifier_name": "mental_state",
+    "feature_extraction_ms": 15.3,
+    "classification_ms": 8.7
+  }
+}
+```
+
+#### Sleep Stage Detection
+
+```http
+POST /api/v1/classification/sleep-stage
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "window_size_ms": 30000,
+  "features": {
+    "include_spindles": true,
+    "include_k_complexes": true,
+    "include_slow_waves": true
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "timestamp": "2025-01-29T10:30:00Z",
+  "confidence": 0.94,
+  "stage": "n2",
+  "probabilities": {
+    "wake": 0.01,
+    "n1": 0.03,
+    "n2": 0.94,
+    "n3": 0.02,
+    "rem": 0.0
+  },
+  "latency_ms": 67.8,
+  "sleep_features": {
+    "spindle_density": 2.3,
+    "k_complex_count": 4,
+    "slow_wave_activity": 0.67
+  }
+}
+```
+
+#### Motor Imagery Classification
+
+```http
+POST /api/v1/classification/motor-imagery
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "window_size_ms": 1000,
+  "channels": ["C3", "C4", "Cz"],
+  "features": {
+    "frequency_bands": ["mu", "beta"],
+    "spatial_filters": true
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "timestamp": "2025-01-29T10:30:00Z",
+  "confidence": 0.82,
+  "action": "left_hand",
+  "probabilities": {
+    "left_hand": 0.82,
+    "right_hand": 0.12,
+    "feet": 0.04,
+    "tongue": 0.01,
+    "rest": 0.01
+  },
+  "latency_ms": 38.5,
+  "lateralization_index": -0.65,
+  "control_signal": {
+    "strength": 0.82,
+    "direction": "left"
+  }
+}
+```
+
+#### Seizure Prediction
+
+```http
+POST /api/v1/classification/seizure-prediction
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "window_size_ms": 10000,
+  "prediction_horizon_minutes": 15
+}
+```
+
+**Response:**
+
+```json
+{
+  "timestamp": "2025-01-29T10:30:00Z",
+  "confidence": 0.23,
+  "risk_level": "low",
+  "probabilities": {
+    "low": 0.77,
+    "medium": 0.18,
+    "high": 0.04,
+    "imminent": 0.01
+  },
+  "latency_ms": 89.3,
+  "warning_time_minutes": 15.0,
+  "seizure_probability": 0.05,
+  "preictal_features": {
+    "connectivity_change": 0.12,
+    "spectral_variance": 0.08,
+    "synchrony_index": 0.15
+  }
+}
+```
+
+### Stream Classification
+
+#### Start Real-time Classification
+
+```http
+POST /api/v1/classification/stream/start
+```
+
+**Request Body:**
+
+```json
+{
+  "device_id": "openbci_cyton_1",
+  "classifiers": ["mental_state", "motor_imagery"],
+  "classification_interval_ms": 100,
+  "buffer_size_ms": 5000
+}
+```
+
+**Response:**
+
+```json
+{
+  "stream_id": "classification_stream_123",
+  "active_classifiers": ["mental_state", "motor_imagery"],
+  "classification_rate_hz": 10,
+  "expected_latency_ms": 45,
+  "message": "Real-time classification started"
+}
+```
+
+### WebSocket Classification Events
+
+```json
+{
+  "type": "classification_result",
+  "stream_id": "classification_stream_123",
+  "classifier": "mental_state",
+  "timestamp": "2025-01-29T10:30:00Z",
+  "result": {
+    "confidence": 0.87,
+    "label": "focus",
+    "probabilities": {
+      "focus": 0.87,
+      "relaxation": 0.08,
+      "stress": 0.04,
+      "neutral": 0.01
+    },
+    "latency_ms": 45.2
+  }
+}
+```
+
 ## Changelog
+
+### v1.8.0 (2025-01-29)
+
+- **Phase 8 Implementation**: Real-time classification system
+- Added mental state classification API
+- Added sleep stage detection API
+- Added motor imagery classification API
+- Added seizure prediction API
+- Implemented stream classification endpoints
+- Google Vertex AI integration for scalable ML inference
+- Sub-100ms latency for real-time classification
 
 ### v1.7.0 (2025-01-27)
 

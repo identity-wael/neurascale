@@ -270,7 +270,7 @@ class MotorImageryFeatureExtractor(BaseFeatureExtractor):
 
     async def _extract_csp_features(self, data: np.ndarray) -> Dict[str, np.ndarray]:
         """Extract Common Spatial Pattern features"""
-        features = {}
+        features: Dict[str, np.ndarray] = {}
 
         if self.csp_filters is None:
             return features
@@ -320,7 +320,7 @@ class MotorImageryFeatureExtractor(BaseFeatureExtractor):
 
         return features
 
-    async def _update_baseline(self, band_features: Dict[str, np.ndarray]):
+    async def _update_baseline(self, band_features: Dict[str, np.ndarray]) -> None:
         """Update baseline features for ERD calculation"""
         if self.baseline_features is None:
             self.baseline_features = {}
@@ -345,14 +345,14 @@ class MotorImageryFeatureExtractor(BaseFeatureExtractor):
             self.baseline_stable = True
             logger.info("Baseline stabilized for ERD calculation")
 
-    async def reset_baseline(self):
+    async def reset_baseline(self) -> None:
         """Reset baseline for new recording session"""
         self.baseline_features = None
         self.baseline_window_count = 0
         self.baseline_stable = False
         logger.info("Baseline reset for new session")
 
-    async def set_csp_filters(self, filters: np.ndarray):
+    async def set_csp_filters(self, filters: np.ndarray) -> None:
         """Set pre-trained CSP filters"""
         self.csp_filters = filters
         logger.info(f"CSP filters set: shape {filters.shape}")

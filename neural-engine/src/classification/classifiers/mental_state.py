@@ -382,7 +382,7 @@ class MentalStateClassifier(BaseClassifier):
 
     def _sigmoid(self, x: float) -> float:
         """Sigmoid activation function"""
-        return 1.0 / (1.0 + np.exp(-x))
+        return float(1.0 / (1.0 + np.exp(-x)))
 
     async def load_model(self, model_path: str) -> None:
         """Load pre-trained model"""

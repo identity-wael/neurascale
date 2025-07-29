@@ -58,10 +58,10 @@ class SleepFeatureExtractor(BaseFeatureExtractor):
             "gamma": (30, 45),  # High frequency
         }
 
-        self.feature_names = []
+        self.feature_names: List[str] = []
         self._build_feature_names()
 
-    def _build_feature_names(self):
+    def _build_feature_names(self) -> None:
         """Build list of feature names"""
         # Spectral features
         for band in self.bands:
@@ -148,7 +148,7 @@ class SleepFeatureExtractor(BaseFeatureExtractor):
 
     def _get_channel_indices(self, channels: List[str]) -> Dict[str, List[int]]:
         """Map channel names to indices"""
-        indices = {"eeg": [], "eog": [], "emg": []}
+        indices: Dict[str, List[int]] = {"eeg": [], "eog": [], "emg": []}
 
         for i, ch in enumerate(channels):
             ch_upper = ch.upper()

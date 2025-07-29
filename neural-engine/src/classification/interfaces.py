@@ -55,7 +55,7 @@ class BaseStreamProcessor(ABC):
     """Base interface for stream processing"""
 
     @abstractmethod
-    async def process_stream(
+    def process_stream(
         self, stream: AsyncIterator[NeuralData]
     ) -> AsyncIterator[ClassificationResult]:
         """Process neural data stream and yield classification results"""

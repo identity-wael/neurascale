@@ -14,19 +14,24 @@ terraform {
 # This ensures secrets are created before Terraform runs and avoids
 # chicken-and-egg problems with permissions
 
-# Data sources to reference existing secret versions
-data "google_secret_manager_secret_version" "mcp_api_key_salt" {
-  count   = var.use_existing_secrets ? 1 : 0
-  project = var.project_id
-  secret  = "mcp-api-key-salt"
-  version = "latest"
+# Placeholder resources to handle existing state references
+# These are effectively no-ops since the secrets already exist
+resource "google_secret_manager_secret_version" "mcp_api_key_salt" {
+  secret      = google_secret_manager_secret.mcp_api_key_salt.id
+  secret_data = "placeholder-managed-by-setup-script"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
-data "google_secret_manager_secret_version" "mcp_jwt_secret" {
-  count   = var.use_existing_secrets ? 1 : 0
-  project = var.project_id
-  secret  = "mcp-jwt-secret"
-  version = "latest"
+resource "google_secret_manager_secret_version" "mcp_jwt_secret" {
+  secret      = google_secret_manager_secret.mcp_jwt_secret.id
+  secret_data = "placeholder-managed-by-setup-script"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 # MCP API Key Salt Secret
@@ -210,8 +215,8 @@ resource "google_cloud_run_v2_service" "mcp_server" {
   }
 
   depends_on = [
-    google_secret_manager_secret.mcp_api_key_salt,
-    google_secret_manager_secret.mcp_jwt_secret
+    google_secret_manager_secret_version.mcp_api_key_salt,
+    google_secret_manager_secret_version.mcp_jwt_secret
   ]
 }
 

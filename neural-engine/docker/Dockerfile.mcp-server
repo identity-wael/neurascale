@@ -1,11 +1,11 @@
 # Multi-stage Dockerfile for NeuraScale MCP Server
 # Optimized for production deployment with minimal attack surface
 
-ARG PYTHON_VERSION=3.12.11
+ARG PYTHON_VERSION=3.12
 ARG DEBIAN_VERSION=bookworm-slim
 
 # Build stage - compile dependencies and prepare application
-FROM python:${PYTHON_VERSION}-${DEBIAN_VERSION} as builder
+FROM python:${PYTHON_VERSION}-${DEBIAN_VERSION} AS builder
 
 # Set build arguments
 ARG BUILDKIT_INLINE_CACHE=1
@@ -52,7 +52,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir -e .
 
 # Production stage - minimal runtime environment
-FROM python:${PYTHON_VERSION}-${DEBIAN_VERSION} as production
+FROM python:${PYTHON_VERSION}-${DEBIAN_VERSION} AS production
 
 # Create non-root user for security
 RUN groupadd --gid 1000 mcp && \

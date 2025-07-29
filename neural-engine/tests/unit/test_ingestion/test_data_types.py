@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from datetime import datetime
+from datetime import datetime, UTC
 
 from src.ingestion.data_types import (
     NeuralDataPacket,
@@ -45,7 +45,7 @@ class TestNeuralDataPacket:
 
         # Create packet
         packet = NeuralDataPacket(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             data=data,
             signal_type=NeuralSignalType.EEG,
             source=DataSource.OPENBCI,
@@ -69,7 +69,7 @@ class TestNeuralDataPacket:
         # Test 1D data array
         with pytest.raises(ValueError, match="Data must be 2D array"):
             NeuralDataPacket(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 data=np.array([1, 2, 3]),  # 1D array
                 signal_type=NeuralSignalType.EEG,
                 source=DataSource.SYNTHETIC,
@@ -85,7 +85,7 @@ class TestNeuralDataPacket:
 
         with pytest.raises(ValueError, match="Data channels.*don't match"):
             NeuralDataPacket(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 data=np.zeros((3, 100)),  # 3 channels but device has 2
                 signal_type=NeuralSignalType.EEG,
                 source=DataSource.SYNTHETIC,

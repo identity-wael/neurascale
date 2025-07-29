@@ -334,35 +334,49 @@ jobs:
             SA_SUFFIX="stag"
           fi
 
-          # Remove and re-import resources that already exist
-          terraform state rm module.neural_ingestion.google_artifact_registry_repository.neural_engine || true
-          terraform state rm module.neural_ingestion.google_service_account.ingestion || true
+          # Check if resources exist in state before importing
+          if ! terraform state show module.neural_ingestion.google_artifact_registry_repository.neural_engine 2>/dev/null; then
+            echo "Importing Artifact Registry..."
+            terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+              -var="environment=${{ needs.setup.outputs.environment }}" \
+              -var="project_id=${{ needs.setup.outputs.project_id }}" \
+              -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+              module.neural_ingestion.google_artifact_registry_repository.neural_engine \
+              "projects/${{ needs.setup.outputs.project_id }}/locations/${{ env.GCP_REGION }}/repositories/neural-engine-${{ needs.setup.outputs.environment }}" || true
+          fi
 
-          # Import existing resources
-          terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
-            -var="environment=${{ needs.setup.outputs.environment }}" \
-            -var="project_id=${{ needs.setup.outputs.project_id }}" \
-            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            module.neural_ingestion.google_artifact_registry_repository.neural_engine \
-            "projects/${{ needs.setup.outputs.project_id }}/locations/${{ env.GCP_REGION }}/repositories/neural-engine-${{ needs.setup.outputs.environment }}" || true
-
-          terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
-            -var="environment=${{ needs.setup.outputs.environment }}" \
-            -var="project_id=${{ needs.setup.outputs.project_id }}" \
-            -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
-            module.neural_ingestion.google_service_account.ingestion \
-            "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-${SA_SUFFIX}@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
+          if ! terraform state show module.neural_ingestion.google_service_account.ingestion 2>/dev/null; then
+            echo "Importing Service Account..."
+            terraform import -var-file="environments/${{ needs.setup.outputs.environment }}.tfvars" \
+              -var="environment=${{ needs.setup.outputs.environment }}" \
+              -var="project_id=${{ needs.setup.outputs.project_id }}" \
+              -var="github_actions_service_account=github-actions@neurascale.iam.gserviceaccount.com" \
+              module.neural_ingestion.google_service_account.ingestion \
+              "projects/${{ needs.setup.outputs.project_id }}/serviceAccounts/neural-ingestion-${SA_SUFFIX}@${{ needs.setup.outputs.project_id }}.iam.gserviceaccount.com" || true
+          fi
 
       - name: Terraform Plan and Apply
         working-directory: neural-engine/terraform
         timeout-minutes: 25
         run: |
-          # Remove any stale locks first
+          # Force remove any stale locks first (more than 5 minutes old)
           LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
           if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
-            echo "Found stale lock at $LOCK_PATH, removing..."
-            gcloud storage rm "$LOCK_PATH"
-            sleep 2
+            # Get lock creation time
+            LOCK_TIME=$(gcloud storage ls -l "$LOCK_PATH" --format="value(timeCreated)")
+            CURRENT_TIME=$(date +%s)
+            LOCK_EPOCH=$(date -d "$LOCK_TIME" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$LOCK_TIME" +%s)
+            AGE=$((CURRENT_TIME - LOCK_EPOCH))
+
+            # If lock is older than 5 minutes (300 seconds), remove it
+            if [ $AGE -gt 300 ]; then
+              echo "Found stale lock at $LOCK_PATH (age: ${AGE}s), removing..."
+              gcloud storage rm "$LOCK_PATH"
+              sleep 5
+            else
+              echo "Lock at $LOCK_PATH is recent (age: ${AGE}s), waiting..."
+              sleep 30
+            fi
           fi
 
           # Function to run terraform with retry

@@ -249,6 +249,7 @@ class TestBrainFlowDevice:
     @pytest.mark.asyncio
     async def test_signal_quality_assessment(self, device):
         """Test signal quality assessment."""
+        device.set_session_id("test_session")
         await device.connect()
         await device.start_streaming()
 

@@ -25,6 +25,7 @@ class DataSource(Enum):
     LSL = "lsl"  # Lab Streaming Layer
     OPENBCI = "openbci"  # OpenBCI devices
     BRAINFLOW = "brainflow"  # BrainFlow supported devices
+    DEVICE = "device"  # Generic device source
     FILE_UPLOAD = "file_upload"  # Batch file uploads
     SYNTHETIC = "synthetic"  # Synthetic test data
     CUSTOM_API = "custom_api"  # Custom streaming APIs

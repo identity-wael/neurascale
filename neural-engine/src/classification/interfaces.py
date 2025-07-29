@@ -62,7 +62,12 @@ class BaseStreamProcessor(ABC):
         pass
 
     @abstractmethod
-    async def add_classifier(self, name: str, classifier: BaseClassifier) -> None:
+    async def add_classifier(
+        self,
+        name: str,
+        classifier: BaseClassifier,
+        feature_extractor: BaseFeatureExtractor,
+    ) -> None:
         """Add a classifier to the pipeline"""
         pass
 

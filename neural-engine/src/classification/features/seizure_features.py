@@ -3,10 +3,9 @@ Feature extraction for seizure prediction
 """
 
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 import numpy as np
-from scipy import signal, stats
+from scipy import signal
 from scipy.signal import hilbert
 import pywt
 
@@ -160,8 +159,8 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
         for channel in data:
             freqs, psd = signal.welch(channel, fs=sampling_rate, nperseg=256)
             psd_norm = psd / psd.sum()
-            entropy = -np.sum(psd_norm * np.log2(psd_norm + 1e-15))
-            spectral_entropy.append(entropy)
+            entropy_val = -np.sum(psd_norm * np.log2(psd_norm + 1e-15))
+            spectral_entropy.append(entropy_val)
 
         features["spectral_entropy"] = np.array(spectral_entropy)
 
@@ -255,11 +254,11 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
             total_energy = sum(energies)
             if total_energy > 0:
                 probabilities = np.array(energies) / total_energy
-                entropy = -np.sum(probabilities * np.log2(probabilities + 1e-15))
+                entropy_val = -np.sum(probabilities * np.log2(probabilities + 1e-15))
             else:
-                entropy = 0
+                entropy_val = 0
 
-            wavelet_entropy.append(entropy)
+            wavelet_entropy.append(entropy_val)
 
         features["wavelet_energy"] = np.array(wavelet_energies)
         features["wavelet_entropy"] = np.array(wavelet_entropy)
@@ -307,7 +306,7 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
 
         return features
 
-    async def _extract_entropy_features(
+    async def _extract_entropy_features(  # noqa: C901
         self, data: np.ndarray
     ) -> Dict[str, np.ndarray]:
         """Extract entropy-based features"""
@@ -370,7 +369,7 @@ class SeizureFeatureExtractor(BaseFeatureExtractor):
 
             try:
                 approx_entropy = _phi(m) - _phi(m + 1)
-            except:
+            except Exception:
                 approx_entropy = 0
 
             approx_entropies.append(approx_entropy)

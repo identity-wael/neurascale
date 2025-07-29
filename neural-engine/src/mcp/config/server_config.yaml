@@ -8,21 +8,21 @@ servers:
     description: "Neural data access and analysis MCP server"
     port: 8100
     host: "0.0.0.0"
-    
+
   device_control:
     name: "neurascale-device-control"
     version: "1.0.0"
     description: "BCI device control and monitoring MCP server"
     port: 8101
     host: "0.0.0.0"
-    
+
   clinical:
     name: "neurascale-clinical"
     version: "1.0.0"
     description: "Clinical workflow management MCP server"
     port: 8102
     host: "0.0.0.0"
-    
+
   analysis:
     name: "neurascale-analysis"
     version: "1.0.0"
@@ -35,7 +35,7 @@ auth:
   jwt_secret: "${NEURASCALE_JWT_SECRET:-default-development-secret}"
   jwt_algorithm: "HS256"
   jwt_expiry_hours: 24
-  
+
   # API Keys (in production, these would be managed securely)
   api_keys:
     neurascale_admin:
@@ -44,7 +44,7 @@ auth:
       user_name: "Administrator"
       permissions: ["*"]  # All permissions
       active: true
-      
+
     neurascale_researcher:
       hash: "demo_hash_researcher"
       user_id: "researcher_001"
@@ -56,7 +56,7 @@ auth:
         - "devices.read"
         - "devices.list"
       active: true
-      
+
     neurascale_clinician:
       hash: "demo_hash_clinician"
       user_id: "clinician_001"
@@ -71,8 +71,10 @@ auth:
         - "devices.connect"
         - "recording.*"
       active: true
-      
-  api_key_salt: "neurascale-mcp-2025"
+
+  # GCP Secret Manager integration for secure credential storage
+  api_key_salt: "gcp-secret://projects/${GCP_PROJECT_ID}/secrets/mcp-api-key-salt/versions/latest"
+  jwt_secret: "gcp-secret://projects/${GCP_PROJECT_ID}/secrets/mcp-jwt-secret/versions/latest"
   session_timeout_minutes: 60
 
 # Permission System
@@ -95,7 +97,7 @@ permissions:
     "neural_data.visualize":
       description: "Create visualizations of neural data"
       category: "neural_data"
-      
+
     # Session Permissions
     "sessions.read":
       description: "Read access to recording sessions"
@@ -112,7 +114,7 @@ permissions:
     "sessions.delete":
       description: "Delete recording sessions"
       category: "sessions"
-      
+
     # Device Permissions
     "devices.read":
       description: "Read device information"
@@ -144,7 +146,7 @@ permissions:
     "devices.test":
       description: "Run device tests"
       category: "devices"
-      
+
     # Recording Permissions
     "recording.start":
       description: "Start data recording"
@@ -158,7 +160,7 @@ permissions:
     "recording.resume":
       description: "Resume data recording"
       category: "recording"
-      
+
     # Analysis Permissions
     "analysis.spectral":
       description: "Run spectral analysis"
@@ -172,7 +174,7 @@ permissions:
     "analysis.ml_models":
       description: "Use ML models for analysis"
       category: "analysis"
-      
+
     # Clinical Permissions
     "clinical.protocols":
       description: "Access clinical protocols"
@@ -192,7 +194,7 @@ permissions:
     "patients.update":
       description: "Update patient information"
       category: "patients"
-      
+
     # System Permissions
     "data.download":
       description: "Download data files"
@@ -209,13 +211,13 @@ permissions:
     "signal_quality.check":
       description: "Check signal quality"
       category: "system"
-      
+
   # Role definitions
   roles:
     admin:
       description: "Full system administrator"
       permissions: ["*"]
-      
+
     researcher:
       description: "Research scientist with data access"
       permissions:
@@ -227,7 +229,7 @@ permissions:
         - "devices.monitor"
         - "data.download"
         - "plots.create"
-        
+
     clinician:
       description: "Clinical practitioner"
       permissions:
@@ -245,7 +247,7 @@ permissions:
         - "recording.*"
         - "impedance.check"
         - "signal_quality.check"
-        
+
     technician:
       description: "Technical support and device maintenance"
       permissions:
@@ -254,7 +256,7 @@ permissions:
         - "impedance.check"
         - "signal_quality.check"
         - "neural_data.read"
-        
+
     analyst:
       description: "Data analyst with limited access"
       permissions:
@@ -265,7 +267,7 @@ permissions:
         - "sessions.list"
         - "analysis.*"
         - "plots.create"
-        
+
   # Default permissions for new users
   default_permissions:
     - "sessions.read"
@@ -279,7 +281,7 @@ rate_limits:
     requests_per_minute: 60
     requests_per_hour: 1000
     burst_limit: 10
-    
+
   # Method-specific limits
   methods:
     # Data-intensive operations
@@ -287,46 +289,46 @@ rate_limits:
       requests_per_minute: 10
       requests_per_hour: 100
       burst_limit: 3
-      
+
     export_neural_data:
       requests_per_minute: 5
       requests_per_hour: 20
       burst_limit: 2
-      
+
     run_spectral_analysis:
       requests_per_minute: 15
       requests_per_hour: 200
       burst_limit: 5
-      
+
     # Device control operations
     start_recording:
       requests_per_minute: 5
       requests_per_hour: 50
       burst_limit: 2
-      
+
     connect_device:
       requests_per_minute: 10
       requests_per_hour: 100
       burst_limit: 3
-      
+
     # Query operations (more lenient)
     query_sessions:
       requests_per_minute: 30
       requests_per_hour: 500
       burst_limit: 10
-      
+
     list_devices:
       requests_per_minute: 20
       requests_per_hour: 300
       burst_limit: 5
-      
+
   # User-specific limits (optional)
   users:
     admin:
       requests_per_minute: 100
       requests_per_hour: 2000
       burst_limit: 20
-      
+
   # Rate limit settings
   cleanup_interval_seconds: 300
 
@@ -335,25 +337,25 @@ neural_engine:
   api_url: "${NEURAL_ENGINE_API_URL:-http://localhost:8000}"
   timeout: 30
   max_retries: 3
-  
-# Device Manager Integration  
+
+# Device Manager Integration
 device_manager:
   connection_timeout: 10
   discovery_interval: 30
   max_concurrent_connections: 10
-  
+
 # Logging Configuration
 logging:
   level: "${LOG_LEVEL:-INFO}"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  
+
   # File logging
   file:
     enabled: true
     path: "/var/log/neurascale/mcp"
     max_size_mb: 100
     backup_count: 5
-    
+
   # Structured logging for analytics
   structured:
     enabled: true
@@ -371,7 +373,7 @@ security:
     - "127.0.0.1"
   audit_logging: true
   encryption: "TLS 1.3"
-  
+
 # Development Settings
 development:
   mock_data: true  # Use mock data for development

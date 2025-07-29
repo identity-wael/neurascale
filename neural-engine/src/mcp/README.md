@@ -7,7 +7,7 @@ This directory contains the MCP server implementations for the NeuraScale Neural
 The NeuraScale MCP servers provide four specialized interfaces:
 
 1. **Neural Data Server** (`neural_data`) - Data access, analysis, and processing
-2. **Device Control Server** (`device_control`) - BCI device management and monitoring  
+2. **Device Control Server** (`device_control`) - BCI device management and monitoring
 3. **Clinical Workflow Server** (`clinical`) - Clinical protocol execution
 4. **Analysis Server** (`analysis`) - Advanced neural data analysis
 
@@ -57,8 +57,11 @@ Add to your Claude Desktop configuration (`claude_desktop_config.json`):
       }
     },
     "neurascale-devices": {
-      "command": "python", 
-      "args": ["-c", "from mcp.main import cli_device_control; cli_device_control()"],
+      "command": "python",
+      "args": [
+        "-c",
+        "from mcp.main import cli_device_control; cli_device_control()"
+      ],
       "env": {
         "NEURASCALE_API_KEY": "your-api-key"
       }
@@ -81,7 +84,7 @@ All MCP servers inherit from `BaseNeuralMCPServer` which provides:
 
 ### Neural Data Server
 
-**Port**: 8100  
+**Port**: 8100
 **Tools Available**:
 
 - `query_sessions` - Query recording sessions with filtering
@@ -93,6 +96,7 @@ All MCP servers inherit from `BaseNeuralMCPServer` which provides:
 - `create_visualization` - Generate plots and visualizations
 
 **Example Usage**:
+
 ```python
 # Query recent EEG sessions
 result = await client.call_tool("query_sessions", {
@@ -113,7 +117,7 @@ data = await client.call_tool("get_neural_data", {
 
 ### Device Control Server
 
-**Port**: 8101  
+**Port**: 8101
 **Tools Available**:
 
 - `list_devices` - List available BCI devices
@@ -129,6 +133,7 @@ data = await client.call_tool("get_neural_data", {
 - `calibrate_device` - Calibrate device settings
 
 **Example Usage**:
+
 ```python
 # List available devices
 devices = await client.call_tool("list_devices", {
@@ -169,10 +174,11 @@ Key configuration sections:
 Three authentication methods supported:
 
 1. **API Keys**: Long-lived keys for service accounts
-2. **JWT Tokens**: Time-limited tokens for user sessions  
+2. **JWT Tokens**: Time-limited tokens for user sessions
 3. **Session IDs**: Temporary session-based authentication
 
 **Permissions System**: Role-based with granular permissions:
+
 - `neural_data.*` - Neural data access and processing
 - `devices.*` - Device control and management
 - `recording.*` - Recording session control
@@ -184,6 +190,7 @@ Three authentication methods supported:
 ### Adding New Tools
 
 1. Define tool in server's `register_tools()` method:
+
 ```python
 self.register_tool(
     name="my_new_tool",
@@ -201,6 +208,7 @@ self.register_tool(
 ```
 
 2. Implement handler method:
+
 ```python
 async def _my_new_tool(self, param1: str) -> Dict[str, Any]:
     # Validate inputs
@@ -223,6 +231,7 @@ python -m pytest neural-engine/tests/mcp/test_device_control_server.py
 ### Mock Data
 
 In development mode (`development.mock_data: true`), servers use realistic mock data:
+
 - Synthetic neural signals with physiological characteristics
 - Mock device status and capabilities
 - Simulated recording sessions and metadata
@@ -232,6 +241,7 @@ In development mode (`development.mock_data: true`), servers use realistic mock 
 ### Common Response Format
 
 All tools return responses in this format:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -251,7 +261,7 @@ All tools return responses in this format:
 
 ```json
 {
-  "jsonrpc": "2.0", 
+  "jsonrpc": "2.0",
   "error": {
     "code": -32000,
     "message": "Error description",
@@ -264,22 +274,82 @@ All tools return responses in this format:
 
 ## Security
 
+### GCP Secret Manager Integration
+
+The MCP server integrates with Google Cloud Secret Manager for secure credential storage:
+
+#### Configuration
+
+Secrets are referenced in the configuration using GCP Secret Manager URIs:
+
+```yaml
+auth:
+  api_key_salt: "gcp-secret://projects/${GCP_PROJECT_ID}/secrets/mcp-api-key-salt/versions/latest"
+  jwt_secret: "gcp-secret://projects/${GCP_PROJECT_ID}/secrets/mcp-jwt-secret/versions/latest"
+```
+
+#### Setup Secrets
+
+Use the provided script to create required secrets:
+
+```bash
+# Set your GCP project ID
+export GCP_PROJECT_ID=your-project-id
+
+# Run the setup script
+./scripts/setup-mcp-secrets.sh
+```
+
+This script will:
+- Enable the Secret Manager API
+- Create secure random values for MCP secrets
+- Set up appropriate IAM permissions
+- Verify secret accessibility
+
+#### Manual Secret Management
+
+You can also manage secrets manually using the GCP CLI:
+
+```bash
+# Create a secret
+gcloud secrets create mcp-api-key-salt --replication-policy="automatic"
+
+# Add a secret version
+echo -n "your-secret-value" | gcloud secrets versions add mcp-api-key-salt --data-file=-
+
+# Access a secret
+gcloud secrets versions access latest --secret="mcp-api-key-salt"
+```
+
+#### Required IAM Permissions
+
+The service account running the MCP server needs:
+- `roles/secretmanager.secretAccessor` - To read secret values
+
+#### Environment Variables
+
+- `GCP_PROJECT_ID` - Your Google Cloud project ID (required for secret resolution)
+
 ### Authentication Security
-- API keys are hashed and salted for storage
+
+- API keys are hashed and salted using secrets from GCP Secret Manager
 - JWT tokens have configurable expiration
 - Sessions timeout after inactivity
 
-### Permission Security  
+### Permission Security
+
 - All tools require explicit permissions
 - Resource-level access control supported
 - Default deny policy for undefined permissions
 
 ### Rate Limiting
+
 - Per-user and per-method rate limits
 - Token bucket algorithm for burst handling
 - Configurable limits based on operation cost
 
 ### Network Security
+
 - TLS 1.3 encryption for all connections
 - Origin validation for WebSocket connections
 - Audit logging for all operations
@@ -287,12 +357,14 @@ All tools return responses in this format:
 ## Monitoring
 
 ### Logging
+
 - Structured JSON logging for analysis
 - Request/response logging with sanitization
 - Performance metrics and timing data
 - Error tracking and alerting
 
 ### Metrics
+
 - Connection counts and client information
 - Tool usage statistics and performance
 - Rate limit hits and authentication failures
@@ -303,16 +375,19 @@ All tools return responses in this format:
 ### Common Issues
 
 1. **Connection Refused**
+
    - Check server is running: `netstat -an | grep 8100`
    - Verify firewall settings
    - Check configuration file syntax
 
 2. **Authentication Failed**
+
    - Verify API key is correct
    - Check user permissions for requested operation
    - Ensure JWT token hasn't expired
 
 3. **Rate Limited**
+
    - Check rate limit configuration
    - Implement exponential backoff in client
    - Consider upgrading user permissions
@@ -325,6 +400,7 @@ All tools return responses in this format:
 ### Debug Mode
 
 Enable debug mode for detailed logging:
+
 ```bash
 python -m mcp.main --log-level DEBUG
 ```

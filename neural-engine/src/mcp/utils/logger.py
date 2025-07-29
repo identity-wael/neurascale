@@ -1,28 +1,27 @@
 """MCP-specific logging utilities."""
 
 import logging
-import json
 from typing import Any, Dict, Optional
 from datetime import datetime
 
 
 class MCPLogger:
     """Specialized logger for MCP server operations."""
-    
+
     def __init__(self, server_name: str):
         """Initialize MCP logger.
-        
+
         Args:
             server_name: Name of the MCP server
         """
         self.server_name = server_name
         self.logger = logging.getLogger(f"mcp.{server_name}")
-        
+
         # Configure logger if not already configured
         if not self.logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
@@ -30,7 +29,7 @@ class MCPLogger:
 
     def info(self, message: str, **kwargs) -> None:
         """Log info message.
-        
+
         Args:
             message: Log message
             **kwargs: Additional context
@@ -39,7 +38,7 @@ class MCPLogger:
 
     def warning(self, message: str, **kwargs) -> None:
         """Log warning message.
-        
+
         Args:
             message: Log message
             **kwargs: Additional context
@@ -48,7 +47,7 @@ class MCPLogger:
 
     def error(self, message: str, **kwargs) -> None:
         """Log error message.
-        
+
         Args:
             message: Log message
             **kwargs: Additional context
@@ -57,7 +56,7 @@ class MCPLogger:
 
     def debug(self, message: str, **kwargs) -> None:
         """Log debug message.
-        
+
         Args:
             message: Log message
             **kwargs: Additional context
@@ -66,7 +65,7 @@ class MCPLogger:
 
     def log_request(self, client_id: str, method: str, params: Dict[str, Any]) -> None:
         """Log incoming MCP request.
-        
+
         Args:
             client_id: Client identifier
             method: MCP method
@@ -74,7 +73,7 @@ class MCPLogger:
         """
         # Sanitize sensitive parameters
         safe_params = self._sanitize_params(params)
-        
+
         self.logger.info(
             f"MCP Request: {method}",
             extra={
@@ -83,13 +82,13 @@ class MCPLogger:
                 "method": method,
                 "params": safe_params,
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
     def log_response(self, client_id: str, response: Dict[str, Any]) -> None:
         """Log MCP response.
-        
+
         Args:
             client_id: Client identifier
             response: Response data
@@ -97,12 +96,12 @@ class MCPLogger:
         # Extract key information
         is_error = "error" in response
         response_type = "error" if is_error else "success"
-        
+
         # Sanitize response data
         safe_response = self._sanitize_response(response)
-        
+
         log_level = logging.ERROR if is_error else logging.INFO
-        
+
         self.logger.log(
             log_level,
             f"MCP Response: {response_type}",
@@ -112,15 +111,20 @@ class MCPLogger:
                 "response_type": response_type,
                 "response": safe_response,
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_tool_execution(self, client_id: str, tool_name: str, 
-                          execution_time: float, success: bool, 
-                          error: Optional[str] = None) -> None:
+    def log_tool_execution(
+        self,
+        client_id: str,
+        tool_name: str,
+        execution_time: float,
+        success: bool,
+        error: Optional[str] = None,
+    ) -> None:
         """Log tool execution.
-        
+
         Args:
             client_id: Client identifier
             tool_name: Name of executed tool
@@ -129,7 +133,7 @@ class MCPLogger:
             error: Error message if failed
         """
         log_level = logging.INFO if success else logging.ERROR
-        
+
         self.logger.log(
             log_level,
             f"Tool executed: {tool_name} ({'success' if success else 'failed'})",
@@ -141,15 +145,20 @@ class MCPLogger:
                 "success": success,
                 "error": error,
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_authentication(self, client_id: str, auth_method: str, 
-                          success: bool, user_id: Optional[str] = None,
-                          failure_reason: Optional[str] = None) -> None:
+    def log_authentication(
+        self,
+        client_id: str,
+        auth_method: str,
+        success: bool,
+        user_id: Optional[str] = None,
+        failure_reason: Optional[str] = None,
+    ) -> None:
         """Log authentication attempt.
-        
+
         Args:
             client_id: Client identifier
             auth_method: Authentication method used
@@ -158,7 +167,7 @@ class MCPLogger:
             failure_reason: Reason for failure if failed
         """
         log_level = logging.INFO if success else logging.WARNING
-        
+
         self.logger.log(
             log_level,
             f"Authentication {'successful' if success else 'failed'}: {auth_method}",
@@ -170,14 +179,15 @@ class MCPLogger:
                 "user_id": user_id,
                 "failure_reason": failure_reason,
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_rate_limit(self, client_id: str, limit_type: str, 
-                      current_usage: int, limit: int) -> None:
+    def log_rate_limit(
+        self, client_id: str, limit_type: str, current_usage: int, limit: int
+    ) -> None:
         """Log rate limit hit.
-        
+
         Args:
             client_id: Client identifier
             limit_type: Type of rate limit
@@ -193,14 +203,18 @@ class MCPLogger:
                 "current_usage": current_usage,
                 "limit": limit,
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_connection(self, client_id: str, event: str, 
-                      connection_info: Optional[Dict[str, Any]] = None) -> None:
+    def log_connection(
+        self,
+        client_id: str,
+        event: str,
+        connection_info: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Log client connection events.
-        
+
         Args:
             client_id: Client identifier
             event: Connection event (connect, disconnect, error)
@@ -214,15 +228,19 @@ class MCPLogger:
                 "connection_event": event,
                 "connection_info": connection_info or {},
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_performance_metric(self, metric_name: str, value: float, 
-                             unit: str = "seconds", 
-                             context: Optional[Dict[str, Any]] = None) -> None:
+    def log_performance_metric(
+        self,
+        metric_name: str,
+        value: float,
+        unit: str = "seconds",
+        context: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Log performance metric.
-        
+
         Args:
             metric_name: Name of the metric
             value: Metric value
@@ -238,26 +256,32 @@ class MCPLogger:
                 "unit": unit,
                 "context": context or {},
                 "server": self.server_name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
     def _sanitize_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize request parameters for logging.
-        
+
         Args:
             params: Request parameters
-            
+
         Returns:
             Sanitized parameters
         """
         sensitive_keys = {
-            "api_key", "token", "password", "secret", "authorization",
-            "private_key", "access_token", "refresh_token"
+            "api_key",
+            "token",
+            "password",
+            "secret",
+            "authorization",
+            "private_key",
+            "access_token",
+            "refresh_token",
         }
-        
+
         sanitized = {}
-        
+
         for key, value in params.items():
             if key.lower() in sensitive_keys:
                 sanitized[key] = "[REDACTED]"
@@ -268,25 +292,25 @@ class MCPLogger:
                 sanitized[key] = value[:1000] + "... [TRUNCATED]"
             else:
                 sanitized[key] = value
-        
+
         return sanitized
 
     def _sanitize_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize response data for logging.
-        
+
         Args:
             response: Response data
-            
+
         Returns:
             Sanitized response
         """
         # For responses, we mainly want to avoid logging huge data payloads
         sanitized = response.copy()
-        
+
         # If result contains large data, summarize it
         if "result" in sanitized and isinstance(sanitized["result"], dict):
             result = sanitized["result"]
-            
+
             # Check for large content arrays (common in MCP responses)
             if "content" in result and isinstance(result["content"], list):
                 content = result["content"]
@@ -296,20 +320,23 @@ class MCPLogger:
                     if isinstance(first_item, dict) and "text" in first_item:
                         text = first_item["text"]
                         if len(text) > 500:
-                            sanitized["result"]["content"] = [{
-                                **first_item,
-                                "text": text[:500] + f"... [TRUNCATED - {len(text)} chars total]"
-                            }]
+                            sanitized["result"]["content"] = [
+                                {
+                                    **first_item,
+                                    "text": text[:500]
+                                    + f"... [TRUNCATED - {len(text)} chars total]",
+                                }
+                            ]
                             if len(content) > 1:
                                 sanitized["result"]["content"].append(
                                     f"... and {len(content) - 1} more items"
                                 )
-        
+
         return sanitized
 
     def create_structured_log(self, event_type: str, **kwargs) -> None:
         """Create structured log entry.
-        
+
         Args:
             event_type: Type of event
             **kwargs: Event data
@@ -320,13 +347,13 @@ class MCPLogger:
                 "event_type": event_type,
                 "server": self.server_name,
                 "timestamp": datetime.utcnow().isoformat(),
-                **kwargs
-            }
+                **kwargs,
+            },
         )
 
     def set_log_level(self, level: str) -> None:
         """Set log level.
-        
+
         Args:
             level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         """

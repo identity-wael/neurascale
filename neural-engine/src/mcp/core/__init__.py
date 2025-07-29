@@ -9,7 +9,7 @@ from .error_handler import MCPErrorHandler
 __all__ = [
     "BaseNeuralMCPServer",
     "MCPAuthManager",
-    "PermissionManager", 
+    "PermissionManager",
     "MCPRateLimiter",
     "MCPErrorHandler",
 ]

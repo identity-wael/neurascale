@@ -16,7 +16,7 @@ __author__ = "NeuraScale Engineering Team"
 
 __all__ = [
     "BaseNeuralMCPServer",
-    "NeuralDataMCPServer", 
+    "NeuralDataMCPServer",
     "DeviceControlMCPServer",
     "ClinicalMCPServer",
     "AnalysisMCPServer",

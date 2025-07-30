@@ -145,6 +145,16 @@ class NeuralData:
     data_shape: List[int]
     statistics: Optional["DataStatistics"]
 
+
+@strawberry.type
+class NeuralDataFrame:
+    """Neural data frame for streaming."""
+
+    timestamp: float
+    channel: int
+    value: float
+    session_id: str
+
     @strawberry.field
     async def download_url(self) -> str:
         """Get download URL for binary data."""
@@ -289,6 +299,40 @@ class SessionEdge:
     """Session edge for pagination."""
 
     node: Session
+    cursor: str
+
+
+@strawberry.type
+class PatientConnection:
+    """Patient connection for pagination."""
+
+    edges: List["PatientEdge"]
+    page_info: PageInfo
+    total_count: int
+
+
+@strawberry.type
+class PatientEdge:
+    """Patient edge for pagination."""
+
+    node: Patient
+    cursor: str
+
+
+@strawberry.type
+class AnalysisConnection:
+    """Analysis connection for pagination."""
+
+    edges: List["AnalysisEdge"]
+    page_info: PageInfo
+    total_count: int
+
+
+@strawberry.type
+class AnalysisEdge:
+    """Analysis edge for pagination."""
+
+    node: Analysis
     cursor: str
 
 

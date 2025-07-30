@@ -323,6 +323,23 @@ jobs:
           echo "Currently enabled APIs:"
           gcloud services list --enabled --project=${{ needs.setup.outputs.project_id }} | grep -E "bigquery|bigtable|compute|container|cloudfunctions|cloudrun|storage" || true
 
+      - name: Clean up Bigtable App Profiles
+        if: needs.setup.outputs.environment == 'production'
+        run: |
+          echo "Checking for orphaned Bigtable app profiles..."
+          # Check if the autoscaling-profile exists and delete it if found
+          if gcloud bigtable app-profiles describe autoscaling-profile \
+              --instance=neural-data-production \
+              --project=${{ needs.setup.outputs.project_id }} 2>/dev/null; then
+            echo "Found autoscaling-profile, attempting to delete..."
+            gcloud bigtable app-profiles delete autoscaling-profile \
+              --instance=neural-data-production \
+              --project=${{ needs.setup.outputs.project_id }} \
+              --force || echo "Failed to delete app profile, continuing..."
+          else
+            echo "No autoscaling-profile found, continuing..."
+          fi
+
       - name: Terraform Init
         working-directory: neural-engine/terraform
         timeout-minutes: 3

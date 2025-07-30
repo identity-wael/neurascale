@@ -54,6 +54,24 @@ module "project_apis" {
   project_id = var.project_id
 }
 
+# Enable APIs in the source project for cross-project service account access
+# This is needed when the GitHub Actions service account is in a different project
+module "source_project_apis" {
+  source = "./modules/project-apis"
+
+  # Extract project ID from service account email
+  project_id = "neurascale"
+
+  # Only enable APIs needed for cross-project access
+  apis = [
+    "servicenetworking.googleapis.com",
+    "cloudkms.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "iam.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+  ]
+}
+
 # Create the main service account for neural ingestion
 resource "google_service_account" "neural_ingestion" {
   account_id   = "neural-ingestion-${local.env_short}"
@@ -61,7 +79,7 @@ resource "google_service_account" "neural_ingestion" {
   description  = "Service account for neural data ingestion functions and services"
   project      = var.project_id
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 # Service account for GKE nodes (if GKE is enabled)
@@ -72,7 +90,7 @@ resource "google_service_account" "gke_nodes" {
   description  = "Service account for GKE cluster nodes"
   project      = var.project_id
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 # Grant necessary permissions to the service account
@@ -187,7 +205,7 @@ resource "google_project_iam_custom_role" "github_deploy" {
     "bigquery.datasets.setIamPolicy"
   ]
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 # Grant custom role to GitHub Actions service account
@@ -209,7 +227,7 @@ resource "google_project_iam_member" "github_actions_service_networking" {
   role    = "roles/servicenetworking.networksAdmin"
   member  = "serviceAccount:${var.github_actions_service_account}"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 resource "google_project_iam_member" "github_actions_kms" {
@@ -217,7 +235,7 @@ resource "google_project_iam_member" "github_actions_kms" {
   role    = "roles/cloudkms.admin"
   member  = "serviceAccount:${var.github_actions_service_account}"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 resource "google_project_iam_member" "github_actions_sql_admin" {
@@ -225,7 +243,7 @@ resource "google_project_iam_member" "github_actions_sql_admin" {
   role    = "roles/cloudsql.admin"
   member  = "serviceAccount:${var.github_actions_service_account}"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 resource "google_project_iam_member" "github_actions_cloudbuild_builds_builder" {
@@ -233,7 +251,7 @@ resource "google_project_iam_member" "github_actions_cloudbuild_builds_builder" 
   role    = "roles/cloudbuild.builds.builder"
   member  = "serviceAccount:${var.github_actions_service_account}"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 # Grant Cloud Build service account permissions for Cloud Functions
@@ -242,7 +260,7 @@ resource "google_project_iam_member" "cloud_build_functions_developer" {
   role    = "roles/cloudfunctions.developer"
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
 }
 
 resource "google_project_iam_member" "cloud_build_service_account_user" {
@@ -250,7 +268,16 @@ resource "google_project_iam_member" "cloud_build_service_account_user" {
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 
-  depends_on = [module.project_apis]
+  depends_on = [module.project_apis, module.source_project_apis]
+}
+
+# Allow Cloud Build to act as the neural ingestion service account
+resource "google_service_account_iam_member" "cloud_build_act_as_ingestion" {
+  service_account_id = google_service_account.neural_ingestion.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [google_service_account.neural_ingestion]
 }
 
 # Grant GitHub Actions permission to act as the ingestion service account

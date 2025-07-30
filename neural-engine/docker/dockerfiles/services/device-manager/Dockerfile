@@ -22,8 +22,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy and install requirements
 # Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
+COPY neural-engine/constraints.txt ./constraints.txt
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -c constraints.txt -r requirements.txt && \
     pip install --no-cache-dir \
         pyusb==1.2.1 \
         hidapi==0.14.0 \

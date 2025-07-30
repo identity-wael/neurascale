@@ -23,9 +23,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy and install requirements
 # Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
+COPY neural-engine/constraints.txt ./constraints.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
 FROM python:3.12-slim AS builder

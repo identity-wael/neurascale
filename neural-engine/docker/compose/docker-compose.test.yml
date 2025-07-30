@@ -24,11 +24,12 @@ services:
       - ../../tests:/app/tests:ro
       - test-results:/app/test-results
       - coverage-reports:/app/coverage
-    command: >
-      sh -c "
-        pip install pytest pytest-cov pytest-asyncio pytest-timeout &&
-        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --junitxml=test-results/junit.xml
-      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # Test database with initialization
   postgres:

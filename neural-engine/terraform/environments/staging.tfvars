@@ -60,12 +60,12 @@ enable_storage_lifecycle_policies = true
 data_retention_days               = 365 # 1 year for staging
 
 # Security configuration
-enable_enhanced_security    = true # Enhanced security for staging
-enable_kms_encryption       = true
+enable_enhanced_security    = false # Temporarily disabled - APIs not yet enabled
+enable_kms_encryption       = false # Temporarily disabled - KMS API not yet enabled
 enable_binary_authorization = false
 
 # Cost optimization
-enable_scheduled_scaling   = true # Auto scale down after hours
+enable_scheduled_scaling   = false # Temporarily disabled - Cloud Build permissions issue
 budget_amount              = "2000"
 cost_center                = "neural-research-staging"
 budget_notification_emails = [] # Add team emails here

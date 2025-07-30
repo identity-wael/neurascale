@@ -77,3 +77,9 @@ variable "apis_enabled" {
   type        = bool
   default     = true
 }
+
+variable "enable_private_service_connection" {
+  description = "Enable private service connection for Cloud SQL and Redis"
+  type        = bool
+  default     = true
+}

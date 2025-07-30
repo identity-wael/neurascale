@@ -253,6 +253,8 @@ EOF
 
 # Alert policy for sudden cost spikes
 resource "google_monitoring_alert_policy" "cost_spike" {
+  count = var.enable_cost_analysis && var.billing_account_id != "" ? 1 : 0
+
   display_name = "${var.environment} Cost Spike Alert"
   project      = var.project_id
   combiner     = "OR"

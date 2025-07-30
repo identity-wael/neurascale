@@ -307,6 +307,15 @@ jobs:
           export REDIS_PASSWORD=test
           echo "Waiting for services to become healthy..."
           docker compose -f docker/compose/docker-compose.yml ps
+
+          # Show neural-processor logs to debug startup issues
+          echo "=== Initial neural-processor logs ==="
+          docker compose -f docker/compose/docker-compose.yml logs neural-processor
+
+          # Check if port 8080 is listening
+          echo "=== Checking if neural-processor is listening on port 8080 ==="
+          docker compose -f docker/compose/docker-compose.yml exec -T neural-processor netstat -tlnp || true
+
           timeout 300 bash -c 'export DB_PASSWORD=test; export REDIS_PASSWORD=test; until docker compose -f docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; echo "Waiting for services..."; docker compose -f docker/compose/docker-compose.yml ps; done'
 
       - name: Run integration tests

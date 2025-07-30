@@ -1,0 +1,64 @@
+# GPU-enabled Dockerfile for ML Pipeline Service
+# Use this for production deployments with GPU support
+# Build separately due to large size
+
+FROM tensorflow/tensorflow:2.15.0-gpu
+
+# Install Python 3.12
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.12 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install requirements
+COPY neural-engine/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Install additional ML frameworks
+RUN pip install --no-cache-dir \
+    torch==2.1.2 \
+    torchvision==0.16.2 \
+    torchaudio==2.1.2 \
+    scikit-learn==1.4.0 \
+    xgboost==2.0.3
+
+# Copy ML pipeline source
+COPY neural-engine/src/classification ./classification
+COPY neural-engine/src/utils ./utils
+COPY neural-engine/src/processors ./processors
+COPY neural-engine/models ./models
+
+# Create non-root user
+RUN groupadd -r neural && useradd -r -g neural -m neural
+RUN chown -R neural:neural /classification /utils /processors /models
+
+WORKDIR /app
+
+# Environment variables
+ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV CUDA_VISIBLE_DEVICES=0
+
+# Switch to non-root user
+USER neural
+
+# Expose ports
+EXPOSE 8080 50051
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+
+# Run the service
+CMD ["python", "-m", "classification.api", "--host", "0.0.0.0", "--port", "8080"]

@@ -363,6 +363,7 @@ module "gke" {
 
 # Deploy database infrastructure
 module "database" {
+  count  = var.enable_database ? 1 : 0
   source = "./modules/database"
 
   project_id                    = var.project_id
@@ -541,18 +542,18 @@ output "gke_cluster_name" {
 
 # Database Outputs
 output "postgres_connection_name" {
-  value       = module.database.postgres_connection_name
+  value       = var.enable_database ? module.database[0].postgres_connection_name : null
   description = "Cloud SQL PostgreSQL connection name"
 }
 
 output "redis_host" {
-  value       = module.database.redis_host
+  value       = var.enable_database ? module.database[0].redis_host : null
   description = "Redis instance host"
   sensitive   = true
 }
 
 output "bigquery_dataset_id" {
-  value       = module.database.bigquery_dataset_id
+  value       = var.enable_database ? module.database[0].bigquery_dataset_id : null
   description = "BigQuery dataset ID for analytics"
 }
 

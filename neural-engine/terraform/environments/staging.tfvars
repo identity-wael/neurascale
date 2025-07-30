@@ -40,13 +40,14 @@ pods_cidr           = "10.1.0.0/16"
 services_cidr       = "10.2.0.0/20"
 
 # GKE configuration
-enable_gke_cluster       = true
+enable_gke_cluster       = false # Temporarily disabled - GKE API error
 gke_general_machine_type = "n2-standard-4"
 gke_neural_machine_type  = "n2-highmem-8"
 enable_gpu_pool          = false # Can enable for ML testing
 gpu_type                 = "nvidia-tesla-t4"
 
 # Database configuration
+enable_database             = false # Temporarily disabled - Cloud SQL API error in source project
 db_tier                     = "db-custom-2-7680"
 db_disk_size                = 200
 redis_memory_gb             = 8

@@ -20,9 +20,13 @@ resource "google_bigquery_dataset" "neural_analytics" {
     user_by_email = var.neural_service_account_email
   }
 
-  access {
-    role           = "READER"
-    group_by_email = var.analytics_reader_group
+  # Only add reader group if specified
+  dynamic "access" {
+    for_each = var.analytics_reader_group != "" ? [1] : []
+    content {
+      role           = "READER"
+      group_by_email = var.analytics_reader_group
+    }
   }
 
   # Encryption with Cloud KMS

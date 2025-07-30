@@ -275,6 +275,12 @@ variable "redis_tier" {
   default     = "BASIC"
 }
 
+variable "enable_database" {
+  description = "Enable database module (Cloud SQL, Redis, BigQuery)"
+  type        = bool
+  default     = true
+}
+
 variable "enable_db_high_availability" {
   description = "Enable high availability for Cloud SQL"
   type        = bool

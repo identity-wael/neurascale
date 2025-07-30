@@ -10,6 +10,20 @@ This directory contains the simplified Terraform configuration for deploying Neu
 2. Terraform >= 1.5.0 installed
 3. Appropriate GCP permissions (or use GitHub Actions)
 
+### Cross-Project API Requirements
+
+When deploying from a service account in a different project (e.g., neurascale project 555656387124), the following APIs must be manually enabled in that source project:
+
+- `servicenetworking.googleapis.com` - Required for VPC peering with Cloud SQL/Redis
+- `cloudkms.googleapis.com` - Required for KMS encryption features
+
+Until these APIs are enabled in the source project, the following features are disabled:
+
+- Private service connection (Cloud SQL/Redis private IPs)
+- KMS encryption
+- Enhanced security features
+- Scheduled scaling (Cloud Functions)
+
 ### Local Deployment
 
 1. **Initialize Terraform** (replace `development` with your target environment):

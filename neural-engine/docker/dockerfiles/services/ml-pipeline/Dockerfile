@@ -27,18 +27,21 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
-COPY neural-engine/requirements.txt .
+# Use lightweight requirements for CI builds
+COPY neural-engine/requirements-ci.txt ./requirements.txt
 # Install base requirements first
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Install only essential ML packages for now
-# TensorFlow and PyTorch can be added later or mounted at runtime
+# Install only essential ML packages for CI builds
+# For production, use Dockerfile.gpu with full ML frameworks
 RUN pip install --no-cache-dir \
     scikit-learn==1.4.0 \
     xgboost==2.0.3 \
     joblib==1.3.2 \
-    pandas==2.1.4
+    pandas==2.1.4 \
+    numpy==1.26.4 \
+    scipy==1.14.1
 
 # Stage 2: Builder
 FROM python:3.12-slim AS builder

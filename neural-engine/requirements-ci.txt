@@ -1,0 +1,114 @@
+# Lightweight requirements for CI builds
+# Excludes heavy ML frameworks to prevent disk space issues
+# For production, use the full requirements.txt
+
+# Core dependencies
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.0
+python-dotenv==1.0.1
+httpx==0.28.0
+prometheus-client==0.21.0
+redis==5.2.0
+pymongo==4.13.2
+asyncpg==0.30.0
+lz4==4.3.3
+msgpack==1.0.8
+orjson==3.11.1
+aiokafka==0.11.0
+grpcio==1.65.5
+protobuf==4.25.8
+
+# Security & Authentication
+cryptography==44.0.1
+pyjwt==2.10.1
+pyotp==2.10.0
+bcrypt==4.3.0
+
+# Monitoring & Logging
+opentelemetry-api==1.27.0
+opentelemetry-sdk==1.27.0
+opentelemetry-instrumentation-fastapi==0.48b0
+opentelemetry-instrumentation-redis==0.48b0
+opentelemetry-instrumentation-sqlalchemy==0.48b0
+opentelemetry-instrumentation-requests==0.48b0
+opentelemetry-instrumentation==0.48b0
+opentelemetry-exporter-otlp==1.27.0
+sentry-sdk==2.34.1
+structlog==24.7.0
+
+# Data Processing (lightweight)
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.14.1
+scikit-learn==1.5.2
+joblib==1.4.2
+xgboost==2.0.3
+
+# Neuroscience libraries (lightweight)
+mne==1.8.0
+pyedflib==0.1.38
+brainflow==5.14.0
+pylsl==1.16.2
+pyserial==3.5
+
+# Utilities
+click==8.1.7
+pyyaml==6.0.2
+watchdog==6.0.0
+watchfiles==1.1.0
+pydantic-settings==2.6.1
+python-multipart==0.0.18
+email-validator==2.2.0
+tzdata==2025.2
+pytz==2025.2
+
+# Development & Testing
+pytest==8.3.3
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+pytest-mock==3.15.0
+httpx==0.28.0
+mock==5.1.0
+faker==34.0.0
+factory-boy==3.3.1
+
+# Code Quality
+black==24.11.0
+flake8==7.1.1
+mypy==1.14.1
+isort==5.13.2
+pylint==3.3.1
+bandit==1.8.0
+safety==3.3.0
+
+# Documentation
+mkdocs==1.6.1
+mkdocs-material==9.5.48
+mkdocstrings[python]==0.27.0
+
+# GCP Services (lightweight)
+google-cloud-storage==2.19.0
+google-cloud-pubsub==2.27.1
+google-cloud-logging==3.12.0
+google-cloud-monitoring==2.25.0
+google-cloud-trace==1.14.1
+google-cloud-bigquery==3.27.0
+google-cloud-firestore==2.19.0
+google-cloud-secret-manager==2.21.1
+google-cloud-kms==2.24.2
+google-cloud-iam==2.15.2
+google-cloud-run==0.10.9
+
+# Additional lightweight dependencies
+gitpython==3.1.45
+docker==7.1.0
+kubernetes==33.0.0
+hvac==2.3.0
+consul-py==1.6.0
+jsonschema==4.25.0
+marshmallow==3.24.0
+cerberus==1.3.6
+voluptuous==0.15.2
+attrs==25.3.0
+cattrs==25.3.0

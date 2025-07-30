@@ -72,6 +72,8 @@ services:
       - postgres
       - redis
       - kafka
+    networks:
+      - neural-net
     environment:
       - TEST_ENV=docker
       - API_URL=http://neural-processor:8080

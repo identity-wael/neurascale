@@ -314,7 +314,7 @@ jobs:
 
           # Check if port 8080 is listening
           echo "=== Checking if neural-processor is listening on port 8080 ==="
-          docker compose -f docker/compose/docker-compose.yml exec -T neural-processor netstat -tlnp || true
+          docker compose -f docker/compose/docker-compose.yml exec -T neural-processor sh -c "python -c 'import socket; s=socket.socket(); result=s.connect_ex((\"localhost\", 8080)); print(\"Port 8080 is\", \"OPEN\" if result==0 else \"CLOSED\"); s.close()'" || true
 
           timeout 300 bash -c 'export DB_PASSWORD=test; export REDIS_PASSWORD=test; until docker compose -f docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; echo "Waiting for services..."; docker compose -f docker/compose/docker-compose.yml ps; done'
 

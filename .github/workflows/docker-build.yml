@@ -327,9 +327,10 @@ jobs:
           export DB_PASSWORD=test
           export REDIS_PASSWORD=test
 
+          # Run integration tests and capture exit code
           docker compose -f docker/compose/docker-compose.yml \
                         -f docker/compose/docker-compose.test.yml \
-                        run integration-tests
+                        up --exit-code-from integration-tests integration-tests
 
       - name: Check service logs
         if: failure()

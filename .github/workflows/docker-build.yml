@@ -266,29 +266,29 @@ jobs:
       - name: Start services
         run: |
           cd neural-engine
-          docker-compose -f docker/compose/docker-compose.yml \
+          docker compose -f docker/compose/docker-compose.yml \
                         -f docker/compose/docker-compose.test.yml \
                         up -d
 
       - name: Wait for services
         run: |
-          timeout 300 bash -c 'until docker-compose -f neural-engine/docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; done'
+          timeout 300 bash -c 'until docker compose -f neural-engine/docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; done'
 
       - name: Run integration tests
         run: |
-          docker-compose -f neural-engine/docker/compose/docker-compose.yml \
+          docker compose -f neural-engine/docker/compose/docker-compose.yml \
                         -f neural-engine/docker/compose/docker-compose.test.yml \
                         run integration-tests
 
       - name: Collect logs
         if: failure()
         run: |
-          docker-compose -f neural-engine/docker/compose/docker-compose.yml logs
+          docker compose -f neural-engine/docker/compose/docker-compose.yml logs
 
       - name: Stop services
         if: always()
         run: |
-          docker-compose -f neural-engine/docker/compose/docker-compose.yml down -v
+          docker compose -f neural-engine/docker/compose/docker-compose.yml down -v
 
   security-scan:
     name: Security Scan Summary

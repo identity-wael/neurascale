@@ -335,7 +335,7 @@ jobs:
             gcloud bigtable app-profiles delete autoscaling-profile \
               --instance=neural-data-production \
               --project=${{ needs.setup.outputs.project_id }} \
-              --force || echo "Failed to delete app profile, continuing..."
+              --force --quiet || echo "Failed to delete app profile, continuing..."
           else
             echo "No autoscaling-profile found, continuing..."
           fi

@@ -1,46 +1,82 @@
 # Multi-stage Dockerfile for Device Manager Service
-# Go-based service for managing BCI device connections
+# Manages neural device connections and data streaming
 
-# Stage 1: Builder
-FROM golang:1.21-alpine AS builder
+# Stage 1: Dependencies
+FROM python:3.12-slim AS dependencies
 
-# Install build dependencies
-RUN apk add --no-cache git gcc musl-dev linux-headers
+WORKDIR /tmp
 
-WORKDIR /build
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libusb-1.0-0-dev \
+    libudev-dev \
+    libhidapi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy go mod files
-COPY neural-engine/device-manager/go.mod neural-engine/device-manager/go.sum ./
-RUN go mod download
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy source code
-COPY neural-engine/device-manager/ .
+# Copy and install requirements
+COPY neural-engine/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+        pyusb==1.2.1 \
+        hidapi==0.14.0 \
+        pylsl==1.16.0
 
-# Build the binary
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-w -s" -o device-manager ./cmd/server
-
-# Stage 2: Runtime
-FROM alpine:3.19
-
-# Install runtime dependencies
-RUN apk add --no-cache ca-certificates libusb-dev bluez-libs
-
-# Create non-root user
-RUN addgroup -g 1000 neural && \
-    adduser -D -u 1000 -G neural neural
-
-# Copy binary from builder
-COPY --from=builder /build/device-manager /usr/local/bin/device-manager
-
-# Create necessary directories
-RUN mkdir -p /etc/device-manager /var/log/device-manager && \
-    chown -R neural:neural /etc/device-manager /var/log/device-manager
-
-# Copy configuration
-COPY neural-engine/device-manager/configs/production.yaml /etc/device-manager/config.yaml
+# Stage 2: Builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
+
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy device manager source
+COPY neural-engine/src/devices ./devices
+COPY neural-engine/src/utils ./utils
+COPY neural-engine/devices ./legacy_devices
+
+# Compile Python files
+RUN python -m compileall -b devices/ utils/
+
+# Stage 3: Runtime
+FROM python:3.12-slim AS runtime
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libusb-1.0-0 \
+    libudev1 \
+    libhidapi-hidraw0 \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r neural && useradd -r -g neural -m neural
+
+# Create necessary directories
+RUN mkdir -p /var/log/device-manager /etc/device-manager && \
+    chown -R neural:neural /var/log/device-manager /etc/device-manager
+
+WORKDIR /app
+
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy compiled application
+COPY --from=builder --chown=neural:neural /app .
+
+# Create entrypoint script
+RUN echo '#!/bin/sh\npython -m devices.device_manager "$@"' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 # Switch to non-root user
 USER neural
@@ -50,7 +86,8 @@ EXPOSE 8081 50052 9091
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8081/health || exit 1
+    CMD curl -f http://localhost:8081/health || exit 1
 
 # Run the service
-CMD ["device-manager", "--config", "/etc/device-manager/config.yaml"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["--host", "0.0.0.0", "--port", "8081"]

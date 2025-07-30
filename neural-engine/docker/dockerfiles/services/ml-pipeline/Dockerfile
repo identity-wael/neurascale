@@ -2,107 +2,99 @@
 # Python-based machine learning inference service with GPU support
 
 # Stage 1: Dependencies
-FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04 AS dependencies
+FROM python:3.12-slim AS dependencies
 
-# Prevent interactive prompts
-ARG DEBIAN_FRONTEND=noninteractive
+WORKDIR /tmp
 
-# Install Python and system dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 \
-    python3.12-venv \
-    python3.12-dev \
-    python3-pip \
     build-essential \
-    cuda-toolkit-12-2 \
-    libcudnn8 \
-    libnccl2 \
+    gcc \
+    g++ \
     libhdf5-dev \
     libopenblas-dev \
-    pkg-config \
+    gfortran \
     && rm -rf /var/lib/apt/lists/*
-
-# Set Python 3.12 as default
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
 
 # Create virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Upgrade pip
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-
 # Copy and install requirements
-COPY neural-engine/ml-pipeline/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Install ML frameworks
-RUN pip install --no-cache-dir \
-    torch==2.1.0 \
-    torchvision==0.16.0 \
-    tensorflow==2.15.0 \
-    onnxruntime-gpu==1.16.0 \
-    transformers==4.36.0
+COPY neural-engine/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+        tensorflow==2.15.0 \
+        torch==2.1.2 \
+        scikit-learn==1.4.0 \
+        xgboost==2.0.3
 
 # Stage 2: Builder
-FROM dependencies AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# Copy source code
-COPY neural-engine/ml-pipeline/ .
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy ML pipeline source
+COPY neural-engine/src/classification ./classification
+COPY neural-engine/src/utils ./utils
+COPY neural-engine/src/processors ./processors
+COPY neural-engine/models ./models
 
 # Compile Python files
 RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04 AS runtime
+FROM python:3.12-slim AS runtime
 
-# Install runtime dependencies only
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 \
     libgomp1 \
     libhdf5-103 \
     libopenblas0 \
     ca-certificates \
+    curl \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN groupadd -r neural && useradd -r -g neural -m neural
 
-# Copy virtual environment
-COPY --from=dependencies /opt/venv /opt/venv
-
-# Copy application
-COPY --from=builder --chown=neural:neural /app /app
-
-# Set environment variables
-ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    CUDA_VISIBLE_DEVICES=0 \
-    TF_CPP_MIN_LOG_LEVEL=2 \
-    PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-
 # Create model cache directory
-RUN mkdir -p /app/models /app/cache && \
-    chown -R neural:neural /app
+RUN mkdir -p /app/model_cache && chown -R neural:neural /app/model_cache
 
 WORKDIR /app
+
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy compiled application
+COPY --from=builder --chown=neural:neural /app .
+
+# Environment variables for ML frameworks
+ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV OMP_NUM_THREADS=4
+ENV OPENBLAS_NUM_THREADS=4
+ENV MKL_NUM_THREADS=4
+
+# Create startup script
+RUN echo '#!/bin/sh\npython -m classification.api --host 0.0.0.0 --port 8080' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 # Switch to non-root user
 USER neural
 
-# Model volume for persistence
-VOLUME ["/app/models"]
-
 # Expose ports
-EXPOSE 8082 50053 9093
+EXPOSE 8080 50051
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8082/health').raise_for_status()"
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Run the service
-CMD ["python", "-m", "src.server", "--host", "0.0.0.0", "--port", "8082"]
+ENTRYPOINT ["/entrypoint.sh"]

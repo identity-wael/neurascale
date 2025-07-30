@@ -18,7 +18,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
-COPY neural-engine/src/mcp/requirements.txt .
+COPY neural-engine/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
@@ -34,7 +34,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy MCP source code
 COPY neural-engine/src/mcp ./mcp
 COPY neural-engine/src/utils ./utils
-COPY neural-engine/src/config ./config
 
 # Compile Python files
 RUN python -m compileall -b mcp/ utils/

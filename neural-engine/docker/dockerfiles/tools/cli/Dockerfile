@@ -38,9 +38,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application source
 COPY neural-engine/src/cli ./cli
-COPY neural-engine/src/core ./core
 COPY neural-engine/src/utils ./utils
 COPY neural-engine/src/api ./api
+COPY neural-engine/src/processors ./processors
+COPY neural-engine/src/devices ./devices
 COPY neural-engine/processing ./processing
 COPY neural-engine/models ./models
 

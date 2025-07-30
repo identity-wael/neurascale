@@ -38,7 +38,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY neural-engine/src ./src
 COPY neural-engine/processing ./processing
 COPY neural-engine/models ./models
-COPY neural-engine/config ./config
+COPY neural-engine/configs ./configs
 
 # Compile Python files for optimization
 RUN python -m compileall -b src/ processing/

@@ -1,78 +1,84 @@
 # Multi-stage Dockerfile for API Gateway Service
-# Node.js-based GraphQL/REST API gateway
+# FastAPI-based GraphQL/REST API gateway
 
 # Stage 1: Dependencies
-FROM node:20-alpine AS dependencies
+FROM python:3.12-slim AS dependencies
 
-WORKDIR /app
+WORKDIR /tmp
 
-# Copy package files
-COPY neural-engine/api-gateway/package*.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install production dependencies
-RUN npm ci --only=production
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy dependencies for builder stage
-RUN cp -R node_modules prod_node_modules
-
-# Install all dependencies (including dev)
-RUN npm ci
+# Copy and install requirements
+COPY neural-engine/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+        fastapi==0.109.0 \
+        uvicorn[standard]==0.27.0 \
+        graphene==3.3 \
+        starlette-graphene3==0.6.0
 
 # Stage 2: Builder
-FROM node:20-alpine AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# Copy dependencies
-COPY --from=dependencies /app/node_modules ./node_modules
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy source code
-COPY neural-engine/api-gateway/ .
+# Copy API gateway source
+COPY neural-engine/src/api ./api
+COPY neural-engine/src/utils ./utils
+COPY neural-engine/src/processors ./processors
+COPY neural-engine/src/devices ./devices
 
-# Build TypeScript
-RUN npm run build
+# Compile Python files
+RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM node:20-alpine AS runtime
+FROM python:3.12-slim AS runtime
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1000 neural && \
-    adduser -D -u 1000 -G neural neural
+RUN groupadd -r neural && useradd -r -g neural -m neural
 
 WORKDIR /app
 
-# Copy production dependencies
-COPY --from=dependencies /app/prod_node_modules ./node_modules
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy built application
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
+# Copy compiled application
+COPY --from=builder --chown=neural:neural /app .
 
-# Copy GraphQL schema files
-COPY neural-engine/api-gateway/src/schema ./schema
-
-# Create necessary directories
-RUN mkdir -p logs && chown -R neural:neural /app
+# Create startup script
+RUN echo '#!/bin/sh\nuvicorn api.app:app --host 0.0.0.0 --port 8080 --workers 4' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 # Switch to non-root user
 USER neural
 
-# Expose ports
-EXPOSE 4000 9092
-
-# Environment variables
-ENV NODE_ENV=production \
-    PORT=4000
+# Expose port
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:4000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+    CMD curl -f http://localhost:8080/health || exit 1
 
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
-# Start the server
-CMD ["node", "dist/server.js"]
+# Run the service
+ENTRYPOINT ["/entrypoint.sh"]

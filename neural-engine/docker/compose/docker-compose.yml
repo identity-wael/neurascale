@@ -5,7 +5,7 @@ services:
   # Neural data processor - main processing engine
   neural-processor:
     build:
-      context: ../..
+      context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
     image: neurascale/neural-processor:${VERSION:-latest}
     container_name: neural-processor
@@ -84,7 +84,7 @@ services:
   # MCP Server - Model Context Protocol server
   mcp-server:
     build:
-      context: ../..
+      context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/services/mcp-server/Dockerfile
     image: neurascale/mcp-server:${VERSION:-latest}
     container_name: neural-mcp-server

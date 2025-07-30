@@ -5,9 +5,9 @@ services:
   neural-processor:
     image: ${REGISTRY}/${PROJECT_ID}/neural-processor:${TAG}
     build:
-      context: ../..
+      context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
-      target: builder
+      target: runtime
       args:
         - BUILD_ENV=test
     environment:
@@ -65,7 +65,7 @@ services:
   integration-tests:
     image: ${REGISTRY}/${PROJECT_ID}/neural-test-runner:${TAG}
     build:
-      context: ../..
+      context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/tools/test-runner/Dockerfile
     depends_on:
       - neural-processor

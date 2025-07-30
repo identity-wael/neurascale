@@ -288,14 +288,15 @@ module "mcp_server" {
 module "networking" {
   source = "./modules/networking"
 
-  project_id          = var.project_id
-  environment         = local.environment
-  region              = var.region
-  gke_subnet_cidr     = var.gke_subnet_cidr
-  private_subnet_cidr = var.private_subnet_cidr
-  pods_cidr           = var.pods_cidr
-  services_cidr       = var.services_cidr
-  apis_enabled        = module.project_apis.apis_enabled
+  project_id                        = var.project_id
+  environment                       = local.environment
+  region                            = var.region
+  gke_subnet_cidr                   = var.gke_subnet_cidr
+  private_subnet_cidr               = var.private_subnet_cidr
+  pods_cidr                         = var.pods_cidr
+  services_cidr                     = var.services_cidr
+  apis_enabled                      = module.project_apis.apis_enabled
+  enable_private_service_connection = false # Temporarily disabled - Service Networking API issues
 
   depends_on = [
     module.project_apis

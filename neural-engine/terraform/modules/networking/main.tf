@@ -79,6 +79,8 @@ resource "google_compute_router_nat" "nat" {
 
 # Reserve IP range for Private Service Connection (Cloud SQL)
 resource "google_compute_global_address" "private_service_connection" {
+  count = var.enable_private_service_connection ? 1 : 0
+
   name          = "${var.environment}-private-service-connection"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -88,9 +90,11 @@ resource "google_compute_global_address" "private_service_connection" {
 
 # Create Private Service Connection
 resource "google_service_networking_connection" "private_service_connection" {
+  count = var.enable_private_service_connection ? 1 : 0
+
   network                 = google_compute_network.vpc.id
   service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_service_connection.name]
+  reserved_peering_ranges = [google_compute_global_address.private_service_connection[0].name]
 }
 
 # Firewall Rules

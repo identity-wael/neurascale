@@ -71,12 +71,12 @@ output "nat_id" {
 # Private Service Connection
 output "private_service_connection_id" {
   description = "The ID of the private service connection"
-  value       = google_service_networking_connection.private_service_connection.id
+  value       = var.enable_private_service_connection ? google_service_networking_connection.private_service_connection[0].id : null
 }
 
 output "private_service_connection_ip" {
   description = "The IP address range of the private service connection"
-  value       = google_compute_global_address.private_service_connection.address
+  value       = var.enable_private_service_connection ? google_compute_global_address.private_service_connection[0].address : null
 }
 
 # DNS zone (if created)

@@ -236,6 +236,23 @@ resource "google_project_iam_member" "github_actions_cloudbuild_builds_builder" 
   depends_on = [module.project_apis]
 }
 
+# Grant Cloud Build service account permissions for Cloud Functions
+resource "google_project_iam_member" "cloud_build_functions_developer" {
+  project = var.project_id
+  role    = "roles/cloudfunctions.developer"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [module.project_apis]
+}
+
+resource "google_project_iam_member" "cloud_build_service_account_user" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [module.project_apis]
+}
+
 # Grant GitHub Actions permission to act as the ingestion service account
 resource "google_service_account_iam_member" "github_actions_act_as" {
   service_account_id = google_service_account.neural_ingestion.name
@@ -296,7 +313,7 @@ module "networking" {
   pods_cidr                         = var.pods_cidr
   services_cidr                     = var.services_cidr
   apis_enabled                      = module.project_apis.apis_enabled
-  enable_private_service_connection = false # Temporarily disabled - Service Networking API issues
+  enable_private_service_connection = true # Re-enabled - APIs are in the list
 
   depends_on = [
     module.project_apis

@@ -29,9 +29,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy and install requirements
 # Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
+COPY neural-engine/constraints.txt ./constraints.txt
 # Install base requirements first
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -c constraints.txt -r requirements.txt
 
 # Install only essential ML packages for CI builds
 # For production, use Dockerfile.gpu with full ML frameworks

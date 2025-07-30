@@ -12,7 +12,7 @@ grpcio==1.65.5
 protobuf==4.25.8
 python-jose[cryptography]==3.3.0
 strawberry-graphql[fastapi]==0.227.1
-aiohttp==3.10.10  # For MCP server HTTP health checks
+aiohttp==3.12.14  # For MCP server HTTP health checks
 
 # Data Processing (minimal)
 numpy==1.26.4

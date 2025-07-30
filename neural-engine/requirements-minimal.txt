@@ -10,6 +10,8 @@ prometheus-client==0.21.0
 redis==5.2.0
 grpcio==1.65.5
 protobuf==4.25.8
+python-jose[cryptography]==3.3.0
+strawberry-graphql[fastapi]==0.227.1
 
 # Data Processing (minimal)
 numpy==1.26.4

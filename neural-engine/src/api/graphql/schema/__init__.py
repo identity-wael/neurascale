@@ -18,5 +18,13 @@ from .types import (
 from .queries import Query
 from .mutations import Mutation
 from .subscriptions import Subscription
+import strawberry
 
-__all__ = ["Query", "Mutation", "Subscription"]
+# Create the GraphQL schema
+schema = strawberry.Schema(
+    query=Query,
+    mutation=Mutation,
+    subscription=Subscription,
+)
+
+__all__ = ["Query", "Mutation", "Subscription", "schema"]

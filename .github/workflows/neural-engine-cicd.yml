@@ -313,6 +313,16 @@ jobs:
           gcloud auth list
           gcloud config set project ${{ needs.setup.outputs.project_id }}
 
+      - name: Enable Required APIs
+        if: needs.setup.outputs.environment == 'production'
+        run: |
+          echo "Enabling required APIs for production..."
+          # Enable BigQuery Data Transfer API
+          gcloud services enable bigquerydatatransfer.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable BigQuery Data Transfer API"
+          # List all enabled APIs for verification
+          echo "Currently enabled APIs:"
+          gcloud services list --enabled --project=${{ needs.setup.outputs.project_id }} | grep -E "bigquery|bigtable|compute|container|cloudfunctions|cloudrun|storage" || true
+
       - name: Terraform Init
         working-directory: neural-engine/terraform
         timeout-minutes: 3

@@ -34,14 +34,12 @@ WORKDIR /app
 COPY --from=dependencies /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy application source
+# Copy only essential source files
 COPY neural-engine/src ./src
-COPY neural-engine/processing ./processing
-COPY neural-engine/models ./models
-COPY neural-engine/configs ./configs
+COPY neural-engine/requirements.txt ./
 
 # Compile Python files for optimization
-RUN python -m compileall -b src/ processing/
+RUN python -m compileall -b src/
 
 # Stage 3: Runtime
 FROM python:3.12-slim AS runtime

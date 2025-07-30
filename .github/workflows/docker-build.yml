@@ -50,6 +50,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check build context size
+        run: |
+          echo "Build context size:"
+          du -sh .
+          echo "Large directories:"
+          du -sh */ 2>/dev/null | sort -hr | head -10 || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -155,6 +162,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check build context size
+        run: |
+          echo "Build context size:"
+          du -sh .
+          echo "Large directories:"
+          du -sh */ 2>/dev/null | sort -hr | head -10 || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -209,6 +223,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Check build context size
+        run: |
+          echo "Build context size:"
+          du -sh .
+          echo "Large directories:"
+          du -sh */ 2>/dev/null | sort -hr | head -10 || true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

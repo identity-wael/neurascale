@@ -1,0 +1,133 @@
+version: '3.9'
+
+# Test environment configuration for Docker Compose
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+
+services:
+  neural-processor:
+    image: neurascale/neural-processor:test
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
+      target: builder
+      args:
+        - BUILD_ENV=test
+    environment:
+      - NEURAL_ENGINE_ENV=test
+      - LOG_LEVEL=debug
+      - DATABASE_URL=postgresql://neural:test@postgres:5432/neural_engine_test
+      - REDIS_URL=redis://:test@redis:6379/1
+      - ENABLE_COVERAGE=true
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../processing:/app/processing:ro
+      - ../../tests:/app/tests:ro
+      - test-results:/app/test-results
+      - coverage-reports:/app/coverage
+    command: >
+      sh -c "
+        pip install pytest pytest-cov pytest-asyncio pytest-timeout &&
+        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --junitxml=test-results/junit.xml
+      "
+
+  # Test database with initialization
+  postgres:
+    environment:
+      - POSTGRES_DB=neural_engine_test
+      - POSTGRES_PASSWORD=test
+    volumes:
+      - ./test-data/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # Test Redis
+  redis:
+    command: redis-server --requirepass test
+    tmpfs:
+      - /data
+
+  # Integration test runner
+  integration-tests:
+    image: neurascale/integration-tests:latest
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/tools/test-runner/Dockerfile
+    depends_on:
+      - neural-processor
+      - postgres
+      - redis
+      - kafka
+    environment:
+      - TEST_ENV=docker
+      - API_URL=http://neural-processor:8080
+      - DATABASE_URL=postgresql://neural:test@postgres:5432/neural_engine_test
+    volumes:
+      - ../../tests/integration:/tests:ro
+      - test-results:/results
+    command: >
+      sh -c "
+        wait-for-it neural-processor:8080 -t 60 &&
+        python -m pytest /tests -v --tb=short --junitxml=/results/integration-junit.xml
+      "
+
+  # Load test runner
+  load-tests:
+    image: grafana/k6:latest
+    depends_on:
+      - neural-processor
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - ../../tests/load:/scripts:ro
+      - test-results:/results
+    command: run -o json=/results/load-test.json /scripts/load-test.js
+
+  # Security scanner
+  security-scanner:
+    image: aquasec/trivy:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - test-results:/results
+    command: >
+      image
+      --format json
+      --output /results/trivy-scan.json
+      --severity HIGH,CRITICAL
+      neurascale/neural-processor:test
+
+  # Test reporting
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    ports:
+      - "5050:5050"
+    volumes:
+      - test-results:/app/allure-results
+      - allure-reports:/app/default-reports
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 10
+      KEEP_HISTORY: 1
+
+  # Test database for load testing
+  influxdb:
+    image: influxdb:1.8-alpine
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+      - INFLUXDB_ADMIN_ENABLED=false
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+
+volumes:
+  test-results:
+    driver: local
+  coverage-reports:
+    driver: local
+  allure-reports:
+    driver: local
+  influxdb-data:
+    driver: local
+
+networks:
+  neural-net:
+    driver: bridge

@@ -1,0 +1,110 @@
+{{- if .Values.apiGateway.enabled }}
+apiVersion: {{ include "neural-engine.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "neural-engine.fullname" . }}-api-gateway
+  labels:
+    {{- include "neural-engine.labels" . | nindent 4 }}
+    component: api-gateway
+spec:
+  replicas: {{ .Values.apiGateway.replicas }}
+  selector:
+    matchLabels:
+      {{- include "neural-engine.selectorLabels" . | nindent 6 }}
+      component: api-gateway
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9092"
+        prometheus.io/path: "/metrics"
+      labels:
+        {{- include "neural-engine.selectorLabels" . | nindent 8 }}
+        component: api-gateway
+        version: {{ .Values.image.tag }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "neural-engine.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: api-gateway
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9092
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment }}
+            - name: LOG_LEVEL
+              value: {{ .Values.apiGateway.logLevel | default "info" }}
+            - name: RATE_LIMIT
+              value: "100"
+            - name: CORS_ORIGINS
+              value: "*"
+            - name: UPSTREAM_URL
+              value: "http://{{ include "neural-engine.fullname" . }}-processor:80"
+            {{- with .Values.apiGateway.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.apiGateway.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: cache
+              mountPath: /var/cache/nginx
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neural-engine.fullname" . }}-api-gateway-config
+        - name: cache
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

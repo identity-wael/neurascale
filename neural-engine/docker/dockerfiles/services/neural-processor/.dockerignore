@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+.pytest_cache/
+.coverage
+.coverage.*
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Development
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+test/
+*_test.py
+test_*.py
+conftest.py
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+wheels/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Kubernetes
+*.yaml
+*.yml
+!docker-compose*.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache

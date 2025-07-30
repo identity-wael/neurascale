@@ -107,3 +107,28 @@ spec:
     {{- include "neural-engine.selectorLabels" . | nindent 4 }}
     component: ml-pipeline
 {{- end }}
+
+{{- if .Values.mcpServer.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neural-engine.fullname" . }}-mcp-server
+  labels:
+    {{- include "neural-engine.labels" . | nindent 4 }}
+    component: mcp-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: http
+    - port: 9094
+      targetPort: 9094
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "neural-engine.selectorLabels" . | nindent 4 }}
+    component: mcp-server
+{{- end }}

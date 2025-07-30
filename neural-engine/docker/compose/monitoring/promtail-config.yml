@@ -1,0 +1,171 @@
+# Promtail configuration for Neural Engine log collection
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Docker container logs
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: containerlogs
+          __path__: /var/lib/docker/containers/*/*log
+
+    pipeline_stages:
+      # Extract container ID and name
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs:
+
+      - regex:
+          expression: '^(?P<container_id>[0-9a-f]{12})'
+          source: filename
+
+      - labels:
+          container_id:
+
+      # Parse JSON logs
+      - json:
+          expressions:
+            timestamp: time
+            level: level
+            message: msg
+            service: service
+            component: component
+          source: output
+
+      - labels:
+          level:
+          service:
+          component:
+
+      # Parse timestamp
+      - timestamp:
+          format: RFC3339
+          source: timestamp
+
+      # Filter out health check logs
+      - match:
+          selector: '{message=~".*health.*"}'
+          action: drop
+
+      # Multiline error messages
+      - multiline:
+          firstline: '^\d{4}-\d{2}-\d{2}'
+          max_wait_time: 3s
+          max_lines: 100
+
+  # Neural Engine application logs
+  - job_name: neural-engine
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: neural-engine
+          __path__: /var/log/neural-engine/**/*.log
+
+    pipeline_stages:
+      # Extract service name from path
+      - regex:
+          expression: '/var/log/neural-engine/(?P<service>[^/]+)/'
+          source: filename
+
+      - labels:
+          service:
+
+      # Parse structured logs
+      - regex:
+          expression: '^(?P<timestamp>\S+)\s+(?P<level>\S+)\s+(?P<component>\S+)\s+(?P<message>.*)'
+
+      - labels:
+          level:
+          component:
+
+      - timestamp:
+          format: '2006-01-02T15:04:05.000Z'
+          source: timestamp
+
+      # Parse neural data metrics
+      - metrics:
+          neural_signals_processed_total:
+            type: Counter
+            description: "Total number of neural signals processed"
+            source: message
+            config:
+              match_all: true
+              action: inc
+
+          neural_processing_duration_seconds:
+            type: Histogram
+            description: "Neural signal processing duration"
+            source: message
+            config:
+              match_all: true
+              value: duration
+
+  # System logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<program>\S+?)(\[(?P<pid>\d+)\])?:\s+(?P<message>.*)'
+
+      - labels:
+          hostname:
+          program:
+
+      - timestamp:
+          format: 'Jan _2 15:04:05'
+          source: timestamp
+
+  # Kubernetes logs (when deployed to K8s)
+  - job_name: kubernetes
+    kubernetes_sd_configs:
+      - role: pod
+
+    relabel_configs:
+      - source_labels:
+          - __meta_kubernetes_pod_node_name
+        target_label: __host__
+
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_namespace
+        target_label: namespace
+
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_pod_name
+        target_label: pod
+
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_container_name
+        target_label: container
+
+      - replacement: /var/log/pods/*$1/*.log
+        separator: /
+        source_labels:
+          - __meta_kubernetes_pod_uid
+          - __meta_kubernetes_container_name
+        target_label: __path__

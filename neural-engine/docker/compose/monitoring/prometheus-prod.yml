@@ -1,0 +1,164 @@
+# Prometheus configuration for Neural Engine production monitoring
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: 'neural-engine-prod'
+    environment: 'production'
+    region: 'northamerica-northeast1'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+      timeout: 10s
+
+# Load rules
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# Remote write for long-term storage
+remote_write:
+  - url: 'http://thanos-receiver:19291/api/v1/receive'
+    write_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'up|.*_error_total|.*_duration_seconds.*'
+        action: keep
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Neural Engine services with service discovery
+  - job_name: 'neural-processor'
+    metrics_path: '/metrics'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['neural-engine']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: neural-processor
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+
+  - job_name: 'device-manager'
+    metrics_path: '/metrics'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['neural-engine']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: device-manager
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+  - job_name: 'api-gateway'
+    metrics_path: '/metrics'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['neural-engine']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: api-gateway
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+  - job_name: 'ml-pipeline'
+    metrics_path: '/metrics'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['neural-engine']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: ml-pipeline
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+  # Kubernetes metrics
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        regex: default;kubernetes;https
+        action: keep
+
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+
+  - job_name: 'kubernetes-cadvisor'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: '(container_cpu_usage_seconds_total|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_fs_usage_bytes)'
+        action: keep
+
+  # Infrastructure services
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'pg_.*'
+        action: keep
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'redis_.*'
+        action: keep
+
+  # Blackbox exporter for endpoint monitoring
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://api.neurascale.com/health
+          - https://api.neurascale.com/graphql
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

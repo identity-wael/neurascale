@@ -1,0 +1,187 @@
+version: '3.9'
+
+# Development overrides for Docker Compose
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  neural-processor:
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
+      target: builder  # Use builder stage for development
+    image: neurascale/neural-processor:dev
+    environment:
+      - NEURAL_ENGINE_ENV=development
+      - LOG_LEVEL=debug
+      - RELOAD=true
+    volumes:
+      # Mount source code for hot reloading
+      - ../../src:/app/src:delegated
+      - ../../processing:/app/processing:delegated
+      - ../../models:/app/models:delegated
+      - ../../config:/app/config:delegated
+      - ../../tests:/app/tests:delegated
+      # Use named volumes for dependencies
+      - venv-cache:/opt/venv
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+      - "9090:9090"
+      - "5678:5678"  # Python debugger
+    command: >
+      sh -c "
+        pip install debugpy watchdog &&
+        python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m src.main --config /app/config/development.yaml --reload
+      "
+
+  # Development database with sample data
+  postgres:
+    environment:
+      - POSTGRES_DB=neural_engine_dev
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  # Redis with persistence disabled for dev
+  redis:
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --save ""
+      --appendonly no
+
+  # Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: neural-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    networks:
+      - neural-net
+    depends_on:
+      - postgres
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: neural-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:${REDIS_PASSWORD}
+    ports:
+      - "8082:8081"
+    networks:
+      - neural-net
+    depends_on:
+      - redis
+
+  # Kafka UI for topic management
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: neural-kafka-ui
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    ports:
+      - "8083:8080"
+    networks:
+      - neural-net
+    depends_on:
+      - kafka
+      - zookeeper
+
+  # MCP Server with development features
+  mcp-server:
+    environment:
+      - MCP_ENV=development
+      - LOG_LEVEL=debug
+      - RELOAD=true
+    volumes:
+      - ../../src/mcp:/app/mcp:delegated
+      - ../../src/utils:/app/utils:delegated
+    ports:
+      - "3001:3001"
+      - "5679:5678"  # Python debugger
+    command: >
+      sh -c "
+        pip install debugpy watchdog &&
+        python -m debugpy --listen 0.0.0.0:5678 -m mcp.main --host 0.0.0.0 --port 3001 --reload
+      "
+
+  # CLI Tool for development
+  neural-cli:
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/tools/cli/Dockerfile
+      target: runtime
+    image: neurascale/neural-cli:dev
+    container_name: neural-cli
+    stdin_open: true
+    tty: true
+    environment:
+      - NEURAL_ENGINE_ENV=development
+      - API_URL=http://neural-processor:8080
+      - MCP_URL=http://mcp-server:3001
+    volumes:
+      - ../../src:/app/src:delegated
+      - ../../processing:/app/processing:delegated
+      - ../../data:/workspace/data:delegated
+      - cli-config:/home/neural/.neural-cli
+    networks:
+      - neural-net
+    depends_on:
+      - neural-processor
+      - mcp-server
+    entrypoint: ["/bin/bash"]
+
+  # Development monitoring stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: neural-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9091:9090"
+    networks:
+      - neural-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: neural-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - neural-net
+    depends_on:
+      - prometheus
+
+volumes:
+  venv-cache:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  cli-config:
+    driver: local

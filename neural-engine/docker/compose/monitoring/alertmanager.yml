@@ -1,0 +1,103 @@
+# Alertmanager configuration for Neural Engine
+
+global:
+  resolve_timeout: 5m
+  smtp_from: 'alerts@neurascale.com'
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_auth_username: 'alerts@neurascale.com'
+  smtp_auth_password_file: '/etc/alertmanager/smtp_password'
+
+# Templates for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+
+  routes:
+    # Critical alerts
+    - match:
+        severity: critical
+      receiver: 'critical'
+      group_wait: 1s
+      repeat_interval: 1h
+
+    # Neural processing specific alerts
+    - match:
+        service: neural-processor
+      receiver: 'neural-team'
+      group_by: ['alertname', 'instance']
+
+    # Infrastructure alerts
+    - match_re:
+        service: (postgres|redis|kafka)
+      receiver: 'infrastructure'
+      group_wait: 30s
+
+    # Development environment alerts
+    - match:
+        environment: development
+      receiver: 'dev-null'
+      group_interval: 24h
+
+# Receivers
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: 'team@neurascale.com'
+        headers:
+          Subject: 'Neural Engine Alert: {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.default.html" . }}'
+
+  - name: 'critical'
+    email_configs:
+      - to: 'oncall@neurascale.com'
+        headers:
+          Subject: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+    pagerduty_configs:
+      - service_key_file: '/etc/alertmanager/pagerduty_key'
+        severity: 'critical'
+    slack_configs:
+      - api_url_file: '/etc/alertmanager/slack_webhook'
+        channel: '#alerts-critical'
+        title: 'Critical Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+  - name: 'neural-team'
+    email_configs:
+      - to: 'neural-team@neurascale.com'
+    slack_configs:
+      - api_url_file: '/etc/alertmanager/slack_webhook'
+        channel: '#neural-alerts'
+        send_resolved: true
+
+  - name: 'infrastructure'
+    email_configs:
+      - to: 'infra@neurascale.com'
+    slack_configs:
+      - api_url_file: '/etc/alertmanager/slack_webhook'
+        channel: '#infra-alerts'
+
+  - name: 'dev-null'
+    # Silently drop development alerts
+
+# Inhibition rules
+inhibit_rules:
+  # Inhibit less severe alerts if critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  # Inhibit alerts when service is in maintenance
+  - source_match:
+      alertname: 'MaintenanceMode'
+    target_match_re:
+      alertname: '.*'
+    equal: ['service']

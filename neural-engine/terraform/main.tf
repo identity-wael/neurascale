@@ -203,6 +203,31 @@ resource "google_project_iam_member" "github_actions_custom_role" {
 # via the cross-project IAM setup. The custom role above provides a template for future
 # migration to least-privilege permissions.
 
+# Grant additional required roles to GitHub Actions service account
+resource "google_project_iam_member" "github_actions_service_networking" {
+  project = var.project_id
+  role    = "roles/servicenetworking.networksAdmin"
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [module.project_apis]
+}
+
+resource "google_project_iam_member" "github_actions_kms" {
+  project = var.project_id
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [module.project_apis]
+}
+
+resource "google_project_iam_member" "github_actions_sql_admin" {
+  project = var.project_id
+  role    = "roles/cloudsql.admin"
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [module.project_apis]
+}
+
 # Grant GitHub Actions permission to act as the ingestion service account
 resource "google_service_account_iam_member" "github_actions_act_as" {
   service_account_id = google_service_account.neural_ingestion.name

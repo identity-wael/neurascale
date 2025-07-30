@@ -1,0 +1,88 @@
+# Git files
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments - CRITICAL: These are huge!
+venv/
+*/venv/
+neural-engine/venv/
+env/
+ENV/
+.venv
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+
+# Documentation
+docs/
+*.md
+
+# Logs
+*.log
+
+# Node modules (for frontend) - CRITICAL: These are huge!
+node_modules/
+*/node_modules/
+*/*/node_modules/
+console/node_modules/
+apps/*/node_modules/
+
+# Build artifacts
+*.tar.gz
+*.whl
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Large data files
+*.h5
+*.hdf5
+*.pkl
+*.model
+*.weights
+
+# Temporary files
+tmp/
+temp/
+
+# Large directories not needed for neural-engine
+console/
+apps/
+docs-site/

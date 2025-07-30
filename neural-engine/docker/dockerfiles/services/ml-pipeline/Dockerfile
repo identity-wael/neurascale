@@ -1,5 +1,11 @@
 # Multi-stage Dockerfile for ML Pipeline Service
 # Python-based machine learning inference service with GPU support
+#
+# NOTE: Large ML frameworks (TensorFlow, PyTorch) should be:
+# 1. Installed at runtime via pip when needed
+# 2. Mounted as volumes from pre-built images
+# 3. Or use specialized ML base images (nvidia/cuda, tensorflow/tensorflow)
+# This keeps the base image smaller and CI builds faster
 
 # Stage 1: Dependencies
 FROM python:3.12-slim AS dependencies
@@ -26,10 +32,13 @@ COPY neural-engine/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Install ML frameworks separately to better handle large packages
-RUN pip install --no-cache-dir tensorflow-cpu==2.15.0
-RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir scikit-learn==1.4.0 xgboost==2.0.3
+# Install only essential ML packages for now
+# TensorFlow and PyTorch can be added later or mounted at runtime
+RUN pip install --no-cache-dir \
+    scikit-learn==1.4.0 \
+    xgboost==2.0.3 \
+    joblib==1.3.2 \
+    pandas==2.1.4
 
 # Stage 2: Builder
 FROM python:3.12-slim AS builder

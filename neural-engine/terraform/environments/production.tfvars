@@ -19,10 +19,10 @@ enable_monitoring_alerts    = true
 alert_notification_channels = [] # Add PagerDuty channel IDs here
 
 # Cost optimization
-enable_bigtable_autoscaling = true # Enable autoscaling for production
+enable_bigtable_autoscaling = false # Temporarily disabled - app profile deletion issue
 
 # MCP Server configuration
-enable_mcp_cloud_run     = true
+enable_mcp_cloud_run     = false # Temporarily disabled - similar to staging
 mcp_server_image         = "northamerica-northeast1-docker.pkg.dev/production-neurascale/neural-engine-production/mcp-server:latest"
 mcp_min_instances        = 2 # Always keep minimum instances for availability
 mcp_max_instances        = 20
@@ -64,5 +64,5 @@ enable_scheduled_scaling   = false # No auto-scaling in production
 budget_amount              = "10000"
 cost_center                = "neural-research-prod"
 budget_notification_emails = [] # Add finance/ops team emails
-enable_cost_analysis       = true
-billing_export_dataset     = "billing_export" # Configure billing export
+enable_cost_analysis       = false # Temporarily disabled - BigQuery Data Transfer API issue
+billing_export_dataset     = "" # Temporarily disabled - BigQuery Data Transfer API issue

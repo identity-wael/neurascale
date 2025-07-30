@@ -46,6 +46,22 @@ services:
     # Remove tmpfs to avoid conflict with main compose file
     # Redis data will be ephemeral anyway in test environment
 
+  # Override MCP server image
+  mcp-server:
+    image: ${REGISTRY}/${PROJECT_ID}/mcp-server:${TAG}
+
+  # Override Device Manager image
+  device-manager:
+    image: ${REGISTRY}/${PROJECT_ID}/device-manager:${TAG}
+
+  # Override API Gateway image
+  api-gateway:
+    image: ${REGISTRY}/${PROJECT_ID}/api-gateway:${TAG}
+
+  # Override ML Pipeline image
+  ml-pipeline:
+    image: ${REGISTRY}/${PROJECT_ID}/ml-pipeline:${TAG}
+
   # Integration test runner
   integration-tests:
     image: ${REGISTRY}/${PROJECT_ID}/neural-test-runner:${TAG}

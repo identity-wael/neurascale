@@ -22,13 +22,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
 COPY neural-engine/requirements.txt .
+# Install base requirements first
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir \
-        tensorflow==2.15.0 \
-        torch==2.1.2 \
-        scikit-learn==1.4.0 \
-        xgboost==2.0.3
+    pip install --no-cache-dir -r requirements.txt
+
+# Install ML frameworks separately to better handle large packages
+RUN pip install --no-cache-dir tensorflow-cpu==2.15.0
+RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir scikit-learn==1.4.0 xgboost==2.0.3
 
 # Stage 2: Builder
 FROM python:3.12-slim AS builder

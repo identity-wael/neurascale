@@ -21,7 +21,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
 # Use lightweight requirements for CI builds
-COPY neural-engine/requirements-ci.txt ./requirements.txt
+COPY neural-engine/requirements-minimal.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir \

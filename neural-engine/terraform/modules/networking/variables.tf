@@ -71,3 +71,9 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "apis_enabled" {
+  description = "Flag indicating that all APIs have been enabled"
+  type        = bool
+  default     = true
+}

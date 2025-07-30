@@ -228,6 +228,14 @@ resource "google_project_iam_member" "github_actions_sql_admin" {
   depends_on = [module.project_apis]
 }
 
+resource "google_project_iam_member" "github_actions_cloudbuild_builds_builder" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${var.github_actions_service_account}"
+
+  depends_on = [module.project_apis]
+}
+
 # Grant GitHub Actions permission to act as the ingestion service account
 resource "google_service_account_iam_member" "github_actions_act_as" {
   service_account_id = google_service_account.neural_ingestion.name
@@ -287,6 +295,7 @@ module "networking" {
   private_subnet_cidr = var.private_subnet_cidr
   pods_cidr           = var.pods_cidr
   services_cidr       = var.services_cidr
+  apis_enabled        = module.project_apis.apis_enabled
 
   depends_on = [
     module.project_apis
@@ -388,6 +397,9 @@ module "security" {
   # Binary Authorization
   enable_binary_authorization = var.enable_binary_authorization
   gke_cluster_name            = var.enable_gke_cluster ? module.gke[0].cluster_name : ""
+
+  # API dependency
+  apis_enabled = module.project_apis.apis_enabled
 
   depends_on = [
     module.project_apis,

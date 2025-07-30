@@ -1,0 +1,12 @@
+# Constraints file to ensure compatible dependency versions
+# This file is used with pip install -c constraints.txt to prevent version conflicts
+
+# Pin protobuf to version compatible with TensorFlow 2.17
+protobuf<5.0.0,>=3.20.3
+
+# Pin other problematic dependencies
+aiohttp==3.12.14
+uvloop==0.21.0
+
+# Ensure Google Cloud packages don't pull in incompatible versions
+# All Google Cloud packages should respect the protobuf constraint above

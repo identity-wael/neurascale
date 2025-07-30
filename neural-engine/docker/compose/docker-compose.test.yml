@@ -35,10 +35,10 @@ services:
     environment:
       - POSTGRES_DB=neural_engine_test
       - POSTGRES_PASSWORD=test
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
+      # Only mount the init script, let data be ephemeral
       - ./test-data/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    tmpfs:
-      - /var/lib/postgresql/data
 
   # Test Redis
   redis:

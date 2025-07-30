@@ -299,7 +299,10 @@ jobs:
 
       - name: Wait for services
         run: |
-          timeout 300 bash -c 'until docker compose -f neural-engine/docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; done'
+          cd neural-engine
+          echo "Waiting for services to become healthy..."
+          docker compose -f docker/compose/docker-compose.yml ps
+          timeout 300 bash -c 'until docker compose -f docker/compose/docker-compose.yml ps | grep -q "healthy"; do sleep 5; echo "Waiting for services..."; docker compose -f docker/compose/docker-compose.yml ps; done'
 
       - name: Run integration tests
         run: |
@@ -307,15 +310,22 @@ jobs:
           export REGISTRY=${{ env.REGISTRY }}
           export PROJECT_ID=${{ env.PROJECT_ID }}
           export TAG=pr-${{ github.event.pull_request.number }}
+          export DB_PASSWORD=test
+          export REDIS_PASSWORD=test
 
           docker compose -f docker/compose/docker-compose.yml \
                         -f docker/compose/docker-compose.test.yml \
                         run integration-tests
 
-      - name: Collect logs
+      - name: Check service logs
         if: failure()
         run: |
           cd neural-engine
+          echo "=== Docker compose status ==="
+          docker compose -f docker/compose/docker-compose.yml ps
+          echo "=== Neural processor logs ==="
+          docker compose -f docker/compose/docker-compose.yml logs neural-processor
+          echo "=== All service logs ==="
           docker compose -f docker/compose/docker-compose.yml logs
 
       - name: Stop services

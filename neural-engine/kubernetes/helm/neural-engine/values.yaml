@@ -1,0 +1,308 @@
+# Default values for neural-engine
+# This is a YAML-formatted file
+# Declare variables to be passed into your templates
+
+# Global configuration
+global:
+  environment: development
+  projectId: "development-neurascale"
+  region: "northamerica-northeast1"
+
+# Image configuration
+image:
+  repository: "northamerica-northeast1-docker.pkg.dev/development-neurascale/neural-engine/neural-processor"
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Service account configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+
+# Neural Processor configuration
+processor:
+  enabled: true
+  name: neural-processor
+  replicas: 2
+
+  # Resource limits
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+  # GPU configuration
+  gpu:
+    enabled: false
+    type: "nvidia.com/gpu"
+    count: 1
+
+  # Environment variables
+  env:
+    - name: LOG_LEVEL
+      value: "info"
+    - name: METRICS_ENABLED
+      value: "true"
+    - name: PROCESSING_THREADS
+      value: "4"
+
+  # Autoscaling
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Device Manager configuration
+deviceManager:
+  enabled: true
+  name: device-manager
+  replicas: 2
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Service configuration
+  service:
+    type: LoadBalancer
+    port: 443
+    targetPort: 8080
+    annotations: {}
+
+# API Gateway configuration
+apiGateway:
+  enabled: true
+  name: api-gateway
+  replicas: 2
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+    hosts:
+      - host: api.neurascale.dev
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: api-neurascale-tls
+        hosts:
+          - api.neurascale.dev
+
+# ML Pipeline configuration
+mlPipeline:
+  enabled: true
+  name: ml-pipeline
+  replicas: 1
+
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+    requests:
+      cpu: 2000m
+      memory: 4Gi
+
+  # Model storage
+  modelStorage:
+    bucket: "neurascale-ml-models"
+    prefix: "production"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: neural-engine
+      - podSelector:
+          matchLabels:
+            app: neural-engine
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+
+  # Grafana dashboards
+  dashboards:
+    enabled: true
+    labels:
+      grafana_dashboard: "1"
+
+# Redis dependency
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    existingSecret: "neural-engine-redis"
+    existingSecretPasswordKey: "password"
+  replica:
+    replicaCount: 2
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# PostgreSQL dependency
+postgresql:
+  enabled: true
+  auth:
+    database: "neural_engine"
+    existingSecret: "neural-engine-postgresql"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  primary:
+    persistence:
+      size: 100Gi
+
+# ConfigMap data
+config:
+  processing:
+    batchSize: 100
+    timeout: 30
+    maxRetries: 3
+
+  streaming:
+    kafkaBootstrapServers: "kafka:9092"
+    topics:
+      eeg: "neural-data-eeg"
+      ecog: "neural-data-ecog"
+      lfp: "neural-data-lfp"
+      spikes: "neural-data-spikes"
+
+  storage:
+    bigtable:
+      instance: "neural-data"
+      table: "timeseries"
+    gcs:
+      bucket: "neural-data-storage"
+
+# Secrets configuration
+secrets:
+  create: true
+  # External secrets operator can be used instead
+  externalSecrets:
+    enabled: false
+    backend: gcpSecretsManager
+    projectId: "development-neurascale"
+
+# Affinity rules
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - neural-engine
+        topologyKey: kubernetes.io/hostname
+
+# Tolerations
+tolerations: []
+
+# Node selector
+nodeSelector: {}
+
+# Extra volumes
+extraVolumes: []
+
+# Extra volume mounts
+extraVolumeMounts: []
+
+# Extra containers
+extraContainers: []
+
+# Init containers
+initContainers: []
+
+# Lifecycle hooks
+lifecycle: {}
+
+# Priority class
+priorityClassName: ""
+
+# Topology spread constraints
+topologySpreadConstraints: []

@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "neural-engine.fullname" . }}-config
+  labels:
+    {{- include "neural-engine.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    server:
+      port: 8080
+      grpc:
+        port: 50051
+
+    environment: {{ .Values.global.environment }}
+    project_id: {{ .Values.global.projectId }}
+    region: {{ .Values.global.region }}
+
+    processing:
+      batch_size: {{ .Values.config.processing.batchSize }}
+      timeout: {{ .Values.config.processing.timeout }}
+      max_retries: {{ .Values.config.processing.maxRetries }}
+      threads: ${PROCESSING_THREADS:4}
+
+    streaming:
+      kafka:
+        bootstrap_servers: {{ .Values.config.streaming.kafkaBootstrapServers }}
+        consumer_group: neural-engine-{{ .Values.global.environment }}
+      topics:
+        eeg: {{ .Values.config.streaming.topics.eeg }}
+        ecog: {{ .Values.config.streaming.topics.ecog }}
+        lfp: {{ .Values.config.streaming.topics.lfp }}
+        spikes: {{ .Values.config.streaming.topics.spikes }}
+
+    storage:
+      bigtable:
+        project_id: {{ .Values.global.projectId }}
+        instance: {{ .Values.config.storage.bigtable.instance }}
+        table: {{ .Values.config.storage.bigtable.table }}
+      gcs:
+        bucket: {{ .Values.config.storage.gcs.bucket }}
+        prefix: {{ .Values.global.environment }}
+
+    monitoring:
+      metrics:
+        enabled: ${METRICS_ENABLED:true}
+        port: 9090
+        path: /metrics
+      tracing:
+        enabled: true
+        endpoint: jaeger-collector:14268
+
+    logging:
+      level: ${LOG_LEVEL:info}
+      format: json
+
+  neural-processing.yaml: |
+    # Neural processing specific configuration
+    signal_types:
+      - name: eeg
+        sampling_rate: 1000
+        channels: 64
+        filter:
+          type: butterworth
+          order: 4
+          low_cutoff: 0.5
+          high_cutoff: 100
+      - name: ecog
+        sampling_rate: 2000
+        channels: 128
+        filter:
+          type: butterworth
+          order: 4
+          low_cutoff: 1
+          high_cutoff: 300
+      - name: lfp
+        sampling_rate: 1000
+        channels: 32
+        filter:
+          type: butterworth
+          order: 4
+          low_cutoff: 1
+          high_cutoff: 200
+      - name: spikes
+        sampling_rate: 30000
+        channels: 96
+        detection:
+          threshold: 4.5
+          method: adaptive
+
+    preprocessing:
+      window_size: 1000  # ms
+      overlap: 100      # ms
+      artifact_removal:
+        enabled: true
+        methods:
+          - ica
+          - adaptive_filter
+
+    feature_extraction:
+      time_domain:
+        - mean
+        - variance
+        - skewness
+        - kurtosis
+      frequency_domain:
+        - power_spectral_density
+        - band_power
+        - spectral_entropy
+      time_frequency:
+        - wavelet_transform
+        - hilbert_transform

@@ -1,6 +1,6 @@
 """Authentication manager for MCP servers."""
 
-import jwt
+from jose import jwt
 import hashlib
 import hmac
 from typing import Dict, Optional, Any
@@ -100,7 +100,7 @@ class MCPAuthManager:
                 "token_payload": payload,
             }
 
-        except jwt.InvalidTokenError:
+        except jwt.JWTError:
             return None
         except Exception:
             return None

@@ -1,6 +1,6 @@
 # NeuraScale MCP (Model Context Protocol) Servers
 
-This directory contains the MCP server implementations for the NeuraScale Neural Engine, enabling AI assistants like Claude to interact directly with neural data, control BCI devices, and execute clinical workflows through standardized tool interfaces.
+This directory contains the MCP server implementations for the NeuraScale Neural Engine, enabling AI assistants like Claude to interact directly with neural data, control BCI devices, execute clinical workflows, and perform advanced neural data analysis through standardized tool interfaces.
 
 ## Overview
 
@@ -8,8 +8,8 @@ The NeuraScale MCP servers provide four specialized interfaces:
 
 1. **Neural Data Server** (`neural_data`) - Data access, analysis, and processing
 2. **Device Control Server** (`device_control`) - BCI device management and monitoring
-3. **Clinical Workflow Server** (`clinical`) - Clinical protocol execution
-4. **Analysis Server** (`analysis`) - Advanced neural data analysis
+3. **Clinical Server** (`clinical`) - Clinical workflow and patient management
+4. **Analysis Server** (`analysis`) - Advanced neural data analysis and ML operations
 
 ## Quick Start
 
@@ -31,14 +31,16 @@ pip install mcp websockets pyyaml numpy jsonschema
 python -m mcp.main
 
 # Start specific servers
-python -m mcp.main --servers neural_data device_control
+python -m mcp.main --servers neural_data device_control clinical analysis
 
 # Start with custom configuration
 python -m mcp.main --config /path/to/config.yaml --log-level DEBUG
 
-# Start individual servers
-python -c "from mcp.main import cli_neural_data; cli_neural_data()"
-python -c "from mcp.main import cli_device_control; cli_device_control()"
+# Start individual servers using CLI commands
+mcp-neural-data      # Neural Data Server (port 8100)
+mcp-device-control   # Device Control Server (port 8101)
+mcp-clinical         # Clinical Server (port 8102)
+mcp-analysis         # Analysis Server (port 8103)
 ```
 
 ### Claude Desktop Integration
@@ -48,20 +50,31 @@ Add to your Claude Desktop configuration (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "neurascale-neural": {
-      "command": "python",
-      "args": ["-c", "from mcp.main import cli_neural_data; cli_neural_data()"],
+    "neurascale-neural-data": {
+      "command": "mcp-neural-data",
+      "cwd": "/path/to/neurascale/neural-engine",
       "env": {
         "NEURASCALE_API_KEY": "your-api-key",
         "NEURAL_ENGINE_API_URL": "http://localhost:8000"
       }
     },
-    "neurascale-devices": {
-      "command": "python",
-      "args": [
-        "-c",
-        "from mcp.main import cli_device_control; cli_device_control()"
-      ],
+    "neurascale-device-control": {
+      "command": "mcp-device-control",
+      "cwd": "/path/to/neurascale/neural-engine",
+      "env": {
+        "NEURASCALE_API_KEY": "your-api-key"
+      }
+    },
+    "neurascale-clinical": {
+      "command": "mcp-clinical",
+      "cwd": "/path/to/neurascale/neural-engine",
+      "env": {
+        "NEURASCALE_API_KEY": "your-api-key"
+      }
+    },
+    "neurascale-analysis": {
+      "command": "mcp-analysis",
+      "cwd": "/path/to/neurascale/neural-engine",
       "env": {
         "NEURASCALE_API_KEY": "your-api-key"
       }
@@ -147,6 +160,92 @@ session = await client.call_tool("start_recording", {
     "duration": 300,  # 5 minutes
     "patient_id": "patient_123",
     "session_name": "Resting State EEG"
+})
+```
+
+### Clinical Server
+
+**Port**: 8102
+**Tools Available**:
+
+- `create_patient_record` - Create new patient record
+- `get_patient_record` - Retrieve patient information
+- `update_patient_record` - Update patient data
+- `create_treatment_plan` - Create treatment plan
+- `record_treatment_session` - Record treatment session
+- `generate_clinical_report` - Generate clinical reports
+- `record_clinical_outcome` - Record outcome measures
+- `track_patient_progress` - Track patient progress
+- `get_clinical_protocols` - Get clinical protocols
+- `check_treatment_compliance` - Check compliance
+- `report_adverse_event` - Report adverse events
+
+**Example Usage**:
+
+```python
+# Create patient record
+patient = await client.call_tool("create_patient_record", {
+    "external_id": "MRN12345",
+    "demographics": {
+        "date_of_birth": "1980-01-15",
+        "gender": "female"
+    },
+    "consent": {
+        "data_collection": True,
+        "research_participation": True,
+        "consent_date": "2025-01-30"
+    }
+})
+
+# Create treatment plan
+plan = await client.call_tool("create_treatment_plan", {
+    "patient_id": "patient_001",
+    "treatment_type": "neurostimulation",
+    "protocol": {
+        "name": "TMS for Depression",
+        "sessions_per_week": 5,
+        "total_sessions": 30
+    },
+    "start_date": "2025-02-01"
+})
+```
+
+### Analysis Server
+
+**Port**: 8103
+**Tools Available**:
+
+- `compute_time_frequency` - Time-frequency analysis
+- `analyze_connectivity` - Functional connectivity analysis
+- `localize_sources` - Source localization
+- `analyze_events` - Event-related analysis
+- `train_classifier` - Train ML classifiers
+- `predict_neural_states` - Predict neural states
+- `run_deep_analysis` - Deep learning analysis
+- `statistical_analysis` - Statistical analysis
+- `discover_biomarkers` - Biomarker discovery
+- `setup_realtime_analysis` - Real-time analysis
+- `generate_analysis_report` - Generate reports
+
+**Example Usage**:
+
+```python
+# Compute time-frequency representation
+tf_result = await client.call_tool("compute_time_frequency", {
+    "session_id": "session_001",
+    "channels": [0, 1, 2, 3],
+    "method": "morlet",
+    "freq_range": [1, 100],
+    "time_range": [0, 60]
+})
+
+# Train classifier
+model = await client.call_tool("train_classifier", {
+    "dataset_id": "dataset_001",
+    "model_type": "svm",
+    "target_variable": "mental_state",
+    "features": ["alpha_power", "beta_power", "connectivity"],
+    "validation_method": "cross_validation"
 })
 ```
 
@@ -301,6 +400,7 @@ export GCP_PROJECT_ID=your-project-id
 ```
 
 This script will:
+
 - Enable the Secret Manager API
 - Create secure random values for MCP secrets
 - Set up appropriate IAM permissions
@@ -324,6 +424,7 @@ gcloud secrets versions access latest --secret="mcp-api-key-salt"
 #### Required IAM Permissions
 
 The service account running the MCP server needs:
+
 - `roles/secretmanager.secretAccessor` - To read secret values
 
 #### Environment Variables

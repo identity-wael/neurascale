@@ -13,6 +13,8 @@ from aiohttp import web
 from .config import load_config
 from .servers.neural_data.server import NeuralDataMCPServer
 from .servers.device_control.server import DeviceControlMCPServer
+from .servers.clinical.server import ClinicalMCPServer
+from .servers.analysis.server import AnalysisMCPServer
 
 
 class MCPServerManager:
@@ -89,7 +91,7 @@ class MCPServerManager:
             http_port: Port for HTTP health server
         """
         if server_types is None:
-            server_types = ["neural_data", "device_control"]
+            server_types = ["neural_data", "device_control", "clinical", "analysis"]
 
         self.logger.info(f"Starting MCP servers: {server_types}")
 
@@ -118,6 +120,10 @@ class MCPServerManager:
             server = NeuralDataMCPServer(self.config)
         elif server_type == "device_control":
             server = DeviceControlMCPServer(self.config)
+        elif server_type == "clinical":
+            server = ClinicalMCPServer(self.config)
+        elif server_type == "analysis":
+            server = AnalysisMCPServer(self.config)
         else:
             raise ValueError(f"Unknown server type: {server_type}")
 
@@ -273,6 +279,50 @@ def cli_device_control():
             pass
 
     asyncio.run(run_device_control())
+
+
+def cli_clinical():
+    """CLI entry point for clinical server only."""
+
+    async def run_clinical():
+        config = load_config()
+        manager = MCPServerManager(config)
+        manager.setup_signal_handlers()
+        await manager.start_servers(["clinical"])
+        await manager.run_forever()
+
+    # Use uvloop for better performance
+    if hasattr(asyncio, "set_event_loop_policy"):
+        try:
+            import uvloop
+
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+
+    asyncio.run(run_clinical())
+
+
+def cli_analysis():
+    """CLI entry point for analysis server only."""
+
+    async def run_analysis():
+        config = load_config()
+        manager = MCPServerManager(config)
+        manager.setup_signal_handlers()
+        await manager.start_servers(["analysis"])
+        await manager.run_forever()
+
+    # Use uvloop for better performance
+    if hasattr(asyncio, "set_event_loop_policy"):
+        try:
+            import uvloop
+
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+
+    asyncio.run(run_analysis())
 
 
 if __name__ == "__main__":

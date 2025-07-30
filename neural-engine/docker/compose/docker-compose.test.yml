@@ -5,7 +5,7 @@ version: '3.9'
 
 services:
   neural-processor:
-    image: neurascale/neural-processor:test
+    image: ${REGISTRY}/${PROJECT_ID}/neural-processor:${TAG}
     build:
       context: ../..
       dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
@@ -48,7 +48,7 @@ services:
 
   # Integration test runner
   integration-tests:
-    image: neurascale/integration-tests:latest
+    image: ${REGISTRY}/${PROJECT_ID}/neural-test-runner:${TAG}
     build:
       context: ../..
       dockerfile: neural-engine/docker/dockerfiles/tools/test-runner/Dockerfile
@@ -93,7 +93,7 @@ services:
       --format json
       --output /results/trivy-scan.json
       --severity HIGH,CRITICAL
-      neurascale/neural-processor:test
+      ${REGISTRY}/${PROJECT_ID}/neural-processor:${TAG}
 
   # Test reporting
   allure:

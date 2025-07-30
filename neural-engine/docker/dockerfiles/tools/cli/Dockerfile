@@ -18,7 +18,8 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
-COPY neural-engine/requirements.txt .
+# Use minimal requirements for faster CI builds
+COPY neural-engine/requirements-minimal.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir \

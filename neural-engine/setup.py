@@ -59,6 +59,11 @@ setup(
     entry_points={
         "console_scripts": [
             "neural-engine=neural_engine.cli:main",
+            "mcp-neural-data=mcp.main:cli_neural_data",
+            "mcp-device-control=mcp.main:cli_device_control",
+            "mcp-clinical=mcp.main:cli_clinical",
+            "mcp-analysis=mcp.main:cli_analysis",
+            "mcp-server=mcp.main:main",
         ],
     },
 )

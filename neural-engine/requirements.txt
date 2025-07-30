@@ -100,6 +100,10 @@ google-cloud-error-reporting==1.12.0
 mne==1.8.0  # For EEG/MEG processing
 pyedflib==0.1.38  # For EDF file format
 
+# MCP Server Dependencies
+aiohttp==3.10.10  # For MCP server HTTP health checks
+uvloop==0.21.0  # High-performance event loop for MCP servers
+
 # Monitoring and observability
 prometheus-client==0.21.0  # Prometheus metrics
 opentelemetry-api==1.27.0  # OpenTelemetry tracing - compatible with Google Cloud

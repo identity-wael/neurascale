@@ -1,5 +1,3 @@
-version: '3.9'
-
 # Base Docker Compose configuration for Neural Engine
 # This file defines core services and networks
 

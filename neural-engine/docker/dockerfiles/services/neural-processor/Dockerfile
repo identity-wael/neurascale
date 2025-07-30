@@ -71,7 +71,8 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONHASHSEED=random \
-    NEURAL_ENGINE_ENV=production
+    NEURAL_ENGINE_ENV=production \
+    PYTHONPATH=/app
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/tmp && \

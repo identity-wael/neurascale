@@ -3,7 +3,7 @@
 
 services:
   neural-processor:
-    image: ${REGISTRY}/${PROJECT_ID}/neural-processor:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/neural-processor:${TAG}
     build:
       context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
@@ -47,23 +47,23 @@ services:
 
   # Override MCP server image
   mcp-server:
-    image: ${REGISTRY}/${PROJECT_ID}/mcp-server:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/mcp-server:${TAG}
 
   # Override Device Manager image
   device-manager:
-    image: ${REGISTRY}/${PROJECT_ID}/device-manager:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/device-manager:${TAG}
 
   # Override API Gateway image
   api-gateway:
-    image: ${REGISTRY}/${PROJECT_ID}/api-gateway:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/api-gateway:${TAG}
 
   # Override ML Pipeline image
   ml-pipeline:
-    image: ${REGISTRY}/${PROJECT_ID}/ml-pipeline:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/ml-pipeline:${TAG}
 
   # Integration test runner
   integration-tests:
-    image: ${REGISTRY}/${PROJECT_ID}/neural-test-runner:${TAG}
+    image: ${REGISTRY}/${PROJECT_ID}/neural-engine-development/neural-test-runner:${TAG}
     build:
       context: ../../..
       dockerfile: neural-engine/docker/dockerfiles/tools/test-runner/Dockerfile
@@ -110,7 +110,7 @@ services:
       --format json
       --output /results/trivy-scan.json
       --severity HIGH,CRITICAL
-      ${REGISTRY}/${PROJECT_ID}/neural-processor:${TAG}
+      ${REGISTRY}/${PROJECT_ID}/neural-engine-development/neural-processor:${TAG}
 
   # Test reporting
   allure:

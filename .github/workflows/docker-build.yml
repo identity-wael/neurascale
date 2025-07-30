@@ -62,13 +62,20 @@ jobs:
         with:
           install: true
 
-      - name: Log in to Google Container Registry
+      - name: Authenticate to Google Cloud
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: google-github-actions/auth@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: _json_key
-          password: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        if: github.event_name != 'pull_request'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        if: github.event_name != 'pull_request'
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Extract metadata
         id: meta
@@ -174,13 +181,20 @@ jobs:
         with:
           install: true
 
-      - name: Log in to Google Container Registry
+      - name: Authenticate to Google Cloud
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: google-github-actions/auth@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: _json_key
-          password: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        if: github.event_name != 'pull_request'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        if: github.event_name != 'pull_request'
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Extract metadata
         id: meta
@@ -211,6 +225,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     strategy:
       matrix:

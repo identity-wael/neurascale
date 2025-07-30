@@ -1,0 +1,31 @@
+# Minimal requirements for CI builds to avoid dependency conflicts
+# This file contains only essential packages needed for running the services
+
+# Core dependencies
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.0
+python-dotenv==1.0.1
+prometheus-client==0.21.0
+redis==5.2.0
+grpcio==1.65.5
+protobuf==4.25.8
+
+# Data Processing (minimal)
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+
+# Neuroscience libraries (essential)
+mne==1.8.0
+pyedflib==0.1.38
+
+# GCP Services (essential)
+google-cloud-storage==2.19.0
+google-cloud-pubsub==2.27.1
+google-cloud-logging==3.12.0
+
+# Utilities
+click==8.1.7
+pyyaml==6.0.2
+requests==2.32.4

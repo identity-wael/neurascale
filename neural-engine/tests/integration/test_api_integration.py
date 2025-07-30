@@ -11,14 +11,19 @@ def test_health_endpoint():
     """Test the health endpoint."""
     response = requests.get(f"{API_URL}/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert "timestamp" in data
+    assert data["version"] == "2.0.0"
 
 
-def test_ready_endpoint():
-    """Test the ready endpoint."""
-    response = requests.get(f"{API_URL}/ready")
+def test_api_v2_endpoint():
+    """Test the API v2 endpoint."""
+    response = requests.get(f"{API_URL}/api/v2")
     assert response.status_code == 200
-    assert response.json() == {"status": "ready"}
+    data = response.json()
+    assert data["version"] == "2.0.0"
+    assert "_links" in data
 
 
 def test_home_endpoint():
@@ -26,9 +31,9 @@ def test_home_endpoint():
     response = requests.get(f"{API_URL}/")
     assert response.status_code == 200
     data = response.json()
-    assert data["service"] == "Neural Engine API"
-    assert data["version"] == "0.1.0"
-    assert data["status"] == "ready"
+    assert data["service"] == "NeuraScale Neural Engine API"
+    assert data["version"] == "2.0.0"
+    assert data["status"] == "operational"
 
 
 def test_api_cors_headers():

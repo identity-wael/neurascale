@@ -27,18 +27,17 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Copy requirements first for better caching
 COPY requirements.txt ./
+COPY constraints.txt ./
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -c constraints.txt -r requirements.txt
 
 # Install additional MCP server dependencies
 RUN pip install --no-cache-dir \
     websockets==12.0 \
-    uvloop==0.19.0 \
+    uvloop==0.21.0 \
     jsonschema==4.21.1 \
-    PyYAML==6.0.1 \
-    google-cloud-secret-manager==2.21.1 \
-    aiohttp==3.9.1
+    PyYAML==6.0.1
 
 # Copy source code and build files
 COPY src/ /app/src/

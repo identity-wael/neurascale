@@ -89,6 +89,7 @@ pymemcache==4.0.0
 # Security
 cryptography==44.0.1  # Updated to fix security vulnerability
 pyjwt==2.10.1  # Updated to fix security vulnerability
+protobuf==4.25.8  # Pin protobuf version for TensorFlow compatibility
 
 # Google Cloud Error Reporting (missing from original)
 google-cloud-error-reporting==1.12.0

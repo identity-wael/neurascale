@@ -18,21 +18,22 @@ ENV PIP_DEFAULT_TIMEOUT=300 \
 
 # First stage: Dependencies
 FROM base AS dependencies
-# Copy requirements
+# Copy requirements and constraints
 COPY requirements.txt .
+COPY constraints.txt .
 # Install dependencies in chunks to avoid timeout
 RUN pip install --upgrade pip setuptools wheel && \
     # Install core dependencies first
     grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -r /dev/stdin && \
+    pip install -c constraints.txt -r /dev/stdin && \
     # Install deep learning dependencies
     grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
-    pip install -r /dev/stdin && \
+    pip install -c constraints.txt -r /dev/stdin && \
     # Install Google Cloud dependencies
     grep -E '^google-cloud-' requirements.txt | \
-    pip install -r /dev/stdin && \
+    pip install -c constraints.txt -r /dev/stdin && \
     # Install remaining dependencies
-    pip install -r requirements.txt
+    pip install -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app

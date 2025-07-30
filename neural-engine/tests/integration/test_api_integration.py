@@ -38,6 +38,13 @@ def test_home_endpoint():
 
 def test_api_cors_headers():
     """Test that CORS headers are properly set."""
-    response = requests.options(f"{API_URL}/health")
+    # Test CORS on a regular GET request since FastAPI handles CORS differently
+    response = requests.get(
+        f"{API_URL}/health", headers={"Origin": "http://localhost:3000"}
+    )
     assert response.status_code == 200
-    assert "Access-Control-Allow-Origin" in response.headers
+    # CORS headers should be present in the response
+    assert (
+        "Access-Control-Allow-Origin" in response.headers
+        or response.headers.get("access-control-allow-origin") == "*"
+    )

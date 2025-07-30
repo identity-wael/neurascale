@@ -226,9 +226,9 @@ variable "redis_snapshot_period" {
 }
 
 variable "redis_snapshot_start_time" {
-  description = "Redis snapshot start time"
+  description = "Redis snapshot start time in RFC3339 format"
   type        = string
-  default     = "04:00"
+  default     = "2024-01-01T04:00:00Z"
 }
 
 variable "maintenance_day_redis" {

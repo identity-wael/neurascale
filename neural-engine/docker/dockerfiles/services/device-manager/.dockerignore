@@ -1,0 +1,44 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Development
+.git/
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+*_test.go
+testdata/
+coverage.*
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+Dockerfile
+.dockerignore
+
+# Build artifacts
+dist/
+build/
+bin/

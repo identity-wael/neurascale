@@ -1,0 +1,81 @@
+# Docker Compose override for Kubernetes-compatible images
+# Use this to test the same images that will be deployed to Kubernetes
+
+version: '3.8'
+
+services:
+  neural-processor:
+    image: gcr.io/development-neurascale/neural-processor:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
+    environment:
+      - LOG_LEVEL=debug
+      - METRICS_ENABLED=true
+    labels:
+      - "com.neurascale.component=neural-processor"
+      - "com.neurascale.version=latest"
+
+  device-manager:
+    image: gcr.io/development-neurascale/device-manager:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/services/device-manager/Dockerfile
+    environment:
+      - LOG_LEVEL=debug
+    labels:
+      - "com.neurascale.component=device-manager"
+      - "com.neurascale.version=latest"
+
+  api-gateway:
+    image: gcr.io/development-neurascale/api-gateway:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/services/api-gateway/Dockerfile
+    environment:
+      - UPSTREAM_URL=http://neural-processor:8080
+      - RATE_LIMIT=100
+    labels:
+      - "com.neurascale.component=api-gateway"
+      - "com.neurascale.version=latest"
+
+  ml-pipeline:
+    image: gcr.io/development-neurascale/ml-pipeline:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/services/ml-pipeline/Dockerfile
+    environment:
+      - MODEL_BUCKET=neurascale-ml-models-dev
+      - MODEL_PREFIX=development
+    labels:
+      - "com.neurascale.component=ml-pipeline"
+      - "com.neurascale.version=latest"
+
+  mcp-server:
+    image: gcr.io/development-neurascale/mcp-server:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/services/mcp-server/Dockerfile
+    environment:
+      - MCP_ENV=development
+      - LOG_LEVEL=debug
+    labels:
+      - "com.neurascale.component=mcp-server"
+      - "com.neurascale.version=latest"
+
+  # CLI tool for testing
+  cli:
+    image: gcr.io/development-neurascale/neural-cli:latest
+    build:
+      context: ../../..
+      dockerfile: neural-engine/docker/dockerfiles/tools/cli/Dockerfile
+    stdin_open: true
+    tty: true
+    networks:
+      - neural-net
+    volumes:
+      - ./test-data:/workspace/data
+    environment:
+      - API_URL=http://api-gateway:8080
+      - MCP_URL=http://mcp-server:3001
+    command: /bin/bash

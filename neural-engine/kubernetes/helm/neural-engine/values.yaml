@@ -10,7 +10,7 @@ global:
 
 # Image configuration
 image:
-  repository: "northamerica-northeast1-docker.pkg.dev/development-neurascale/neural-engine/neural-processor"
+  repository: "gcr.io/development-neurascale/neural-processor"
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -84,6 +84,10 @@ deviceManager:
   name: device-manager
   replicas: 2
 
+  image:
+    repository: "gcr.io/development-neurascale/device-manager"
+    tag: "latest"
+
   resources:
     limits:
       cpu: 1000m
@@ -92,18 +96,30 @@ deviceManager:
       cpu: 500m
       memory: 1Gi
 
+  # USB device access
+  privileged: false  # Set to true for USB device access
+  usbAccess: false   # Mount /dev/bus/usb
+
   # Service configuration
   service:
     type: LoadBalancer
     port: 443
-    targetPort: 8080
+    targetPort: 8081
     annotations: {}
+
+  # Node selector for USB devices
+  nodeSelector: {}
+    # hardware: usb-enabled
 
 # API Gateway configuration
 apiGateway:
   enabled: true
   name: api-gateway
   replicas: 2
+
+  image:
+    repository: "gcr.io/development-neurascale/api-gateway"
+    tag: "latest"
 
   resources:
     limits:
@@ -136,10 +152,15 @@ mlPipeline:
   name: ml-pipeline
   replicas: 1
 
+  image:
+    repository: "gcr.io/development-neurascale/ml-pipeline"
+    tag: "latest"
+
   resources:
     limits:
       cpu: 4000m
       memory: 8Gi
+      nvidia.com/gpu: 1  # Request 1 GPU when enabled
     requests:
       cpu: 2000m
       memory: 4Gi
@@ -148,6 +169,38 @@ mlPipeline:
   modelStorage:
     bucket: "neurascale-ml-models"
     prefix: "production"
+
+  # GPU configuration
+  nodeSelector: {}
+    # accelerator: nvidia-tesla-t4
+
+# MCP Server configuration
+mcpServer:
+  enabled: true
+  name: mcp-server
+  replicas: 2
+
+  image:
+    repository: "gcr.io/development-neurascale/mcp-server"
+    tag: "latest"
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # Environment variables
+  env: []
+
+  # Autoscaling
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
 # Service configuration
 service:

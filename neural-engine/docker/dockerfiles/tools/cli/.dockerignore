@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+.pytest_cache/
+
+# Development
+.git/
+.gitignore
+.env
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+docs/
+*.md
+
+# Tests
+tests/
+test/
+
+# Data files
+*.h5
+*.hdf5
+*.npy
+*.npz
+data/
+datasets/
+
+# CLI specific
+.neural-cli/
+*.history

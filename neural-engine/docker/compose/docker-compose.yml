@@ -1,0 +1,172 @@
+version: '3.9'
+
+# Base Docker Compose configuration for Neural Engine
+# This file defines core services and networks
+
+services:
+  # Neural data processor - main processing engine
+  neural-processor:
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/services/neural-processor/Dockerfile
+    image: neurascale/neural-processor:${VERSION:-latest}
+    container_name: neural-processor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # HTTP API
+      - "50051:50051" # gRPC
+      - "9090:9090"   # Metrics
+    environment:
+      - NEURAL_ENGINE_ENV=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - DATABASE_URL=postgresql://neural:${DB_PASSWORD}@postgres:5432/neural_engine
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - BIGTABLE_INSTANCE=${BIGTABLE_INSTANCE:-neural-data}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - neural-net
+    volumes:
+      - neural-data:/app/data
+      - neural-logs:/app/logs
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: neural-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=neural_engine
+      - POSTGRES_USER=neural
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - neural-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neural -d neural_engine"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: neural-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - neural-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MCP Server - Model Context Protocol server
+  mcp-server:
+    build:
+      context: ../..
+      dockerfile: neural-engine/docker/dockerfiles/services/mcp-server/Dockerfile
+    image: neurascale/mcp-server:${VERSION:-latest}
+    container_name: neural-mcp-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - MCP_ENV=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - DATABASE_URL=postgresql://neural:${DB_PASSWORD}@postgres:5432/neural_engine
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - neural-net
+    volumes:
+      - mcp-data:/app/data
+      - mcp-logs:/app/logs
+
+  # Kafka message broker
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: neural-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    networks:
+      - neural-net
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: neural-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - neural-net
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+
+networks:
+  neural-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  neural-data:
+    driver: local
+  neural-logs:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  kafka-data:
+    driver: local
+  zookeeper-data:
+    driver: local
+  zookeeper-logs:
+    driver: local
+  mcp-data:
+    driver: local
+  mcp-logs:
+    driver: local

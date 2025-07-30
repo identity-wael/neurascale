@@ -1,0 +1,134 @@
+{{- if .Values.mlPipeline.enabled }}
+apiVersion: {{ include "neural-engine.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "neural-engine.fullname" . }}-ml-pipeline
+  labels:
+    {{- include "neural-engine.labels" . | nindent 4 }}
+    component: ml-pipeline
+spec:
+  replicas: {{ .Values.mlPipeline.replicas }}
+  selector:
+    matchLabels:
+      {{- include "neural-engine.selectorLabels" . | nindent 6 }}
+      component: ml-pipeline
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
+        prometheus.io/path: "/metrics"
+      labels:
+        {{- include "neural-engine.selectorLabels" . | nindent 8 }}
+        component: ml-pipeline
+        version: {{ .Values.image.tag }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "neural-engine.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: ml-pipeline
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.mlPipeline.image.repository }}:{{ .Values.mlPipeline.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: grpc
+              containerPort: 50051
+              protocol: TCP
+            - name: metrics
+              containerPort: 9093
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment }}
+            - name: LOG_LEVEL
+              value: {{ .Values.mlPipeline.logLevel | default "info" }}
+            - name: MODEL_BUCKET
+              value: {{ .Values.mlPipeline.modelStorage.bucket }}
+            - name: MODEL_PREFIX
+              value: {{ .Values.mlPipeline.modelStorage.prefix }}
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "neural-engine.fullname" . }}-secrets
+                  key: redis-url
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "neural-engine.fullname" . }}-secrets
+                  key: database-url
+            {{- if .Values.mlPipeline.resources.limits }}
+            {{- if index .Values.mlPipeline.resources.limits "nvidia.com/gpu" }}
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
+            - name: TF_FORCE_GPU_ALLOW_GROWTH
+              value: "true"
+            {{- end }}
+            {{- end }}
+            {{- with .Values.mlPipeline.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.mlPipeline.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: models
+              mountPath: /app/models
+            - name: cache
+              mountPath: /app/cache
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neural-engine.fullname" . }}-config
+        - name: models
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.mlPipeline.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

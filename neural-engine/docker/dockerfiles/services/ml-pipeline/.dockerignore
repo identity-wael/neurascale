@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+.pytest_cache/
+.coverage
+*.cover
+.mypy_cache/
+
+# ML/Data
+*.h5
+*.hdf5
+*.pkl
+*.pth
+*.onnx
+*.pb
+data/
+datasets/
+checkpoints/
+wandb/
+mlruns/
+.ipynb_checkpoints/
+*.ipynb
+
+# Development
+.git/
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Documentation
+docs/
+*.md
+
+# Tests
+tests/
+test/
+*_test.py
+
+# CI/CD
+.github/
+Dockerfile
+.dockerignore
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Large model files (will be mounted as volume)
+models/
+pretrained/

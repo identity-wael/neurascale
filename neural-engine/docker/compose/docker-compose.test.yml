@@ -43,8 +43,8 @@ services:
   # Test Redis
   redis:
     command: redis-server --requirepass test
-    tmpfs:
-      - /data
+    # Remove tmpfs to avoid conflict with main compose file
+    # Redis data will be ephemeral anyway in test environment
 
   # Integration test runner
   integration-tests:

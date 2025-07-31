@@ -81,6 +81,9 @@ jobs:
       - name: Ensure Artifact Registry repository exists
         if: github.event_name != 'pull_request'
         run: |
+          # Enable Artifact Registry API
+          gcloud services enable artifactregistry.googleapis.com --project=${{ env.PROJECT_ID }} || true
+
           # Try to create repository, ignore if it already exists
           gcloud artifacts repositories create neural-engine-development \
             --repository-format=docker \
@@ -210,6 +213,9 @@ jobs:
       - name: Ensure Artifact Registry repository exists
         if: github.event_name != 'pull_request'
         run: |
+          # Enable Artifact Registry API
+          gcloud services enable artifactregistry.googleapis.com --project=${{ env.PROJECT_ID }} || true
+
           # Try to create repository, ignore if it already exists
           gcloud artifacts repositories create neural-engine-development \
             --repository-format=docker \
@@ -284,6 +290,9 @@ jobs:
 
       - name: Ensure Artifact Registry repository exists
         run: |
+          # Enable Artifact Registry API
+          gcloud services enable artifactregistry.googleapis.com --project=${{ env.PROJECT_ID }} || true
+
           # Try to create repository, ignore if it already exists
           gcloud artifacts repositories create neural-engine-development \
             --repository-format=docker \

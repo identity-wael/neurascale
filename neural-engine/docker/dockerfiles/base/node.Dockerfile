@@ -20,9 +20,9 @@ RUN npm install -g \
     pm2@5.3.0 \
     pino-pretty@10.3.0
 
-# Create non-root user
-RUN addgroup -g 1000 neural && \
-    adduser -D -u 1000 -G neural neural
+# Create non-root user (check if group exists first)
+RUN addgroup -g 1000 neural 2>/dev/null || true && \
+    adduser -D -u 1000 -G neural neural 2>/dev/null || true
 
 # Set npm configuration
 RUN npm config set update-notifier false && \

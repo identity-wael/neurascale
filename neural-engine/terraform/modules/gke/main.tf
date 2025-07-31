@@ -116,12 +116,15 @@ resource "google_container_cluster" "neural_engine" {
   # Note: cluster_telemetry block was deprecated in favor of monitoring_config
 
   # Resource usage export to BigQuery
-  resource_usage_export_config {
-    enable_network_egress_metering       = true
-    enable_resource_consumption_metering = true
+  dynamic "resource_usage_export_config" {
+    for_each = var.resource_usage_dataset_id != "" ? [1] : []
+    content {
+      enable_network_egress_metering       = true
+      enable_resource_consumption_metering = true
 
-    bigquery_destination {
-      dataset_id = var.resource_usage_dataset_id
+      bigquery_destination {
+        dataset_id = var.resource_usage_dataset_id
+      }
     }
   }
 

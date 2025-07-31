@@ -610,3 +610,5 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 ---
 
 **Built with ❤️ and 🧠 by the NeuraScale Team**
+
+# Trigger CI

@@ -64,7 +64,7 @@ enable_storage_lifecycle_policies = true
 data_retention_days               = 2555 # 7 years for HIPAA compliance
 
 # Security configuration
-enable_enhanced_security    = false # Temporarily disabled - VPC service controls require access policy
+enable_enhanced_security    = true  # Keep security module to avoid destroying KMS resources
 enable_kms_encryption       = false # Temporarily disabled - KMS region incompatible with US storage
 enable_binary_authorization = false # Temporarily disabled - requires PEM key setup
 

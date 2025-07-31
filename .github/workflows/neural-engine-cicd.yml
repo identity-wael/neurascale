@@ -326,13 +326,24 @@ jobs:
       - name: Enable Required APIs
         run: |
           echo "Enabling required APIs for ${{ needs.setup.outputs.environment }}..."
-          # Enable all required APIs for enhanced security features
+
+          # Enable APIs in the environment-specific project
+          echo "Enabling APIs in ${{ needs.setup.outputs.project_id }}..."
           gcloud services enable cloudkms.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Cloud KMS API"
           gcloud services enable accesscontextmanager.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Access Context Manager API"
           gcloud services enable containeranalysis.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Container Analysis API"
           gcloud services enable binaryauthorization.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Binary Authorization API"
           gcloud services enable sqladmin.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable SQL Admin API"
           gcloud services enable redis.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Redis API"
+
+          # Also enable APIs in the main neurascale project (needed for cross-project resources)
+          echo "Enabling APIs in main neurascale project (555656387124)..."
+          gcloud services enable cloudkms.googleapis.com --project=555656387124 || echo "Failed to enable Cloud KMS API in main project"
+          gcloud services enable accesscontextmanager.googleapis.com --project=555656387124 || echo "Failed to enable Access Context Manager API in main project"
+          gcloud services enable containeranalysis.googleapis.com --project=555656387124 || echo "Failed to enable Container Analysis API in main project"
+          gcloud services enable binaryauthorization.googleapis.com --project=555656387124 || echo "Failed to enable Binary Authorization API in main project"
+          gcloud services enable sqladmin.googleapis.com --project=555656387124 || echo "Failed to enable SQL Admin API in main project"
+          gcloud services enable redis.googleapis.com --project=555656387124 || echo "Failed to enable Redis API in main project"
 
           # Enable BigQuery Data Transfer API for production
           if [[ "${{ needs.setup.outputs.environment }}" == "production" ]]; then
@@ -344,8 +355,8 @@ jobs:
           gcloud services list --enabled --project=${{ needs.setup.outputs.project_id }} | grep -E "bigquery|bigtable|compute|container|cloudfunctions|cloudrun|storage|kms|accesscontext|binary|sqladmin|redis" || true
 
           # Wait for APIs to propagate
-          echo "Waiting 30 seconds for APIs to propagate..."
-          sleep 30
+          echo "Waiting 60 seconds for APIs to propagate..."
+          sleep 60
 
       - name: Clean up Bigtable App Profiles
         if: needs.setup.outputs.environment == 'production'

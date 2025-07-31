@@ -64,7 +64,7 @@ enable_db_high_availability = true
 
 # Storage configuration
 storage_location                  = "US"
-backup_location                   = "ASIA-SOUTHEAST1" # Different continent for DR (match production)
+backup_location                   = "NORTHAMERICA-NORTHEAST1" # Same region as primary resources
 enable_storage_lifecycle_policies = true
 data_retention_days               = 2555 # 7 years for HIPAA compliance (match production)
 

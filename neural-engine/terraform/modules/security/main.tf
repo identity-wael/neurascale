@@ -163,7 +163,7 @@ resource "google_kms_crypto_key_iam_member" "application_encrypter" {
 resource "google_kms_crypto_key_iam_member" "bigquery_encrypter" {
   crypto_key_id = google_kms_crypto_key.bigquery.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquery.iam.gserviceaccount.com"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
 }
 
 # Data source for project number

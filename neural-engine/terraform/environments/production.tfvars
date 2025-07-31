@@ -36,22 +36,22 @@ services_cidr       = "10.2.0.0/20"
 
 # GKE configuration
 enable_gke_cluster       = true
-gke_general_machine_type = "n2-standard-8"
-gke_neural_machine_type  = "n2-highmem-16"
-enable_gpu_pool          = true
+gke_general_machine_type = "e2-standard-2"  # Reduced to fit quota (2 vCPUs)
+gke_neural_machine_type  = "n2-standard-4"  # Reduced to fit quota (4 vCPUs)
+enable_gpu_pool          = false  # Disabled - T4 not available in region
 gpu_type                 = "nvidia-tesla-t4"
 
 # GKE node pool configurations for production
-general_pool_node_count = 3
-general_pool_min_nodes  = 2
-general_pool_max_nodes  = 10
-neural_pool_node_count  = 2
-neural_pool_min_nodes   = 1
-neural_pool_max_nodes   = 5
+general_pool_node_count = 2    # Reduced to fit quota (4 vCPUs total)
+general_pool_min_nodes  = 1
+general_pool_max_nodes  = 3
+neural_pool_node_count  = 1    # Reduced to fit quota (4 vCPUs total)
+neural_pool_min_nodes   = 0
+neural_pool_max_nodes   = 2
 
 # Database configuration
 enable_database             = true
-db_tier                     = "db-n1-highmem-8"
+db_tier                     = "db-custom-8-32768"  # Custom tier for PostgreSQL
 db_disk_size                = 1000
 redis_memory_gb             = 32
 redis_tier                  = "STANDARD_HA"

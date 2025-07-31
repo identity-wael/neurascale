@@ -328,7 +328,7 @@ module "networking" {
   pods_cidr                         = var.pods_cidr
   services_cidr                     = var.services_cidr
   apis_enabled                      = module.project_apis.apis_enabled
-  enable_private_service_connection = false # Disabled - requires Service Networking API in neurascale project
+  enable_private_service_connection = true # Enable for Cloud SQL and Redis
 
   depends_on = [
     module.project_apis

@@ -11,7 +11,7 @@ bigtable_ssd_size_gb = 256
 bigtable_cpu_target  = 70
 
 # Security settings
-enable_deletion_protection  = true # Production parity
+enable_deletion_protection  = true  # Production parity
 enable_vpc_service_controls = false # Disabled - requires access policy setup
 
 # Monitoring
@@ -63,13 +63,13 @@ redis_tier                  = "STANDARD_HA"
 enable_db_high_availability = true
 
 # Storage configuration
-storage_location                  = "US" # Must use US multi-region for existing buckets
+storage_location                  = "US"                      # Must use US multi-region for existing buckets
 backup_location                   = "NORTHAMERICA-NORTHEAST1" # Same region as primary resources
 enable_storage_lifecycle_policies = true
 data_retention_days               = 2555 # 7 years for HIPAA compliance (match production)
 
 # Security configuration
-enable_enhanced_security    = true # Full security for production parity
+enable_enhanced_security    = true  # Full security for production parity
 enable_kms_encryption       = false # Temporarily disabled - KMS region incompatible with US storage
 enable_binary_authorization = false # Disabled - requires PEM key setup
 

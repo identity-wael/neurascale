@@ -71,13 +71,13 @@ resource "google_container_cluster" "neural_engine" {
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"
 
-  monitoring_config {
-    enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+  # monitoring_config {
+  #   enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
 
-    managed_prometheus {
-      enabled = true
-    }
-  }
+  #   managed_prometheus {
+  #     enabled = true
+  #   }
+  # }
 
   # Security settings
   master_auth {
@@ -97,19 +97,17 @@ resource "google_container_cluster" "neural_engine" {
     }
   }
 
-  # Maintenance window
-  maintenance_policy {
-    recurring_window {
-      start_time = var.maintenance_start_time
-      end_time   = var.maintenance_end_time
-      recurrence = "FREQ=WEEKLY;BYDAY=SA"
-    }
-  }
+  # Maintenance window - removed to use default daily window
+  # The custom window was too restrictive (only Saturdays)
+  # GKE requires at least 48h of maintenance availability in any 32d period
 
-  # Database encryption
-  database_encryption {
-    state    = var.database_encryption_key != "" ? "ENCRYPTED" : "DECRYPTED"
-    key_name = var.database_encryption_key
+  # Database encryption - only add block if key is provided
+  dynamic "database_encryption" {
+    for_each = var.database_encryption_key != "" ? [1] : []
+    content {
+      state    = "ENCRYPTED"
+      key_name = var.database_encryption_key
+    }
   }
 
   # Enable cluster telemetry via logging config
@@ -155,7 +153,7 @@ resource "google_container_node_pool" "general" {
     preemptible  = var.environment != "production"
     machine_type = var.general_pool_machine_type
     disk_size_gb = var.general_pool_disk_size
-    disk_type    = "pd-ssd"
+    disk_type    = "pd-standard"
     image_type   = "COS_CONTAINERD"
 
     # Service account
@@ -221,7 +219,7 @@ resource "google_container_node_pool" "neural_compute" {
     preemptible  = false # Neural processing needs stability
     machine_type = var.neural_pool_machine_type
     disk_size_gb = var.neural_pool_disk_size
-    disk_type    = "pd-ssd"
+    disk_type    = "pd-standard"
     image_type   = "COS_CONTAINERD"
 
     # Service account
@@ -284,7 +282,7 @@ resource "google_container_node_pool" "gpu" {
     preemptible  = var.gpu_pool_preemptible
     machine_type = var.gpu_pool_machine_type
     disk_size_gb = 100
-    disk_type    = "pd-ssd"
+    disk_type    = "pd-standard"
     image_type   = "COS_CONTAINERD"
 
     # GPU configuration

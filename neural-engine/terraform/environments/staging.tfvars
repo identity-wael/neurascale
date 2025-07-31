@@ -43,16 +43,16 @@ services_cidr       = "10.2.0.0/20"
 enable_gke_cluster       = true # Enabled for PR testing with production parity
 gke_general_machine_type = "n2-standard-4"
 gke_neural_machine_type  = "n2-highmem-8"
-enable_gpu_pool          = true # Enabled for production parity
+enable_gpu_pool          = false # Temporarily disabled due to quota
 gpu_type                 = "nvidia-tesla-t4"
 
 # GKE node pool configurations for staging (minimal for cost optimization)
-general_pool_node_count = 2
+general_pool_node_count = 1  # Reduced from 2 to fit quota
 general_pool_min_nodes  = 1
-general_pool_max_nodes  = 5
-neural_pool_node_count  = 1
+general_pool_max_nodes  = 3  # Reduced from 5
+neural_pool_node_count  = 0  # Start with 0, scale up when needed
 neural_pool_min_nodes   = 0
-neural_pool_max_nodes   = 3
+neural_pool_max_nodes   = 2  # Reduced from 3
 
 # Database configuration
 enable_database             = true # Enabled for production parity

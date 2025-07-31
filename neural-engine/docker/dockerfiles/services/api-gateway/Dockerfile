@@ -1,20 +1,22 @@
 # Multi-stage Dockerfile for API Gateway Service
 # FastAPI-based GraphQL/REST API gateway
-# Using Alpine Linux for security
+# Using Debian slim for compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12-alpine AS dependencies
+FROM python:3.12-slim-bookworm AS dependencies
 
 WORKDIR /tmp
 
 # Install build dependencies
-RUN apk add --no-cache \
-    build-base \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     gcc \
-    musl-dev \
+    g++ \
     libffi-dev \
-    openssl-dev \
-    postgresql-dev
+    libssl-dev \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
 RUN python -m venv /opt/venv
@@ -27,17 +29,19 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -c constraints.txt -r requirements.txt
 
 # Stage 2: Runtime
-FROM python:3.12-alpine AS runtime
+FROM python:3.12-slim-bookworm AS runtime
 
 # Install runtime dependencies
-RUN apk add --no-cache \
-    postgresql-libs \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
     ca-certificates \
     curl \
-    tini
+    tini \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -S neural && adduser -S neural -G neural
+RUN groupadd -r neural && useradd -r -g neural -m neural
 
 # Copy virtual environment
 COPY --from=dependencies /opt/venv /opt/venv

@@ -1,28 +1,28 @@
 # Multi-stage Dockerfile for MCP Server
 # Model Context Protocol server for neural data processing
-# Using Alpine Linux for security
+# Using Debian slim for compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12-alpine AS dependencies
+FROM python:3.12-slim-bookworm AS dependencies
 
 WORKDIR /tmp
 
 # Install build dependencies
-RUN apk add --no-cache \
-    build-base \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     gcc \
     g++ \
-    musl-dev \
-    linux-headers \
     libffi-dev \
-    openssl-dev \
+    libssl-dev \
     # For async support
-    libuv-dev \
+    libuv1-dev \
     # For neural processing
-    openblas-dev \
-    lapack-dev \
-    hdf5-dev \
-    gfortran
+    libopenblas-dev \
+    liblapack-dev \
+    libhdf5-dev \
+    gfortran \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
 RUN python -m venv /opt/venv
@@ -35,24 +35,26 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install aiohttp uvloop
 
 # Stage 2: Runtime
-FROM python:3.12-alpine AS runtime
+FROM python:3.12-slim-bookworm AS runtime
 
 # Install runtime dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     # Runtime libraries
-    openblas \
-    lapack \
-    hdf5 \
-    libgfortran \
-    libstdc++ \
-    libuv \
+    libopenblas0 \
+    liblapack3 \
+    libhdf5-103 \
+    libgfortran5 \
+    libstdc++6 \
+    libuv1 \
     # Security and networking
     ca-certificates \
     # Process management
-    tini
+    tini \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -S neural && adduser -S neural -G neural
+RUN groupadd -r neural && useradd -r -g neural -m neural
 
 # Copy virtual environment
 COPY --from=dependencies /opt/venv /opt/venv

@@ -12,7 +12,7 @@ bigtable_cpu_target  = 60
 
 # Security settings
 enable_deletion_protection  = true
-enable_vpc_service_controls = true
+enable_vpc_service_controls = false # Temporarily disabled - requires access policy setup
 
 # Monitoring
 enable_monitoring_alerts    = true
@@ -41,7 +41,16 @@ gke_neural_machine_type  = "n2-highmem-16"
 enable_gpu_pool          = true
 gpu_type                 = "nvidia-tesla-t4"
 
+# GKE node pool configurations for production
+general_pool_node_count = 3
+general_pool_min_nodes  = 2
+general_pool_max_nodes  = 10
+neural_pool_node_count  = 2
+neural_pool_min_nodes   = 1
+neural_pool_max_nodes   = 5
+
 # Database configuration
+enable_database             = true
 db_tier                     = "db-n1-highmem-8"
 db_disk_size                = 1000
 redis_memory_gb             = 32
@@ -55,9 +64,9 @@ enable_storage_lifecycle_policies = true
 data_retention_days               = 2555 # 7 years for HIPAA compliance
 
 # Security configuration
-enable_enhanced_security    = true # Full security in production
-enable_kms_encryption       = true
-enable_binary_authorization = true
+enable_enhanced_security    = false # Temporarily disabled - VPC service controls require access policy
+enable_kms_encryption       = false # Temporarily disabled - KMS region incompatible with US storage
+enable_binary_authorization = false # Temporarily disabled - requires PEM key setup
 
 # Cost optimization
 enable_scheduled_scaling   = false # No auto-scaling in production

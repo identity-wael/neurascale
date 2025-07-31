@@ -51,8 +51,9 @@ COPY examples/ ./examples/
 COPY setup.py .
 COPY README.md .
 
-# Install the package in development mode
-RUN pip install -e .
+# Install the package in development mode without dependencies
+# (dependencies already installed from requirements-no-ml.txt)
+RUN pip install --no-deps -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

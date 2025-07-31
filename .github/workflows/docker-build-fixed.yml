@@ -1,0 +1,135 @@
+name: Docker Build and Push (Fixed)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+    tags:
+      - 'v*'
+
+env:
+  GCP_REGION: northamerica-northeast1
+  REGISTRY: northamerica-northeast1-docker.pkg.dev
+
+jobs:
+  determine-environment:
+    name: Determine Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      project_id: ${{ steps.set-env.outputs.project_id }}
+    steps:
+      - name: Set environment based on branch
+        id: set-env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            ENVIRONMENT="production"
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            ENVIRONMENT="staging"
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            ENVIRONMENT="development"
+          else
+            ENVIRONMENT="development"
+          fi
+
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "project_id=${ENVIRONMENT}-neurascale" >> $GITHUB_OUTPUT
+          echo "Deploying to: ${ENVIRONMENT} (project: ${ENVIRONMENT}-neurascale)"
+
+  build:
+    name: Build Docker Images
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    environment: ${{ needs.determine-environment.outputs.environment }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+
+    strategy:
+      matrix:
+        service:
+          - neural-processor
+          - device-manager
+          - api-gateway
+          - ml-pipeline
+          - mcp-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          access_token_lifetime: '3600s'
+
+      - name: Configure Docker for Google Artifact Registry
+        run: |
+          echo "${{ steps.auth.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://${{ env.REGISTRY }}
+
+      - name: Set up Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ needs.determine-environment.outputs.project_id }}/neural-engine-${{ needs.determine-environment.outputs.environment }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ needs.determine-environment.outputs.environment }}-latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: neural-engine/docker/dockerfiles/services/${{ matrix.service }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=buildkit-${{ matrix.service }}-${{ needs.determine-environment.outputs.environment }}
+          cache-to: type=gha,mode=max,scope=buildkit-${{ matrix.service }}-${{ needs.determine-environment.outputs.environment }}
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ github.sha }}
+            ENVIRONMENT=${{ needs.determine-environment.outputs.environment }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

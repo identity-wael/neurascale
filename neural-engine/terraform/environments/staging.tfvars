@@ -41,7 +41,7 @@ services_cidr       = "10.2.0.0/20"
 
 # GKE configuration
 enable_gke_cluster       = true # Enabled for PR testing with production parity
-gke_general_machine_type = "n2-standard-4"
+gke_general_machine_type = "e2-medium"  # 2 vCPUs, fits in quota
 gke_neural_machine_type  = "n2-highmem-8"
 enable_gpu_pool          = false # Temporarily disabled due to quota
 gpu_type                 = "nvidia-tesla-t4"

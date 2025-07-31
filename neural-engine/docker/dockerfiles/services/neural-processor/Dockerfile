@@ -1,31 +1,25 @@
 # Multi-stage Dockerfile for Neural Processor Service
-# Using Alpine Linux for reduced vulnerabilities and smaller size
+# Using Debian slim for ML library compatibility (TensorFlow/PyTorch)
 
 # Stage 1: Dependencies
-FROM python:3.12-alpine AS dependencies
+FROM python:3.12-slim-bookworm AS dependencies
 
 WORKDIR /tmp
 
-# Install build dependencies for Python packages
-RUN apk add --no-cache \
-    # Build essentials
-    build-base \
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
     gcc \
     g++ \
     gfortran \
-    musl-dev \
-    linux-headers \
-    # Scientific computing
-    openblas-dev \
-    lapack-dev \
-    hdf5-dev \
-    # Additional dependencies
+    libhdf5-dev \
+    libopenblas-dev \
+    liblapack-dev \
     libffi-dev \
-    openssl-dev \
-    # Required for numpy/scipy
-    py3-numpy-dev \
-    freetype-dev \
-    libpng-dev
+    libssl-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create and activate virtual environment
 RUN python -m venv /opt/venv
@@ -39,7 +33,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12-alpine AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -54,25 +48,25 @@ COPY neural-engine/requirements.txt ./
 # Compile Python files for optimization
 RUN python -m compileall -b src/
 
-# Stage 3: Runtime - Using minimal Alpine
-FROM python:3.12-alpine AS runtime
+# Stage 3: Runtime
+FROM python:3.12-slim-bookworm AS runtime
 
 # Install runtime dependencies only
-RUN apk add --no-cache \
-    # Runtime libs
-    openblas \
-    lapack \
-    hdf5 \
-    libgfortran \
-    libstdc++ \
-    # Network and monitoring
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libopenblas0 \
+    liblapack3 \
+    libhdf5-103 \
+    libgfortran5 \
+    libgomp1 \
     ca-certificates \
     curl \
-    # Process management
-    tini
+    tini \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -S neural && adduser -S neural -G neural
+RUN groupadd -r neural && useradd -r -g neural -m neural
 
 # Copy virtual environment
 COPY --from=dependencies /opt/venv /opt/venv

@@ -180,13 +180,13 @@ variable "redis_memory_gb" {
 variable "redis_zone" {
   description = "Zone for Redis instance"
   type        = string
-  default     = "us-central1-a"
+  default     = "northamerica-northeast1-a"
 }
 
 variable "redis_alternative_zone" {
   description = "Alternative zone for Redis HA"
   type        = string
-  default     = "us-central1-b"
+  default     = "northamerica-northeast1-b"
 }
 
 variable "redis_version" {

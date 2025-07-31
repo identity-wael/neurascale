@@ -29,8 +29,8 @@ enable_cloud_functions = true
 # MCP Server configuration
 enable_mcp_cloud_run     = false # Temporarily disabled - similar to production
 mcp_server_image         = "northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest"
-mcp_min_instances        = 2 # Match production - always keep minimum instances
-mcp_max_instances        = 20 # Match production
+mcp_min_instances        = 2    # Match production - always keep minimum instances
+mcp_max_instances        = 20   # Match production
 enable_mcp_public_access = true # Production parity - with proper security
 
 # Networking configuration
@@ -74,8 +74,8 @@ enable_kms_encryption       = true # KMS encryption for production parity
 enable_binary_authorization = true # Binary authorization for production parity
 
 # Cost optimization
-enable_scheduled_scaling   = false # Match production - no auto-scaling
-enable_cost_analysis       = false # Temporarily disabled - BigQuery Data Transfer API issue (match production)
+enable_scheduled_scaling   = false  # Match production - no auto-scaling
+enable_cost_analysis       = false  # Temporarily disabled - BigQuery Data Transfer API issue (match production)
 budget_amount              = "5000" # Higher budget for production parity testing
 cost_center                = "neural-research-staging"
 budget_notification_emails = [] # Add team emails here

@@ -39,21 +39,13 @@ RUN pip install --upgrade pip setuptools wheel && \
 
 # Second stage: Application
 FROM dependencies AS app
-# Copy source code
-COPY src/ ./src/
-COPY processing/ ./processing/
-COPY devices/ ./devices/
-COPY api/ ./api/
-COPY monitoring/ ./monitoring/
-COPY security/ ./security/
-COPY ledger/ ./ledger/
+# Copy only the source code needed for ingestion
+COPY src/ingestion/ ./src/ingestion/
+COPY src/__init__.py ./src/
 COPY examples/ ./examples/
-COPY setup.py .
-COPY README.md .
 
-# Install the package in development mode without dependencies
-# (dependencies already installed from requirements-no-ml.txt)
-RUN pip install --no-deps -e .
+# Set PYTHONPATH so imports work without installing the package
+ENV PYTHONPATH=/app:$PYTHONPATH
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

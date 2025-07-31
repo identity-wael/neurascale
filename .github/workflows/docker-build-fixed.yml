@@ -27,6 +27,13 @@ on:
       - 'neural-engine/**'
       - '.github/workflows/docker-build-fixed.yml'
 
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  security-events: write
+  pull-requests: write
+
 env:
   GCP_REGION: northamerica-northeast1
   REGISTRY: northamerica-northeast1-docker.pkg.dev
@@ -115,20 +122,42 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Check if running from fork
-        id: check-fork
+      - name: Debug Authentication Context
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
-            echo "is_fork=true" >> $GITHUB_OUTPUT
-            echo "Running from fork - will use limited validation"
-          else
-            echo "is_fork=false" >> $GITHUB_OUTPUT
-            echo "Running from main repo - will use full validation"
+          echo "=== Authentication Debug Info ==="
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Ref: ${{ github.ref }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR Number: ${{ github.event.pull_request.number }}"
+            echo "PR Head Repo: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "PR Base Ref: ${{ github.base_ref }}"
+          fi
+          echo "OIDC Token URL Present: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL != '' }}"
+          echo "OIDC Token Present: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN != '' }}"
+          echo "============================="
+
+      - name: Verify PR Source
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            echo "❌ ERROR: This PR is from a fork!"
+            echo ""
+            echo "For security reasons, PRs must be created from branches in the main repository."
+            echo "Please:"
+            echo "1. Fork the repository (if you haven't already)"
+            echo "2. Clone your fork locally"
+            echo "3. Add the upstream remote: git remote add upstream https://github.com/${{ github.repository }}.git"
+            echo "4. Create a branch in the main repository: git push upstream <your-branch-name>"
+            echo "5. Create your PR from that branch"
+            echo ""
+            echo "This ensures full production-level testing for all PRs."
+            exit 1
           fi
 
       - name: Authenticate to Google Cloud
         id: auth
-        if: steps.check-fork.outputs.is_fork != 'true'
         uses: google-github-actions/auth@v2
         with:
           project_id: ${{ needs.determine-environment.outputs.project_id }}
@@ -138,7 +167,6 @@ jobs:
           access_token_lifetime: '3600s'
 
       - name: Configure Docker for Google Artifact Registry
-        if: steps.check-fork.outputs.is_fork != 'true'
         run: |
           echo "${{ steps.auth.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://${{ env.REGISTRY }}
 
@@ -163,8 +191,7 @@ jobs:
         with:
           context: .
           file: neural-engine/docker/dockerfiles/services/${{ matrix.service }}/Dockerfile
-          push: ${{ steps.check-fork.outputs.is_fork != 'true' }}  # Only push if not from fork
-          load: ${{ steps.check-fork.outputs.is_fork == 'true' }}  # Load locally for fork PRs
+          push: true  # Always push to test full pipeline
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=buildkit-${{ matrix.service }}-${{ needs.determine-environment.outputs.environment }}
@@ -195,64 +222,38 @@ jobs:
         run: |
           echo "=== PR Build Validation Summary ==="
           echo "Service: ${{ matrix.service }}"
+          echo "Target Environment: ${{ needs.determine-environment.outputs.environment }}"
+          echo "Target Project: ${{ needs.determine-environment.outputs.project_id }}"
 
-          if [[ "${{ steps.check-fork.outputs.is_fork }}" == "true" ]]; then
-            echo "PR from fork - Limited validation mode"
-            echo ""
-
-            # Check if image was built
-            if [[ "${{ steps.build.outcome }}" == "success" ]]; then
-              echo "✓ Docker build successful (local only)"
-            else
-              echo "✗ Docker build failed"
-              exit 1
-            fi
-
-            # Check if Trivy scan ran
-            if [[ -f "trivy-results.sarif" ]]; then
-              echo "✓ Trivy security scan completed"
-              echo "  Results saved to trivy-results.sarif"
-            else
-              echo "⚠ Trivy scan did not produce results"
-            fi
-
-            echo ""
-            echo "Fork PR validation completed with limited testing"
-            echo "Full validation will run after merge"
+          # Check authentication
+          if [[ "${{ steps.auth.outcome }}" == "success" ]]; then
+            echo "✓ Google Cloud authentication successful"
           else
-            echo "Target Environment: ${{ needs.determine-environment.outputs.environment }}"
-            echo "Target Project: ${{ needs.determine-environment.outputs.project_id }}"
-
-            # Check authentication
-            if [[ "${{ steps.auth.outcome }}" == "success" ]]; then
-              echo "✓ Google Cloud authentication successful"
-            else
-              echo "✗ Google Cloud authentication failed"
-              exit 1
-            fi
-
-            # Check if image was built and pushed
-            if [[ "${{ steps.build.outcome }}" == "success" ]]; then
-              echo "✓ Docker build and push successful"
-              echo "  Image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
-            else
-              echo "✗ Docker build failed"
-              exit 1
-            fi
-
-            # Check if Trivy scan ran
-            if [[ -f "trivy-results.sarif" ]]; then
-              echo "✓ Trivy security scan completed"
-              echo "  Results saved to trivy-results.sarif"
-            else
-              echo "⚠ Trivy scan did not produce results"
-            fi
-
-            echo ""
-            echo "Full production-level testing completed for PR #${{ github.event.pull_request.number }}"
-            echo "Images pushed to ${{ needs.determine-environment.outputs.environment }} environment"
+            echo "✗ Google Cloud authentication failed"
+            exit 1
           fi
 
+          # Check if image was built and pushed
+          if [[ "${{ steps.build.outcome }}" == "success" ]]; then
+            echo "✓ Docker build and push successful"
+            echo "  Image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
+          else
+            echo "✗ Docker build failed"
+            exit 1
+          fi
+
+          # Check if Trivy scan ran
+          if [[ -f "trivy-results.sarif" ]]; then
+            echo "✓ Trivy security scan completed"
+            echo "  Results saved to trivy-results.sarif"
+          else
+            echo "⚠ Trivy scan did not produce results"
+          fi
+
+          echo ""
+          echo "🚀 Full production-identical testing completed for PR #${{ github.event.pull_request.number }}"
+          echo "Images pushed to ${{ needs.determine-environment.outputs.environment }} registry"
+          echo "Ready for deployment to ${{ needs.determine-environment.outputs.environment }}"
           echo "=== PR validation complete ==="
 
   deploy:
@@ -260,11 +261,12 @@ jobs:
     needs: [determine-environment, build]
     runs-on: ubuntu-latest
     if: |
-      (github.event_name != 'pull_request' ||
-       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) &&
-      (needs.determine-environment.outputs.environment != 'production' ||
-       (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+      needs.determine-environment.outputs.environment != 'production' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     environment: ${{ needs.determine-environment.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout code

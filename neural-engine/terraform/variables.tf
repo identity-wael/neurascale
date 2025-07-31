@@ -243,6 +243,43 @@ variable "gpu_type" {
   default     = "nvidia-tesla-t4"
 }
 
+# GKE node pool configuration
+variable "general_pool_node_count" {
+  description = "Initial node count for general pool"
+  type        = number
+  default     = 3
+}
+
+variable "general_pool_min_nodes" {
+  description = "Minimum nodes for general pool autoscaling"
+  type        = number
+  default     = 1
+}
+
+variable "general_pool_max_nodes" {
+  description = "Maximum nodes for general pool autoscaling"
+  type        = number
+  default     = 10
+}
+
+variable "neural_pool_node_count" {
+  description = "Initial node count for neural compute pool"
+  type        = number
+  default     = 2
+}
+
+variable "neural_pool_min_nodes" {
+  description = "Minimum nodes for neural pool autoscaling"
+  type        = number
+  default     = 0
+}
+
+variable "neural_pool_max_nodes" {
+  description = "Maximum nodes for neural pool autoscaling"
+  type        = number
+  default     = 5
+}
+
 # Database variables
 variable "db_tier" {
   description = "Cloud SQL instance tier"

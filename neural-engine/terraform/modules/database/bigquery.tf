@@ -54,11 +54,12 @@ resource "google_bigquery_table" "neural_sessions" {
   table_id   = "neural_sessions"
   project    = var.project_id
 
+  require_partition_filter = true
+
   time_partitioning {
-    type                     = "DAY"
-    field                    = "session_timestamp"
-    expiration_ms            = var.session_retention_days * 24 * 60 * 60 * 1000
-    require_partition_filter = true
+    type          = "DAY"
+    field         = "session_timestamp"
+    expiration_ms = var.session_retention_days * 24 * 60 * 60 * 1000
   }
 
   clustering = ["patient_id", "device_type", "signal_type"]

@@ -10,8 +10,8 @@ prometheus-client==0.21.0
 redis==5.2.0
 grpcio==1.65.5
 protobuf==4.25.8
-python-jose[cryptography]==3.3.0
-strawberry-graphql[fastapi]==0.227.1
+python-jose[cryptography]==3.4.0  # Updated to fix CVE vulnerabilities
+strawberry-graphql[fastapi]==0.257.0  # Updated to fix CSRF and type resolution vulnerabilities
 aiohttp==3.12.14  # For MCP server HTTP health checks
 
 # Data Processing (minimal)

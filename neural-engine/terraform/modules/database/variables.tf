@@ -115,8 +115,8 @@ variable "database_flags" {
   type        = map(string)
   default = {
     "max_connections"            = "200"
-    "shared_buffers"             = "256MB"
-    "effective_cache_size"       = "1GB"
+    "shared_buffers"             = "65536"  # 256MB in 8KB pages
+    "effective_cache_size"       = "262144" # 1GB in 8KB pages
     "log_statement"              = "all"
     "log_min_duration_statement" = "1000" # Log queries over 1 second
   }

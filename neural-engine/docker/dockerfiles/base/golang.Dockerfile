@@ -14,10 +14,10 @@ RUN apk add --no-cache \
     make \
     bash
 
-# Install common Go tools
-RUN go install github.com/go-delve/delve/cmd/dlv@latest && \
-    go install github.com/cosmtrek/air@latest && \
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# Install common Go tools with specific versions that work with Go 1.22
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.22.1 && \
+    go install github.com/cosmtrek/air@v1.52.0 && \
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
 
 # Create non-root user - handle conflicts with existing GID/UID
 RUN if getent group 1000 >/dev/null 2>&1; then \

@@ -27,11 +27,12 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Copy requirements first for better caching
-COPY requirements.txt ./
+# Using requirements without ML libraries for Alpine compatibility
+COPY requirements-no-ml.txt ./requirements.txt
 COPY constraints.txt ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -c constraints.txt -r requirements.txt
+# Install Python dependencies (no ML libraries)
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Install additional MCP server dependencies
 RUN pip install --no-cache-dir \

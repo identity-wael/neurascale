@@ -1,0 +1,97 @@
+# Multi-stage Dockerfile for Neural Processor - Hybrid approach
+# Uses Alpine where possible, slim for ML dependencies
+
+# Stage 1: Dependencies with ML libraries (requires glibc)
+FROM python:3.12-slim-bookworm AS ml-dependencies
+
+WORKDIR /tmp
+
+# Security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    libhdf5-dev \
+    libatlas-base-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment for ML packages
+RUN python -m venv /opt/ml-venv
+ENV PATH="/opt/ml-venv/bin:$PATH"
+
+# Install ML dependencies that require glibc
+COPY neural-engine/requirements.txt ./
+RUN pip install --upgrade pip && \
+    pip install tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
+
+# Stage 2: Core dependencies with Alpine
+FROM python:3.12-alpine AS core-dependencies
+
+WORKDIR /tmp
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    musl-dev \
+    libffi-dev \
+    openssl-dev
+
+# Create virtual environment for core packages
+RUN python -m venv /opt/core-venv
+ENV PATH="/opt/core-venv/bin:$PATH"
+
+# Install core dependencies
+COPY neural-engine/requirements-minimal-alpine.txt ./
+RUN pip install --upgrade pip && \
+    pip install -r requirements-minimal-alpine.txt
+
+# Stage 3: Runtime - minimal Alpine
+FROM python:3.12-alpine AS runtime
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    # Compatibility layer for glibc binaries
+    gcompat \
+    # Runtime libs
+    libstdc++ \
+    libgfortran \
+    # Security
+    ca-certificates \
+    # Monitoring
+    curl \
+    # Process management
+    tini
+
+# Create non-root user
+RUN addgroup -S neural && adduser -S neural -G neural
+
+# Copy virtual environments
+COPY --from=ml-dependencies /opt/ml-venv /opt/ml-venv
+COPY --from=core-dependencies /opt/core-venv /opt/core-venv
+
+# Copy application
+WORKDIR /app
+COPY --chown=neural:neural neural-engine/src ./src
+
+# Merge virtual environments
+ENV PATH="/opt/ml-venv/bin:/opt/core-venv/bin:$PATH" \
+    PYTHONPATH="/opt/ml-venv/lib/python3.12/site-packages:/opt/core-venv/lib/python3.12/site-packages:$PYTHONPATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R neural:neural /app
+
+USER neural
+EXPOSE 8080 50051 9090
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["python", "-m", "src.processing.main"]

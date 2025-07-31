@@ -1,13 +1,14 @@
 # Neural Engine Processor Dockerfile
-FROM python:3.12-alpine AS base
+# Using slim instead of Alpine for TensorFlow/PyTorch compatibility
+FROM python:3.12-slim-bookworm AS base
 
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache \
-    build-base \
-    musl-dev \
-    linux-headers \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
     hdf5-dev \
     openblas-dev \
     lapack-dev

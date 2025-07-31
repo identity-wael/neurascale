@@ -18,7 +18,7 @@ ENV PIP_DEFAULT_TIMEOUT=300 \
 # First stage: Dependencies
 FROM base AS dependencies
 # Copy only requirements to cache dependencies
-COPY requirements.txt .
+COPY requirements-no-ml.txt ./requirements.txt .
 # Install dependencies in chunks to avoid timeout
 RUN pip install --upgrade pip setuptools wheel && \
     # Install core dependencies first

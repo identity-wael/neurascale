@@ -343,6 +343,7 @@ module "gke" {
   project_id                    = var.project_id
   environment                   = local.environment
   region                        = var.region
+  zone                          = "${var.region}-a" # Default to first zone in region
   vpc_id                        = module.networking.vpc_id
   subnet_id                     = module.networking.gke_subnet_id
   pods_secondary_range_name     = module.networking.pods_secondary_range_name
@@ -354,6 +355,14 @@ module "gke" {
   neural_pool_machine_type  = var.gke_neural_machine_type
   enable_gpu_pool           = var.enable_gpu_pool
   gpu_type                  = var.gpu_type
+
+  # Node pool sizes
+  general_pool_node_count = var.general_pool_node_count
+  general_pool_min_nodes  = var.general_pool_min_nodes
+  general_pool_max_nodes  = var.general_pool_max_nodes
+  neural_pool_node_count  = var.neural_pool_node_count
+  neural_pool_min_nodes   = var.neural_pool_min_nodes
+  neural_pool_max_nodes   = var.neural_pool_max_nodes
 
   depends_on = [
     module.networking,

@@ -4,8 +4,6 @@ title: Home
 permalink: /
 ---
 
-# NeuraScale Documentation
-
 <div align="center">
 
 [![Neural Engine CI/CD](https://github.com/identity-wael/neurascale/actions/workflows/neural-engine-cicd.yml/badge.svg)](https://github.com/identity-wael/neurascale/actions/workflows/neural-engine-cicd.yml)

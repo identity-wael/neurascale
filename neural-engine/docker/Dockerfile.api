@@ -1,12 +1,13 @@
 # Neural Engine API Dockerfile
-FROM python:3.12-slim AS base
+FROM python:3.12-alpine AS base
 
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    build-base \
+    musl-dev \
+    linux-headers
 
 # Set pip to use more parallel downloads and increase timeout
 ENV PIP_DEFAULT_TIMEOUT=300 \

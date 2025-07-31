@@ -33,7 +33,7 @@ resource "google_sql_database_instance" "postgres" {
     ip_configuration {
       ipv4_enabled    = false # Private IP only for security
       private_network = var.vpc_self_link
-      ssl_mode        = "REQUIRE_SSL"
+      ssl_mode        = "ENCRYPTED_ONLY"
     }
 
     # Database flags for performance and security

@@ -12,7 +12,7 @@ bigtable_cpu_target  = 70
 
 # Security settings
 enable_deletion_protection  = true # Production parity
-enable_vpc_service_controls = true # Production parity
+enable_vpc_service_controls = false # Disabled - requires access policy setup
 
 # Monitoring
 enable_monitoring_alerts    = true
@@ -70,8 +70,8 @@ data_retention_days               = 2555 # 7 years for HIPAA compliance (match p
 
 # Security configuration
 enable_enhanced_security    = true # Full security for production parity
-enable_kms_encryption       = true # KMS encryption for production parity
-enable_binary_authorization = true # Binary authorization for production parity
+enable_kms_encryption       = false # Temporarily disabled - KMS region incompatible with US storage
+enable_binary_authorization = false # Disabled - requires PEM key setup
 
 # Cost optimization
 enable_scheduled_scaling   = false  # Match production - no auto-scaling

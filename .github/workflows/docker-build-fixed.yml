@@ -82,6 +82,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate PR Build Configuration
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Running PR validation checks..."
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Branch: ${{ github.head_ref }}"
+          echo "Target Branch: ${{ github.base_ref }}"
+
+          # Validate Dockerfiles exist
+          for service in neural-processor device-manager api-gateway ml-pipeline mcp-server; do
+            dockerfile="neural-engine/docker/dockerfiles/services/${service}/Dockerfile"
+            if [[ ! -f "$dockerfile" ]]; then
+              echo "ERROR: Dockerfile not found: $dockerfile"
+              exit 1
+            fi
+          done
+
+          echo "✓ All Dockerfiles found"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -96,6 +115,7 @@ jobs:
           access_token_lifetime: '3600s'
 
       - name: Configure Docker for Google Artifact Registry
+        if: github.event_name != 'pull_request'
         run: |
           echo "${{ steps.auth.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://${{ env.REGISTRY }}
 
@@ -115,6 +135,7 @@ jobs:
             type=raw,value=${{ needs.determine-environment.outputs.environment }}-latest
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -129,12 +150,13 @@ jobs:
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             REVISION=${{ github.sha }}
             ENVIRONMENT=${{ needs.determine-environment.outputs.environment }}
+          load: ${{ github.event_name == 'pull_request' }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         if: success()
         with:
-          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          image-ref: ${{ github.event_name == 'pull_request' && format('{0}:{1}', matrix.service, github.sha) || fromJSON(steps.meta.outputs.json).tags[0] }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
@@ -144,3 +166,28 @@ jobs:
         if: success() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
+
+      - name: PR Build Validation Summary
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "=== PR Build Validation Summary ==="
+          echo "Service: ${{ matrix.service }}"
+
+          # Check if image was built
+          if [[ "${{ steps.build.outcome }}" == "success" ]]; then
+            echo "✓ Docker build successful"
+          else
+            echo "✗ Docker build failed"
+            exit 1
+          fi
+
+          # Check if Trivy scan ran
+          if [[ -f "trivy-results.sarif" ]]; then
+            echo "✓ Trivy scan completed"
+            # Show vulnerability summary
+            echo "Vulnerability scan results saved to trivy-results.sarif"
+          else
+            echo "⚠ Trivy scan did not produce results"
+          fi
+
+          echo "=== PR validation complete ==="

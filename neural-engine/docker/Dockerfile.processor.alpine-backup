@@ -1,15 +1,16 @@
-# Neural Data Ingestion Service
+# Neural Engine Processor Dockerfile
 FROM python:3.12-alpine AS base
+
+WORKDIR /app
 
 # Install system dependencies
 RUN apk add --no-cache \
     build-base \
     musl-dev \
     linux-headers \
-    curl
-
-# Set working directory
-WORKDIR /app
+    hdf5-dev \
+    openblas-dev \
+    lapack-dev
 
 # Set pip environment with increased timeout
 ENV PIP_DEFAULT_TIMEOUT=300 \
@@ -19,23 +20,22 @@ ENV PIP_DEFAULT_TIMEOUT=300 \
 
 # First stage: Dependencies
 FROM base AS dependencies
-# Copy requirements first for better caching
-# Using requirements without ML libraries for Alpine compatibility
-COPY requirements-no-ml.txt ./requirements.txt
-
-# Install Python dependencies in chunks to avoid timeout
+# Copy requirements and constraints
+COPY requirements.txt .
+COPY constraints.txt .
+# Install dependencies in chunks to avoid timeout
 RUN pip install --upgrade pip setuptools wheel && \
     # Install core dependencies first
     grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -r /dev/stdin && \
-    # Install neural signal dependencies
-    grep -E '^(pylsl|brainflow|pyserial|mne|pyedflib)' requirements.txt | \
-    pip install -r /dev/stdin && \
+    pip install -c constraints.txt -r /dev/stdin && \
+    # Install deep learning dependencies
+    grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
+    pip install -c constraints.txt -r /dev/stdin && \
     # Install Google Cloud dependencies
     grep -E '^google-cloud-' requirements.txt | \
-    pip install -r /dev/stdin && \
+    pip install -c constraints.txt -r /dev/stdin && \
     # Install remaining dependencies
-    pip install -r requirements.txt
+    pip install -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app
@@ -47,19 +47,15 @@ COPY api/ ./api/
 COPY monitoring/ ./monitoring/
 COPY security/ ./security/
 COPY ledger/ ./ledger/
-COPY examples/ ./examples/
 COPY setup.py .
 COPY README.md .
 
-# Install the package in development mode
+# Install the package
 RUN pip install -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/key.json
 
-# Create directories
-RUN mkdir -p /app/data /app/logs /app/credentials
-
-# Default command runs the example
-CMD ["python", "examples/ingestion_example.py"]
+# Run the processor
+CMD ["python", "-m", "processors.main"]

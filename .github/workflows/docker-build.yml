@@ -78,6 +78,16 @@ jobs:
         if: github.event_name != 'pull_request'
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
+      - name: Ensure Artifact Registry repository exists
+        if: github.event_name != 'pull_request'
+        run: |
+          # Try to create repository, ignore if it already exists
+          gcloud artifacts repositories create neural-engine-development \
+            --repository-format=docker \
+            --location=${{ env.GCP_REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --description="Neural Engine Docker images" || true
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -197,6 +207,16 @@ jobs:
         if: github.event_name != 'pull_request'
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
+      - name: Ensure Artifact Registry repository exists
+        if: github.event_name != 'pull_request'
+        run: |
+          # Try to create repository, ignore if it already exists
+          gcloud artifacts repositories create neural-engine-development \
+            --repository-format=docker \
+            --location=${{ env.GCP_REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --description="Neural Engine Docker images" || true
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -261,6 +281,15 @@ jobs:
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          # Try to create repository, ignore if it already exists
+          gcloud artifacts repositories create neural-engine-development \
+            --repository-format=docker \
+            --location=${{ env.GCP_REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --description="Neural Engine Docker images" || true
 
       - name: Build and push base image
         uses: docker/build-push-action@v5

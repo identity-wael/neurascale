@@ -1,7 +1,7 @@
 # Base Go image for Neural Engine services
 # Provides common Go runtime with necessary tools
 
-FROM golang:1.21-alpine AS golang-base
+FROM golang:1.22-alpine AS golang-base
 
 # Install common build dependencies
 RUN apk add --no-cache \

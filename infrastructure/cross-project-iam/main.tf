@@ -32,7 +32,8 @@ resource "google_project_service" "required_apis" {
       "iam.googleapis.com",
       "cloudresourcemanager.googleapis.com",
       "billingbudgets.googleapis.com",
-      "bigquery.googleapis.com"
+      "bigquery.googleapis.com",
+      "artifactregistry.googleapis.com"
     ]) : "${pair[0]}-${pair[1]}" => {
       project = pair[0]
       service = pair[1]
@@ -66,7 +67,8 @@ resource "google_project_iam_member" "github_actions_roles" {
       "roles/resourcemanager.projectIamAdmin",
       "roles/billing.costsManager",
       "roles/monitoring.admin",
-      "roles/logging.admin"
+      "roles/logging.admin",
+      "roles/artifactregistry.admin"
     ]) : "${pair[0]}-${pair[1]}" => {
       project = pair[0]
       role    = pair[1]
@@ -92,7 +94,8 @@ output "permissions_granted" {
       "roles/resourcemanager.projectIamAdmin",
       "roles/billing.costsManager",
       "roles/monitoring.admin",
-      "roles/logging.admin"
+      "roles/logging.admin",
+      "roles/artifactregistry.admin"
     ]
   }
 }

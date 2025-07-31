@@ -18,7 +18,7 @@ on:
 env:
   GCP_REGION: northamerica-northeast1
   REGISTRY: northamerica-northeast1-docker.pkg.dev
-  PROJECT_ID: neurascale
+  PROJECT_ID: development-neurascale
 
 jobs:
   build:

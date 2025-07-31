@@ -108,7 +108,7 @@ resource "google_container_cluster" "neural_engine" {
 
   # Database encryption
   database_encryption {
-    state    = "ENCRYPTED"
+    state    = var.database_encryption_key != "" ? "ENCRYPTED" : "DECRYPTED"
     key_name = var.database_encryption_key
   }
 

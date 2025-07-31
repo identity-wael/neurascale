@@ -58,7 +58,7 @@ variable "master_cidr" {
 variable "kubernetes_version" {
   description = "The Kubernetes version for the cluster"
   type        = string
-  default     = "1.28"
+  default     = "" # Let GKE choose the default version
 }
 
 variable "enable_private_endpoint" {

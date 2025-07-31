@@ -19,9 +19,17 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest && \
     go install github.com/cosmtrek/air@latest && \
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-# Create non-root user - ensure it's actually created
-RUN (getent group neural || addgroup -g 1000 neural) && \
-    (getent passwd neural || adduser -D -u 1000 -G neural neural)
+# Create non-root user - handle conflicts with existing GID/UID
+RUN if getent group 1000 >/dev/null 2>&1; then \
+        addgroup -S neural; \
+    else \
+        addgroup -g 1000 neural; \
+    fi && \
+    if getent passwd 1000 >/dev/null 2>&1; then \
+        adduser -D -S -G neural neural; \
+    else \
+        adduser -D -u 1000 -G neural neural; \
+    fi
 
 # Set up Go environment
 ENV GO111MODULE=on \

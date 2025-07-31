@@ -288,24 +288,64 @@ jobs:
           echo "Deploying to ${{ needs.determine-environment.outputs.environment }} environment"
           echo "Project: ${{ needs.determine-environment.outputs.project_id }}"
 
-          # Get GKE credentials
-          gcloud container clusters get-credentials neural-engine-${{ needs.determine-environment.outputs.environment }} \
+          # Check if GKE cluster exists
+          CLUSTER_NAME="neural-engine-${{ needs.determine-environment.outputs.environment }}"
+          echo "Checking for GKE cluster: $CLUSTER_NAME"
+
+          if gcloud container clusters describe $CLUSTER_NAME \
             --region ${{ env.GCP_REGION }} \
-            --project ${{ needs.determine-environment.outputs.project_id }}
+            --project ${{ needs.determine-environment.outputs.project_id }} \
+            --format="value(name)" 2>/dev/null; then
 
-          # Deploy using Helm
-          cd neural-engine/kubernetes/helm
+            echo "✓ Cluster found: $CLUSTER_NAME"
 
-          # Update values for environment
-          helm upgrade --install neural-engine ./neural-engine \
-            --namespace neural-engine \
-            --create-namespace \
-            --values ./neural-engine/values-${{ needs.determine-environment.outputs.environment }}.yaml \
-            --set image.registry=${{ env.REGISTRY }} \
-            --set image.repository=${{ needs.determine-environment.outputs.project_id }}/neural-engine-${{ needs.determine-environment.outputs.environment }} \
-            --set image.tag=${{ github.sha }} \
-            --wait \
-            --timeout 10m
+            # Get GKE credentials
+            gcloud container clusters get-credentials $CLUSTER_NAME \
+              --region ${{ env.GCP_REGION }} \
+              --project ${{ needs.determine-environment.outputs.project_id }}
+
+            # Deploy using Helm
+            cd neural-engine/kubernetes/helm
+
+            # Check if values file exists
+            VALUES_FILE="./neural-engine/values-${{ needs.determine-environment.outputs.environment }}.yaml"
+            if [[ -f "$VALUES_FILE" ]]; then
+              echo "Using environment-specific values: $VALUES_FILE"
+              VALUES_ARGS="--values $VALUES_FILE"
+            else
+              echo "Warning: No environment-specific values file found at $VALUES_FILE"
+              echo "Using default values.yaml"
+              VALUES_ARGS=""
+            fi
+
+            # Update values for environment
+            helm upgrade --install neural-engine ./neural-engine \
+              --namespace neural-engine \
+              --create-namespace \
+              $VALUES_ARGS \
+              --set image.registry=${{ env.REGISTRY }} \
+              --set image.repository=${{ needs.determine-environment.outputs.project_id }}/neural-engine-${{ needs.determine-environment.outputs.environment }} \
+              --set image.tag=${{ github.sha }} \
+              --wait \
+              --timeout 10m
+          else
+            echo "⚠️  WARNING: GKE cluster '$CLUSTER_NAME' not found in project '${{ needs.determine-environment.outputs.project_id }}'"
+            echo ""
+            echo "The cluster may not be created yet. Available clusters:"
+            gcloud container clusters list --project ${{ needs.determine-environment.outputs.project_id }} || echo "No clusters found"
+            echo ""
+            echo "Images have been built and pushed successfully to:"
+            echo "  Registry: ${{ env.REGISTRY }}"
+            echo "  Repository: ${{ needs.determine-environment.outputs.project_id }}/neural-engine-${{ needs.determine-environment.outputs.environment }}"
+            echo "  Tag: ${{ github.sha }}"
+            echo ""
+            echo "To create the cluster, run:"
+            echo "  gcloud container clusters create $CLUSTER_NAME \\"
+            echo "    --region ${{ env.GCP_REGION }} \\"
+            echo "    --project ${{ needs.determine-environment.outputs.project_id }}"
+            echo ""
+            echo "Skipping deployment step - cluster infrastructure not ready"
+          fi
 
       - name: Deployment Summary
         if: always()

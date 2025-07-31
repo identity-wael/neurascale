@@ -331,6 +331,8 @@ jobs:
           gcloud services enable accesscontextmanager.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Access Context Manager API"
           gcloud services enable containeranalysis.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Container Analysis API"
           gcloud services enable binaryauthorization.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Binary Authorization API"
+          gcloud services enable sqladmin.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable SQL Admin API"
+          gcloud services enable redis.googleapis.com --project=${{ needs.setup.outputs.project_id }} || echo "Failed to enable Redis API"
 
           # Enable BigQuery Data Transfer API for production
           if [[ "${{ needs.setup.outputs.environment }}" == "production" ]]; then
@@ -339,7 +341,11 @@ jobs:
 
           # List all enabled APIs for verification
           echo "Currently enabled APIs:"
-          gcloud services list --enabled --project=${{ needs.setup.outputs.project_id }} | grep -E "bigquery|bigtable|compute|container|cloudfunctions|cloudrun|storage|kms|accesscontext|binary" || true
+          gcloud services list --enabled --project=${{ needs.setup.outputs.project_id }} | grep -E "bigquery|bigtable|compute|container|cloudfunctions|cloudrun|storage|kms|accesscontext|binary|sqladmin|redis" || true
+
+          # Wait for APIs to propagate
+          echo "Waiting 30 seconds for APIs to propagate..."
+          sleep 30
 
       - name: Clean up Bigtable App Profiles
         if: needs.setup.outputs.environment == 'production'

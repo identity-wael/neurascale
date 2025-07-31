@@ -44,6 +44,9 @@ yarn-error.log*
 # Local context engineering outputs
 local/
 
+# Temp folder for scripts
+temp/
+
 # Vercel
 .vercel
 

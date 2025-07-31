@@ -40,11 +40,19 @@ pods_cidr           = "10.1.0.0/16"
 services_cidr       = "10.2.0.0/20"
 
 # GKE configuration
-enable_gke_cluster       = false # Temporarily disabled - GKE API error
+enable_gke_cluster       = true # Enabled for PR testing with production parity
 gke_general_machine_type = "n2-standard-4"
 gke_neural_machine_type  = "n2-highmem-8"
 enable_gpu_pool          = false # Can enable for ML testing
 gpu_type                 = "nvidia-tesla-t4"
+
+# GKE node pool configurations for staging (minimal for cost optimization)
+general_pool_node_count = 2
+general_pool_min_nodes  = 1
+general_pool_max_nodes  = 5
+neural_pool_node_count  = 1
+neural_pool_min_nodes   = 0
+neural_pool_max_nodes   = 3
 
 # Database configuration
 enable_database             = false # Temporarily disabled - Cloud SQL API error in source project

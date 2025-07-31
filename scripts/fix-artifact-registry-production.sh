@@ -1,0 +1,27 @@
+#!/bin/bash
+# Fix production Artifact Registry issues
+
+PROJECT_ID="development-neurascale"
+REGION="northamerica-northeast1"
+REPOSITORY="neural-engine-development"
+SERVICE_ACCOUNT="github-actions@neurascale.iam.gserviceaccount.com"
+
+echo "=== PRODUCTION FIX SCRIPT ==="
+echo ""
+echo "The problem: Service account from 'neurascale' project needs access to 'development-neurascale' project"
+echo ""
+echo "Run these commands:"
+echo ""
+echo "1. Grant Artifact Registry Writer role (allows push):"
+echo "gcloud projects add-iam-policy-binding $PROJECT_ID \\"
+echo "  --member='serviceAccount:$SERVICE_ACCOUNT' \\"
+echo "  --role='roles/artifactregistry.writer'"
+echo ""
+echo "2. If that doesn't work, also grant repository admin:"
+echo "gcloud artifacts repositories add-iam-policy-binding $REPOSITORY \\"
+echo "  --location=$REGION \\"
+echo "  --member='serviceAccount:$SERVICE_ACCOUNT' \\"
+echo "  --role='roles/artifactregistry.repoAdmin' \\"
+echo "  --project=$PROJECT_ID"
+echo ""
+echo "This will fix the 403 Forbidden errors immediately."

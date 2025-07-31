@@ -448,7 +448,7 @@ jobs:
           LOCK_PATH="gs://neurascale-terraform-state/neural-engine/${{ needs.setup.outputs.environment }}/default.tflock"
           if gcloud storage ls "$LOCK_PATH" 2>/dev/null; then
             # Get lock creation time
-            LOCK_TIME=$(gcloud storage ls -l "$LOCK_PATH" --format="value(timeCreated)")
+            LOCK_TIME=$(gcloud storage ls -L "$LOCK_PATH" | grep "Creation time:" | cut -d: -f2- | xargs)
             CURRENT_TIME=$(date +%s)
             LOCK_EPOCH=$(date -d "$LOCK_TIME" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$LOCK_TIME" +%s)
             AGE=$((CURRENT_TIME - LOCK_EPOCH))

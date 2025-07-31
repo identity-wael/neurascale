@@ -49,7 +49,7 @@ redis_tier                  = "STANDARD_HA"
 enable_db_high_availability = true
 
 # Storage configuration
-storage_location                  = "NORTHAMERICA-NORTHEAST1"
+storage_location                  = "US" # Must use US multi-region for existing buckets
 backup_location                   = "NORTHAMERICA-NORTHEAST1" # Same region as primary resources
 enable_storage_lifecycle_policies = true
 data_retention_days               = 2555 # 7 years for HIPAA compliance

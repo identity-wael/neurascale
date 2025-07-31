@@ -97,8 +97,11 @@ resource "google_storage_bucket" "neural_data" {
   }
 
   # Encryption with customer-managed keys
-  encryption {
-    default_kms_key_name = var.storage_encryption_key
+  dynamic "encryption" {
+    for_each = var.storage_encryption_key != "" ? [1] : []
+    content {
+      default_kms_key_name = var.storage_encryption_key
+    }
   }
 
   # Logging configuration
@@ -164,8 +167,11 @@ resource "google_storage_bucket" "ml_models" {
     }
   }
 
-  encryption {
-    default_kms_key_name = var.storage_encryption_key
+  dynamic "encryption" {
+    for_each = var.storage_encryption_key != "" ? [1] : []
+    content {
+      default_kms_key_name = var.storage_encryption_key
+    }
   }
 
   labels = merge(
@@ -260,8 +266,11 @@ resource "google_storage_bucket" "backups" {
     is_locked        = var.lock_backup_retention
   }
 
-  encryption {
-    default_kms_key_name = var.storage_encryption_key
+  dynamic "encryption" {
+    for_each = var.storage_encryption_key != "" ? [1] : []
+    content {
+      default_kms_key_name = var.storage_encryption_key
+    }
   }
 
   labels = merge(

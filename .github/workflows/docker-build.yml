@@ -1,19 +1,20 @@
 name: Docker Build and Push
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'neural-engine/**'
-      - '.github/workflows/docker-build.yml'
+  workflow_dispatch:  # Only run manually for now
+  # push:
+  #   branches:
+  #     - main
+  #     - develop
+  #   tags:
+  #     - 'v*'
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - develop
+  #   paths:
+  #     - 'neural-engine/**'
+  #     - '.github/workflows/docker-build.yml'
 
 env:
   GCP_REGION: northamerica-northeast1

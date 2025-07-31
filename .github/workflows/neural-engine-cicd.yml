@@ -169,9 +169,12 @@ jobs:
         with:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+          project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Check Docker availability
         id: check_docker
@@ -272,6 +275,7 @@ jobs:
         with:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+          project_id: ${{ needs.setup.outputs.project_id }}
         continue-on-error: true
         id: gcp_auth
 
@@ -306,6 +310,12 @@ jobs:
         with:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+          project_id: ${{ needs.setup.outputs.project_id }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Verify Google Cloud Authentication
         run: |
@@ -539,6 +549,12 @@ jobs:
         with:
           workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
           service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+          project_id: ${{ needs.setup.outputs.project_id }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Set up Python
         uses: actions/setup-python@v5

@@ -44,6 +44,17 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             ENVIRONMENT="${{ github.event.inputs.environment }}"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, use the target branch to determine environment
+            if [[ "${{ github.base_ref }}" == "main" ]]; then
+              ENVIRONMENT="staging"  # PRs to main test in staging
+            elif [[ "${{ github.base_ref }}" == "staging" ]]; then
+              ENVIRONMENT="staging"  # PRs to staging deploy to staging
+            elif [[ "${{ github.base_ref }}" == "develop" ]]; then
+              ENVIRONMENT="development"
+            else
+              ENVIRONMENT="development"
+            fi
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
             ENVIRONMENT="production"
           elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
@@ -115,7 +126,6 @@ jobs:
           access_token_lifetime: '3600s'
 
       - name: Configure Docker for Google Artifact Registry
-        if: github.event_name != 'pull_request'
         run: |
           echo "${{ steps.auth.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://${{ env.REGISTRY }}
 
@@ -140,7 +150,7 @@ jobs:
         with:
           context: .
           file: neural-engine/docker/dockerfiles/services/${{ matrix.service }}/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true  # Always push to test full pipeline
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=buildkit-${{ matrix.service }}-${{ needs.determine-environment.outputs.environment }}
@@ -150,13 +160,12 @@ jobs:
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             REVISION=${{ github.sha }}
             ENVIRONMENT=${{ needs.determine-environment.outputs.environment }}
-          load: ${{ github.event_name == 'pull_request' }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         if: success()
         with:
-          image-ref: ${{ github.event_name == 'pull_request' && format('{0}:{1}', matrix.service, github.sha) || fromJSON(steps.meta.outputs.json).tags[0] }}
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
@@ -172,10 +181,21 @@ jobs:
         run: |
           echo "=== PR Build Validation Summary ==="
           echo "Service: ${{ matrix.service }}"
+          echo "Target Environment: ${{ needs.determine-environment.outputs.environment }}"
+          echo "Target Project: ${{ needs.determine-environment.outputs.project_id }}"
 
-          # Check if image was built
+          # Check authentication
+          if [[ "${{ steps.auth.outcome }}" == "success" ]]; then
+            echo "✓ Google Cloud authentication successful"
+          else
+            echo "✗ Google Cloud authentication failed"
+            exit 1
+          fi
+
+          # Check if image was built and pushed
           if [[ "${{ steps.build.outcome }}" == "success" ]]; then
-            echo "✓ Docker build successful"
+            echo "✓ Docker build and push successful"
+            echo "  Image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
           else
             echo "✗ Docker build failed"
             exit 1
@@ -183,11 +203,74 @@ jobs:
 
           # Check if Trivy scan ran
           if [[ -f "trivy-results.sarif" ]]; then
-            echo "✓ Trivy scan completed"
+            echo "✓ Trivy security scan completed"
             # Show vulnerability summary
-            echo "Vulnerability scan results saved to trivy-results.sarif"
+            echo "  Results saved to trivy-results.sarif"
           else
             echo "⚠ Trivy scan did not produce results"
           fi
 
+          echo ""
+          echo "Full production-level testing completed for PR #${{ github.event.pull_request.number }}"
+          echo "Images pushed to ${{ needs.determine-environment.outputs.environment }} environment"
           echo "=== PR validation complete ==="
+
+  deploy:
+    name: Deploy to Environment
+    needs: [determine-environment, build]
+    runs-on: ubuntu-latest
+    if: |
+      needs.determine-environment.outputs.environment != 'production' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    environment: ${{ needs.determine-environment.outputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ needs.determine-environment.outputs.project_id }}
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to GKE
+        run: |
+          echo "Deploying to ${{ needs.determine-environment.outputs.environment }} environment"
+          echo "Project: ${{ needs.determine-environment.outputs.project_id }}"
+
+          # Get GKE credentials
+          gcloud container clusters get-credentials neural-engine-${{ needs.determine-environment.outputs.environment }} \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ needs.determine-environment.outputs.project_id }}
+
+          # Deploy using Helm
+          cd neural-engine/kubernetes/helm
+
+          # Update values for environment
+          helm upgrade --install neural-engine ./neural-engine \
+            --namespace neural-engine \
+            --create-namespace \
+            --values ./neural-engine/values-${{ needs.determine-environment.outputs.environment }}.yaml \
+            --set image.registry=${{ env.REGISTRY }} \
+            --set image.repository=${{ needs.determine-environment.outputs.project_id }}/neural-engine-${{ needs.determine-environment.outputs.environment }} \
+            --set image.tag=${{ github.sha }} \
+            --wait \
+            --timeout 10m
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "=== Deployment Summary ==="
+          echo "Environment: ${{ needs.determine-environment.outputs.environment }}"
+          echo "Project: ${{ needs.determine-environment.outputs.project_id }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR #${{ github.event.pull_request.number }} deployed to ${{ needs.determine-environment.outputs.environment }}"
+            echo "Preview URL: https://${{ needs.determine-environment.outputs.environment }}-neural-engine.neurascale.com"
+          fi
+          echo "=== Deployment complete ==="

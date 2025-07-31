@@ -1,45 +1,35 @@
 # Multi-stage Dockerfile for Neural Processor Service
-# Using Alpine Linux for reduced vulnerabilities and smaller size
+# Optimized for production with minimal attack surface
 
 # Stage 1: Dependencies
-FROM python:3.12-alpine AS dependencies
+FROM python:3.12-slim AS dependencies
 
 WORKDIR /tmp
 
-# Install build dependencies for Python packages
-RUN apk add --no-cache \
-    # Build essentials
-    build-base \
+# Install system dependencies for building Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     gcc \
     g++ \
-    gfortran \
-    musl-dev \
-    linux-headers \
-    # Scientific computing
-    openblas-dev \
-    lapack-dev \
-    hdf5-dev \
-    # Additional dependencies
-    libffi-dev \
-    openssl-dev \
-    # Required for numpy/scipy
-    py3-numpy-dev \
-    freetype-dev \
-    libpng-dev
+    libhdf5-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create and activate virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
+# Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip setuptools wheel && \
+    pip install --upgrade pip && \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12-alpine AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
@@ -54,25 +44,22 @@ COPY neural-engine/requirements.txt ./
 # Compile Python files for optimization
 RUN python -m compileall -b src/
 
-# Stage 3: Runtime - Using minimal Alpine
-FROM python:3.12-alpine AS runtime
+# Stage 3: Runtime
+FROM python:3.12-slim AS runtime
 
 # Install runtime dependencies only
-RUN apk add --no-cache \
-    # Runtime libs
-    openblas \
-    lapack \
-    hdf5 \
-    libgfortran \
-    libstdc++ \
-    # Network and monitoring
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    libhdf5-103 \
+    libopenblas0 \
     ca-certificates \
     curl \
-    # Process management
-    tini
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/*
 
 # Create non-root user
-RUN addgroup -S neural && adduser -S neural -G neural
+RUN groupadd -r neural && useradd -r -g neural -m neural
 
 # Copy virtual environment
 COPY --from=dependencies /opt/venv /opt/venv
@@ -103,9 +90,6 @@ EXPOSE 8080 50051 9090
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
-
-# Use tini for proper signal handling
-ENTRYPOINT ["/sbin/tini", "--"]
 
 # Default command
 CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8080"]

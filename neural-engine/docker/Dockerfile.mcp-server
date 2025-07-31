@@ -2,7 +2,7 @@
 # Optimized for production deployment with minimal attack surface
 
 # Build stage - compile dependencies and prepare application
-FROM python:3.12-slim AS builder
+FROM python:3.12-alpine AS builder
 
 # Set build arguments
 ARG BUILDKIT_INLINE_CACHE=1
@@ -10,13 +10,14 @@ ARG DOCKER_BUILDKIT=1
 ARG BUILDKIT_PARALLELISM=12
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+RUN apk add --no-cache \
+    build-base \
+    musl-dev \
+    linux-headers \
     gcc \
     g++ \
     git \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    curl
 
 # Create virtual environment
 RUN python -m venv /opt/venv
@@ -51,18 +52,16 @@ WORKDIR /app
 RUN pip install --no-cache-dir -e .
 
 # Production stage - minimal runtime environment
-FROM python:3.12-slim AS production
+FROM python:3.12-alpine AS production
 
 # Create non-root user for security
-RUN groupadd --gid 1000 mcp && \
-    useradd --uid 1000 --gid mcp --shell /bin/bash --create-home mcp
+RUN addgroup -g 1000 mcp && \
+    adduser -u 1000 -G mcp -s /bin/sh -D mcp
 
 # Install only runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     ca-certificates \
-    curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    curl
 
 # Copy virtual environment from builder
 COPY --from=builder /opt/venv /opt/venv

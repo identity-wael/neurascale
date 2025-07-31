@@ -364,6 +364,9 @@ module "gke" {
   neural_pool_min_nodes   = var.neural_pool_min_nodes
   neural_pool_max_nodes   = var.neural_pool_max_nodes
 
+  # Database encryption key (optional)
+  database_encryption_key = var.enable_kms_encryption && var.enable_enhanced_security ? module.security[0].database_key_id : ""
+
   depends_on = [
     module.networking,
     google_service_account.gke_nodes[0]

@@ -1,0 +1,116 @@
+import { Callout, Cards, Card, Steps, Tabs } from 'nextra/components'
+
+# NeuraScale Documentation
+
+<div className="flex justify-center my-8">
+  <div className="flex gap-4">
+    <a href="https://github.com/identity-wael/neurascale/actions/workflows/neural-engine-cicd.yml">
+      <img src="https://github.com/identity-wael/neurascale/actions/workflows/neural-engine-cicd.yml/badge.svg" alt="Neural Engine CI/CD" />
+    </a>
+    <a href="https://github.com/identity-wael/neurascale">
+      <img src="https://img.shields.io/badge/Phase%2015-Deployed%20✅-success" alt="Phase 15 Complete" />
+    </a>
+    <a href="https://docs.neurascale.io">
+      <img src="https://img.shields.io/badge/docs-neurascale.io-blue" alt="Documentation" />
+    </a>
+  </div>
+</div>
+
+Welcome to the official documentation for **NeuraScale**, a comprehensive Brain-Computer Interface (BCI) platform providing real-time neural data acquisition, processing, and analysis with sub-100ms latency.
+
+<Callout type="info" emoji="🎉">
+  **Latest: Phase 15 - Kubernetes Deployment Complete**
+
+  We've successfully deployed NeuraScale to production with enterprise-grade Kubernetes orchestration!
+</Callout>
+
+## Quick Navigation
+
+<Cards>
+  <Card title="🚀 Getting Started" href="/documentation/getting-started">
+    Set up NeuraScale and start recording neural data in minutes
+  </Card>
+  <Card title="🏗️ Architecture" href="/architecture/overview">
+    Understand the system design and components
+  </Card>
+  <Card title="🧠 Neural Engine" href="/neural-management-system">
+    Core processing system for BCI data
+  </Card>
+  <Card title="📊 API Reference" href="/api-documentation">
+    Complete API documentation
+  </Card>
+</Cards>
+
+## What is NeuraScale?
+
+NeuraScale is a cloud-native BCI platform that enables:
+
+- **🧠 Universal Device Support**: 30+ BCI devices from consumer to research grade
+- **⚡ Real-Time Processing**: Sub-100ms latency for closed-loop applications
+- **📊 Massive Scalability**: Handle 10,000+ channels simultaneously
+- **🔒 Clinical Compliance**: HIPAA/GDPR compliant with end-to-end encryption
+- **🤖 ML Integration**: Real-time inference and online learning capabilities
+
+## Latest Updates
+
+### ✅ Production Kubernetes Infrastructure
+
+- **Google Kubernetes Engine (GKE)** with auto-scaling node pools
+- **Helm charts** for all services with version management
+- **Service mesh** with Istio for traffic management and observability
+- **Auto-scaling** configurations for pods and nodes based on load
+- **Health checks** and self-healing with liveness/readiness probes
+
+### ✅ Complete Microservices Architecture
+
+- **Neural Engine API** deployed as scalable microservice
+- **WebSocket servers** with session affinity for real-time streaming
+- **Background workers** for signal processing and ML inference
+- **Message queue** integration with Kafka for event streaming
+- **Distributed caching** with Redis cluster
+
+### ✅ High Availability & Reliability
+
+- **Multi-zone deployment** across 3 availability zones
+- **Zero-downtime deployments** with rolling updates
+- **Circuit breakers** and retry logic for fault tolerance
+- **Backup and disaster recovery** with automated snapshots
+- **99.9% uptime SLA** achieved in production
+
+## Get Started
+
+<Steps>
+### Clone the Repository
+```bash
+git clone https://github.com/identity-wael/neurascale.git
+cd neurascale
+```
+
+### Set Up Environment
+```bash
+./scripts/dev-tools/setup-venvs.sh
+```
+
+### Start the Platform
+```bash
+docker-compose up -d
+cd neural-engine && source venv/bin/activate
+python -m src.main
+```
+
+### Connect Your Device
+Visit `http://localhost:8000` to connect your BCI device and start streaming data.
+</Steps>
+
+## Community & Support
+
+- 📚 [Documentation](https://docs.neurascale.io) - Comprehensive guides
+- 💬 [GitHub Discussions](https://github.com/identity-wael/neurascale/discussions) - Ask questions
+- 🐛 [Issue Tracker](https://github.com/identity-wael/neurascale/issues) - Report bugs
+- 📧 [Email Support](mailto:support@neurascale.io) - Direct assistance
+
+---
+
+**Built with ❤️ and 🧠 by the NeuraScale Team**
+
+_Bridging Mind and World Through Advanced Neural Cloud Technology_

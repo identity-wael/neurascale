@@ -1,0 +1,418 @@
+import { Callout, Steps, Tabs } from 'nextra/components'
+import Mermaid from '../../components/Mermaid'
+
+# Data Flow Architecture
+
+<Callout type="info">
+  Understanding how data flows through NeuraScale is crucial for optimizing performance and troubleshooting issues.
+</Callout>
+
+## Overview
+
+NeuraScale processes neural data through a carefully orchestrated pipeline designed for real-time performance and reliability. Data flows from BCI devices through multiple processing stages before reaching end users and storage systems.
+
+## Real-Time Data Flow
+
+<Mermaid>
+{`graph TB
+    subgraph "Data Sources"
+        D1[OpenBCI Device]
+        D2[Emotiv Headset]
+        D3[Muse Device]
+        D4[Clinical Array]
+    end
+
+    subgraph "Ingestion Layer"
+        WS[WebSocket Server]
+        REST[REST API]
+        LSL[LSL Receiver]
+    end
+
+    subgraph "Processing Layer"
+        Queue[Message Queue<br/>Apache Kafka]
+        Stream[Stream Processor<br/>Signal Filters]
+        ML[ML Pipeline<br/>Feature Extraction]
+    end
+
+    subgraph "Storage Layer"
+        Hot[(Hot Storage<br/>Redis)]
+        Warm[(Warm Storage<br/>TimescaleDB)]
+        Cold[(Cold Storage<br/>Cloud Storage)]
+    end
+
+    subgraph "Consumption Layer"
+        RT[Real-time Clients]
+        API[API Consumers]
+        Analytics[Analytics Platform]
+    end
+
+    D1 --> WS
+    D2 --> WS
+    D3 --> REST
+    D4 --> LSL
+
+    WS --> Queue
+    REST --> Queue
+    LSL --> Queue
+
+    Queue --> Stream
+    Stream --> ML
+
+    Stream --> Hot
+    ML --> Hot
+    Hot --> Warm
+    Warm --> Cold
+
+    Hot --> RT
+    Warm --> API
+    Cold --> Analytics
+
+    style D1 fill:#4285f4
+    style D2 fill:#4285f4
+    style D3 fill:#4285f4
+    style D4 fill:#4285f4
+    style Queue fill:#34a853
+    style Hot fill:#ea4335
+    style RT fill:#fbbc04`}
+</Mermaid>
+
+## Data Ingestion Patterns
+
+### WebSocket Streaming
+
+The primary method for real-time data ingestion from BCI devices.
+
+<Steps>
+### Device Connection
+Device establishes WebSocket connection with authentication token
+
+### Stream Initialization
+Server validates device and creates dedicated processing pipeline
+
+### Data Streaming
+Device sends data packets at configured sampling rate (250-30,000 Hz)
+
+### Acknowledgment
+Server acknowledges receipt and processes data asynchronously
+</Steps>
+
+**WebSocket Message Format:**
+```json
+{
+  "device_id": "device_123",
+  "timestamp": 1704067200000,
+  "sequence": 1234567,
+  "channels": [
+    {"id": 1, "value": 23.45, "quality": 0.98},
+    {"id": 2, "value": -12.34, "quality": 0.95},
+    // ... more channels
+  ],
+  "markers": ["start_trial", "stimulus_onset"]
+}
+```
+
+### REST API Upload
+
+For batch data upload and offline processing.
+
+<Mermaid>
+{`sequenceDiagram
+    participant Client
+    participant API
+    participant Validator
+    participant Storage
+    participant Queue
+
+    Client->>API: POST /api/v1/data/upload
+    API->>Validator: Validate Format
+    Validator-->>API: Valid
+    API->>Storage: Store Raw File
+    Storage-->>API: File ID
+    API->>Queue: Queue Processing Job
+    Queue-->>Client: Job ID
+
+    Note over Queue: Async Processing
+    Queue->>Storage: Process File
+    Queue->>API: Update Status`}
+</Mermaid>
+
+## Processing Pipeline
+
+### Stage 1: Preprocessing
+
+<Tabs items={['Filtering', 'Artifact Removal', 'Resampling']}>
+  <Tabs.Tab>
+    **Digital Filtering:**
+    - Notch filter: 50/60 Hz powerline noise
+    - Bandpass: 0.5-100 Hz for EEG
+    - High-pass: 0.1 Hz for drift removal
+
+    ```python
+    # Example filter configuration
+    filters = {
+        "notch": {"freq": 60, "quality": 30},
+        "bandpass": {"low": 0.5, "high": 100, "order": 4},
+        "highpass": {"freq": 0.1, "order": 2}
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    **Artifact Detection & Removal:**
+    - EOG (eye movement) artifacts
+    - EMG (muscle) artifacts
+    - Motion artifacts
+    - Bad channel detection
+
+    Algorithms:
+    - Independent Component Analysis (ICA)
+    - Adaptive filtering
+    - Statistical thresholding
+  </Tabs.Tab>
+  <Tabs.Tab>
+    **Signal Resampling:**
+    - Downsampling for storage efficiency
+    - Upsampling for analysis compatibility
+    - Anti-aliasing filters
+
+    Common rates:
+    - Storage: 250 Hz
+    - Analysis: 500-1000 Hz
+    - Display: 125 Hz
+  </Tabs.Tab>
+</Tabs>
+
+### Stage 2: Feature Extraction
+
+<Mermaid>
+{`graph LR
+    subgraph "Time Domain"
+        Mean[Mean]
+        Var[Variance]
+        RMS[RMS]
+        ZC[Zero Crossings]
+    end
+
+    subgraph "Frequency Domain"
+        FFT[FFT]
+        PSD[Power Spectral Density]
+        Band[Band Powers]
+        Peak[Peak Frequency]
+    end
+
+    subgraph "Time-Frequency"
+        STFT[Short-Time FFT]
+        Wavelet[Wavelet Transform]
+        Hilbert[Hilbert Transform]
+    end
+
+    subgraph "Connectivity"
+        Coherence[Coherence]
+        PLV[Phase Locking]
+        MI[Mutual Information]
+    end
+
+    Input[Preprocessed Signal]
+    Output[Feature Vector]
+
+    Input --> Mean
+    Input --> FFT
+    Input --> STFT
+    Input --> Coherence
+
+    Mean --> Output
+    Var --> Output
+    FFT --> Band
+    Band --> Output
+    STFT --> Output
+    Coherence --> Output`}
+</Mermaid>
+
+### Stage 3: Real-Time Analysis
+
+**Machine Learning Pipeline:**
+
+1. **Feature Selection**: Choose relevant features based on application
+2. **Classification**: Apply trained models for prediction
+3. **Post-processing**: Smooth predictions, apply confidence thresholds
+4. **Output Generation**: Format results for consumption
+
+## Storage Strategy
+
+### Hot Storage (Redis)
+- **Purpose**: Real-time access to recent data
+- **Retention**: Last 5 minutes of data
+- **Format**: Compressed binary
+- **Access Pattern**: High frequency reads/writes
+
+### Warm Storage (TimescaleDB)
+- **Purpose**: Recent historical data for analysis
+- **Retention**: 30 days
+- **Format**: Time-series optimized
+- **Access Pattern**: Analytical queries
+
+### Cold Storage (Cloud Storage)
+- **Purpose**: Long-term archival
+- **Retention**: Indefinite
+- **Format**: Compressed Parquet files
+- **Access Pattern**: Batch processing
+
+<Mermaid>
+{`graph TB
+    subgraph "Storage Lifecycle"
+        Hot[Hot: Redis<br/>5 minutes]
+        Warm[Warm: TimescaleDB<br/>30 days]
+        Cold[Cold: Cloud Storage<br/>Forever]
+
+        Hot -->|Age > 5min| Warm
+        Warm -->|Age > 30d| Cold
+
+        Hot -->|Backup| Cold
+        Warm -->|Backup| Cold
+    end
+
+    style Hot fill:#ea4335
+    style Warm fill:#fbbc04
+    style Cold fill:#4285f4`}
+</Mermaid>
+
+## Event-Driven Architecture
+
+### Event Types
+
+```typescript
+// Device Events
+interface DeviceEvent {
+  type: 'device.connected' | 'device.disconnected' | 'device.error'
+  deviceId: string
+  timestamp: number
+  metadata: Record<string, any>
+}
+
+// Data Events
+interface DataEvent {
+  type: 'data.received' | 'data.processed' | 'data.stored'
+  sessionId: string
+  timestamp: number
+  metrics: {
+    samplesProcessed: number
+    latency: number
+    quality: number
+  }
+}
+
+// System Events
+interface SystemEvent {
+  type: 'system.alert' | 'system.error' | 'system.metric'
+  severity: 'info' | 'warning' | 'error' | 'critical'
+  message: string
+  context: Record<string, any>
+}
+```
+
+### Event Flow
+
+<Mermaid>
+{`graph LR
+    subgraph "Event Sources"
+        Device[Device Manager]
+        Processor[Data Processor]
+        System[System Monitor]
+    end
+
+    subgraph "Event Bus"
+        Kafka[Apache Kafka]
+        Topics[Topics]
+    end
+
+    subgraph "Event Consumers"
+        Logger[Event Logger]
+        Alerting[Alert Manager]
+        Analytics[Analytics Engine]
+        Websocket[WebSocket Broadcaster]
+    end
+
+    Device --> Kafka
+    Processor --> Kafka
+    System --> Kafka
+
+    Kafka --> Topics
+
+    Topics --> Logger
+    Topics --> Alerting
+    Topics --> Analytics
+    Topics --> Websocket`}
+</Mermaid>
+
+## Performance Optimization
+
+### Buffering Strategy
+
+1. **Ring Buffers**: Lock-free circular buffers for real-time data
+2. **Double Buffering**: Prevent blocking during processing
+3. **Memory Pools**: Pre-allocated memory for zero-copy operations
+
+### Parallel Processing
+
+- **Channel Parallelism**: Process each channel independently
+- **Time Parallelism**: Process time windows in parallel
+- **Pipeline Parallelism**: Different stages run concurrently
+
+### Caching Layers
+
+- **Result Cache**: Cache computed features and predictions
+- **Query Cache**: Cache frequent database queries
+- **Session Cache**: Maintain device session state
+
+## Data Quality Monitoring
+
+<Callout type="warning">
+  Data quality directly impacts the accuracy of analysis and machine learning models.
+</Callout>
+
+### Quality Metrics
+
+- **Signal-to-Noise Ratio (SNR)**
+- **Impedance values**
+- **Packet loss rate**
+- **Sampling consistency**
+- **Artifact percentage**
+
+### Quality Assurance Pipeline
+
+<Mermaid>
+{`graph TB
+    Data[Incoming Data]
+
+    Check1{SNR Check}
+    Check2{Impedance Check}
+    Check3{Continuity Check}
+    Check4{Range Check}
+
+    Good[Good Quality]
+    Degraded[Degraded Quality]
+    Bad[Bad Quality]
+
+    Data --> Check1
+    Check1 -->|Pass| Check2
+    Check1 -->|Fail| Bad
+
+    Check2 -->|Pass| Check3
+    Check2 -->|Warning| Degraded
+
+    Check3 -->|Pass| Check4
+    Check3 -->|Fail| Bad
+
+    Check4 -->|Pass| Good
+    Check4 -->|Warning| Degraded
+    Check4 -->|Fail| Bad
+
+    style Good fill:#34a853
+    style Degraded fill:#fbbc04
+    style Bad fill:#ea4335`}
+</Mermaid>
+
+## Next Steps
+
+- Review [Architecture Diagrams](/architecture/diagrams) for visual representations
+- Return to [System Components](/architecture/system-components)
+- Go back to [Architecture Overview](/architecture/overview)

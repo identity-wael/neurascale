@@ -4,8 +4,12 @@
   "buildCommand": "pnpm run build",
   "rewrites": [
     {
+      "source": "/docs",
+      "destination": "https://docs-nextra-neurascale.vercel.app"
+    },
+    {
       "source": "/docs/:path*",
-      "destination": "https://docs-nextra-neurascale.vercel.app/docs/:path*"
+      "destination": "https://docs-nextra-neurascale.vercel.app/:path*"
     }
   ],
   "headers": [

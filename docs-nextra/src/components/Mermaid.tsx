@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from "react";
 import mermaid from "mermaid";
 
@@ -38,11 +40,20 @@ const Mermaid: React.FC<MermaidProps> = ({ children }) => {
       });
 
       try {
-        mermaid.render(id, children, (svgCode) => {
-          if (ref.current) {
-            ref.current.innerHTML = svgCode;
-          }
-        });
+        mermaid
+          .render(id, children)
+          .then((result) => {
+            if (ref.current) {
+              ref.current.innerHTML = result.svg;
+            }
+          })
+          .catch((error) => {
+            console.error("Mermaid rendering error:", error);
+            if (ref.current) {
+              ref.current.innerHTML =
+                '<p style="color: red;">Error rendering diagram</p>';
+            }
+          });
       } catch (error) {
         console.error("Mermaid rendering error:", error);
         if (ref.current) {

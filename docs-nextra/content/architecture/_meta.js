@@ -1,6 +1,6 @@
-{
-  "overview": "Overview",
+export default {
+  overview: "Overview",
   "system-components": "System Components",
   "data-flow": "Data Flow",
-  "diagrams": "Architecture Diagrams"
-}
+  diagrams: "Diagrams",
+};

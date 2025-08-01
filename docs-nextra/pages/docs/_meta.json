@@ -1,0 +1,30 @@
+{
+  "deployment": {
+    "title": "Deployment Guide",
+    "type": "page"
+  },
+  "environment-variables": {
+    "title": "Environment Variables",
+    "type": "page"
+  },
+  "sanity-integration": {
+    "title": "Sanity Integration",
+    "type": "page"
+  },
+  "neon-database": {
+    "title": "Neon Database",
+    "type": "page"
+  },
+  "google-analytics-setup": {
+    "title": "Google Analytics Setup",
+    "type": "page"
+  },
+  "google-ads-setup": {
+    "title": "Google Ads Setup",
+    "type": "page"
+  },
+  "fix-google-maps": {
+    "title": "Fix Google Maps",
+    "type": "page"
+  }
+}

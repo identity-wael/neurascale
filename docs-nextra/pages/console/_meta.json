@@ -1,0 +1,14 @@
+{
+  "index": {
+    "title": "Console Overview",
+    "type": "page"
+  },
+  "firebase-setup": {
+    "title": "Firebase Setup",
+    "type": "page"
+  },
+  "infrastructure": {
+    "title": "Infrastructure",
+    "type": "page"
+  }
+}

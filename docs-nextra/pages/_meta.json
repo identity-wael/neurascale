@@ -3,6 +3,10 @@
     "title": "Home",
     "type": "page"
   },
+  "getting-started": {
+    "title": "Getting Started",
+    "type": "page"
+  },
   "architecture": {
     "title": "Architecture",
     "type": "menu",
@@ -29,24 +33,32 @@
     "title": "Neural Management System",
     "type": "page"
   },
-  "documentation": {
-    "title": "Getting Started",
+  "dataset-management": {
+    "title": "Dataset Management",
+    "type": "page"
+  },
+  "docs": {
+    "title": "Documentation",
+    "type": "folder"
+  },
+  "console": {
+    "title": "Console",
     "type": "folder"
   },
   "api-documentation": {
     "title": "API Documentation",
     "type": "page"
   },
-  "console": {
-    "title": "Console Application",
+  "security": {
+    "title": "Security",
     "type": "folder"
   },
   "contributing": {
     "title": "Contributing",
     "type": "page"
   },
-  "security": {
-    "title": "Security",
-    "type": "page"
+  "documentation": {
+    "title": "Legacy Docs",
+    "type": "folder"
   }
 }

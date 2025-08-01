@@ -1,17 +1,10 @@
 import nextra from 'nextra'
 
-const withNextra = nextra()
+const withNextra = nextra({})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        'next-mdx-import-source-file': './mdx-components.tsx',
-      },
-    },
-  },
   images: {
     domains: ['docs.neurascale.io'],
   },

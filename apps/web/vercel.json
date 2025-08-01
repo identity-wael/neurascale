@@ -2,6 +2,12 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile && cd apps/web",
   "buildCommand": "pnpm run build",
+  "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "https://docs-nextra-neurascale.vercel.app/docs/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

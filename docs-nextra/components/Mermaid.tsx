@@ -37,19 +37,22 @@ const Mermaid: React.FC<MermaidProps> = ({ children }) => {
         securityLevel: "loose",
       });
 
-      try {
-        mermaid.render(id, children, (svgCode) => {
+      const renderDiagram = async () => {
+        try {
+          const { svg } = await mermaid.render(id, children);
           if (ref.current) {
-            ref.current.innerHTML = svgCode;
+            ref.current.innerHTML = svg;
           }
-        });
-      } catch (error) {
-        console.error("Mermaid rendering error:", error);
-        if (ref.current) {
-          ref.current.innerHTML =
-            '<p style="color: red;">Error rendering diagram</p>';
+        } catch (error) {
+          console.error("Mermaid rendering error:", error);
+          if (ref.current) {
+            ref.current.innerHTML =
+              '<p style="color: red;">Error rendering diagram</p>';
+          }
         }
-      }
+      };
+
+      renderDiagram();
     }
   }, [children, id]);
 

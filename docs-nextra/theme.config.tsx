@@ -1,8 +1,7 @@
 import React from "react";
-import { DocsThemeConfig } from "nextra-theme-docs";
 import { useRouter } from "next/router";
 
-const config: DocsThemeConfig = {
+const config = {
   logo: <span style={{ fontWeight: "bold" }}>NeuraScale Documentation</span>,
   project: {
     link: "https://github.com/identity-wael/neurascale",

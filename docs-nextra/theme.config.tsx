@@ -1,6 +1,5 @@
 import React from "react";
 import { DocsThemeConfig } from "nextra-theme-docs";
-import { useRouter } from "next/router";
 
 const config: DocsThemeConfig = {
   logo: <span style={{ fontWeight: "bold" }}>NeuraScale Documentation</span>,
@@ -49,12 +48,9 @@ const config: DocsThemeConfig = {
     </>
   ),
   useNextSeoProps() {
-    const { asPath } = useRouter();
-    if (asPath !== "/") {
-      return {
-        titleTemplate: "%s – NeuraScale Docs",
-      };
-    }
+    return {
+      titleTemplate: "%s – NeuraScale Docs",
+    };
   },
   banner: {
     key: "nextra-migration",

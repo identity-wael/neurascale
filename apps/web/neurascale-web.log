@@ -1,0 +1,107 @@
+
+> @neurascale/web@1.0.0 dev /Users/weg/NeuraScale/neurascale/apps/web
+> next dev "--port" "3002"
+
+   ▲ Next.js 15.4.4
+   - Local:        http://localhost:3002
+   - Network:      http://172.20.7.170:3002
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1072ms
+ ✓ Compiled /middleware in 296ms (153 modules)
+ ○ Compiling / ...
+ ⚠ ../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+ ⚠ ../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+ GET / 200 in 5140ms
+ ⚠ ../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+ ⚠ ../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/capabilities/WebGPU.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+The generated code contains 'async/await' because this module is using "topLevelAwait".
+However, your target environment does not appear to support 'async/await'.
+As a result, the code may not run as expected or may cause runtime errors.
+
+Import trace for requested module:
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPUBackend.js
+../../node_modules/.pnpm/three@0.160.1/node_modules/three/examples/jsm/renderers/webgpu/WebGPURenderer.js
+./components/visuals/DataUniverse3D.tsx
+./components/sections/Hero.tsx
+./app/page-client.tsx
+ GET /favicon.ico 200 in 653ms

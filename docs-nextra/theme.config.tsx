@@ -1,5 +1,6 @@
 import React from "react";
 import { DocsThemeConfig } from "nextra-theme-docs";
+import { useRouter } from "next/router";
 
 const config: DocsThemeConfig = {
   logo: <span style={{ fontWeight: "bold" }}>NeuraScale Documentation</span>,
@@ -12,13 +13,19 @@ const config: DocsThemeConfig = {
   docsRepositoryBase:
     "https://github.com/identity-wael/neurascale/tree/main/docs-nextra",
   footer: {
-    content: <span>© 2025 NeuraScale. Built with ❤️ and 🧠</span>,
+    text: "© 2025 NeuraScale. Built with ❤️ and 🧠",
   },
   navigation: {
     prev: true,
     next: true,
   },
   sidebar: {
+    titleComponent({ title, type }) {
+      if (type === "separator") {
+        return <span className="cursor-default">{title}</span>;
+      }
+      return <>{title}</>;
+    },
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
   },
@@ -48,9 +55,12 @@ const config: DocsThemeConfig = {
     </>
   ),
   useNextSeoProps() {
-    return {
-      titleTemplate: "%s – NeuraScale Docs",
-    };
+    const { asPath } = useRouter();
+    if (asPath !== "/") {
+      return {
+        titleTemplate: "%s – NeuraScale Docs",
+      };
+    }
   },
   banner: {
     key: "nextra-migration",

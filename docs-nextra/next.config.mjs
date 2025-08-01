@@ -1,16 +1,5 @@
-import nextra from 'nextra'
-
-const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-  defaultShowCopyCode: true,
-  mdxOptions: {
-    remarkPlugins: [],
-    rehypePlugins: []
-  }
-})
-
-export default withNextra({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['docs.neurascale.io'],
@@ -30,4 +19,6 @@ export default withNextra({
       }
     ]
   }
-})
+}
+
+export default nextConfig

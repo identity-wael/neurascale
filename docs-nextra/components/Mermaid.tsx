@@ -18,7 +18,7 @@ const Mermaid: React.FC<MermaidProps> = ({ children }) => {
         theme: "default",
         themeVariables: {
           primaryColor: "#4285f4",
-          primaryTextColor: "#fff",
+          primaryTextColor: "#202124",
           primaryBorderColor: "#1a73e8",
           lineColor: "#5f6368",
           secondaryColor: "#34a853",
@@ -27,8 +27,6 @@ const Mermaid: React.FC<MermaidProps> = ({ children }) => {
           mainBkg: "#4285f4",
           secondBkg: "#34a853",
           tertiaryBkg: "#fbbc04",
-          primaryTextColor: "#202124",
-          lineColor: "#5f6368",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         },

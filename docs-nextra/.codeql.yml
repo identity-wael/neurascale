@@ -1,0 +1,7 @@
+name: "nextra-docs"
+paths:
+  - .
+paths-ignore:
+  - node_modules
+  - .next
+  - out

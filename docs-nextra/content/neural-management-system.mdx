@@ -80,25 +80,25 @@ The Neural Management System provides:
 
 ### 📋 Upcoming Components
 
-1. **Neural Ledger Implementation**
+- **Neural Ledger Implementation**
    - Event sourcing with Cloud Pub/Sub
    - Hash chain for data integrity
    - Audit trail and compliance features
    - Data lineage tracking
 
-2. **API Migration to FastAPI**
+- **API Migration to FastAPI**
    - Async support for better performance
    - WebSocket endpoints for streaming
    - OpenAPI documentation
    - Authentication middleware
 
-3. **Monitoring and Observability**
+- **Monitoring and Observability**
    - Custom metrics for neural processing
    - Distributed tracing with OpenTelemetry
    - Grafana dashboards
    - PagerDuty integration
 
-4. **Machine Learning Pipeline**
+- **Machine Learning Pipeline**
    - Pre-trained models for BCI tasks
    - Real-time movement decoder
    - Model versioning and A/B testing
@@ -157,26 +157,26 @@ The Neural Management System provides:
 
 ## Getting Started
 
-1. **Set up the development environment**
+- **Set up the development environment**
    ```bash
    cd neural-engine
    ./scripts/setup-dev.sh
    ```
 
-2. **Start the Neural Engine**
+- **Start the Neural Engine**
    ```bash
    source venv/bin/activate
    python -m src.main
    ```
 
-3. **Connect a device**
+- **Connect a device**
    ```bash
    curl -X POST http://localhost:8000/api/v1/devices \
      -H "Content-Type: application/json" \
      -d '{"device_id": "test", "device_type": "synthetic"}'
    ```
 
-4. **Start streaming**
+- **Start streaming**
    ```bash
    curl -X POST http://localhost:8000/api/v1/devices/test/stream/start
    ```

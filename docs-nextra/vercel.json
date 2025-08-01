@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/app/**/*.jsx": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}

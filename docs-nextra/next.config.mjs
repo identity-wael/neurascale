@@ -1,12 +1,13 @@
 import nextra from 'nextra'
 
 const withNextra = nextra({
-  // MDX options limited with Turbopack - avoid function-based plugins
+  latex: true,
+  search: {
+    codeblocks: false
+  },
+  contentDirBasePath: '/docs'
 })
 
 export default withNextra({
-  reactStrictMode: true,
-  images: {
-    domains: ['docs.neurascale.io'],
-  }
+  reactStrictMode: true
 })

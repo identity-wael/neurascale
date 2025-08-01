@@ -1,0 +1,312 @@
+import { Callout, Card, Cards } from 'nextra/components'
+import Mermaid from '../../components/Mermaid'
+
+# System Components
+
+<Callout>
+  This page provides detailed information about each major component in the NeuraScale architecture.
+</Callout>
+
+## Frontend Components
+
+### Next.js Web Application
+
+The frontend is built with Next.js 15 and provides the user interface for NeuraScale.
+
+**Key Features:**
+- Server-side rendering for optimal performance
+- Real-time data visualization with WebGL
+- Responsive design for desktop and mobile
+- Progressive Web App capabilities
+
+**Technology Stack:**
+- Next.js 15.0
+- React 18.3
+- TypeScript 5.3
+- Tailwind CSS 3.4
+- Three.js for 3D visualizations
+
+<Mermaid>
+{`graph LR
+    subgraph "Frontend Architecture"
+        Pages[Pages/Routes]
+        Components[React Components]
+        Store[State Management]
+        API[API Client]
+        WS[WebSocket Client]
+
+        Pages --> Components
+        Components --> Store
+        Components --> API
+        Components --> WS
+
+        Store --> API
+        WS --> Store
+    end`}
+</Mermaid>
+
+### Console Application
+
+A specialized interface for device management and monitoring.
+
+**Features:**
+- Device discovery and pairing
+- Real-time signal quality monitoring
+- Recording session management
+- Data export functionality
+
+## Backend Services
+
+### Neural Engine API
+
+The core backend service built with FastAPI.
+
+<Mermaid>
+{`graph TB
+    subgraph "Neural Engine"
+        API[FastAPI Application]
+
+        subgraph "Routers"
+            Device[Device Router]
+            Stream[Stream Router]
+            Data[Data Router]
+            ML[ML Router]
+        end
+
+        subgraph "Services"
+            DeviceMgr[Device Manager]
+            StreamProc[Stream Processor]
+            DataStore[Data Service]
+            MLEngine[ML Engine]
+        end
+
+        subgraph "Core"
+            Pipeline[Processing Pipeline]
+            Buffer[Ring Buffer]
+            Filter[Signal Filters]
+        end
+
+        API --> Device
+        API --> Stream
+        API --> Data
+        API --> ML
+
+        Device --> DeviceMgr
+        Stream --> StreamProc
+        Data --> DataStore
+        ML --> MLEngine
+
+        StreamProc --> Pipeline
+        Pipeline --> Buffer
+        Pipeline --> Filter
+    end`}
+</Mermaid>
+
+**Key Capabilities:**
+- RESTful API with OpenAPI documentation
+- Async request handling
+- Rate limiting and authentication
+- Comprehensive error handling
+- Metrics and logging
+
+### Device Interfaces
+
+Support for 30+ BCI devices through modular drivers.
+
+<Cards>
+  <Card title="OpenBCI" href="#">
+    Cyton, Ganglion, Cyton+Daisy boards
+  </Card>
+  <Card title="Emotiv" href="#">
+    EPOC+, Insight headsets
+  </Card>
+  <Card title="Muse" href="#">
+    Muse 2, Muse S devices
+  </Card>
+  <Card title="Clinical Arrays" href="#">
+    Blackrock, Plexon systems
+  </Card>
+</Cards>
+
+### Signal Processing Pipeline
+
+Real-time signal processing with sub-100ms latency.
+
+<Mermaid>
+{`graph LR
+    subgraph "Signal Processing Pipeline"
+        Input[Raw Signal]
+
+        subgraph "Preprocessing"
+            Notch[Notch Filter<br/>50/60Hz]
+            BP[Bandpass<br/>0.5-100Hz]
+            Ref[Re-reference]
+        end
+
+        subgraph "Feature Extraction"
+            FFT[FFT Analysis]
+            Wavelet[Wavelet Transform]
+            Stats[Statistical Features]
+        end
+
+        subgraph "Classification"
+            ML[ML Models]
+            Threshold[Thresholding]
+            Pattern[Pattern Matching]
+        end
+
+        Output[Processed Data]
+
+        Input --> Notch
+        Notch --> BP
+        BP --> Ref
+
+        Ref --> FFT
+        Ref --> Wavelet
+        Ref --> Stats
+
+        FFT --> ML
+        Wavelet --> ML
+        Stats --> Threshold
+        ML --> Pattern
+
+        Pattern --> Output
+        Threshold --> Output
+    end`}
+</Mermaid>
+
+## Data Storage
+
+### PostgreSQL Database
+
+Primary relational database for metadata and user data.
+
+**Schema Overview:**
+- Users and authentication
+- Device configurations
+- Recording sessions
+- Experiment metadata
+- Analysis results
+
+### TimescaleDB
+
+Optimized time-series database for neural data.
+
+**Features:**
+- Hypertables for automatic partitioning
+- Continuous aggregates for real-time analytics
+- Compression for efficient storage
+- Data retention policies
+
+### BigQuery
+
+Data warehouse for analytics and machine learning.
+
+**Use Cases:**
+- Long-term data archival
+- Complex analytics queries
+- ML model training datasets
+- Business intelligence
+
+## Infrastructure Services
+
+### Google Kubernetes Engine
+
+Container orchestration platform.
+
+<Mermaid>
+{`graph TB
+    subgraph "GKE Cluster"
+        subgraph "Control Plane"
+            API[API Server]
+            Scheduler[Scheduler]
+            Controller[Controller Manager]
+        end
+
+        subgraph "Node Pools"
+            subgraph "General Pool"
+                Pod1[API Pods]
+                Pod2[Frontend Pods]
+            end
+
+            subgraph "Neural Pool"
+                Pod3[Processing Pods]
+                Pod4[ML Pods]
+            end
+
+            subgraph "GPU Pool"
+                Pod5[Training Pods]
+                Pod6[Inference Pods]
+            end
+        end
+
+        API --> Scheduler
+        Scheduler --> Controller
+        Controller --> Pod1
+        Controller --> Pod3
+        Controller --> Pod5
+    end`}
+</Mermaid>
+
+### Message Queue (Kafka)
+
+Event streaming platform for reliable data flow.
+
+**Topics:**
+- `raw-neural-data`: Incoming device streams
+- `processed-signals`: Filtered and processed data
+- `ml-predictions`: Real-time inference results
+- `system-events`: Platform events and alerts
+
+### Redis Cache
+
+In-memory data structure store.
+
+**Use Cases:**
+- Session management
+- Real-time data buffering
+- Pub/Sub for WebSocket events
+- Distributed locking
+- Rate limiting
+
+## Security Components
+
+### Authentication & Authorization
+
+- **JWT tokens** for API authentication
+- **OAuth 2.0** integration
+- **Role-based access control** (RBAC)
+- **API key management**
+
+### Encryption
+
+- **TLS 1.3** for data in transit
+- **AES-256** for data at rest
+- **Cloud KMS** for key management
+- **End-to-end encryption** for sensitive data
+
+## Monitoring & Observability
+
+### Metrics Collection
+
+- **Prometheus** for metrics aggregation
+- **Grafana** for visualization
+- **Custom dashboards** for business metrics
+
+### Logging
+
+- **Structured logging** with JSON format
+- **Cloud Logging** aggregation
+- **Log analysis** with BigQuery
+
+### Tracing
+
+- **OpenTelemetry** instrumentation
+- **Distributed tracing** across services
+- **Performance profiling**
+
+## Next Steps
+
+- Continue to [Data Flow](/architecture/data-flow) documentation
+- View [Architecture Diagrams](/architecture/diagrams)
+- Return to [Architecture Overview](/architecture/overview)

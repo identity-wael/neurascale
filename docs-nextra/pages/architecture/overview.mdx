@@ -1,0 +1,270 @@
+import { Callout, Tabs } from 'nextra/components'
+import Mermaid from '../../components/Mermaid'
+
+# NeuraScale Architecture Overview
+
+<Callout type="info">
+  This document provides a comprehensive overview of NeuraScale's architecture, covering all major components and their interactions.
+</Callout>
+
+## System Overview
+
+NeuraScale is a cloud-native Brain-Computer Interface (BCI) platform built with a microservices architecture. The system is designed to handle real-time neural data acquisition, processing, and analysis with sub-100ms latency.
+
+<Mermaid>
+{`graph TB
+    subgraph "Client Layer"
+        UI[Next.js Web App]
+        SDK[SDKs/APIs]
+        Device[BCI Devices]
+    end
+
+    subgraph "API Gateway"
+        Gateway[API Gateway<br/>Authentication/Routing]
+    end
+
+    subgraph "Core Services"
+        NE[Neural Engine<br/>FastAPI]
+        WS[WebSocket Server<br/>Real-time Streaming]
+        Worker[Background Workers<br/>Signal Processing]
+    end
+
+    subgraph "Data Layer"
+        PG[(PostgreSQL<br/>Metadata)]
+        TS[(TimescaleDB<br/>Time Series)]
+        Redis[(Redis<br/>Cache/Sessions)]
+        BQ[(BigQuery<br/>Analytics)]
+    end
+
+    subgraph "Infrastructure"
+        GKE[Google Kubernetes Engine]
+        Storage[Cloud Storage<br/>Raw Data]
+        PubSub[Pub/Sub<br/>Event Bus]
+    end
+
+    UI --> Gateway
+    SDK --> Gateway
+    Device --> WS
+
+    Gateway --> NE
+    Gateway --> WS
+
+    NE --> PG
+    NE --> Redis
+    NE --> Worker
+
+    WS --> TS
+    WS --> PubSub
+
+    Worker --> Storage
+    Worker --> BQ
+    Worker --> PubSub
+
+    style UI fill:#4285f4,stroke:#1a73e8,color:#fff
+    style NE fill:#34a853,stroke:#188038,color:#fff
+    style WS fill:#fbbc04,stroke:#f9ab00,color:#000
+    style PG fill:#ea4335,stroke:#d33b27,color:#fff`}
+</Mermaid>
+
+## Key Components
+
+### 1. Frontend Application
+- **Technology**: Next.js 15 with React 18
+- **Features**:
+  - Real-time data visualization
+  - Device management interface
+  - User authentication
+  - Administrative dashboard
+- **Deployment**: Vercel with edge functions
+
+### 2. Neural Engine (Backend)
+- **Technology**: Python with FastAPI
+- **Responsibilities**:
+  - Device connection management
+  - Signal processing pipeline
+  - API endpoints
+  - Business logic
+- **Performance**: Handles 10,000+ concurrent channels
+
+### 3. Real-time Infrastructure
+- **WebSocket Server**: Manages bidirectional streaming
+- **Message Queue**: Kafka for event streaming
+- **Cache Layer**: Redis for session management
+
+### 4. Data Storage
+- **PostgreSQL**: User data, metadata, configurations
+- **TimescaleDB**: High-frequency time-series data
+- **BigQuery**: Analytics and long-term storage
+- **Cloud Storage**: Raw data files and backups
+
+## Data Flow Architecture
+
+<Mermaid>
+{`sequenceDiagram
+    participant Device as BCI Device
+    participant WS as WebSocket Server
+    participant Queue as Message Queue
+    participant Worker as Processing Worker
+    participant DB as Database
+    participant Client as Web Client
+
+    Device->>WS: Connect & Authenticate
+    WS->>DB: Verify Device
+    WS-->>Device: Connection Established
+
+    loop Real-time Streaming
+        Device->>WS: Stream Neural Data
+        WS->>Queue: Publish Raw Data
+        Queue->>Worker: Process Signal
+        Worker->>DB: Store Processed Data
+        Worker->>Client: Push Updates
+    end
+
+    Client->>WS: Request Historical Data
+    WS->>DB: Query Time Series
+    DB-->>Client: Return Data`}
+</Mermaid>
+
+## Deployment Architecture
+
+<Mermaid>
+{`graph TB
+    subgraph "Google Cloud Platform"
+        subgraph "Production Environment"
+            subgraph "GKE Cluster"
+                subgraph "Node Pool 1"
+                    API1[Neural API Pod]
+                    API2[Neural API Pod]
+                end
+
+                subgraph "Node Pool 2"
+                    WS1[WebSocket Pod]
+                    WS2[WebSocket Pod]
+                end
+
+                subgraph "Node Pool 3"
+                    W1[Worker Pod]
+                    W2[Worker Pod]
+                    W3[Worker Pod]
+                end
+            end
+
+            LB[Load Balancer]
+            SQL[(Cloud SQL)]
+            REDIS[(Redis Cluster)]
+        end
+
+        subgraph "Staging Environment"
+            STAGE[Staging Cluster]
+        end
+    end
+
+    subgraph "External Services"
+        VERCEL[Vercel<br/>Frontend]
+        NEON[Neon DB<br/>Development]
+    end
+
+    Internet --> LB
+    LB --> API1
+    LB --> API2
+    LB --> WS1
+    LB --> WS2
+
+    style Production fill:#4285f4,stroke:#1a73e8,color:#fff
+    style GKE fill:#34a853,stroke:#188038,color:#fff`}
+</Mermaid>
+
+## Security Architecture
+
+<Mermaid>
+{`graph LR
+    subgraph "Authentication Flow"
+        User[User] --> Auth0[Auth0/JWT]
+        Auth0 --> API[API Gateway]
+        API --> Valid{Valid Token?}
+        Valid -->|Yes| Service[Microservice]
+        Valid -->|No| Reject[401 Unauthorized]
+    end
+
+    subgraph "Encryption"
+        Data[Data at Rest] --> KMS[Cloud KMS]
+        KMS --> Encrypted[Encrypted Storage]
+
+        Transit[Data in Transit] --> TLS[TLS 1.3]
+        TLS --> Secure[Secure Channel]
+    end
+
+    subgraph "Access Control"
+        RBAC[Role-Based Access]
+        IAM[GCP IAM]
+        WIF[Workload Identity]
+    end
+
+    Service --> RBAC
+    Service --> IAM
+    Service --> WIF`}
+</Mermaid>
+
+## Performance Specifications
+
+<Tabs items={['Latency', 'Throughput', 'Scalability']}>
+  <Tabs.Tab>
+    - **End-to-end latency**: 50-80ms typical, <100ms guaranteed
+    - **WebSocket latency**: <10ms
+    - **Processing latency**: 20-40ms
+    - **Database write**: <5ms
+  </Tabs.Tab>
+  <Tabs.Tab>
+    - **Channels**: 10,000+ concurrent
+    - **Data rate**: 40 MB/s sustained
+    - **API requests**: 10,000 req/s
+    - **WebSocket connections**: 50,000 concurrent
+  </Tabs.Tab>
+  <Tabs.Tab>
+    - **Horizontal scaling**: Auto-scale 1-100 pods
+    - **Node pools**: 3 separate pools for workload isolation
+    - **Multi-region**: Deployable across regions
+    - **Load balancing**: Global with CDN
+  </Tabs.Tab>
+</Tabs>
+
+## Technology Stack
+
+### Backend
+- **Language**: Python 3.12.11
+- **Framework**: FastAPI
+- **Async**: asyncio, aiohttp
+- **Processing**: NumPy, SciPy, scikit-learn
+
+### Frontend
+- **Framework**: Next.js 15
+- **UI**: React 18, Tailwind CSS
+- **State**: Zustand
+- **Real-time**: Socket.io client
+
+### Infrastructure
+- **Container**: Docker
+- **Orchestration**: Kubernetes (GKE)
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Prometheus + Grafana
+
+### Data
+- **OLTP**: PostgreSQL 15
+- **Time-series**: TimescaleDB
+- **Analytics**: BigQuery
+- **Cache**: Redis 7
+
+## High Availability Design
+
+1. **Multi-zone deployment**: Across 3 availability zones
+2. **Load balancing**: Global and regional
+3. **Auto-scaling**: Based on CPU/memory/custom metrics
+4. **Health checks**: Liveness and readiness probes
+5. **Circuit breakers**: Prevent cascade failures
+6. **Backup strategy**: Automated daily backups
+
+## Next Steps
+
+- Explore [System Components](/architecture/system-components) for detailed component documentation
+- Learn about [Data Flow](/architecture/data-flow) patterns
+- View [Architecture Diagrams](/architecture/diagrams) for visual representations

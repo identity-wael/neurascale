@@ -1,14 +1,17 @@
 import nextra from 'nextra'
 
-const withNextra = nextra({})
+const withNextra = nextra({
+  latex: true,
+  defaultShowCopyCode: true,
+  contentDirBasePath: "/docs",
+})
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withNextra({
   reactStrictMode: true,
   images: {
     domains: ['docs.neurascale.io'],
   },
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   async redirects() {
     return [
       {
@@ -18,11 +21,11 @@ const nextConfig = {
       },
       {
         source: '/docs/:path*',
-        destination: '/documentation/:path*',
-        permanent: true,
+        destination: '/docs/:path*',
+        permanent: false,
       }
     ]
   }
-}
+})
 
-export default withNextra(nextConfig)
+export default nextConfig

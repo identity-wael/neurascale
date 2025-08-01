@@ -13,7 +13,7 @@ const config: DocsThemeConfig = {
   docsRepositoryBase:
     "https://github.com/identity-wael/neurascale/tree/main/docs-nextra",
   footer: {
-    text: "© 2025 NeuraScale. Built with ❤️ and 🧠",
+    content: <span>© 2025 NeuraScale. Built with ❤️ and 🧠</span>,
   },
   navigation: {
     prev: true,

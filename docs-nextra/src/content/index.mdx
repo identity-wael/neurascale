@@ -8,13 +8,15 @@ Welcome to the official documentation for **NeuraScale**, a comprehensive Brain-
 
 ### What is NeuraScale?
 
-NeuraScale is a cloud-native BCI platform that enables:
+NeuraScale is a production-ready BCI platform deployed on Google Cloud Platform that enables:
 
 - **Universal Device Support**: 30+ BCI devices from consumer to research grade
-- **Real-Time Processing**: Sub-100ms latency for closed-loop applications
-- **Massive Scalability**: Handle 10,000+ channels simultaneously
-- **Clinical Compliance**: HIPAA/GDPR compliant with end-to-end encryption
-- **ML Integration**: Real-time inference and online learning capabilities
+- **Real-Time Processing**: Sub-100ms latency via Bigtable and Pub/Sub
+- **Massive Scalability**: Handle 10,000+ channels with autoscaling infrastructure
+- **Clinical Compliance**: HIPAA/GDPR compliant with Secret Manager and KMS encryption
+- **ML Integration**: Real-time inference with GPU-enabled GKE clusters
+- **Multi-Environment**: Separate development, staging, and production projects
+- **Infrastructure as Code**: Full Terraform automation with modular architecture
 
 ### Core Architecture
 
@@ -241,11 +243,21 @@ flowchart LR
 
     - **Phase 13**: MCP Server Implementation
     - **Phase 14**: Terraform Infrastructure on GCP
-      - Multi-tier storage (Bigtable/Firestore/BigQuery)
-      - Cloud SQL PostgreSQL HA
-      - GKE clusters with GPU support
+      - Bigtable for time-series neural data (with autoscaling)
+      - Pub/Sub topics for signal types (EEG, EMG, ECG, etc.)
+      - Cloud Run for MCP Server deployment
+      - Artifact Registry for container images
+      - Secret Manager for secure configuration
     - **Phase 15**: Kubernetes Deployment on GKE
-    - **Phase 16**: Docker Containerization Enhancement
+      - Helm charts for Neural Engine services
+      - Autoscaling with HPA and node pools
+      - GPU support for ML workloads
+      - Ingress with TLS termination
+    - **Phase 16**: CI/CD Pipeline Enhancement
+      - GitHub Actions with Workload Identity
+      - Multi-environment deployment (dev/staging/prod)
+      - Automated testing and validation
+      - Infrastructure as Code with Terraform
   </Tabs.Tab>
 
   <Tabs.Tab>

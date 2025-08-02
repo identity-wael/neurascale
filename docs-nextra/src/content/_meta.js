@@ -4,6 +4,4 @@ export default {
   architecture: "",
   "system-modeling": "",
   features: "",
-  themes: "",
-  advanced: "",
 };

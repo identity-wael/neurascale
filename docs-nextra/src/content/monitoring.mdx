@@ -1,0 +1,1220 @@
+---
+title: Monitoring & Observability
+description: Monitor and observe NeuraScale's health, performance, and usage
+---
+
+import { Callout, Card, Cards, Tabs } from 'nextra/components'
+
+# Monitoring & Observability
+
+Comprehensive monitoring and observability for NeuraScale across all environments.
+
+## Overview
+
+NeuraScale implements a multi-layered observability strategy:
+
+- **Application Monitoring**: Performance metrics, error tracking, and distributed tracing
+- **Infrastructure Monitoring**: GCP resource usage, Kubernetes health, and system metrics
+- **Business Monitoring**: User activity, neural session analytics, and compliance auditing
+- **Security Monitoring**: Access logs, threat detection, and compliance events
+
+## Stack Components
+
+<Cards>
+  <Card title="Google Cloud Monitoring" icon="📊">
+    Infrastructure metrics, logs, and alerts
+  </Card>
+  <Card title="Prometheus + Grafana" icon="📈">
+    Application metrics and custom dashboards
+  </Card>
+  <Card title="OpenTelemetry" icon="🔍">
+    Distributed tracing and instrumentation
+  </Card>
+  <Card title="Sentry" icon="🐛">
+    Error tracking and performance monitoring
+  </Card>
+</Cards>
+
+## Application Monitoring
+
+### Metrics Collection
+
+<Tabs items={['FastAPI Metrics', 'Neural Processing Metrics', 'Database Metrics']}>
+  <Tabs.Tab>
+```python
+# neural-engine/src/monitoring/api_metrics.py
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import PlainTextResponse
+import time
+from typing import Callable
+
+# Define metrics
+http_requests_total = Counter(
+    'http_requests_total',
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status']
+)
+
+http_request_duration = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request duration in seconds',
+    ['method', 'endpoint']
+)
+
+active_requests = Gauge(
+    'http_requests_active',
+    'Active HTTP requests'
+)
+
+class PrometheusMiddleware:
+    """Middleware to collect Prometheus metrics"""
+
+    def __init__(self, app: FastAPI):
+        self.app = app
+
+    async def __call__(self, request: Request, call_next: Callable):
+        # Track active requests
+        active_requests.inc()
+
+        # Record start time
+        start_time = time.time()
+
+        # Process request
+        response = await call_next(request)
+
+        # Calculate duration
+        duration = time.time() - start_time
+
+        # Record metrics
+        http_requests_total.labels(
+            method=request.method,
+            endpoint=request.url.path,
+            status=response.status_code
+        ).inc()
+
+        http_request_duration.labels(
+            method=request.method,
+            endpoint=request.url.path
+        ).observe(duration)
+
+        # Decrement active requests
+        active_requests.dec()
+
+        return response
+
+# Add metrics endpoint
+@app.get("/metrics", response_class=PlainTextResponse)
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return generate_latest()
+
+# Health check with detailed status
+@app.get("/health")
+async def health_check():
+    """Comprehensive health check"""
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "checks": {
+            "database": await check_database_health(),
+            "cache": await check_cache_health(),
+            "gpu": check_gpu_health(),
+            "disk_space": check_disk_space()
+        }
+    }
+
+    # Determine overall health
+    if any(not check["healthy"] for check in health_status["checks"].values()):
+        health_status["status"] = "unhealthy"
+        return Response(content=json.dumps(health_status), status_code=503)
+
+    return health_status
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+# neural-engine/src/monitoring/processing_metrics.py
+from prometheus_client import Counter, Histogram, Gauge, Summary
+import psutil
+import GPUtil
+from typing import Dict, Any
+
+# Neural processing metrics
+signals_processed = Counter(
+    'neural_signals_processed_total',
+    'Total neural signals processed',
+    ['signal_type', 'processing_stage']
+)
+
+processing_latency = Histogram(
+    'neural_processing_latency_seconds',
+    'Neural signal processing latency',
+    ['operation', 'signal_type'],
+    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
+)
+
+queue_depth = Gauge(
+    'neural_processing_queue_depth',
+    'Current processing queue depth',
+    ['queue_name']
+)
+
+gpu_memory_usage = Gauge(
+    'neural_gpu_memory_usage_bytes',
+    'GPU memory usage in bytes',
+    ['device_id', 'device_name']
+)
+
+model_inference_time = Summary(
+    'neural_model_inference_seconds',
+    'Model inference time',
+    ['model_name', 'model_version']
+)
+
+class NeuralMetricsCollector:
+    """Collect and export neural processing metrics"""
+
+    def __init__(self):
+        self.start_background_collection()
+
+    def record_signal_processed(
+        self,
+        signal_type: str,
+        processing_stage: str,
+        latency: float
+    ):
+        """Record signal processing metrics"""
+        signals_processed.labels(
+            signal_type=signal_type,
+            processing_stage=processing_stage
+        ).inc()
+
+        processing_latency.labels(
+            operation=processing_stage,
+            signal_type=signal_type
+        ).observe(latency)
+
+    def update_queue_metrics(self, queue_stats: Dict[str, int]):
+        """Update queue depth metrics"""
+        for queue_name, depth in queue_stats.items():
+            queue_depth.labels(queue_name=queue_name).set(depth)
+
+    def collect_system_metrics(self):
+        """Collect system resource metrics"""
+        # CPU metrics
+        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_usage.set(cpu_percent)
+
+        # Memory metrics
+        memory = psutil.virtual_memory()
+        memory_usage.labels(type='used').set(memory.used)
+        memory_usage.labels(type='available').set(memory.available)
+
+        # GPU metrics
+        try:
+            gpus = GPUtil.getGPUs()
+            for gpu in gpus:
+                gpu_memory_usage.labels(
+                    device_id=str(gpu.id),
+                    device_name=gpu.name
+                ).set(gpu.memoryUsed * 1024 * 1024)  # Convert to bytes
+
+                gpu_utilization.labels(
+                    device_id=str(gpu.id),
+                    device_name=gpu.name
+                ).set(gpu.load * 100)
+        except Exception as e:
+            logger.error(f"Failed to collect GPU metrics: {e}")
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+# neural-engine/src/monitoring/database_metrics.py
+from prometheus_client import Gauge, Counter, Histogram
+import asyncpg
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlalchemy.pool import Pool
+
+# Database connection metrics
+db_connections_active = Gauge(
+    'database_connections_active',
+    'Active database connections',
+    ['database', 'state']
+)
+
+db_connections_total = Counter(
+    'database_connections_total',
+    'Total database connections created',
+    ['database']
+)
+
+db_query_duration = Histogram(
+    'database_query_duration_seconds',
+    'Database query duration',
+    ['database', 'operation'],
+    buckets=[0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0]
+)
+
+db_errors = Counter(
+    'database_errors_total',
+    'Database errors',
+    ['database', 'error_type']
+)
+
+class DatabaseMetricsCollector:
+    """Collect database performance metrics"""
+
+    def __init__(self, engine: Engine):
+        self.engine = engine
+        self.setup_listeners()
+
+    def setup_listeners(self):
+        """Setup SQLAlchemy event listeners"""
+        # Connection pool events
+        event.listen(Pool, "connect", self.on_connect)
+        event.listen(Pool, "checkout", self.on_checkout)
+        event.listen(Pool, "checkin", self.on_checkin)
+
+        # Query execution events
+        event.listen(Engine, "before_execute", self.before_execute)
+        event.listen(Engine, "after_execute", self.after_execute)
+
+    def on_connect(self, dbapi_conn, connection_record):
+        """Track new connections"""
+        db_connections_total.labels(database='postgresql').inc()
+
+    def on_checkout(self, dbapi_conn, connection_record, connection_proxy):
+        """Track connection checkout"""
+        db_connections_active.labels(
+            database='postgresql',
+            state='active'
+        ).inc()
+
+    def on_checkin(self, dbapi_conn, connection_record):
+        """Track connection checkin"""
+        db_connections_active.labels(
+            database='postgresql',
+            state='active'
+        ).dec()
+
+    def before_execute(self, conn, clauseelement, multiparams, params, execution_options):
+        """Start query timing"""
+        conn.info['query_start_time'] = time.time()
+
+    def after_execute(self, conn, clauseelement, multiparams, params, execution_options, result):
+        """Record query duration"""
+        duration = time.time() - conn.info.get('query_start_time', time.time())
+
+        # Determine operation type
+        operation = 'select'
+        if clauseelement.is_insert:
+            operation = 'insert'
+        elif clauseelement.is_update:
+            operation = 'update'
+        elif clauseelement.is_delete:
+            operation = 'delete'
+
+        db_query_duration.labels(
+            database='postgresql',
+            operation=operation
+        ).observe(duration)
+
+# BigQuery metrics
+class BigQueryMetricsCollector:
+    """Collect BigQuery usage metrics"""
+
+    def __init__(self, client):
+        self.client = client
+
+    def record_query_metrics(self, job):
+        """Record BigQuery job metrics"""
+        if job.done():
+            # Query execution time
+            duration = (job.ended - job.started).total_seconds()
+            db_query_duration.labels(
+                database='bigquery',
+                operation='query'
+            ).observe(duration)
+
+            # Bytes processed
+            if job.total_bytes_processed:
+                bigquery_bytes_processed.labels(
+                    project=job.project
+                ).inc(job.total_bytes_processed)
+
+            # Slot milliseconds
+            if job.slot_millis:
+                bigquery_slot_millis.labels(
+                    project=job.project
+                ).inc(job.slot_millis)
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Distributed Tracing
+
+```python
+# neural-engine/src/monitoring/tracing.py
+from opentelemetry import trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource
+
+def setup_tracing(app: FastAPI, service_name: str):
+    """Configure OpenTelemetry tracing"""
+    # Create resource
+    resource = Resource.create({
+        "service.name": service_name,
+        "service.version": get_version(),
+        "deployment.environment": os.getenv("ENVIRONMENT", "development")
+    })
+
+    # Setup tracer provider
+    tracer_provider = TracerProvider(resource=resource)
+    trace.set_tracer_provider(tracer_provider)
+
+    # Configure Cloud Trace exporter
+    cloud_trace_exporter = CloudTraceSpanExporter()
+    span_processor = BatchSpanProcessor(cloud_trace_exporter)
+    tracer_provider.add_span_processor(span_processor)
+
+    # Instrument libraries
+    FastAPIInstrumentor.instrument_app(app)
+    SQLAlchemyInstrumentor().instrument()
+    RequestsInstrumentor().instrument()
+
+    return trace.get_tracer(service_name)
+
+# Usage in application
+tracer = setup_tracing(app, "neural-engine")
+
+@app.post("/api/v1/process")
+async def process_signal(request: SignalRequest):
+    """Process neural signal with tracing"""
+    with tracer.start_as_current_span("process_signal") as span:
+        # Add span attributes
+        span.set_attribute("signal.type", request.signal_type)
+        span.set_attribute("signal.channels", len(request.channels))
+        span.set_attribute("signal.sampling_rate", request.sampling_rate)
+
+        # Preprocessing span
+        with tracer.start_as_current_span("preprocess"):
+            preprocessed = await preprocess_signal(request.data)
+
+        # Feature extraction span
+        with tracer.start_as_current_span("extract_features"):
+            features = await extract_features(preprocessed)
+            span.set_attribute("features.count", len(features))
+
+        # Model inference span
+        with tracer.start_as_current_span("model_inference") as inference_span:
+            inference_span.set_attribute("model.name", "neural_classifier_v2")
+            result = await run_inference(features)
+
+        return result
+```
+
+### Error Tracking
+
+```python
+# neural-engine/src/monitoring/error_tracking.py
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+
+def setup_sentry(dsn: str, environment: str):
+    """Configure Sentry error tracking"""
+    sentry_sdk.init(
+        dsn=dsn,
+        environment=environment,
+        integrations=[
+            FastApiIntegration(
+                transaction_style="endpoint",
+                failed_request_status_codes={400, 403, 404, 405, 500, 503}
+            ),
+            SqlalchemyIntegration(),
+            LoggingIntegration(
+                level=logging.INFO,
+                event_level=logging.ERROR
+            )
+        ],
+        traces_sample_rate=0.1,  # 10% of transactions
+        profiles_sample_rate=0.1,  # 10% profiling
+        attach_stacktrace=True,
+        send_default_pii=False,  # HIPAA compliance
+        before_send=sanitize_event  # Remove PHI
+    )
+
+def sanitize_event(event, hint):
+    """Remove any PHI from Sentry events"""
+    # Remove sensitive fields
+    sensitive_fields = ['patient_id', 'session_id', 'email', 'name']
+
+    if 'extra' in event:
+        for field in sensitive_fields:
+            event['extra'].pop(field, None)
+
+    if 'user' in event:
+        event['user'] = {'id': event['user'].get('id')}
+
+    return event
+
+# Custom error handling
+@app.exception_handler(NeuralProcessingError)
+async def neural_processing_error_handler(request: Request, exc: NeuralProcessingError):
+    """Handle neural processing errors with detailed tracking"""
+    # Log to Sentry with context
+    with sentry_sdk.push_scope() as scope:
+        scope.set_tag("error.type", "neural_processing")
+        scope.set_context("processing", {
+            "stage": exc.stage,
+            "signal_type": exc.signal_type,
+            "duration": exc.processing_duration
+        })
+        sentry_sdk.capture_exception(exc)
+
+    # Return sanitized error response
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Processing failed",
+            "error_id": sentry_sdk.last_event_id(),
+            "stage": exc.stage
+        }
+    )
+```
+
+## Infrastructure Monitoring
+
+### Google Cloud Monitoring
+
+```yaml
+# neural-engine/monitoring/alerting-policies.yaml
+apiVersion: monitoring.googleapis.com/v3
+kind: AlertPolicy
+metadata:
+  name: neural-engine-high-latency
+spec:
+  displayName: "Neural Engine High Latency"
+  conditions:
+  - displayName: "API latency > 100ms"
+    conditionThreshold:
+      filter: |
+        resource.type = "k8s_container"
+        resource.labels.container_name = "neural-engine"
+        metric.type = "kubernetes.io/container/request_latency"
+      aggregations:
+      - alignmentPeriod: 60s
+        perSeriesAligner: ALIGN_PERCENTILE_95
+      comparison: COMPARISON_GT
+      thresholdValue: 0.1
+      duration: 300s
+
+  notificationChannels:
+  - projects/neurascale/notificationChannels/12345  # PagerDuty
+  - projects/neurascale/notificationChannels/67890  # Slack
+
+  alertStrategy:
+    autoClose: 86400s  # 24 hours
+
+---
+apiVersion: monitoring.googleapis.com/v3
+kind: AlertPolicy
+metadata:
+  name: neural-engine-error-rate
+spec:
+  displayName: "Neural Engine Error Rate"
+  conditions:
+  - displayName: "Error rate > 1%"
+    conditionThreshold:
+      filter: |
+        resource.type = "cloud_run_revision"
+        metric.type = "run.googleapis.com/request_count"
+        metric.labels.response_code_class != "2xx"
+      aggregations:
+      - alignmentPeriod: 300s
+        perSeriesAligner: ALIGN_RATE
+        crossSeriesReducer: REDUCE_SUM
+      comparison: COMPARISON_GT
+      thresholdValue: 0.01
+      duration: 600s
+```
+
+### Custom Dashboards
+
+```python
+# neural-engine/monitoring/dashboard_generator.py
+from google.cloud import monitoring_dashboard_v1
+import json
+
+def create_neural_dashboard(project_id: str):
+    """Create custom monitoring dashboard"""
+    client = monitoring_dashboard_v1.DashboardsServiceClient()
+
+    dashboard_config = {
+        "displayName": "Neural Engine Performance",
+        "mosaicLayout": {
+            "columns": 12,
+            "tiles": [
+                {
+                    "width": 6,
+                    "height": 4,
+                    "widget": {
+                        "title": "Request Rate",
+                        "xyChart": {
+                            "dataSets": [{
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "filter": 'metric.type="custom.googleapis.com/neural/http_requests_total"',
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_RATE"
+                                        }
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                },
+                {
+                    "xPos": 6,
+                    "width": 6,
+                    "height": 4,
+                    "widget": {
+                        "title": "Processing Latency (p95)",
+                        "xyChart": {
+                            "dataSets": [{
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "filter": 'metric.type="custom.googleapis.com/neural/processing_latency"',
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_PERCENTILE_95"
+                                        }
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                },
+                {
+                    "yPos": 4,
+                    "width": 12,
+                    "height": 4,
+                    "widget": {
+                        "title": "GPU Utilization",
+                        "xyChart": {
+                            "dataSets": [{
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "filter": 'metric.type="custom.googleapis.com/neural/gpu_utilization"',
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        }
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+
+    dashboard = monitoring_dashboard_v1.Dashboard(dashboard_config)
+    project_path = f"projects/{project_id}"
+
+    return client.create_dashboard(
+        parent=project_path,
+        dashboard=dashboard
+    )
+```
+
+### Kubernetes Monitoring
+
+```yaml
+# neural-engine/kubernetes/monitoring/prometheus-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+    - job_name: 'neural-engine'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - neural-engine
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+
+    - job_name: 'kubernetes-nodes'
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+
+    - job_name: 'kubernetes-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      metrics_path: /metrics/cadvisor
+      relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):\d+'
+        replacement: '$1:10250'
+        target_label: __address__
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus/'
+        - '--storage.tsdb.retention.time=30d'
+        - '--web.enable-lifecycle'
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: data
+          mountPath: /prometheus
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1"
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: prometheus-data
+```
+
+## Log Management
+
+### Structured Logging
+
+```python
+# neural-engine/src/monitoring/structured_logging.py
+import structlog
+from google.cloud import logging as cloud_logging
+import json
+
+def setup_structured_logging(service_name: str):
+    """Configure structured logging with Cloud Logging integration"""
+    # Initialize Cloud Logging client
+    client = cloud_logging.Client()
+    handler = client.get_default_handler()
+
+    # Configure structlog
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.add_log_level,
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.dev.set_exc_info,
+            structlog.processors.dict_tracebacks,
+            add_service_context,
+            sanitize_phi,
+            structlog.processors.JSONRenderer()
+        ],
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        cache_logger_on_first_use=True,
+    )
+
+    return structlog.get_logger(service_name)
+
+def add_service_context(logger, method_name, event_dict):
+    """Add service context to all logs"""
+    event_dict['service'] = {
+        'name': logger.name,
+        'version': get_version(),
+        'environment': os.getenv('ENVIRONMENT', 'development')
+    }
+
+    # Add trace context if available
+    span = trace.get_current_span()
+    if span and span.is_recording():
+        event_dict['trace'] = {
+            'trace_id': format(span.get_span_context().trace_id, '032x'),
+            'span_id': format(span.get_span_context().span_id, '016x')
+        }
+
+    return event_dict
+
+def sanitize_phi(logger, method_name, event_dict):
+    """Remove PHI from logs for HIPAA compliance"""
+    sensitive_fields = ['patient_id', 'session_data', 'neural_signals']
+
+    for field in sensitive_fields:
+        if field in event_dict:
+            event_dict[field] = '[REDACTED]'
+
+    return event_dict
+
+# Usage
+logger = setup_structured_logging("neural-engine")
+
+logger.info(
+    "signal_processed",
+    signal_type="EEG",
+    channels=64,
+    duration_ms=1000,
+    processing_time_ms=15.3
+)
+```
+
+### Log Analysis
+
+```python
+# neural-engine/monitoring/log_analysis.py
+from google.cloud import bigquery
+from datetime import datetime, timedelta
+
+class LogAnalyzer:
+    """Analyze logs for patterns and anomalies"""
+
+    def __init__(self, project_id: str):
+        self.client = bigquery.Client(project=project_id)
+        self.dataset_id = f"{project_id}.neural_logs"
+
+    def analyze_error_patterns(self, hours: int = 24) -> Dict[str, Any]:
+        """Analyze error patterns in logs"""
+        query = f"""
+        WITH error_logs AS (
+            SELECT
+                timestamp,
+                jsonPayload.error_type AS error_type,
+                jsonPayload.error_message AS error_message,
+                jsonPayload.service.name AS service_name,
+                jsonPayload.trace.trace_id AS trace_id
+            FROM `{self.dataset_id}.stderr`
+            WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {hours} HOUR)
+                AND severity = 'ERROR'
+        )
+        SELECT
+            error_type,
+            COUNT(*) as error_count,
+            COUNT(DISTINCT trace_id) as affected_requests,
+            ARRAY_AGG(DISTINCT error_message LIMIT 5) as sample_messages,
+            MIN(timestamp) as first_occurrence,
+            MAX(timestamp) as last_occurrence
+        FROM error_logs
+        GROUP BY error_type
+        ORDER BY error_count DESC
+        """
+
+        results = self.client.query(query).to_dataframe()
+
+        return {
+            'error_summary': results.to_dict('records'),
+            'total_errors': results['error_count'].sum(),
+            'unique_error_types': len(results),
+            'analysis_period_hours': hours
+        }
+
+    def detect_anomalies(self) -> List[Dict[str, Any]]:
+        """Detect anomalies in log patterns"""
+        query = f"""
+        WITH hourly_stats AS (
+            SELECT
+                TIMESTAMP_TRUNC(timestamp, HOUR) as hour,
+                COUNT(*) as log_count,
+                COUNTIF(severity = 'ERROR') as error_count,
+                AVG(CAST(jsonPayload.processing_time_ms AS FLOAT64)) as avg_processing_time
+            FROM `{self.dataset_id}.stdout`
+            WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
+            GROUP BY hour
+        ),
+        baseline AS (
+            SELECT
+                AVG(log_count) as avg_logs,
+                STDDEV(log_count) as stddev_logs,
+                AVG(error_count) as avg_errors,
+                STDDEV(error_count) as stddev_errors
+            FROM hourly_stats
+        )
+        SELECT
+            h.hour,
+            h.log_count,
+            h.error_count,
+            h.avg_processing_time,
+            CASE
+                WHEN h.log_count > b.avg_logs + (3 * b.stddev_logs) THEN 'high_volume'
+                WHEN h.log_count < b.avg_logs - (3 * b.stddev_logs) THEN 'low_volume'
+                WHEN h.error_count > b.avg_errors + (3 * b.stddev_errors) THEN 'high_errors'
+                ELSE 'normal'
+            END as anomaly_type
+        FROM hourly_stats h
+        CROSS JOIN baseline b
+        WHERE h.hour > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+            AND (
+                h.log_count > b.avg_logs + (3 * b.stddev_logs) OR
+                h.log_count < b.avg_logs - (3 * b.stddev_logs) OR
+                h.error_count > b.avg_errors + (3 * b.stddev_errors)
+            )
+        ORDER BY h.hour DESC
+        """
+
+        anomalies = self.client.query(query).to_dataframe()
+
+        return anomalies.to_dict('records')
+```
+
+## Business Metrics
+
+### Session Analytics
+
+```python
+# neural-engine/src/monitoring/business_metrics.py
+from prometheus_client import Counter, Gauge, Histogram
+import structlog
+
+# Business metrics
+sessions_created = Counter(
+    'neural_sessions_created_total',
+    'Total neural sessions created',
+    ['device_type', 'signal_type']
+)
+
+active_sessions = Gauge(
+    'neural_sessions_active',
+    'Currently active neural sessions',
+    ['device_type']
+)
+
+session_duration = Histogram(
+    'neural_session_duration_seconds',
+    'Neural session duration',
+    ['device_type', 'completion_status'],
+    buckets=[60, 300, 600, 1800, 3600, 7200]  # 1m, 5m, 10m, 30m, 1h, 2h
+)
+
+data_quality_score = Histogram(
+    'neural_data_quality_score',
+    'Neural data quality scores',
+    ['device_type', 'signal_type'],
+    buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+)
+
+class BusinessMetricsCollector:
+    """Collect and track business metrics"""
+
+    def __init__(self):
+        self.logger = structlog.get_logger(__name__)
+
+    async def track_session_created(
+        self,
+        session_id: str,
+        device_type: str,
+        signal_type: str
+    ):
+        """Track new session creation"""
+        sessions_created.labels(
+            device_type=device_type,
+            signal_type=signal_type
+        ).inc()
+
+        active_sessions.labels(device_type=device_type).inc()
+
+        self.logger.info(
+            "session_created",
+            session_id=session_id,
+            device_type=device_type,
+            signal_type=signal_type
+        )
+
+    async def track_session_completed(
+        self,
+        session_id: str,
+        device_type: str,
+        duration_seconds: float,
+        completion_status: str,
+        quality_score: float
+    ):
+        """Track session completion"""
+        active_sessions.labels(device_type=device_type).dec()
+
+        session_duration.labels(
+            device_type=device_type,
+            completion_status=completion_status
+        ).observe(duration_seconds)
+
+        data_quality_score.labels(
+            device_type=device_type,
+            signal_type=signal_type
+        ).observe(quality_score)
+
+        self.logger.info(
+            "session_completed",
+            session_id=session_id,
+            duration_seconds=duration_seconds,
+            completion_status=completion_status,
+            quality_score=quality_score
+        )
+```
+
+### Compliance Monitoring
+
+```python
+# neural-engine/src/monitoring/compliance_metrics.py
+from prometheus_client import Counter, Gauge
+import structlog
+from datetime import datetime
+
+# Compliance metrics
+phi_access_events = Counter(
+    'neural_phi_access_total',
+    'PHI access events',
+    ['access_type', 'user_role', 'resource_type']
+)
+
+security_events = Counter(
+    'neural_security_events_total',
+    'Security events',
+    ['event_type', 'severity']
+)
+
+audit_log_size = Gauge(
+    'neural_audit_log_size_bytes',
+    'Audit log size in bytes'
+)
+
+class ComplianceMonitor:
+    """Monitor compliance-related events"""
+
+    def __init__(self):
+        self.logger = structlog.get_logger(__name__)
+
+    async def log_phi_access(
+        self,
+        user_id: str,
+        user_role: str,
+        resource_type: str,
+        resource_id: str,
+        access_type: str,
+        ip_address: str
+    ):
+        """Log PHI access for HIPAA compliance"""
+        phi_access_events.labels(
+            access_type=access_type,
+            user_role=user_role,
+            resource_type=resource_type
+        ).inc()
+
+        # Structured audit log
+        self.logger.info(
+            "phi_access",
+            user_id=user_id,
+            user_role=user_role,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            access_type=access_type,
+            ip_address=ip_address,
+            timestamp=datetime.utcnow().isoformat(),
+            compliance_event=True
+        )
+
+    async def log_security_event(
+        self,
+        event_type: str,
+        severity: str,
+        details: Dict[str, Any]
+    ):
+        """Log security events"""
+        security_events.labels(
+            event_type=event_type,
+            severity=severity
+        ).inc()
+
+        self.logger.warning(
+            "security_event",
+            event_type=event_type,
+            severity=severity,
+            details=details,
+            compliance_event=True
+        )
+```
+
+## Alerting Rules
+
+### Critical Alerts
+
+```yaml
+# neural-engine/monitoring/alerts/critical.yaml
+groups:
+- name: neural_critical
+  interval: 30s
+  rules:
+
+  - alert: NeuralEngineDown
+    expr: up{job="neural-engine"} == 0
+    for: 2m
+    labels:
+      severity: critical
+      team: platform
+    annotations:
+      summary: "Neural Engine instance {{ $labels.instance }} is down"
+      description: "Neural Engine has been down for more than 2 minutes."
+      runbook_url: "https://neurascale.docs/runbooks/neural-engine-down"
+
+  - alert: HighErrorRate
+    expr: |
+      rate(http_requests_total{status=~"5.."}[5m])
+      / rate(http_requests_total[5m]) > 0.05
+    for: 5m
+    labels:
+      severity: critical
+      team: platform
+    annotations:
+      summary: "High error rate on {{ $labels.job }}"
+      description: "Error rate is above 5% for the last 5 minutes"
+
+  - alert: DatabaseConnectionPoolExhausted
+    expr: database_connections_active / database_connections_max > 0.9
+    for: 5m
+    labels:
+      severity: critical
+      team: platform
+    annotations:
+      summary: "Database connection pool nearly exhausted"
+      description: "{{ $value | humanizePercentage }} of connections are in use"
+
+  - alert: GPUMemoryExhausted
+    expr: neural_gpu_memory_usage_bytes / neural_gpu_memory_total_bytes > 0.95
+    for: 2m
+    labels:
+      severity: critical
+      team: ml
+    annotations:
+      summary: "GPU memory nearly exhausted on {{ $labels.device_name }}"
+      description: "GPU memory usage is at {{ $value | humanizePercentage }}"
+```
+
+## Dashboards
+
+### Grafana Dashboard Configuration
+
+```json
+{
+  "dashboard": {
+    "title": "NeuraScale Neural Engine",
+    "panels": [
+      {
+        "title": "Request Rate",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Latency Percentiles",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Active Sessions",
+        "targets": [
+          {
+            "expr": "neural_sessions_active",
+            "legendFormat": "{{device_type}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Processing Queue Depth",
+        "targets": [
+          {
+            "expr": "neural_processing_queue_depth",
+            "legendFormat": "{{queue_name}}"
+          }
+        ],
+        "type": "graph"
+      }
+    ]
+  }
+}
+```
+
+## Monitoring Checklist
+
+- [ ] Configure Prometheus metrics collection
+- [ ] Set up Cloud Monitoring dashboards
+- [ ] Implement distributed tracing with OpenTelemetry
+- [ ] Configure Sentry error tracking
+- [ ] Set up log aggregation and analysis
+- [ ] Create alerting rules for critical issues
+- [ ] Implement SLO monitoring
+- [ ] Configure compliance audit logging
+- [ ] Set up performance profiling
+- [ ] Create runbooks for common issues
+
+<Callout type="success">
+Comprehensive monitoring ensures NeuraScale operates reliably and efficiently, enabling quick detection and resolution of issues while maintaining compliance requirements.
+</Callout>

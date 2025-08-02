@@ -2,109 +2,204 @@ import { Tabs, Callout, Table } from 'nextra/components'
 
 # System Modeling
 
-NeuraScale is built as a cloud-native, microservices-based platform designed for real-time neural data processing at scale. The architecture prioritizes low latency, high throughput, and clinical-grade reliability.
+This section provides detailed system modeling diagrams that illustrate the internal workings of NeuraScale, including data flows, state machines, sequence diagrams, and entity relationships.
 
-## Core Design Principles
+## Overview
 
-1. **Microservices Architecture** - Loosely coupled services with clear domain boundaries
-2. **Event-Driven Communication** - Asynchronous messaging for scalability
-3. **Data Locality** - Process data close to the source to minimize latency
-4. **Horizontal Scalability** - Stateless services that scale linearly
-5. **Fault Tolerance** - Circuit breakers, retries, and graceful degradation
+The system modeling documentation uses industry-standard diagram types to represent:
 
-## System Architecture
+1. **Flowcharts** - Step-by-step process flows for key operations
+2. **Sequence Diagrams** - Time-ordered interactions between system components
+3. **State Diagrams** - State transitions for devices, sessions, and processing pipelines
+4. **Entity Relationship Diagrams** - Data model relationships and schemas
+5. **Component Interaction Diagrams** - Detailed service communication patterns
+
+## Process Flowcharts
+
+### Device Connection Flow
+
+This flowchart illustrates the complete process from device discovery to active data streaming, including error handling and recovery mechanisms.
 
 ```mermaid
-graph TB
-    subgraph "External Clients"
-        EC1[Research Tools]
-        EC2[Clinical Systems]
-        EC3[Consumer Apps]
-        EC4[Neural CLI]
-        EC5[MCP Clients<br/>AI Assistants]
-    end
+flowchart TB
+    Start([User Initiates Connection])
 
-    subgraph "API Gateway Layer"
-        AG[Cloud Load Balancer<br/>+ Cloud Armor<br/>Rate Limiting • DDoS Protection • SSL Termination]
-    end
+    Discovery{Device<br/>Discovery Mode}
+    USB[USB Device<br/>Detection]
+    BLE[BLE Device<br/>Scanning]
+    WIFI[WiFi/LSL<br/>Network Scan]
 
-    subgraph "Core Services (GKE)"
-        subgraph "Device Service"
-            DS1[Device Manager]
-            DS2[Discovery Engine]
-            DS3[Health Monitor]
-        end
+    DeviceList[Display Available<br/>Devices List]
 
-        subgraph "Processing Service"
-            PS1[Signal Pipeline]
-            PS2[Feature Extraction]
-            PS3[ML Inference<br/>Vertex AI]
-        end
+    SelectDevice{User Selects<br/>Device}
 
-        subgraph "Data Service"
-            DTS1[Bigtable API]
-            DTS2[Storage API]
-            DTS3[BigQuery API]
-        end
+    CheckDriver{Driver<br/>Installed?}
+    InstallDriver[Install Device<br/>Driver]
 
-        subgraph "Support Services"
-            SS1[Neural Ledger<br/>Audit Trail]
-            SS2[MCP Server<br/>Cloud Run]
-        end
-    end
+    InitConnection[Initialize<br/>Connection]
 
-    subgraph "Message Bus"
-        MB[Cloud Pub/Sub<br/>Topics: device.* • processing.* • audit.*]
-    end
+    Handshake{Protocol<br/>Handshake}
 
-    subgraph "Storage Layer (GCP)"
-        SL1[Bigtable<br/>Time Series Data]
-        SL2[Memorystore<br/>Redis Cache]
-        SL3[Cloud Storage<br/>Raw Files]
-        SL4[BigQuery<br/>Analytics]
-        SL5[Cloud SQL<br/>PostgreSQL]
-    end
+    Configure[Configure Device<br/>Parameters]
+    SetSampleRate[Set Sample Rate<br/>250-1000 Hz]
+    SetChannels[Select Active<br/>Channels]
+    SetFilters[Configure<br/>Filters]
 
-    EC1 --> AG
-    EC2 --> AG
-    EC3 --> AG
-    EC4 --> AG
-    EC5 --> SS2
+    Impedance{Impedance<br/>Check Required?}
+    CheckImpedance[Run Impedance<br/>Check]
+    ImpedanceOK{Impedance<br/><10kΩ?}
 
-    AG --> DS1
-    AG --> PS1
-    AG --> DTS1
-    AG --> SS1
+    StartBuffer[Initialize<br/>Ring Buffer]
 
-    DS1 --> MB
-    PS1 --> MB
-    DTS1 --> MB
-    SS1 --> MB
+    StartStream[Start Data<br/>Stream]
 
-    MB --> SL1
-    MB --> SL2
-    MB --> SL3
-    MB --> SL4
-    SS1 --> SL5
+    Validate{Data<br/>Valid?}
 
-    style EC1 fill:#bbdefb,color:#0d47a1
-    style EC2 fill:#bbdefb,color:#0d47a1
-    style EC3 fill:#bbdefb,color:#0d47a1
-    style EC4 fill:#bbdefb,color:#0d47a1
-    style EC5 fill:#bbdefb,color:#0d47a1
-    style AG fill:#34a853,color:#ffffff
-    style DS1 fill:#ea4335,color:#ffffff
-    style PS1 fill:#ea4335,color:#ffffff
-    style DTS1 fill:#ea4335,color:#ffffff
-    style SS1 fill:#ea4335,color:#ffffff
-    style SS2 fill:#ea4335,color:#ffffff
-    style MB fill:#fbbc04,color:#000000
-    style SL1 fill:#4285f4,color:#ffffff
-    style SL2 fill:#4285f4,color:#ffffff
-    style SL3 fill:#4285f4,color:#ffffff
-    style SL4 fill:#4285f4,color:#ffffff
-    style SL5 fill:#4285f4,color:#ffffff
+    ProcessData[Process<br/>Incoming Data]
+    PublishData[Publish to<br/>Pub/Sub]
+
+    Streaming([Active Streaming])
+
+    Error[Connection<br/>Error]
+    Retry{Retry<br/>Connection?}
+
+    Disconnect[Disconnect<br/>Device]
+
+    End([Connection Ended])
+
+    Start --> Discovery
+    Discovery --> USB
+    Discovery --> BLE
+    Discovery --> WIFI
+
+    USB --> DeviceList
+    BLE --> DeviceList
+    WIFI --> DeviceList
+
+    DeviceList --> SelectDevice
+
+    SelectDevice -->|No Device| End
+    SelectDevice -->|Device Selected| CheckDriver
+
+    CheckDriver -->|No| InstallDriver
+    CheckDriver -->|Yes| InitConnection
+    InstallDriver --> InitConnection
+
+    InitConnection --> Handshake
+
+    Handshake -->|Failed| Error
+    Handshake -->|Success| Configure
+
+    Configure --> SetSampleRate
+    SetSampleRate --> SetChannels
+    SetChannels --> SetFilters
+    SetFilters --> Impedance
+
+    Impedance -->|Yes| CheckImpedance
+    Impedance -->|No| StartBuffer
+
+    CheckImpedance --> ImpedanceOK
+    ImpedanceOK -->|No| Error
+    ImpedanceOK -->|Yes| StartBuffer
+
+    StartBuffer --> StartStream
+    StartStream --> Validate
+
+    Validate -->|Invalid| Error
+    Validate -->|Valid| ProcessData
+
+    ProcessData --> PublishData
+    PublishData --> Streaming
+
+    Streaming -->|Data Flow| ProcessData
+    Streaming -->|User Disconnect| Disconnect
+    Streaming -->|Connection Lost| Error
+
+    Error --> Retry
+    Retry -->|Yes| InitConnection
+    Retry -->|No| Disconnect
+
+    Disconnect --> End
+
+    style Start fill:#34a853,color:#fff
+    style Streaming fill:#4285f4,color:#fff
+    style Error fill:#ea4335,color:#fff
+    style End fill:#9c27b0,color:#fff
+    style ProcessData fill:#fbbc04,color:#000
+    style PublishData fill:#fbbc04,color:#000
 ```
+
+<Tabs items={['Process Steps', 'Error Handling', 'Implementation Details']}>
+  <Tabs.Tab>
+    **Key Process Steps:**
+
+    1. **Discovery Phase**
+       - USB devices detected via serial port enumeration
+       - BLE devices found through active scanning
+       - WiFi/LSL devices discovered via mDNS broadcast
+
+    2. **Connection Setup**
+       - Driver verification and installation if needed
+       - Protocol-specific handshake (varies by device type)
+       - Connection parameters negotiation
+
+    3. **Configuration**
+       - Sample rate selection (250Hz, 500Hz, 1000Hz)
+       - Channel mapping and activation
+       - Digital filter configuration (notch, bandpass)
+
+    4. **Quality Assurance**
+       - Optional impedance checking per channel
+       - Signal quality validation
+       - Automatic bad channel detection
+
+    5. **Data Streaming**
+       - Zero-copy ring buffer initialization
+       - Real-time data validation
+       - Asynchronous Pub/Sub publishing
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Error Handling Mechanisms:**
+
+    - **Connection Failures**: Exponential backoff retry strategy
+    - **Driver Issues**: Automatic driver download and installation
+    - **Protocol Errors**: Fallback to compatible protocol versions
+    - **Data Validation**: Packet checksum and timestamp verification
+    - **Network Issues**: Automatic reconnection with state preservation
+    - **Buffer Overflow**: Backpressure handling and flow control
+
+    **Recovery Strategies:**
+    ```python
+    # Retry configuration
+    MAX_RETRIES = 3
+    INITIAL_BACKOFF = 1.0  # seconds
+    MAX_BACKOFF = 30.0     # seconds
+    BACKOFF_MULTIPLIER = 2.0
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Implementation References:**
+
+    - **Device Discovery**: `neural-engine/src/devices/discovery_service.py`
+    - **Connection Manager**: `neural-engine/src/devices/device_manager.py`
+    - **Protocol Handlers**: `neural-engine/src/devices/protocols/`
+    - **Ring Buffer**: `neural-engine/src/core/ring_buffer.py`
+    - **Pub/Sub Client**: `neural-engine/src/messaging/pubsub_client.py`
+
+    **Key Classes:**
+    ```python
+    class DeviceDiscoveryService:
+        async def discover_devices(self) -> List[DeviceInfo]
+
+    class DeviceManager:
+        async def connect(self, device_id: str) -> Device
+        async def configure(self, device: Device, config: DeviceConfig)
+        async def start_streaming(self, device: Device)
+    ```
+  </Tabs.Tab>
+</Tabs>
 
 ## Service Architecture
 

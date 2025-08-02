@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "katex": "^0.16.22",
     "next": "^15.4.5",
     "nextra": "^4.3.0",
     "nextra-theme-docs": "^4.3.0",

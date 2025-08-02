@@ -875,38 +875,81 @@ graph TB
 
 ## Deployment Architecture
 
-### Multi-Region Deployment
+### Multi-Project GCP Setup
 
 ```mermaid
 graph TB
-    CDN[CloudFront CDN]
-    ALB[Application Load Balancer]
+    subgraph "GitHub Actions"
+        GA[GitHub Actions<br/>CI/CD Pipeline]
+        WIF[Workload Identity<br/>Federation]
+    end
 
-    subgraph "Regions"
-        subgraph "US-East"
-            USE[Services]
-        end
-
-        subgraph "EU-West"
-            EUW[Services]
+    subgraph "Development Environment"
+        subgraph "development-neurascale"
+            DEV_GKE[GKE Cluster<br/>Dev Workloads]
+            DEV_DB[Cloud SQL<br/>Dev Database]
+            DEV_BT[Bigtable<br/>Dev Instance]
+            DEV_PS[Pub/Sub<br/>Dev Topics]
         end
     end
 
-    subgraph "Database"
-        DB[Multi-Region Database<br/>Active-Active Replication]
+    subgraph "Staging Environment"
+        subgraph "staging-neurascale"
+            STG_GKE[GKE Cluster<br/>Staging Workloads]
+            STG_DB[Cloud SQL<br/>Staging Database]
+            STG_BT[Bigtable<br/>Staging Instance]
+            STG_PS[Pub/Sub<br/>Staging Topics]
+        end
     end
 
-    CDN --> ALB
-    ALB --> USE
-    ALB --> EUW
-    USE --> DB
-    EUW --> DB
+    subgraph "Production Environment"
+        subgraph "production-neurascale"
+            subgraph "us-central1"
+                PROD_GKE_C[GKE Cluster<br/>Production Workloads<br/>n2-standard-16]
+                PROD_DB_C[Cloud SQL<br/>Production Primary<br/>HA Configuration]
+                PROD_BT_C[Bigtable<br/>Production Instance<br/>SSD Storage]
+                PROD_PS_C[Pub/Sub<br/>Production Topics]
+            end
+            subgraph "us-east1"
+                PROD_GKE_E[GKE Cluster<br/>Production Workloads<br/>n2-standard-16]
+                PROD_DB_E[Cloud SQL<br/>Production Replica<br/>Read Replicas]
+                PROD_BT_E[Bigtable<br/>Replication Instance]
+                PROD_PS_E[Pub/Sub<br/>Multi-region Topics]
+            end
+        end
+    end
 
-    style CDN fill:#e3f2fd,color:#0d47a1
-    style ALB fill:#c8e6c9,color:#1b5e20
-    style USE fill:#fff3e0,color:#e65100
-    style EUW fill:#fff3e0,color:#e65100
-    style DB fill:#f3e5f5,color:#4a148c
+    subgraph "Shared Services"
+        MON[Cloud Monitoring<br/>Logging & Metrics]
+        SEC[Security Command Center<br/>Threat Detection]
+        REG[Artifact Registry<br/>Container Images]
+        TF[Terraform State<br/>Cloud Storage]
+    end
+
+    GA --> WIF
+    WIF --> |develop branch| DEV_GKE
+    WIF --> |PR branches| STG_GKE
+    WIF --> |main branch| PROD_GKE_C
+    WIF --> |main branch| PROD_GKE_E
+
+    DEV_GKE --> MON
+    STG_GKE --> MON
+    PROD_GKE_C --> MON
+    PROD_GKE_E --> MON
+
+    PROD_DB_C -.->|Replication| PROD_DB_E
+    PROD_BT_C -.->|Replication| PROD_BT_E
+
+    style GA fill:#4285f4,color:#fff
+    style WIF fill:#4285f4,color:#fff
+    style DEV_GKE fill:#34a853,color:#fff
+    style STG_GKE fill:#fbbc04,color:#000
+    style PROD_GKE_C fill:#ea4335,color:#fff
+    style PROD_GKE_E fill:#ea4335,color:#fff
+    style MON fill:#4285f4,color:#fff
+    style SEC fill:#ea4335,color:#fff
+    style REG fill:#34a853,color:#fff
+    style TF fill:#fbbc04,color:#000
 ```
 
 ### Disaster Recovery

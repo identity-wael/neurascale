@@ -1,5 +1,22 @@
 import { Steps, Tabs, Callout } from 'nextra/components'
 
+export const StatusBadge = ({ status }) => {
+  const colors = {
+    'available': 'nx-bg-green-100 nx-text-green-800 dark:nx-bg-green-900 dark:nx-text-green-200',
+    'beta': 'nx-bg-blue-100 nx-text-blue-800 dark:nx-bg-blue-900 dark:nx-text-blue-200',
+    'coming-soon': 'nx-bg-yellow-100 nx-text-yellow-800 dark:nx-bg-yellow-900 dark:nx-text-yellow-200',
+    'planned': 'nx-bg-gray-100 nx-text-gray-800 dark:nx-bg-gray-900 dark:nx-text-gray-200'
+  }
+  return (
+    <span className={`nx-inline-flex nx-items-center nx-px-2.5 nx-py-0.5 nx-rounded-full nx-text-xs nx-font-medium ${colors[status] || colors.planned}`}>
+      {status === 'available' && '✓ Available'}
+      {status === 'beta' && '🔧 Beta'}
+      {status === 'coming-soon' && '🚀 Coming Soon'}
+      {status === 'planned' && '📅 Planned'}
+    </span>
+  )
+}
+
 # Deployment Guide
 
 This comprehensive guide covers deploying both the NeuraScale Console (frontend) and Neural Engine (backend) across different environments.
@@ -8,8 +25,49 @@ This comprehensive guide covers deploying both the NeuraScale Console (frontend)
 
 NeuraScale has two main components with separate deployment strategies:
 
-1. **Console (Frontend)** - Next.js app deployed on Vercel
-2. **Neural Engine (Backend)** - Python API deployed on Google Cloud Platform
+1. **Console (Frontend)** - Next.js app deployed on Vercel <StatusBadge status="available" />
+2. **Neural Engine (Backend)** - Python API deployed on Google Cloud Platform <StatusBadge status="coming-soon" />
+
+### Deployment Status
+
+<div className="nx-mt-6">
+  <table className="nx-w-full nx-table-auto nx-border-collapse">
+    <thead>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <th className="nx-text-left nx-p-2">Environment</th>
+        <th className="nx-text-left nx-p-2">Frontend</th>
+        <th className="nx-text-left nx-p-2">Backend</th>
+        <th className="nx-text-left nx-p-2">Infrastructure</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Local Development</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Docker Compose</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Preview (Vercel)</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2">-</td>
+        <td className="nx-p-2 nx-text-sm">Automatic PR deployments</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Staging</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2"><StatusBadge status="coming-soon" /></td>
+        <td className="nx-p-2 nx-text-sm">Cloud Run</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Production</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2"><StatusBadge status="planned" /></td>
+        <td className="nx-p-2 nx-text-sm">GKE with Helm</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ### Architecture Overview
 

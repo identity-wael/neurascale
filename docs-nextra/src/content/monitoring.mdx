@@ -5,6 +5,23 @@ description: Monitor and observe NeuraScale's health, performance, and usage
 
 import { Callout, Tabs } from 'nextra/components'
 
+export const StatusBadge = ({ status }) => {
+  const colors = {
+    'available': 'nx-bg-green-100 nx-text-green-800 dark:nx-bg-green-900 dark:nx-text-green-200',
+    'beta': 'nx-bg-blue-100 nx-text-blue-800 dark:nx-bg-blue-900 dark:nx-text-blue-200',
+    'coming-soon': 'nx-bg-yellow-100 nx-text-yellow-800 dark:nx-bg-yellow-900 dark:nx-text-yellow-200',
+    'planned': 'nx-bg-gray-100 nx-text-gray-800 dark:nx-bg-gray-900 dark:nx-text-gray-200'
+  }
+  return (
+    <span className={`nx-inline-flex nx-items-center nx-px-2.5 nx-py-0.5 nx-rounded-full nx-text-xs nx-font-medium ${colors[status] || colors.planned}`}>
+      {status === 'available' && '✓ Available'}
+      {status === 'beta' && '🔧 Beta'}
+      {status === 'coming-soon' && '🚀 Coming Soon'}
+      {status === 'planned' && '📅 Planned'}
+    </span>
+  )
+}
+
 # Monitoring & Observability
 
 Comprehensive monitoring and observability for NeuraScale across all environments.
@@ -13,19 +30,102 @@ Comprehensive monitoring and observability for NeuraScale across all environment
 
 NeuraScale implements a multi-layered observability strategy:
 
-- **Application Monitoring**: Performance metrics, error tracking, and distributed tracing
-- **Infrastructure Monitoring**: GCP resource usage, Kubernetes health, and system metrics
-- **Business Monitoring**: User activity, neural session analytics, and compliance auditing
-- **Security Monitoring**: Access logs, threat detection, and compliance events
+- **Application Monitoring**: Performance metrics, error tracking, and distributed tracing <StatusBadge status="beta" />
+- **Infrastructure Monitoring**: GCP resource usage, Kubernetes health, and system metrics <StatusBadge status="coming-soon" />
+- **Business Monitoring**: User activity, neural session analytics, and compliance auditing <StatusBadge status="planned" />
+- **Security Monitoring**: Access logs, threat detection, and compliance events <StatusBadge status="coming-soon" />
+
+## Monitoring Platform Status
+
+<div className="nx-mt-6">
+  <table className="nx-w-full nx-table-auto nx-border-collapse">
+    <thead>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <th className="nx-text-left nx-p-2">Component</th>
+        <th className="nx-text-left nx-p-2">Status</th>
+        <th className="nx-text-left nx-p-2">Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Prometheus Metrics</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Deployed via Helm, collecting service metrics</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Application Logging</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Structured JSON logging with correlation IDs</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Grafana Dashboards</strong></td>
+        <td className="nx-p-2"><StatusBadge status="beta" /></td>
+        <td className="nx-p-2 nx-text-sm">Basic dashboards, custom ones in development</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>GCP Monitoring</strong></td>
+        <td className="nx-p-2"><StatusBadge status="coming-soon" /></td>
+        <td className="nx-p-2 nx-text-sm">Cloud deployment metrics pending</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Distributed Tracing</strong></td>
+        <td className="nx-p-2"><StatusBadge status="planned" /></td>
+        <td className="nx-p-2 nx-text-sm">OpenTelemetry implementation planned</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Alerting</strong></td>
+        <td className="nx-p-2"><StatusBadge status="planned" /></td>
+        <td className="nx-p-2 nx-text-sm">PagerDuty integration planned</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ## Stack Components
 
 ### Stack Components
 
-- **Google Cloud Monitoring**: Infrastructure metrics, logs, and alerts
-- **Prometheus + Grafana**: Application metrics and custom dashboards
-- **OpenTelemetry**: Distributed tracing and instrumentation
-- **Sentry**: Error tracking and performance monitoring
+- **Google Cloud Monitoring**: Infrastructure metrics, logs, and alerts <StatusBadge status="coming-soon" />
+- **Prometheus + Grafana**: Application metrics and custom dashboards <StatusBadge status="available" />
+- **OpenTelemetry**: Distributed tracing and instrumentation <StatusBadge status="planned" />
+- **Sentry**: Error tracking and performance monitoring <StatusBadge status="planned" />
+
+## Prometheus Deployment
+
+<Callout type="info">
+  Prometheus is actively deployed in our Neural Engine infrastructure via Helm charts and is collecting metrics from all services.
+</Callout>
+
+### Prometheus Configuration
+
+NeuraScale uses Prometheus for metrics collection from all Neural Engine services. The deployment is managed through Helm charts in the `neural-engine/helm` directory.
+
+#### Service Endpoints
+
+All Neural Engine services expose metrics endpoints:
+
+- **API Gateway**: Port 9092 at `/metrics`
+- **Device Manager**: Port 9091 at `/metrics`
+- **Signal Processor**: Port 8080 at `/metrics`
+- **ML Pipeline**: Port 9093 at `/metrics`
+- **MCP Server**: Port 9094 at `/metrics`
+
+#### Metrics Collected
+
+- HTTP request rates and latencies
+- Processing queue depths
+- Device connection status
+- Signal quality metrics
+- Resource utilization (CPU, memory, GPU)
+- Error rates and types
+
+#### Grafana Dashboards
+
+Basic dashboards are available for:
+- Service health overview
+- API performance metrics
+- Neural processing pipeline status
+- Resource utilization trends
 
 ## Application Monitoring
 

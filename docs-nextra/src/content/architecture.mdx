@@ -20,14 +20,15 @@ graph TB
         EC1[Research Tools]
         EC2[Clinical Systems]
         EC3[Consumer Apps]
-        EC4[SDKs]
+        EC4[Neural CLI]
+        EC5[MCP Clients<br/>AI Assistants]
     end
 
     subgraph "API Gateway Layer"
-        AG[API Gateway<br/>Kong/Nginx<br/>Rate Limiting • Auth • Load Balancing • Caching]
+        AG[Cloud Load Balancer<br/>+ Cloud Armor<br/>Rate Limiting • DDoS Protection • SSL Termination]
     end
 
-    subgraph "Core Services"
+    subgraph "Core Services (GKE)"
         subgraph "Device Service"
             DS1[Device Manager]
             DS2[Discovery Engine]
@@ -37,58 +38,72 @@ graph TB
         subgraph "Processing Service"
             PS1[Signal Pipeline]
             PS2[Feature Extraction]
-            PS3[ML Inference]
+            PS3[ML Inference<br/>Vertex AI]
         end
 
         subgraph "Data Service"
-            DTS1[Time Series DB]
-            DTS2[File Storage]
-            DTS3[Query Engine]
+            DTS1[Bigtable API]
+            DTS2[Storage API]
+            DTS3[BigQuery API]
+        end
+
+        subgraph "Support Services"
+            SS1[Neural Ledger<br/>Audit Trail]
+            SS2[MCP Server<br/>Cloud Run]
         end
     end
 
     subgraph "Message Bus"
-        MB[Kafka/Redis<br/>Topics: device.data • processing.* • system.events]
+        MB[Cloud Pub/Sub<br/>Topics: device.* • processing.* • audit.*]
     end
 
-    subgraph "Storage Layer"
-        SL1[TimescaleDB<br/>Time Series]
-        SL2[Redis<br/>Hot Cache]
-        SL3[S3/MinIO<br/>Cold Storage]
-        SL4[Elasticsearch<br/>Search]
+    subgraph "Storage Layer (GCP)"
+        SL1[Bigtable<br/>Time Series Data]
+        SL2[Memorystore<br/>Redis Cache]
+        SL3[Cloud Storage<br/>Raw Files]
+        SL4[BigQuery<br/>Analytics]
+        SL5[Cloud SQL<br/>PostgreSQL]
     end
 
     EC1 --> AG
     EC2 --> AG
     EC3 --> AG
     EC4 --> AG
+    EC5 --> SS2
 
     AG --> DS1
     AG --> PS1
     AG --> DTS1
+    AG --> SS1
 
     DS1 --> MB
     PS1 --> MB
     DTS1 --> MB
+    SS1 --> MB
 
     MB --> SL1
     MB --> SL2
     MB --> SL3
     MB --> SL4
+    SS1 --> SL5
 
     style EC1 fill:#bbdefb,color:#0d47a1
     style EC2 fill:#bbdefb,color:#0d47a1
     style EC3 fill:#bbdefb,color:#0d47a1
     style EC4 fill:#bbdefb,color:#0d47a1
-    style AG fill:#c8e6c9,color:#1b5e20
-    style DS1 fill:#ffe0b2,color:#e65100
-    style PS1 fill:#ffe0b2,color:#e65100
-    style DTS1 fill:#ffe0b2,color:#e65100
-    style MB fill:#f8bbd0,color:#880e4f
-    style SL1 fill:#e1bee7,color:#4a148c
-    style SL2 fill:#e1bee7,color:#4a148c
-    style SL3 fill:#e1bee7,color:#4a148c
-    style SL4 fill:#e1bee7,color:#4a148c
+    style EC5 fill:#bbdefb,color:#0d47a1
+    style AG fill:#34a853,color:#ffffff
+    style DS1 fill:#ea4335,color:#ffffff
+    style PS1 fill:#ea4335,color:#ffffff
+    style DTS1 fill:#ea4335,color:#ffffff
+    style SS1 fill:#ea4335,color:#ffffff
+    style SS2 fill:#ea4335,color:#ffffff
+    style MB fill:#fbbc04,color:#000000
+    style SL1 fill:#4285f4,color:#ffffff
+    style SL2 fill:#4285f4,color:#ffffff
+    style SL3 fill:#4285f4,color:#ffffff
+    style SL4 fill:#4285f4,color:#ffffff
+    style SL5 fill:#4285f4,color:#ffffff
 ```
 
 ## Service Architecture

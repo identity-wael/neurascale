@@ -3,4 +3,5 @@ export default {
   "component-interaction": "Component Interaction",
   flowcharts: "Process Flowcharts",
   "sequence-diagrams": "Sequence Diagrams",
+  "state-diagrams": "State Diagrams",
 };

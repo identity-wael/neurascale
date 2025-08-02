@@ -456,8 +456,8 @@ graph TB
 
     subgraph "Output"
         OUT1[Pub/Sub<br/>processing.results]
-        OUT2[Bigtable<br/>Feature Storage]
-        OUT3[BigQuery<br/>Analytics]
+        OUT2[Cloud SQL<br/>Session Metadata]
+        OUT3[BigQuery<br/>Analytics & ML Data]
     end
 
     PS1 --> PS2
@@ -539,19 +539,19 @@ graph LR
 
     subgraph "Multi-Tier Storage Architecture"
         subgraph "Hot Tier (Real-time)"
-            H1[Memorystore Redis<br/>Latest 5 min<br/>Sub-ms Access]
-            H2[Bigtable<br/>Last 24 hours<br/>1-10ms Access]
+            H1[Memorystore Redis<br/>Session Cache<br/>Sub-ms Access]
+            H2[Cloud SQL<br/>Active Sessions<br/>5-10ms Access]
         end
 
-        subgraph "Warm Tier (Recent)"
-            W1[Bigtable<br/>Last 30 days<br/>Column Families]
-            W2[Cloud SQL<br/>Metadata & Sessions<br/>PostgreSQL HA]
+        subgraph "Analytics Tier"
+            W1[BigQuery Streaming<br/>Real-time Ingestion<br/>Neural Metrics]
+            W2[Cloud SQL<br/>Metadata & Config<br/>PostgreSQL HA]
         end
 
-        subgraph "Cold Tier (Historical)"
-            C1[Cloud Storage<br/>Nearline Class<br/>30+ days]
-            C2[BigQuery<br/>Analytics Warehouse<br/>Partitioned Tables]
-            C3[Archive Storage<br/>Coldline Class<br/>1+ year]
+        subgraph "Archive Tier"
+            C1[Cloud Storage<br/>Raw Data Export<br/>Nearline/Coldline]
+            C2[BigQuery<br/>Historical Analytics<br/>Partitioned Tables]
+            C3[Backup Storage<br/>Disaster Recovery<br/>Multi-region]
         end
     end
 
@@ -596,6 +596,10 @@ graph LR
     style AP3 fill:#9c27b0,color:#ffffff
     style AP4 fill:#9c27b0,color:#ffffff
 ```
+
+<Callout type="info">
+  **Current Implementation**: The production system currently uses Cloud SQL PostgreSQL for metadata and BigQuery for analytics. Bigtable integration is planned for future releases when sub-millisecond latency is required for massive time-series datasets.
+</Callout>
 
 ## Data Flow & Latency
 

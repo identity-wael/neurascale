@@ -862,6 +862,235 @@ erDiagram
   </Tabs.Tab>
 </Tabs>
 
+### Authentication Sequence
+
+This sequence diagram shows the complete authentication and authorization flow using JWT tokens.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as API Gateway
+    participant Auth as Auth Service
+    participant DB as PostgreSQL
+    participant Redis
+    participant KMS as Cloud KMS
+
+    Note over Client,KMS: Initial Login Flow
+
+    Client->>API: POST /auth/login {email, password}
+    API->>Auth: ValidateCredentials(email, password)
+    Auth->>DB: SELECT user WHERE email = ?
+    DB-->>Auth: User record
+
+    Auth->>Auth: VerifyPassword(hash, password)
+
+    alt Invalid Credentials
+        Auth-->>API: 401 Unauthorized
+        API-->>Client: 401 {error: "Invalid credentials"}
+    else Valid Credentials
+        Auth->>KMS: GenerateTokenPair()
+        KMS->>KMS: Sign JWT with private key
+        KMS-->>Auth: {access_token, refresh_token}
+
+        Auth->>Redis: SETEX session:{user_id} TTL=3600
+        Auth->>DB: UPDATE user SET last_login = NOW()
+
+        Auth-->>API: TokenPair + User info
+        API-->>Client: 200 {tokens, user}
+    end
+
+    Note over Client,KMS: Authenticated Request Flow
+
+    Client->>API: GET /devices {Authorization: Bearer <token>}
+    API->>Auth: ValidateToken(access_token)
+
+    Auth->>Redis: GET session:{user_id}
+
+    alt Session Not Found
+        Auth->>KMS: VerifySignature(token)
+
+        alt Invalid Token
+            Auth-->>API: 401 Unauthorized
+            API-->>Client: 401 {error: "Invalid token"}
+        else Valid Token
+            Auth->>Auth: CheckExpiration(token)
+
+            alt Token Expired
+                Auth-->>API: 401 {error: "Token expired"}
+                API-->>Client: 401 {error: "Token expired"}
+            else Token Valid
+                Auth->>Redis: SETEX session:{user_id} TTL=3600
+                Auth-->>API: User context
+                API->>API: Process request
+                API-->>Client: 200 {data}
+            end
+        end
+    else Session Found
+        Auth-->>API: User context (from cache)
+        API->>API: Process request
+        API-->>Client: 200 {data}
+    end
+
+    Note over Client,KMS: Token Refresh Flow
+
+    Client->>API: POST /auth/refresh {refresh_token}
+    API->>Auth: RefreshTokens(refresh_token)
+
+    Auth->>KMS: VerifySignature(refresh_token)
+    Auth->>DB: SELECT user WHERE id = ? AND is_active = true
+
+    alt Valid Refresh Token
+        Auth->>KMS: GenerateTokenPair()
+        KMS-->>Auth: {new_access_token, new_refresh_token}
+        Auth->>Redis: SETEX session:{user_id} TTL=3600
+        Auth-->>API: New TokenPair
+        API-->>Client: 200 {tokens}
+    else Invalid Refresh Token
+        Auth->>Redis: DEL session:{user_id}
+        Auth-->>API: 401 Unauthorized
+        API-->>Client: 401 {error: "Invalid refresh token"}
+    end
+```
+
+<Tabs items={['Token Details', 'Security Features', 'Implementation']}>
+  <Tabs.Tab>
+    **JWT Token Structure:**
+
+    ```json
+    {
+      "header": {
+        "alg": "RS256",
+        "typ": "JWT",
+        "kid": "key_id_2024"
+      },
+      "payload": {
+        "sub": "user_uuid",
+        "email": "user@example.com",
+        "role": "researcher",
+        "permissions": ["read:devices", "write:sessions"],
+        "iat": 1705320000,
+        "exp": 1705323600,
+        "iss": "neurascale.io",
+        "aud": "neurascale-api"
+      },
+      "signature": "..."
+    }
+    ```
+
+    **Token Lifetimes:**
+    - Access Token: 1 hour
+    - Refresh Token: 30 days
+    - Session Cache: 1 hour (sliding window)
+
+    **Token Storage:**
+    - Client: Secure storage (HttpOnly cookies or secure local storage)
+    - Server: Redis for session caching
+    - Keys: Cloud KMS for signing keys
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Security Measures:**
+
+    1. **Password Security**
+       - Argon2id hashing (memory-hard)
+       - Salt per password
+       - Configurable work factors
+
+    2. **Token Security**
+       - RS256 asymmetric signing
+       - Key rotation every 90 days
+       - Token binding to IP/device
+
+    3. **Rate Limiting**
+       - Login: 5 attempts per 15 minutes
+       - Token refresh: 10 per hour
+       - API calls: 1000 per hour
+
+    4. **Additional Protection**
+       - CSRF tokens for web clients
+       - Secure headers (HSTS, CSP)
+       - Request signing for sensitive operations
+
+    ```python
+    # Rate limiting implementation
+    @rate_limit(
+        key=lambda: f"login:{request.remote_addr}",
+        rate="5/15m",
+        method="sliding_window"
+    )
+    async def login(credentials: LoginRequest):
+        # Login logic
+        pass
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Authentication Service Implementation:**
+
+    ```python
+    from datetime import datetime, timedelta
+    from typing import Optional, Tuple
+    import jwt
+    from argon2 import PasswordHasher
+    from redis import Redis
+
+    class AuthService:
+        def __init__(self, kms_client, db, redis: Redis):
+            self.kms = kms_client
+            self.db = db
+            self.redis = redis
+            self.ph = PasswordHasher()
+
+        async def authenticate(
+            self,
+            email: str,
+            password: str
+        ) -> Tuple[str, str]:
+            # Fetch user
+            user = await self.db.fetch_one(
+                "SELECT * FROM users WHERE email = ?",
+                email
+            )
+
+            if not user:
+                raise AuthenticationError("Invalid credentials")
+
+            # Verify password
+            try:
+                self.ph.verify(user.password_hash, password)
+            except:
+                raise AuthenticationError("Invalid credentials")
+
+            # Generate tokens
+            access_token = await self._generate_access_token(user)
+            refresh_token = await self._generate_refresh_token(user)
+
+            # Cache session
+            await self._cache_session(user.id, {
+                "user_id": user.id,
+                "email": user.email,
+                "role": user.role,
+                "permissions": user.permissions
+            })
+
+            return access_token, refresh_token
+
+        async def _generate_access_token(self, user) -> str:
+            payload = {
+                "sub": str(user.id),
+                "email": user.email,
+                "role": user.role,
+                "permissions": user.permissions,
+                "iat": datetime.utcnow(),
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            }
+
+            # Sign with KMS
+            return await self.kms.sign_jwt(payload)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
 ## Service Architecture
 
 ### Device Service

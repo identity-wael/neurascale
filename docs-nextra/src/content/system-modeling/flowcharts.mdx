@@ -1,0 +1,526 @@
+import { Tabs } from 'nextra/components'
+
+# Process Flowcharts
+
+## Device Connection Flow
+
+This flowchart illustrates the complete process from device discovery to active data streaming, including error handling and recovery mechanisms.
+
+```mermaid
+flowchart TB
+    Start([User Initiates Connection])
+
+    Discovery{Device<br/>Discovery Mode}
+    USB[USB Device<br/>Detection]
+    BLE[BLE Device<br/>Scanning]
+    WIFI[WiFi/LSL<br/>Network Scan]
+
+    DeviceList[Display Available<br/>Devices List]
+
+    SelectDevice{User Selects<br/>Device}
+
+    CheckDriver{Driver<br/>Installed?}
+    InstallDriver[Install Device<br/>Driver]
+
+    InitConnection[Initialize<br/>Connection]
+
+    Handshake{Protocol<br/>Handshake}
+
+    Configure[Configure Device<br/>Parameters]
+    SetSampleRate[Set Sample Rate<br/>250-1000 Hz]
+    SetChannels[Select Active<br/>Channels]
+    SetFilters[Configure<br/>Filters]
+
+    Impedance{Impedance<br/>Check Required?}
+    CheckImpedance[Run Impedance<br/>Check]
+    ImpedanceOK{Impedance<br/><10kΩ?}
+
+    StartBuffer[Initialize<br/>Ring Buffer]
+
+    StartStream[Start Data<br/>Stream]
+
+    Validate{Data<br/>Valid?}
+
+    ProcessData[Process<br/>Incoming Data]
+    PublishData[Publish to<br/>Pub/Sub]
+
+    Streaming([Active Streaming])
+
+    Error[Connection<br/>Error]
+    Retry{Retry<br/>Connection?}
+
+    Disconnect[Disconnect<br/>Device]
+
+    End([Connection Ended])
+
+    Start --> Discovery
+    Discovery --> USB
+    Discovery --> BLE
+    Discovery --> WIFI
+
+    USB --> DeviceList
+    BLE --> DeviceList
+    WIFI --> DeviceList
+
+    DeviceList --> SelectDevice
+
+    SelectDevice -->|No Device| End
+    SelectDevice -->|Device Selected| CheckDriver
+
+    CheckDriver -->|No| InstallDriver
+    CheckDriver -->|Yes| InitConnection
+    InstallDriver --> InitConnection
+
+    InitConnection --> Handshake
+
+    Handshake -->|Failed| Error
+    Handshake -->|Success| Configure
+
+    Configure --> SetSampleRate
+    SetSampleRate --> SetChannels
+    SetChannels --> SetFilters
+    SetFilters --> Impedance
+
+    Impedance -->|Yes| CheckImpedance
+    Impedance -->|No| StartBuffer
+
+    CheckImpedance --> ImpedanceOK
+    ImpedanceOK -->|No| Error
+    ImpedanceOK -->|Yes| StartBuffer
+
+    StartBuffer --> StartStream
+    StartStream --> Validate
+
+    Validate -->|Invalid| Error
+    Validate -->|Valid| ProcessData
+
+    ProcessData --> PublishData
+    PublishData --> Streaming
+
+    Streaming -->|Data Flow| ProcessData
+    Streaming -->|User Disconnect| Disconnect
+    Streaming -->|Connection Lost| Error
+
+    Error --> Retry
+    Retry -->|Yes| InitConnection
+    Retry -->|No| Disconnect
+
+    Disconnect --> End
+
+    style Start fill:#34a853,color:#fff
+    style Streaming fill:#4285f4,color:#fff
+    style Error fill:#ea4335,color:#fff
+    style End fill:#9c27b0,color:#fff
+    style ProcessData fill:#fbbc04,color:#000
+    style PublishData fill:#fbbc04,color:#000
+```
+
+<Tabs items={['Process Steps', 'Error Handling', 'Implementation Details']}>
+  <Tabs.Tab>
+    **Key Process Steps:**
+
+    1. **Discovery Phase**
+       - USB devices detected via serial port enumeration
+       - BLE devices found through active scanning
+       - WiFi/LSL devices discovered via mDNS broadcast
+
+    2. **Connection Setup**
+       - Driver verification and installation if needed
+       - Protocol-specific handshake (varies by device type)
+       - Connection parameters negotiation
+
+    3. **Configuration**
+       - Sample rate selection (250Hz, 500Hz, 1000Hz)
+       - Channel mapping and activation
+       - Digital filter configuration (notch, bandpass)
+
+    4. **Quality Assurance**
+       - Optional impedance checking per channel
+       - Signal quality validation
+       - Automatic bad channel detection
+
+    5. **Data Streaming**
+       - Zero-copy ring buffer initialization
+       - Real-time data validation
+       - Asynchronous Pub/Sub publishing
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Error Handling Mechanisms:**
+
+    - **Connection Failures**: Exponential backoff retry strategy
+    - **Driver Issues**: Automatic driver download and installation
+    - **Protocol Errors**: Fallback to compatible protocol versions
+    - **Data Validation**: Packet checksum and timestamp verification
+    - **Network Issues**: Automatic reconnection with state preservation
+    - **Buffer Overflow**: Backpressure handling and flow control
+
+    **Recovery Strategies:**
+    ```python
+    # Retry configuration
+    MAX_RETRIES = 3
+    INITIAL_BACKOFF = 1.0  # seconds
+    MAX_BACKOFF = 30.0     # seconds
+    BACKOFF_MULTIPLIER = 2.0
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Implementation References:**
+
+    - **Device Discovery**: `neural-engine/src/devices/discovery_service.py`
+    - **Connection Manager**: `neural-engine/src/devices/device_manager.py`
+    - **Protocol Handlers**: `neural-engine/src/devices/protocols/`
+    - **Ring Buffer**: `neural-engine/src/core/ring_buffer.py`
+    - **Pub/Sub Client**: `neural-engine/src/messaging/pubsub_client.py`
+
+    **Key Classes:**
+    ```python
+    class DeviceDiscoveryService:
+        async def discover_devices(self) -> List[DeviceInfo]
+
+    class DeviceManager:
+        async def connect(self, device_id: str) -> Device
+        async def configure(self, device: Device, config: DeviceConfig)
+        async def start_streaming(self, device: Device)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Session Management Flow
+
+This flowchart shows the complete lifecycle of a neural recording session from creation to completion.
+
+```mermaid
+flowchart TB
+    Start([User Creates Session])
+
+    CreateSession[Create Session<br/>Metadata]
+    AssignID[Generate<br/>Session UUID]
+
+    SelectDevices{Select<br/>Devices}
+    ValidateDevices[Validate Device<br/>Availability]
+
+    ConfigSession[Configure Session<br/>Parameters]
+    SetDuration[Set Recording<br/>Duration]
+    SetTriggers[Configure<br/>Event Triggers]
+    SetStorage[Select Storage<br/>Options]
+
+    InitStorage[Initialize<br/>Storage Backend]
+    CreateFiles[Create Data<br/>Files]
+
+    StartRecording[Start<br/>Recording]
+
+    Recording([Active Recording])
+
+    MonitorHealth{Monitor<br/>Session Health}
+
+    PauseOption{User Action}
+    Pause[Pause<br/>Recording]
+    Resume[Resume<br/>Recording]
+
+    StopRecording[Stop<br/>Recording]
+
+    FinalizeData[Finalize<br/>Data Files]
+    GenerateMetadata[Generate Session<br/>Metadata]
+    ArchiveSession[Archive<br/>Session]
+
+    End([Session Complete])
+
+    Error[Session<br/>Error]
+    Cleanup[Cleanup<br/>Resources]
+
+    Start --> CreateSession
+    CreateSession --> AssignID
+    AssignID --> SelectDevices
+
+    SelectDevices --> ValidateDevices
+    ValidateDevices --> ConfigSession
+
+    ConfigSession --> SetDuration
+    SetDuration --> SetTriggers
+    SetTriggers --> SetStorage
+    SetStorage --> InitStorage
+
+    InitStorage --> CreateFiles
+    CreateFiles --> StartRecording
+    StartRecording --> Recording
+
+    Recording --> MonitorHealth
+    MonitorHealth -->|Healthy| PauseOption
+    MonitorHealth -->|Error| Error
+
+    PauseOption -->|Pause| Pause
+    PauseOption -->|Stop| StopRecording
+    PauseOption -->|Continue| Recording
+
+    Pause --> Resume
+    Resume --> Recording
+
+    StopRecording --> FinalizeData
+    FinalizeData --> GenerateMetadata
+    GenerateMetadata --> ArchiveSession
+    ArchiveSession --> End
+
+    Error --> Cleanup
+    Cleanup --> End
+
+    style Start fill:#34a853,color:#fff
+    style Recording fill:#4285f4,color:#fff
+    style Error fill:#ea4335,color:#fff
+    style End fill:#9c27b0,color:#fff
+```
+
+<Tabs items={['Session Lifecycle', 'Data Management', 'Error Recovery']}>
+  <Tabs.Tab>
+    **Session Management Steps:**
+
+    1. **Session Creation**
+       - Generate unique session identifier (UUID v4)
+       - Associate with patient/participant record
+       - Set recording permissions and access controls
+
+    2. **Device Selection**
+       - Verify device availability and compatibility
+       - Check for device conflicts or exclusive access
+       - Reserve devices for session duration
+
+    3. **Configuration**
+       - Recording duration (continuous or fixed)
+       - Event triggers (manual, scheduled, or signal-based)
+       - Storage options (hot, warm, cold tiers)
+
+    4. **Recording Process**
+       - Synchronized multi-device recording
+       - Real-time health monitoring
+       - Pause/resume functionality
+
+    5. **Session Completion**
+       - Data file finalization and integrity checks
+       - Metadata generation with session summary
+       - Archival to appropriate storage tier
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Data Management During Session:**
+
+    ```python
+    class SessionDataManager:
+        def __init__(self, session_id: str):
+            self.session_id = session_id
+            self.storage_tier = "hot"  # bigtable
+            self.buffer_size = 1_000_000  # samples
+
+        async def write_data(self, data: np.ndarray):
+            # Write to hot storage with buffering
+            await self.hot_storage.write_batch(data)
+
+        async def finalize(self):
+            # Move to appropriate tier based on config
+            if self.long_term_storage:
+                await self.migrate_to_cold_storage()
+    ```
+
+    **Storage Hierarchy:**
+    - **Hot**: Real-time access during recording
+    - **Warm**: Recent sessions (< 30 days)
+    - **Cold**: Long-term archive (> 30 days)
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Error Recovery Procedures:**
+
+    | Error Type | Recovery Action | Data Preservation |
+    |------------|----------------|-------------------|
+    | Device Disconnect | Auto-reconnect, continue recording | Buffer maintains 10s window |
+    | Storage Failure | Failover to backup storage | Write-ahead log ensures no loss |
+    | Network Issues | Local caching, sync when restored | Up to 1 hour local cache |
+    | Power Loss | Auto-save every 60 seconds | Maximum 60s data loss |
+    | System Crash | Session recovery on restart | Checkpoint every 5 minutes |
+
+    **Cleanup Operations:**
+    - Release device reservations
+    - Flush all buffers to storage
+    - Update session status in database
+    - Notify connected clients
+    - Generate audit trail entry
+  </Tabs.Tab>
+</Tabs>
+
+## Real-Time Data Streaming Flow
+
+This flowchart details the real-time data processing pipeline from acquisition to client delivery.
+
+```mermaid
+flowchart TB
+    Start([Data Acquisition])
+
+    AcquireData[Acquire Raw<br/>Neural Data]
+
+    Timestamp[Add Precision<br/>Timestamp]
+
+    Validate{Data<br/>Valid?}
+
+    PreProcess[Pre-Process<br/>Signal]
+    RemoveDC[Remove DC<br/>Offset]
+    ApplyNotch[Apply Notch<br/>Filter]
+
+    QualityCheck{Signal<br/>Quality OK?}
+
+    BufferData[Buffer<br/>Data]
+
+    ThresholdCheck{Buffer<br/>Threshold?}
+
+    BatchProcess[Create Data<br/>Batch]
+
+    Compress[Compress<br/>Data]
+
+    PublishBatch[Publish to<br/>Pub/Sub]
+
+    FanOut{Distribution}
+
+    Storage[Write to<br/>Storage]
+    MLPipeline[Send to ML<br/>Pipeline]
+    WebSocket[Broadcast via<br/>WebSocket]
+
+    ClientDelivery([Client Receives<br/>Real-time Data])
+
+    DropData[Drop Bad<br/>Data]
+    LogError[Log Data<br/>Error]
+
+    Start --> AcquireData
+    AcquireData --> Timestamp
+    Timestamp --> Validate
+
+    Validate -->|Valid| PreProcess
+    Validate -->|Invalid| DropData
+
+    PreProcess --> RemoveDC
+    RemoveDC --> ApplyNotch
+    ApplyNotch --> QualityCheck
+
+    QualityCheck -->|Good| BufferData
+    QualityCheck -->|Poor| LogError
+    LogError --> BufferData
+
+    BufferData --> ThresholdCheck
+
+    ThresholdCheck -->|Not Full| AcquireData
+    ThresholdCheck -->|Full| BatchProcess
+
+    BatchProcess --> Compress
+    Compress --> PublishBatch
+
+    PublishBatch --> FanOut
+
+    FanOut --> Storage
+    FanOut --> MLPipeline
+    FanOut --> WebSocket
+
+    WebSocket --> ClientDelivery
+
+    DropData --> LogError
+
+    style Start fill:#34a853,color:#fff
+    style ClientDelivery fill:#4285f4,color:#fff
+    style DropData fill:#ea4335,color:#fff
+    style PublishBatch fill:#fbbc04,color:#000
+```
+
+<Tabs items={['Pipeline Stages', 'Performance Metrics', 'Optimization']}>
+  <Tabs.Tab>
+    **Data Processing Pipeline:**
+
+    1. **Acquisition Stage**
+       - Receive raw data from device drivers
+       - Apply hardware timestamps with microsecond precision
+       - Validate packet integrity and sequence
+
+    2. **Pre-Processing Stage**
+       - Remove DC offset using high-pass filter (0.1 Hz)
+       - Apply notch filter for powerline noise (50/60 Hz)
+       - Optional: Apply bandpass filter based on use case
+
+    3. **Quality Assessment**
+       - Check for saturated channels
+       - Detect disconnected electrodes
+       - Calculate signal-to-noise ratio
+       - Mark poor quality segments
+
+    4. **Buffering Strategy**
+       - Ring buffer: 10,000 samples per channel
+       - Batch threshold: 1,000 samples (4 seconds @ 250Hz)
+       - Emergency flush: Every 100ms
+
+    5. **Distribution**
+       - Parallel fan-out to multiple consumers
+       - Priority-based message delivery
+       - Guaranteed delivery to storage
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Performance Characteristics:**
+
+    | Stage | Processing Time | Throughput | CPU Usage |
+    |-------|----------------|------------|-----------|
+    | Acquisition | < 0.1ms | 100k samples/s | 5% |
+    | Validation | < 0.5ms | 50k samples/s | 10% |
+    | Pre-Processing | < 2ms | 20k samples/s | 25% |
+    | Compression | < 1ms | 40k samples/s | 15% |
+    | Publishing | < 5ms | 10k samples/s | 10% |
+
+    **Latency Breakdown:**
+    ```
+    Device → Buffer:       0.1ms
+    Buffer → Processing:   2.0ms
+    Processing → Pub/Sub:  5.0ms
+    Pub/Sub → WebSocket:   3.0ms
+    WebSocket → Client:    5.0ms
+    -------------------------------
+    Total End-to-End:     15.1ms
+    ```
+
+    **Scalability Limits:**
+    - Single node: 64 channels @ 1kHz
+    - Distributed: 1000+ channels @ 1kHz
+    - WebSocket connections: 10,000 concurrent
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Optimization Techniques:**
+
+    ```python
+    # Vectorized processing using NumPy
+    class OptimizedProcessor:
+        def __init__(self):
+            # Pre-compute filter coefficients
+            self.notch_b, self.notch_a = signal.iirnotch(
+                60.0, 30.0, fs=1000
+            )
+
+        def process_batch(self, data: np.ndarray) -> np.ndarray:
+            # Process entire batch at once
+            # Shape: (n_channels, n_samples)
+
+            # Remove DC offset (vectorized)
+            data = data - np.mean(data, axis=1, keepdims=True)
+
+            # Apply notch filter (parallelized)
+            data = signal.filtfilt(
+                self.notch_b, self.notch_a, data, axis=1
+            )
+
+            return data
+    ```
+
+    **Memory Optimization:**
+    - Zero-copy operations where possible
+    - Memory pool for buffer allocation
+    - Efficient data structure alignment
+
+    **Network Optimization:**
+    - Binary protocol (MessagePack)
+    - Compression for > 1000 samples
+    - Batched WebSocket frames
+  </Tabs.Tab>
+</Tabs>

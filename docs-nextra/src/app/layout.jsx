@@ -126,6 +126,9 @@ export default async function RootLayout({ children }) {
             defaultTheme: "dark",
             forcedTheme: "dark",
           }}
+          search={{
+            placeholder: "Search documentation...",
+          }}
         >
           {children}
         </Layout>

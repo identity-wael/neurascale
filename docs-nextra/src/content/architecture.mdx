@@ -1,0 +1,643 @@
+import { Tabs, Callout, Table } from 'nextra/components'
+
+# Architecture
+
+NeuraScale is built as a cloud-native, microservices-based platform designed for real-time neural data processing at scale. The architecture prioritizes low latency, high throughput, and clinical-grade reliability.
+
+## Core Design Principles
+
+1. **Microservices Architecture** - Loosely coupled services with clear domain boundaries
+2. **Event-Driven Communication** - Asynchronous messaging for scalability
+3. **Data Locality** - Process data close to the source to minimize latency
+4. **Horizontal Scalability** - Stateless services that scale linearly
+5. **Fault Tolerance** - Circuit breakers, retries, and graceful degradation
+
+## System Architecture
+
+```mermaid
+graph TB
+    subgraph "External Clients"
+        EC1[Research Tools]
+        EC2[Clinical Systems]
+        EC3[Consumer Apps]
+        EC4[SDKs]
+    end
+
+    subgraph "API Gateway Layer"
+        AG[API Gateway<br/>Kong/Nginx<br/>Rate Limiting • Auth • Load Balancing • Caching]
+    end
+
+    subgraph "Core Services"
+        subgraph "Device Service"
+            DS1[Device Manager]
+            DS2[Discovery Engine]
+            DS3[Health Monitor]
+        end
+
+        subgraph "Processing Service"
+            PS1[Signal Pipeline]
+            PS2[Feature Extraction]
+            PS3[ML Inference]
+        end
+
+        subgraph "Data Service"
+            DTS1[Time Series DB]
+            DTS2[File Storage]
+            DTS3[Query Engine]
+        end
+    end
+
+    subgraph "Message Bus"
+        MB[Kafka/Redis<br/>Topics: device.data • processing.* • system.events]
+    end
+
+    subgraph "Storage Layer"
+        SL1[TimescaleDB<br/>Time Series]
+        SL2[Redis<br/>Hot Cache]
+        SL3[S3/MinIO<br/>Cold Storage]
+        SL4[Elasticsearch<br/>Search]
+    end
+
+    EC1 --> AG
+    EC2 --> AG
+    EC3 --> AG
+    EC4 --> AG
+
+    AG --> DS1
+    AG --> PS1
+    AG --> DTS1
+
+    DS1 --> MB
+    PS1 --> MB
+    DTS1 --> MB
+
+    MB --> SL1
+    MB --> SL2
+    MB --> SL3
+    MB --> SL4
+
+    style EC1 fill:#bbdefb,color:#0d47a1
+    style EC2 fill:#bbdefb,color:#0d47a1
+    style EC3 fill:#bbdefb,color:#0d47a1
+    style EC4 fill:#bbdefb,color:#0d47a1
+    style AG fill:#c8e6c9,color:#1b5e20
+    style DS1 fill:#ffe0b2,color:#e65100
+    style PS1 fill:#ffe0b2,color:#e65100
+    style DTS1 fill:#ffe0b2,color:#e65100
+    style MB fill:#f8bbd0,color:#880e4f
+    style SL1 fill:#e1bee7,color:#4a148c
+    style SL2 fill:#e1bee7,color:#4a148c
+    style SL3 fill:#e1bee7,color:#4a148c
+    style SL4 fill:#e1bee7,color:#4a148c
+```
+
+## Service Architecture
+
+### Device Service
+
+The Device Service manages all device-related operations and real-time data acquisition.
+
+```mermaid
+graph LR
+    subgraph "Device Service Components"
+        DR[Device Registry]
+        CP[Connection Pool]
+        SE[Streaming Engine]
+        HM[Health Monitor]
+    end
+
+    subgraph "Device Types"
+        D1[Serial Devices]
+        D2[Bluetooth LE]
+        D3[WiFi Devices]
+        D4[LSL Streams]
+    end
+
+    subgraph "Features"
+        F1[Discovery]
+        F2[Retry Logic]
+        F3[Impedance Check]
+        F4[Signal Quality]
+        F5[Multi-device Sync]
+    end
+
+    D1 --> DR
+    D2 --> DR
+    D3 --> DR
+    D4 --> DR
+
+    DR --> CP
+    CP --> SE
+    SE --> HM
+
+    HM --> F1
+    HM --> F2
+    HM --> F3
+    HM --> F4
+    HM --> F5
+
+    style DR fill:#fff3e0,color:#e65100
+    style CP fill:#fff3e0,color:#e65100
+    style SE fill:#fff3e0,color:#e65100
+    style HM fill:#fff3e0,color:#e65100
+```
+
+**Technical Specifications:**
+- Written in Python 3.12 with asyncio
+- Uses lock-free ring buffers for data
+- Implements backpressure mechanisms
+- Sub-100ms latency guarantee
+
+### Processing Service
+
+The Processing Service handles all signal processing and feature extraction operations.
+
+```mermaid
+graph TB
+    subgraph "Processing Pipeline"
+        subgraph "PreProcessor"
+            PP1[Resampler]
+            PP2[Filter Bank]
+            PP3[Artifact Removal]
+        end
+
+        subgraph "Feature Extractor"
+            FE1[Spectral Features<br/>FFT, PSD, Wavelets]
+            FE2[Temporal Features<br/>Statistics, Entropy]
+            FE3[Connectivity Metrics<br/>Coherence, PLV, PAC]
+        end
+
+        subgraph "ML Inference"
+            ML1[ONNX Runtime]
+            ML2[TensorRT]
+            ML3[Edge TPU]
+        end
+
+        subgraph "Classification"
+            C1[Mental State]
+            C2[Sleep Stage]
+            C3[Motor Imagery]
+            C4[Seizure Predictor]
+        end
+    end
+
+    PP1 --> PP2
+    PP2 --> PP3
+    PP3 --> FE1
+    PP3 --> FE2
+    PP3 --> FE3
+
+    FE1 --> ML1
+    FE2 --> ML1
+    FE3 --> ML1
+
+    ML1 --> C1
+    ML1 --> C2
+    ML1 --> C3
+    ML1 --> C4
+
+    style PP1 fill:#e3f2fd,color:#0d47a1
+    style PP2 fill:#e3f2fd,color:#0d47a1
+    style PP3 fill:#e3f2fd,color:#0d47a1
+    style FE1 fill:#f3e5f5,color:#4a148c
+    style FE2 fill:#f3e5f5,color:#4a148c
+    style FE3 fill:#f3e5f5,color:#4a148c
+    style ML1 fill:#e8f5e9,color:#1b5e20
+    style C1 fill:#fff3e0,color:#e65100
+    style C2 fill:#fff3e0,color:#e65100
+    style C3 fill:#fff3e0,color:#e65100
+    style C4 fill:#fff3e0,color:#e65100
+```
+
+### Data Service
+
+The Data Service manages data persistence, retrieval, and analytics with automatic tiering.
+
+```mermaid
+graph LR
+    subgraph "Data Architecture"
+        subgraph "Hot Storage"
+            H1[Redis<br/>Latest 5 min]
+            H2[TimescaleDB<br/>Last 24 hours]
+        end
+
+        subgraph "Warm Storage"
+            W1[TimescaleDB<br/>Last 30 days]
+            W2[Compressed Chunks]
+        end
+
+        subgraph "Cold Storage"
+            C1[S3/MinIO<br/>Historical]
+            C2[Parquet Format]
+            C3[Iceberg Tables]
+        end
+    end
+
+    H1 --> H2
+    H2 --> W1
+    W1 --> W2
+    W2 --> C1
+    C1 --> C2
+    C2 --> C3
+
+    style H1 fill:#ffebee,color:#b71c1c
+    style H2 fill:#ffebee,color:#b71c1c
+    style W1 fill:#fff3e0,color:#e65100
+    style W2 fill:#fff3e0,color:#e65100
+    style C1 fill:#e3f2fd,color:#0d47a1
+    style C2 fill:#e3f2fd,color:#0d47a1
+    style C3 fill:#e3f2fd,color:#0d47a1
+```
+
+## Data Flow & Latency
+
+### Real-Time Data Pipeline
+
+```mermaid
+graph LR
+    subgraph "Data Flow"
+        A[Device] --> B[Acquisition]
+        B --> C[Buffering]
+        C --> D[Processing]
+        D --> E[Storage]
+        E --> F[API]
+    end
+
+    subgraph "Implementation"
+        A1[Hardware<br/>Driver]
+        B1[Protocol<br/>Handler]
+        C1[Ring Buffer<br/>Zero-Copy]
+        D1[DSP/ML<br/>Pipeline]
+        E1[Time Series<br/>Database]
+        F1[REST/WS<br/>Endpoint]
+    end
+
+    A --> A1
+    B --> B1
+    C --> C1
+    D --> D1
+    E --> E1
+    F --> F1
+```
+
+### Latency Budget
+
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th>Stage</Table.Th>
+      <Table.Th>Budget</Table.Th>
+      <Table.Th>Actual</Table.Th>
+      <Table.Th>Notes</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>Device Acquisition</Table.Td>
+      <Table.Td>20ms</Table.Td>
+      <Table.Td>10-15ms</Table.Td>
+      <Table.Td>Hardware dependent</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Network Transfer</Table.Td>
+      <Table.Td>15ms</Table.Td>
+      <Table.Td>5-10ms</Table.Td>
+      <Table.Td>Optimized protocols</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Buffering</Table.Td>
+      <Table.Td>5ms</Table.Td>
+      <Table.Td>&lt;2ms</Table.Td>
+      <Table.Td>Lock-free queues</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Feature Extraction</Table.Td>
+      <Table.Td>15ms</Table.Td>
+      <Table.Td>10-15ms</Table.Td>
+      <Table.Td>SIMD optimized</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>ML Classification</Table.Td>
+      <Table.Td>15ms</Table.Td>
+      <Table.Td>5-10ms</Table.Td>
+      <Table.Td>TensorRT/ONNX</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Processing</Table.Td>
+      <Table.Td>10ms</Table.Td>
+      <Table.Td>5-10ms</Table.Td>
+      <Table.Td>Parallel pipelines</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Storage Write</Table.Td>
+      <Table.Td>10ms</Table.Td>
+      <Table.Td>5-8ms</Table.Td>
+      <Table.Td>Async writes</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>API Response</Table.Td>
+      <Table.Td>10ms</Table.Td>
+      <Table.Td>5-8ms</Table.Td>
+      <Table.Td>Cached responses</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Scalability
+
+### Horizontal Scaling Architecture
+
+```mermaid
+graph TB
+    LB[Load Balancer]
+
+    subgraph "Service Instances"
+        I1[Instance 1<br/>Worker Pool]
+        I2[Instance 2<br/>Worker Pool]
+        I3[Instance 3<br/>Worker Pool]
+    end
+
+    subgraph "Shared Storage"
+        SS[Storage Layer]
+    end
+
+    LB --> I1
+    LB --> I2
+    LB --> I3
+
+    I1 --> SS
+    I2 --> SS
+    I3 --> SS
+
+    style LB fill:#c8e6c9,color:#1b5e20
+    style I1 fill:#e3f2fd,color:#0d47a1
+    style I2 fill:#e3f2fd,color:#0d47a1
+    style I3 fill:#e3f2fd,color:#0d47a1
+    style SS fill:#f3e5f5,color:#4a148c
+```
+
+### Resource Allocation
+
+<Tabs items={['Device Service', 'Processing Service', 'Data Service']}>
+  <Tabs.Tab>
+    **Device Service Resources:**
+    - CPU: 2-8 cores
+    - Memory: 4-16 GB
+    - Network: 1-10 Gbps
+    - Scaling: By device count
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Processing Service Resources:**
+    - CPU: 8-32 cores
+    - Memory: 32-128 GB
+    - GPU: Optional (CUDA)
+    - Scaling: By channel count
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Data Service Resources:**
+    - CPU: 4-16 cores
+    - Memory: 16-64 GB
+    - Storage: NVMe SSD
+    - Scaling: By write throughput
+  </Tabs.Tab>
+</Tabs>
+
+## Security Architecture
+
+### Defense in Depth
+
+```mermaid
+graph TB
+    subgraph "Security Layers"
+        L7[WAF - Web Application Firewall]
+        L6[API Gateway - Rate Limiting]
+        L5[TLS 1.3 Encryption]
+        L4[Network Segmentation]
+        L3[Service Authentication]
+        L2[Data Encryption at Rest]
+        L1[Audit Logging]
+    end
+
+    L7 --> L6
+    L6 --> L5
+    L5 --> L4
+    L4 --> L3
+    L3 --> L2
+    L2 --> L1
+
+    style L7 fill:#ffebee,color:#b71c1c
+    style L6 fill:#ffe0b2,color:#e65100
+    style L5 fill:#fff3e0,color:#f57c00
+    style L4 fill:#f3e5f5,color:#6a1b9a
+    style L3 fill:#e8eaf6,color:#3f51b5
+    style L2 fill:#e3f2fd,color:#0288d1
+    style L1 fill:#e0f2f1,color:#00695c
+```
+
+### Compliance Features
+
+<Tabs items={['HIPAA', 'GDPR']}>
+  <Tabs.Tab>
+    **HIPAA Compliance:**
+    - End-to-end encryption (AES-256)
+    - Audit logging with immutability
+    - Access controls (RBAC + ABAC)
+    - Data retention policies
+    - Business Associate Agreements
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **GDPR Compliance:**
+    - Consent management
+    - Right to deletion
+    - Data portability
+    - Privacy by design
+    - Data minimization
+  </Tabs.Tab>
+</Tabs>
+
+## Technology Stack
+
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th>Component</Table.Th>
+      <Table.Th>Technology</Table.Th>
+      <Table.Th>Justification</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>Backend</Table.Td>
+      <Table.Td>Python 3.12 + FastAPI</Table.Td>
+      <Table.Td>Async performance, ecosystem</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Real-time</Table.Td>
+      <Table.Td>WebSocket + gRPC</Table.Td>
+      <Table.Td>Low latency, bidirectional</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Message Bus</Table.Td>
+      <Table.Td>Kafka + Redis Pub/Sub</Table.Td>
+      <Table.Td>Scalability, persistence</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Time Series</Table.Td>
+      <Table.Td>TimescaleDB</Table.Td>
+      <Table.Td>PostgreSQL compatibility</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Object Store</Table.Td>
+      <Table.Td>S3/MinIO</Table.Td>
+      <Table.Td>Standard API, scalability</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Search</Table.Td>
+      <Table.Td>Elasticsearch</Table.Td>
+      <Table.Td>Full-text, aggregations</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>ML Inference</Table.Td>
+      <Table.Td>ONNX Runtime + TensorRT</Table.Td>
+      <Table.Td>Optimized inference</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Monitoring</Table.Td>
+      <Table.Td>Prometheus + Grafana</Table.Td>
+      <Table.Td>Industry standard</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Deployment Architecture
+
+### Multi-Region Deployment
+
+```mermaid
+graph TB
+    CDN[CloudFront CDN]
+    ALB[Application Load Balancer]
+
+    subgraph "Regions"
+        subgraph "US-East"
+            USE[Services]
+        end
+
+        subgraph "EU-West"
+            EUW[Services]
+        end
+    end
+
+    subgraph "Database"
+        DB[Multi-Region Database<br/>Active-Active Replication]
+    end
+
+    CDN --> ALB
+    ALB --> USE
+    ALB --> EUW
+    USE --> DB
+    EUW --> DB
+
+    style CDN fill:#e3f2fd,color:#0d47a1
+    style ALB fill:#c8e6c9,color:#1b5e20
+    style USE fill:#fff3e0,color:#e65100
+    style EUW fill:#fff3e0,color:#e65100
+    style DB fill:#f3e5f5,color:#4a148c
+```
+
+### Disaster Recovery
+
+<Callout type="info">
+  **RTO/RPO Targets:**
+  - RTO (Recovery Time Objective): &lt;1 hour
+  - RPO (Recovery Point Objective): &lt;5 minutes
+</Callout>
+
+**Backup Strategy:**
+- Continuous replication to standby region
+- Point-in-time recovery for 30 days
+- Automated failover with health checks
+- Regular DR drills
+
+## Performance Optimization
+
+### Optimization Techniques
+
+<Tabs items={['Zero-Copy', 'SIMD', 'GPU', 'Async I/O']}>
+  <Tabs.Tab>
+    **Zero-Copy Data Transfer**
+    ```python
+    # Shared memory segments
+    buffer = mmap.mmap(-1, size)
+    # Direct memory access
+    numpy_array = np.frombuffer(buffer)
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **SIMD Vectorization**
+    ```python
+    # NumPy with MKL backend
+    # AVX2/AVX-512 instructions
+    filtered = np.convolve(data, kernel, mode='same')
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **GPU Acceleration**
+    ```python
+    # CuPy for GPU processing
+    import cupy as cp
+    gpu_data = cp.asarray(cpu_data)
+    gpu_fft = cp.fft.fft(gpu_data)
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Async I/O**
+    ```python
+    # AsyncIO for concurrent operations
+    async def process_streams(devices):
+        tasks = [process_device(d) for d in devices]
+        await asyncio.gather(*tasks)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Future Enhancements
+
+### Roadmap
+
+```mermaid
+timeline
+    title Architecture Evolution Timeline
+
+    section Completed
+        Phase 8 - Real-time Classification : Mental state, Sleep stages, Motor imagery, Seizure prediction, Google Vertex AI integration
+
+    section Q2 2025
+        Edge Computing : Deploy to edge nodes, Sub-10ms latency, Reduced cloud costs
+
+    section Q3 2025
+        Federated Learning : Distributed training, Privacy preservation, Collaborative platform
+
+    section 2026+
+        Quantum-Ready : Quantum algorithms, Hybrid processing, Next-gen encryption
+```
+
+### Research Areas
+
+- **Neuromorphic Computing** - Brain-inspired hardware integration
+- **Spiking Neural Networks** - Event-based processing
+- **Reservoir Computing** - Efficient temporal processing
+- **Brain-Computer Interface Standards** - Industry standardization
+
+## Related Documentation
+
+- [API Documentation](/api-documentation) - Complete API reference
+- [Neural Management System](/neural-management-system) - Neural Engine details
+- [Security](/security) - Security and compliance details
+- [Contributing Guide](/contributing) - Development guidelines

@@ -2,7 +2,9 @@ import nextra from 'nextra'
 
 const withNextra = nextra({
   latex: true,
-  search: true
+  flexsearch: {
+    codeblocks: false
+  }
 })
 
 export default withNextra({

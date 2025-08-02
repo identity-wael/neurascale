@@ -1091,6 +1091,713 @@ sequenceDiagram
   </Tabs.Tab>
 </Tabs>
 
+### Processing Pipeline State Machine
+
+This state diagram shows the states and transitions for the real-time neural data processing pipeline.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+
+    Idle --> Initializing: start_pipeline()
+
+    Initializing --> Ready: init_complete
+    Initializing --> Failed: init_error
+
+    Ready --> Processing: data_available
+    Ready --> Idle: stop_pipeline()
+
+    Processing --> Buffering: buffer_threshold
+    Processing --> FeatureExtraction: window_complete
+    Processing --> Error: processing_error
+
+    Buffering --> Processing: buffer_flushed
+    Buffering --> Error: buffer_overflow
+
+    FeatureExtraction --> Classification: features_ready
+    FeatureExtraction --> Error: extraction_error
+
+    Classification --> Publishing: results_ready
+    Classification --> Error: classification_error
+
+    Publishing --> Processing: publish_complete
+    Publishing --> Error: publish_error
+
+    Error --> Recovery: auto_recover [retry_count < 3]
+    Error --> Failed: max_retries_exceeded
+    Error --> Ready: manual_reset
+
+    Recovery --> Processing: recovery_success
+    Recovery --> Error: recovery_failed
+
+    Failed --> Idle: reset_pipeline()
+
+    Processing --> Ready: pause()
+    Ready --> Processing: resume()
+
+    state Processing {
+        [*] --> Receiving
+        Receiving --> Validating: packet_received
+        Validating --> Filtering: valid_data
+        Validating --> Dropping: invalid_data
+        Filtering --> Windowing: filtered
+        Windowing --> [*]: window_ready
+        Dropping --> Receiving: continue
+    }
+
+    state FeatureExtraction {
+        [*] --> Spectral
+        Spectral --> Temporal: fft_complete
+        Temporal --> Connectivity: stats_complete
+        Connectivity --> [*]: features_complete
+    }
+
+    state Classification {
+        [*] --> Loading
+        Loading --> Inferencing: model_ready
+        Inferencing --> PostProcessing: raw_predictions
+        PostProcessing --> [*]: final_results
+    }
+```
+
+<Tabs items={['Pipeline States', 'Processing Details', 'Implementation']}>
+  <Tabs.Tab>
+    **Pipeline States:**
+
+    | State | Description | Processing Rate |
+    |-------|-------------|-----------------|
+    | **Idle** | No active processing | 0 samples/s |
+    | **Initializing** | Loading models, allocating buffers | N/A |
+    | **Ready** | Waiting for data | 0 samples/s |
+    | **Processing** | Active data processing | 250-1000 samples/s |
+    | **Buffering** | Accumulating data for batch | Variable |
+    | **FeatureExtraction** | Computing features | ~10 windows/s |
+    | **Classification** | ML inference | ~10 predictions/s |
+    | **Publishing** | Sending results | Async |
+    | **Error** | Recoverable error state | 0 samples/s |
+    | **Recovery** | Attempting auto-recovery | N/A |
+    | **Failed** | Unrecoverable error | 0 samples/s |
+
+    **Composite State Details:**
+    - **Processing**: Receiving → Validating → Filtering → Windowing
+    - **FeatureExtraction**: Spectral → Temporal → Connectivity analysis
+    - **Classification**: Model loading → Inference → Post-processing
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Processing Pipeline Stages:**
+
+    ```python
+    # Pipeline Configuration
+    PIPELINE_CONFIG = {
+        "buffer_size": 10000,        # samples
+        "window_size": 1000,         # samples (4s at 250Hz)
+        "window_overlap": 0.5,       # 50% overlap
+        "batch_size": 10,            # windows per batch
+        "feature_dims": 128,         # feature vector size
+        "model_timeout": 100,        # ms
+        "publish_timeout": 50,       # ms
+    }
+
+    # Processing Stages
+    class ProcessingStages:
+        RECEIVING = "receiving"
+        VALIDATING = "validating"
+        FILTERING = "filtering"
+        WINDOWING = "windowing"
+        SPECTRAL = "spectral_features"
+        TEMPORAL = "temporal_features"
+        CONNECTIVITY = "connectivity_features"
+        INFERENCE = "ml_inference"
+        PUBLISHING = "result_publishing"
+    ```
+
+    **Performance Metrics:**
+    - Latency per stage: 1-5ms
+    - Total pipeline latency: Less than 50ms
+    - Throughput: 1000 samples/s per channel
+    - Feature extraction: 10ms per window
+    - ML inference: 5-10ms per batch
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Pipeline State Machine Implementation:**
+
+    ```python
+    from enum import Enum, auto
+    from dataclasses import dataclass
+    from typing import Optional, List
+    import asyncio
+
+    class PipelineState(Enum):
+        IDLE = auto()
+        INITIALIZING = auto()
+        READY = auto()
+        PROCESSING = auto()
+        BUFFERING = auto()
+        FEATURE_EXTRACTION = auto()
+        CLASSIFICATION = auto()
+        PUBLISHING = auto()
+        ERROR = auto()
+        RECOVERY = auto()
+        FAILED = auto()
+
+    @dataclass
+    class PipelineContext:
+        buffer: RingBuffer
+        feature_extractor: FeatureExtractor
+        classifier: MLClassifier
+        publisher: ResultPublisher
+        error_count: int = 0
+        current_window: Optional[np.ndarray] = None
+        features: Optional[np.ndarray] = None
+        predictions: Optional[dict] = None
+
+    class ProcessingPipeline:
+        def __init__(self, config: dict):
+            self.config = config
+            self.state = PipelineState.IDLE
+            self.context = None
+            self._state_handlers = self._setup_handlers()
+
+        async def start(self):
+            await self.transition_to(PipelineState.INITIALIZING)
+
+        async def process_data(self, data: np.ndarray):
+            if self.state != PipelineState.READY:
+                raise InvalidStateError(
+                    f"Cannot process data in state {self.state}"
+                )
+
+            self.context.buffer.write(data)
+
+            if self.context.buffer.ready_for_window():
+                await self.transition_to(PipelineState.PROCESSING)
+
+        async def transition_to(
+            self,
+            new_state: PipelineState
+        ):
+            # Execute state transition
+            old_state = self.state
+            self.state = new_state
+
+            # Call appropriate handler
+            handler = self._state_handlers.get(new_state)
+            if handler:
+                try:
+                    await handler()
+                except Exception as e:
+                    await self._handle_error(e)
+
+        async def _handle_processing(self):
+            # Get window from buffer
+            window = self.context.buffer.get_window(
+                size=self.config["window_size"],
+                overlap=self.config["window_overlap"]
+            )
+
+            # Validate and filter
+            if not self._validate_window(window):
+                return await self.transition_to(PipelineState.READY)
+
+            filtered = await self._filter_window(window)
+            self.context.current_window = filtered
+
+            # Move to feature extraction
+            await self.transition_to(PipelineState.FEATURE_EXTRACTION)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### GraphQL API Flow
+
+This sequence diagram shows the complete flow of a GraphQL API request, including query parsing, resolution, and data fetching with DataLoader optimization.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway as API Gateway
+    participant GraphQL as GraphQL Server
+    participant Schema as Schema Registry
+    participant Resolver as Resolvers
+    participant DataLoader
+    participant Cache as Redis Cache
+    participant DB as PostgreSQL
+    participant BT as Bigtable
+
+    Client->>Gateway: POST /graphql
+    Note over Client: Query: devices {<br/>  id, name, status<br/>  sessions(limit: 10) {<br/>    id, start_time<br/>  }<br/>}
+
+    Gateway->>Gateway: Validate JWT
+    Gateway->>Gateway: Rate limiting check
+    Gateway->>GraphQL: Forward request + user context
+
+    GraphQL->>Schema: Parse & validate query
+    Schema-->>GraphQL: AST + validation result
+
+    alt Invalid query
+        GraphQL-->>Client: 400 Bad Request<br/>(validation errors)
+    end
+
+    GraphQL->>GraphQL: Build execution plan
+    GraphQL->>GraphQL: Apply query complexity limits
+
+    GraphQL->>Resolver: Execute devices resolver
+
+    Resolver->>Cache: Check cache for devices
+    alt Cache hit
+        Cache-->>Resolver: Cached devices data
+    else Cache miss
+        Resolver->>DataLoader: Load devices (batched)
+        DataLoader->>DB: SELECT * FROM devices<br/>WHERE user_id = ?
+        DB-->>DataLoader: Device records
+        DataLoader-->>Resolver: Device objects
+        Resolver->>Cache: Store in cache (TTL: 5min)
+    end
+
+    loop For each device
+        Resolver->>Resolver: Resolve sessions field
+        Resolver->>DataLoader: Load sessions (batched)
+
+        Note over DataLoader: Batch multiple<br/>session requests
+
+        DataLoader->>DB: SELECT * FROM sessions<br/>WHERE device_id IN (?)<br/>ORDER BY start_time DESC<br/>LIMIT ?
+        DB-->>DataLoader: Session records
+
+        DataLoader->>BT: Get session metadata
+        BT-->>DataLoader: Time-series metadata
+
+        DataLoader-->>Resolver: Session objects
+    end
+
+    Resolver-->>GraphQL: Resolved data tree
+
+    GraphQL->>GraphQL: Apply field-level permissions
+    GraphQL->>GraphQL: Format response
+
+    GraphQL-->>Gateway: GraphQL response
+    Gateway->>Gateway: Add response headers
+    Gateway-->>Client: 200 OK + JSON response
+
+    Note over Client: Response: {<br/>  "data": {<br/>    "devices": [{<br/>      "id": "...",<br/>      "name": "...",<br/>      "status": "ONLINE",<br/>      "sessions": [...]<br/>    }]<br/>  }<br/>}
+```
+
+<Tabs items={['API Features', 'Query Examples', 'Performance']}>
+  <Tabs.Tab>
+    **GraphQL API Features:**
+
+    | Feature | Description | Implementation |
+    |---------|-------------|----------------|
+    | **Type Safety** | Strongly typed schema | Strawberry GraphQL |
+    | **Query Batching** | N+1 query prevention | DataLoader pattern |
+    | **Caching** | Multi-level caching | Redis + in-memory |
+    | **Subscriptions** | Real-time updates | WebSocket + Pub/Sub |
+    | **Pagination** | Cursor-based pagination | Relay specification |
+    | **Rate Limiting** | Per-user/per-IP limits | Token bucket algorithm |
+    | **Query Complexity** | Prevent expensive queries | Depth + cost analysis |
+    | **Field Permissions** | Fine-grained access control | Decorator-based |
+    | **Error Handling** | Structured error responses | GraphQL error spec |
+    | **Introspection** | Schema discovery | Disabled in production |
+
+    **Security Features:**
+    - JWT authentication with refresh tokens
+    - Field-level authorization
+    - Query depth limiting (max: 10 levels)
+    - Query complexity scoring (max: 1000 points)
+    - Rate limiting (100 req/min per user)
+    - SQL injection prevention via parameterized queries
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Common Query Patterns:**
+
+    ```graphql
+    # Device listing with nested data
+    query GetDevices($filter: DeviceFilter, $pagination: PaginationInput) {
+      devices(filter: $filter, pagination: $pagination) {
+        edges {
+          node {
+            id
+            name
+            type
+            status
+            lastSeen
+            sessions(first: 5) {
+              edges {
+                node {
+                  id
+                  startTime
+                  status
+                  patient {
+                    id
+                    externalId
+                  }
+                }
+              }
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+
+    # Real-time subscriptions
+    subscription StreamNeuralData($sessionId: ID!) {
+      neuralDataStream(sessionId: $sessionId) {
+        timestamp
+        channel
+        value
+        sessionId
+      }
+    }
+
+    # Mutations with nested returns
+    mutation StartSession($input: StartSessionInput!) {
+      startSession(input: $input) {
+        session {
+          id
+          status
+          device {
+            id
+            name
+          }
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+    ```
+
+    **DataLoader Batching Example:**
+    ```python
+    # Without DataLoader: N+1 queries
+    devices = get_devices()  # 1 query
+    for device in devices:
+        sessions = get_sessions(device.id)  # N queries
+
+    # With DataLoader: 2 queries total
+    devices = get_devices()  # 1 query
+    session_loader.load_many([d.id for d in devices])  # 1 batched query
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Performance Metrics:**
+
+    | Operation | Response Time | Throughput |
+    |-----------|---------------|------------|
+    | Simple query (cached) | Less than 10ms | 10,000 req/s |
+    | Simple query (DB) | Less than 50ms | 2,000 req/s |
+    | Complex nested query | Less than 200ms | 500 req/s |
+    | Subscription setup | Less than 100ms | 1,000 conn/s |
+    | Data streaming | Less than 5ms/msg | 100,000 msg/s |
+
+    **Optimization Strategies:**
+
+    ```python
+    # Efficient resolver with DataLoader
+    @strawberry.field
+    async def sessions(
+        self,
+        info: Info,
+        first: int = 10,
+        after: Optional[str] = None
+    ) -> SessionConnection:
+        # Use DataLoader for batching
+        loader = info.context.dataloaders.session_loader
+
+        # Apply cursor-based pagination
+        sessions = await loader.load(
+            SessionQuery(
+                device_id=self.id,
+                limit=first + 1,  # Extra for hasNextPage
+                after_cursor=after
+            )
+        )
+
+        # Build connection response
+        has_next = len(sessions) > first
+        edges = [
+            SessionEdge(
+                node=session,
+                cursor=encode_cursor(session.id)
+            )
+            for session in sessions[:first]
+        ]
+
+        return SessionConnection(
+            edges=edges,
+            page_info=PageInfo(
+                has_next_page=has_next,
+                end_cursor=edges[-1].cursor if edges else None
+            )
+        )
+    ```
+
+    **Caching Strategy:**
+    - L1 Cache: In-memory LRU (100MB, 1min TTL)
+    - L2 Cache: Redis (1GB, 5min TTL)
+    - Cache key pattern: `gql:{query_hash}:{variables_hash}`
+    - Cache invalidation: Event-driven via Pub/Sub
+  </Tabs.Tab>
+</Tabs>
+
+### Real-time Data Streaming Flow
+
+This flowchart shows the complete real-time data streaming architecture, from device data acquisition through WebSocket delivery to clients.
+
+```mermaid
+flowchart TB
+    subgraph "Data Sources"
+        D1[OpenBCI Device]
+        D2[Emotiv Device]
+        D3[Custom BCI]
+        D4[Synthetic Device]
+    end
+
+    subgraph "Device Layer"
+        DM[Device Manager]
+        RB[Ring Buffer<br/>Per Device]
+        DS[Data Sampler<br/>250-1000Hz]
+        IM[Impedance Monitor]
+    end
+
+    subgraph "Processing Layer"
+        AG[Aggregator<br/>Time Sync]
+        FT[Filter<br/>Bandpass/Notch]
+        WN[Windowing<br/>1-4s windows]
+        FE[Feature Extraction<br/>Parallel]
+    end
+
+    subgraph "Transport Layer"
+        PS[Pub/Sub Publisher]
+        WS[WebSocket Server]
+        SB[Stream Buffer<br/>Backpressure]
+        CM[Connection Manager]
+    end
+
+    subgraph "Client Layer"
+        WC1[WebSocket Client 1]
+        WC2[WebSocket Client 2]
+        WC3[WebSocket Client N]
+        VZ[Visualizations]
+    end
+
+    subgraph "Storage Layer"
+        BT[Bigtable<br/>Time-series]
+        RD[Redis<br/>Hot Data]
+        S3[Cloud Storage<br/>Raw Files]
+    end
+
+    D1 -->|USB/BLE| DM
+    D2 -->|SDK| DM
+    D3 -->|LSL| DM
+    D4 -->|Internal| DM
+
+    DM --> RB
+    RB --> DS
+    DS --> IM
+
+    IM -->|Valid| AG
+    IM -->|Invalid| DM
+
+    AG --> FT
+    FT --> WN
+    WN --> FE
+
+    FE --> PS
+    FE --> WS
+    FE --> BT
+
+    PS -->|Topics| CM
+    WS --> SB
+    SB --> CM
+
+    CM --> WC1
+    CM --> WC2
+    CM --> WC3
+
+    WC1 --> VZ
+    WC2 --> VZ
+    WC3 --> VZ
+
+    PS --> BT
+    PS --> RD
+    PS --> S3
+
+    style D1 fill:#4285F4,stroke:#1a73e8,color:#fff
+    style D2 fill:#4285F4,stroke:#1a73e8,color:#fff
+    style D3 fill:#4285F4,stroke:#1a73e8,color:#fff
+    style D4 fill:#4285F4,stroke:#1a73e8,color:#fff
+    style DM fill:#34A853,stroke:#188038,color:#fff
+    style AG fill:#FBBC04,stroke:#F9AB00,color:#000
+    style PS fill:#EA4335,stroke:#C5221F,color:#fff
+    style WS fill:#EA4335,stroke:#C5221F,color:#fff
+    style BT fill:#9E9E9E,stroke:#616161,color:#fff
+```
+
+<Tabs items={['Streaming Architecture', 'WebSocket Protocol', 'Implementation']}>
+  <Tabs.Tab>
+    **Streaming Components:**
+
+    | Component | Purpose | Capacity | Latency |
+    |-----------|---------|----------|---------|
+    | **Ring Buffer** | Per-device circular buffer | 10s of data | Less than 1ms write |
+    | **Data Sampler** | Downsample/upsample to target rate | 250-1000 Hz | Less than 1ms |
+    | **Aggregator** | Time-align multi-device streams | 32 devices | Less than 5ms |
+    | **Filter** | Remove noise and artifacts | Real-time | Less than 2ms |
+    | **Windowing** | Create analysis windows | 1-4s windows | Less than 1ms |
+    | **Feature Extraction** | Compute real-time features | 100+ features | Less than 10ms |
+    | **WebSocket Server** | Real-time client delivery | 1000+ clients | Less than 5ms |
+    | **Stream Buffer** | Handle client backpressure | 1MB per client | Variable |
+
+    **Data Flow Rates:**
+    - Raw data: 32 channels × 1000 Hz × 4 bytes = 128 KB/s per device
+    - Feature data: 100 features × 10 Hz × 4 bytes = 4 KB/s per device
+    - WebSocket messages: ~100-1000 msg/s per client
+    - Pub/Sub throughput: 10,000+ msg/s total
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **WebSocket Message Protocol:**
+
+    ```typescript
+    // Client -> Server Messages
+    interface ClientMessage {
+      type: "subscribe" | "unsubscribe" | "configure";
+      payload: SubscribePayload | UnsubscribePayload | ConfigPayload;
+    }
+
+    interface SubscribePayload {
+      streamType: "raw" | "features" | "predictions";
+      deviceIds: string[];
+      channels?: number[];
+      sampleRate?: number;
+    }
+
+    // Server -> Client Messages
+    interface ServerMessage {
+      type: "data" | "event" | "error" | "ack";
+      timestamp: number;
+      payload: DataPayload | EventPayload | ErrorPayload;
+    }
+
+    interface DataPayload {
+      deviceId: string;
+      streamType: "raw" | "features" | "predictions";
+      data: Float32Array | FeatureData | PredictionData;
+      sequenceNumber: number;
+    }
+
+    interface EventPayload {
+      eventType: "device_connected" | "device_disconnected" | "impedance_change";
+      deviceId: string;
+      details: any;
+    }
+    ```
+
+    **Connection Lifecycle:**
+    1. Client connects: `ws://api/v1/streaming/neural-data`
+    2. Server sends: `{"type": "ack", "payload": {"connectionId": "..."}}`
+    3. Client subscribes: `{"type": "subscribe", "payload": {...}}`
+    4. Server streams data: `{"type": "data", "payload": {...}}`
+    5. Client can configure filtering, sampling rate, etc.
+    6. Server handles backpressure with buffering
+    7. Clean disconnect or timeout handling
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Streaming Implementation:**
+
+    ```python
+    class StreamingService:
+        def __init__(self):
+            self.connections: Dict[str, WebSocketConnection] = {}
+            self.device_streams: Dict[str, DeviceStream] = {}
+            self.buffer_size = 10000  # samples per device
+
+        async def handle_connection(self, websocket: WebSocket):
+            connection_id = str(uuid4())
+            connection = WebSocketConnection(
+                id=connection_id,
+                websocket=websocket,
+                subscriptions=set(),
+                buffer=StreamBuffer(max_size=1024*1024)  # 1MB
+            )
+
+            self.connections[connection_id] = connection
+
+            try:
+                # Send acknowledgment
+                await websocket.send_json({
+                    "type": "ack",
+                    "timestamp": time.time(),
+                    "payload": {"connectionId": connection_id}
+                })
+
+                # Handle messages
+                while True:
+                    message = await websocket.receive_json()
+                    await self._handle_client_message(connection, message)
+
+            except WebSocketDisconnect:
+                await self._cleanup_connection(connection_id)
+
+        async def stream_data(self, device_id: str, data: np.ndarray):
+            # Process through pipeline
+            filtered = await self.filter_data(data)
+            windowed = self.window_data(filtered)
+            features = await self.extract_features(windowed)
+
+            # Publish to subscribers
+            tasks = []
+            for conn_id, connection in self.connections.items():
+                if device_id in connection.subscriptions:
+                    tasks.append(
+                        self._send_to_client(connection, {
+                            "type": "data",
+                            "timestamp": time.time(),
+                            "payload": {
+                                "deviceId": device_id,
+                                "streamType": "features",
+                                "data": features.tolist(),
+                                "sequenceNumber": self._get_sequence()
+                            }
+                        })
+                    )
+
+            # Send concurrently with backpressure handling
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        async def _send_to_client(self, connection: WebSocketConnection, message: dict):
+            # Check buffer space
+            if connection.buffer.available_space() < len(message):
+                # Apply backpressure
+                await connection.buffer.wait_for_space()
+
+            # Queue message
+            connection.buffer.put(message)
+
+            # Send if not already sending
+            if not connection.is_sending:
+                await self._flush_buffer(connection)
+    ```
+
+    **Performance Optimizations:**
+    - Zero-copy buffers for raw data
+    - SIMD operations for filtering
+    - Parallel feature extraction
+    - Message batching for efficiency
+    - Automatic quality degradation under load
+  </Tabs.Tab>
+</Tabs>
+
 ## Service Architecture
 
 ### Device Service

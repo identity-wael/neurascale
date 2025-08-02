@@ -1,112 +1,265 @@
-import { Steps } from 'nextra/components'
+import { Steps, Tabs, Callout } from 'nextra/components'
 
 # Get Started
 
-## Quick start with Vercel
+This guide will help you get up and running with NeuraScale in minutes.
 
-You can start by creating your own Nextra site and deploying to Vercel by
-clicking the link:
+## Prerequisites
 
-[![](https://vercel.com/button)](https://vercel.com/new/clone?demo-description=Markdown%20powered%20docs%20site.%20Built%20with%20Next.js.&demo-image=https%3A%2F%2Fnextra.vercel.app%2Fdemo.png&demo-title=Documentation%20Starter%20Kit&demo-url=https%3A%2F%2Fnextra.vercel.app%2F&project-name=nextjs-docs&repository-name=nextjs-docs&s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra&from=templates)
+Before you begin, ensure you have the following installed:
 
-Vercel will create the Nextra repository and deploy the site for you with just a
-few clicks. Once done, every change in the repository will be deployed
-automatically.
+- **Python** 3.12.11 (exact version required) - [Download](https://www.python.org/downloads/)
+- **Node.js** 18.x or higher - [Download](https://nodejs.org/)
+- **pnpm** 9.x or higher - [Installation guide](https://pnpm.io/installation)
+- **Docker** & Docker Compose - [Download](https://www.docker.com/)
+- **Git** - [Download](https://git-scm.com/)
 
-## Create manually
+<Callout type="warning">
+  Python version must be exactly 3.12.11. Other versions may cause compatibility issues.
+</Callout>
 
-Nextra works like a Next.js plugin, and it accepts a theme config (layout) to
-render the page. To start: [^3]
+## Quick Start
 
 <Steps>
-### Install Next.js, Nextra and React [^1]
+### Clone the Repository
 
-```sh npm2yarn
-npm i react react-dom next nextra
+```bash
+git clone https://github.com/identity-wael/neurascale.git
+cd neurascale
 ```
 
-### Install the docs theme [^2]
+### Set Up Virtual Environments
 
-```sh npm2yarn
-npm i nextra-theme-docs
+Run our automated setup script to configure Python environments:
+
+```bash
+./scripts/dev-tools/setup-venvs.sh
 ```
 
-### Create the following Next.js config and theme config under the root directory
+This script will:
+- Verify Python 3.12.11 is available
+- Create virtual environments for all components
+- Install required dependencies
 
-```js filename="next.config.mjs"
-import nextra from 'nextra'
+### Start Infrastructure Services
 
-const withNextra = nextra({
-  theme: 'nextra-theme-blog',
-  themeConfig: './theme.config.js'
-})
-export default withNextra()
+Launch the required infrastructure services:
+
+```bash
+docker-compose up -d
 ```
 
-### Create a `theme.config.js` file for the docs theme
+This starts:
+- TimescaleDB for time-series data
+- Redis for caching and real-time features
+- PostgreSQL for application data
 
-```js filename="theme.config.js"
-export default {
-  project: {
-    link: 'https://github.com/shuding/nextra' // GitHub link in the navbar
-  },
-  docsRepositoryBase: 'https://github.com/shuding/nextra/blob/master', // base URL for the docs repository
-  getNextSeoProps: () => ({ titleTemplate: '%s – Nextra' }),
-  navigation: true,
-  darkMode: true,
-  footer: {
-    text: `MIT ${new Date().getFullYear()} © Shu Ding.`
-  },
-  editLink: {
-    text: 'Edit this page on GitHub'
-  },
-  logo: (
-    <>
-      <svg>...</svg>
-      <span>Next.js Static Site Generator</span>
-    </>
-  ),
-  head: (
-    <>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="description" content="Nextra: the next docs builder" />
-      <meta name="og:title" content="Nextra: the next docs builder" />
-    </>
-  ),
-  primaryHue: {
-    dark: 204,
-    light: 212
-  }
-}
+### Start the Neural Engine
+
+<Tabs items={['Development', 'Production']}>
+  <Tabs.Tab>
+    ```bash
+    cd neural-engine
+    source venv/bin/activate
+    python -m src.main
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    cd neural-engine
+    source venv/bin/activate
+    uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+The Neural Engine API will be available at: http://localhost:8000
+
+### Start the Console (Optional)
+
+In a new terminal:
+
+```bash
+cd console
+npm run dev
 ```
 
-> [!NOTE]
->
-> More configuration options for the docs theme can be found
-> [here](/themes/docs/configuration).
+The NeuraScale Console will be available at: http://localhost:3000
 
-### You are good to go! Run `next dev` to start
+### Test Your Installation
 
+Create a synthetic device to verify everything is working:
+
+```bash
+# Create a test device
+curl -X POST http://localhost:8000/api/v1/devices \
+  -H "Content-Type: application/json" \
+  -d '{"device_id": "test-device", "device_type": "synthetic"}'
+
+# Start streaming data
+curl -X POST http://localhost:8000/api/v1/devices/test-device/stream/start
+```
+
+You should see synthetic neural data streaming in the logs.
 </Steps>
 
----
+## Project Structure
 
-<span id="sidebar-and-anchor-links" />
+```
+neurascale/
+├── neural-engine/           # Core neural data processing engine
+│   ├── src/
+│   │   ├── api/            # FastAPI endpoints
+│   │   ├── devices/        # Device interfaces (OpenBCI, Emotiv, etc.)
+│   │   ├── processing/     # Signal processing pipelines
+│   │   └── classification/ # Real-time ML models
+│   └── tests/              # Test suite
+├── console/                # NeuraScale Console UI
+├── docs-nextra/           # Documentation (you are here!)
+├── infrastructure/        # Terraform & Kubernetes configs
+└── scripts/              # Development tools and utilities
+```
 
-> [!NOTE]
->
-> Any `.md` or `.mdx` file will turn into a doc page and be displayed in
-> sidebar. You can also create a `_meta.js` file to customize the page order and
-> title. <br /> Check the source code: https://github.com/shuding/nextra for
-> more information.
+## Next Steps
 
-> [!TIP]
->
-> You can also use [`<style jsx>`](https://nextjs.org/docs/app/guides/css-in-js)
-> to style elements inside `theme.config.js`.
+Now that you have NeuraScale running, explore:
 
-[^1]: Install Next.js, Nextra and React.
+<div className="nx-grid nx-mt-6 nx-gap-4 md:nx-grid-cols-2">
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">Connect a Device</h3>
+    <p className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Learn how to connect real BCI devices
+    </p>
+    <a href="/docs/device-integration" className="nx-text-primary-600 nx-text-sm">
+      Device Integration →
+    </a>
+  </div>
 
-[^2]: Install the docs theme.
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">Build Your First App</h3>
+    <p className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Create a simple BCI application
+    </p>
+    <a href="/docs/tutorials/first-app" className="nx-text-primary-600 nx-text-sm">
+      Tutorial →
+    </a>
+  </div>
 
-[^3]: To start.
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">API Reference</h3>
+    <p className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Explore the complete API documentation
+    </p>
+    <a href="/api-documentation" className="nx-text-primary-600 nx-text-sm">
+      API Docs →
+    </a>
+  </div>
+
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">Architecture Deep Dive</h3>
+    <p className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Understand the system architecture
+    </p>
+    <a href="/architecture" className="nx-text-primary-600 nx-text-sm">
+      Architecture →
+    </a>
+  </div>
+</div>
+
+## Common Commands
+
+<Tabs items={['Neural Engine', 'Development', 'Docker']}>
+  <Tabs.Tab>
+    ```bash
+    # Activate virtual environment
+    source neural-engine/venv/bin/activate
+
+    # Start the engine
+    python -m src.main
+
+    # Run tests
+    pytest tests/
+
+    # Format code
+    black .
+
+    # Lint code
+    flake8 .
+
+    # Type checking
+    mypy .
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Install dependencies
+    pnpm install
+
+    # Start development server
+    pnpm dev
+
+    # Build for production
+    pnpm build
+
+    # Run linting
+    pnpm lint
+
+    # Format code
+    pnpm format
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Start all services
+    docker-compose up -d
+
+    # View logs
+    docker-compose logs -f
+
+    # Stop services
+    docker-compose down
+
+    # Clean volumes
+    docker-compose down -v
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Troubleshooting
+
+<Callout type="error" title="Port Already in Use">
+  If you see "Port 3000/8000 is already in use":
+
+  ```bash
+  # Find and kill the process
+  lsof -ti:3000 | xargs kill -9
+  # Or use a different port
+  PORT=3001 npm run dev
+  ```
+</Callout>
+
+<Callout type="error" title="Python Version Issues">
+  If you encounter Python version errors:
+
+  ```bash
+  # Check your Python version
+  python --version
+
+  # Must be exactly 3.12.11
+  # Run the setup script to fix
+  ./scripts/dev-tools/setup-venvs.sh
+  ```
+</Callout>
+
+<Callout type="info">
+  For more troubleshooting help, see our [Troubleshooting Guide](/docs/troubleshooting) or ask in [GitHub Discussions](https://github.com/identity-wael/neurascale/discussions).
+</Callout>
+
+## Getting Help
+
+- **Documentation**: [docs.neurascale.io](https://docs.neurascale.io)
+- **GitHub Discussions**: [Ask questions](https://github.com/identity-wael/neurascale/discussions)
+- **Issue Tracker**: [Report bugs](https://github.com/identity-wael/neurascale/issues)
+- **Email Support**: [support@neurascale.io](mailto:support@neurascale.io)
+
+Ready to build something amazing? Let's bridge mind and world together!

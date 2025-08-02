@@ -254,52 +254,6 @@ graph TB
   </Tabs.Tab>
 </Tabs>
 
-## Quick Start
-
-### Prerequisites
-
-- Python 3.12.11 (exact version required)
-- Node.js 18+ and pnpm 9+
-- Docker & Docker Compose
-- 8GB RAM minimum (16GB recommended)
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/identity-wael/neurascale.git
-cd neurascale
-
-# Set up virtual environments
-./scripts/dev-tools/setup-venvs.sh
-
-# Start infrastructure
-docker-compose up -d
-
-# Start Neural Engine
-cd neural-engine
-source venv/bin/activate
-python -m src.main
-
-# Start Console (new terminal)
-cd console
-npm run dev
-```
-
-Visit `http://localhost:3000` to access the NeuraScale console.
-
-### Test with Synthetic Device
-
-```bash
-# Create synthetic device
-curl -X POST http://localhost:8000/api/v1/devices \
-  -H "Content-Type: application/json" \
-  -d '{"device_id": "test", "device_type": "synthetic"}'
-
-# Start streaming
-curl -X POST http://localhost:8000/api/v1/devices/test/stream/start
-```
-
 ## Community & Support
 
 ### Getting Help

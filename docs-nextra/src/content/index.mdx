@@ -62,25 +62,51 @@ NeuraScale is a cloud-native BCI platform that enables:
 
 ### Core Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│              User Applications                       │
-│    (Research Tools, Clinical Apps, Consumer BCI)    │
-└────────────────────────┬────────────────────────────┘
-                         │
-┌────────────────────────┴────────────────────────────┐
-│                 NeuraScale Platform                  │
-├──────────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │  Device  │  │Processing│  │  Data Management │  │
-│  │ Manager  │→ │ Pipeline │→ │   & Storage      │  │
-│  └──────────┘  └──────────┘  └──────────────────┘  │
-│                                                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │WebSocket │  │ REST API │  │Machine Learning  │  │
-│  │ Server   │  │(FastAPI) │  │   Engine         │  │
-│  └──────────┘  └──────────┘  └──────────────────┘  │
-└──────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "User Applications"
+        A1[Research Tools]
+        A2[Clinical Apps]
+        A3[Consumer BCI]
+    end
+
+    subgraph "NeuraScale Platform"
+        subgraph "Core Components"
+            B1[Device Manager]
+            B2[Processing Pipeline]
+            B3[Data Management & Storage]
+        end
+
+        subgraph "API Layer"
+            C1[WebSocket Server]
+            C2[REST API<br/>FastAPI]
+            C3[Machine Learning Engine]
+        end
+    end
+
+    A1 --> C1
+    A1 --> C2
+    A2 --> C1
+    A2 --> C2
+    A3 --> C1
+    A3 --> C2
+
+    B1 --> B2
+    B2 --> B3
+
+    C1 --> B1
+    C2 --> B1
+    C3 --> B2
+
+    style A1 fill:#1565c0,color:#ffffff
+    style A2 fill:#1565c0,color:#ffffff
+    style A3 fill:#1565c0,color:#ffffff
+    style B1 fill:#e65100,color:#ffffff
+    style B2 fill:#e65100,color:#ffffff
+    style B3 fill:#e65100,color:#ffffff
+    style C1 fill:#6a1b9a,color:#ffffff
+    style C2 fill:#6a1b9a,color:#ffffff
+    style C3 fill:#6a1b9a,color:#ffffff
 ```
 
 ## Documentation Sections

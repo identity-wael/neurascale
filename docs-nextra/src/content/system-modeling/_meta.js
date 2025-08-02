@@ -4,4 +4,5 @@ export default {
   flowcharts: "Process Flowcharts",
   "sequence-diagrams": "Sequence Diagrams",
   "state-diagrams": "State Diagrams",
+  "data-models": "Data Models",
 };

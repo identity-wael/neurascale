@@ -15,6 +15,11 @@ Before you begin, ensure you have the following installed:
 - **Docker** & Docker Compose - [Download](https://www.docker.com/)
 - **Git** - [Download](https://git-scm.com/)
 
+### For Console Development
+- **Firebase CLI** - [Installation guide](https://firebase.google.com/docs/cli)
+- **Vercel CLI** - [Installation guide](https://vercel.com/docs/cli)
+- **Neon CLI** (optional) - [Installation guide](https://neon.tech/docs/reference/cli-install)
+
 ### For GCP Deployment
 - **Google Cloud SDK** - [Installation guide](https://cloud.google.com/sdk/docs/install)
 - **Terraform** 1.5.x or higher - [Download](https://www.terraform.io/downloads)
@@ -119,6 +124,127 @@ export GOOGLE_APPLICATION_CREDENTIALS=~/key.json
 ```
 </Steps>
 
+## Firebase Setup
+
+<Steps>
+### Install Firebase CLI
+
+<Tabs items={['npm', 'standalone']}>
+  <Tabs.Tab>
+    ```bash
+    npm install -g firebase-tools
+
+    # Verify installation
+    firebase --version
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Download the standalone binary
+    curl -sL https://firebase.tools | bash
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Initialize Firebase Project
+
+```bash
+# Login to Firebase
+firebase login
+
+# Initialize Firebase in the console directory
+cd console
+firebase init
+```
+
+Select the following services:
+- **Authentication** - For user management
+- **Hosting** - For Vercel integration (optional)
+- **Functions** - For server-side auth operations
+
+### Configure Firebase Authentication
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Select your project or create a new one
+3. Navigate to **Authentication** → **Sign-in method**
+4. Enable the following providers:
+   - Email/Password
+   - Google
+   - GitHub (optional)
+
+### Set up Environment Variables
+
+Create `.env.local` in the console directory:
+
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+
+# Firebase Admin SDK (for API routes)
+FIREBASE_ADMIN_PROJECT_ID=your-project-id
+FIREBASE_ADMIN_CLIENT_EMAIL=your-client-email
+FIREBASE_ADMIN_PRIVATE_KEY=your-private-key
+```
+</Steps>
+
+## NeonDB Setup
+
+<Steps>
+### Create Neon Account
+
+1. Sign up at [neon.tech](https://neon.tech)
+2. Create a new project for NeuraScale
+3. Choose your region (preferably same as GCP region)
+
+### Configure Database Connection
+
+Get your connection string from the Neon dashboard and add to `.env.local`:
+
+```env
+# NeonDB Configuration
+DATABASE_URL=postgresql://user:password@host/neurascale?sslmode=require
+DIRECT_URL=postgresql://user:password@host/neurascale?sslmode=require
+```
+
+### Initialize Database Schema
+
+```bash
+cd console
+
+# Install Prisma CLI
+pnpm add -D prisma @prisma/client
+
+# Initialize Prisma
+npx prisma init
+
+# Push schema to database
+npx prisma db push
+
+# Generate Prisma client
+npx prisma generate
+```
+
+### Set up Database Branching (Optional)
+
+For development workflows:
+
+```bash
+# Install Neon CLI
+npm install -g neonctl
+
+# Authenticate
+neonctl auth
+
+# Create a development branch
+neonctl branches create --name dev --project-id your-project-id
+```
+</Steps>
+
 ## Quick Start
 
 <Steps>
@@ -220,16 +346,48 @@ terraform apply -var-file="environments/development.tfvars"
 
 The Neural Engine API will be available at: http://localhost:8000
 
-### Start the Console (Optional)
+### Start the Console
 
-In a new terminal:
+The NeuraScale Console provides a web interface for device management and data visualization.
 
-```bash
-cd console
-npm run dev
-```
+<Tabs items={['Local Development', 'Production']}>
+  <Tabs.Tab>
+    ```bash
+    cd console
 
-The NeuraScale Console will be available at: http://localhost:3000
+    # Install dependencies
+    pnpm install
+
+    # Run database migrations
+    npx prisma migrate dev
+
+    # Start development server
+    pnpm dev
+    ```
+
+    The console will be available at: http://localhost:3000
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    cd console
+
+    # Build for production
+    pnpm build
+
+    # Deploy to Vercel
+    vercel --prod
+    ```
+
+    Follow the prompts to deploy to your Vercel account.
+  </Tabs.Tab>
+</Tabs>
+
+**Console Features:**
+- Real-time device monitoring
+- EEG data visualization
+- Session recording and playback
+- User authentication via Firebase
+- Experiment management
 
 ### Test Your Installation
 

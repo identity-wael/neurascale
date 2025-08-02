@@ -80,6 +80,12 @@ graph TB
         API_CLIENT[API Clients]
     end
 
+    subgraph "Authentication Layer"
+        FIREBASE[Firebase Auth<br/>Identity Provider]
+        OAUTH[OAuth Providers<br/>Google, GitHub]
+        MFA[Multi-Factor Auth]
+    end
+
     subgraph "Security Perimeter"
         WAF[Web Application Firewall]
         LB[Load Balancer + TLS]
@@ -87,6 +93,7 @@ graph TB
     end
 
     subgraph "Application Layer"
+        VERCEL[Vercel Edge<br/>Console]
         AUTH[Authentication Service]
         AUTHZ[Authorization Service]
         API[API Gateway]
@@ -94,6 +101,7 @@ graph TB
     end
 
     subgraph "Data Layer"
+        NEON[NeonDB<br/>User Data]
         KMS[Cloud KMS<br/>Key Management]
         SM[Secret Manager]
         AUDIT[Audit Logging]
@@ -437,7 +445,301 @@ resource "google_compute_ssl_policy" "modern" {
 
 ## Access Control
 
-### Authentication
+### Firebase Authentication
+
+NeuraScale uses Firebase Authentication for the console, providing secure, scalable user management with support for multiple authentication providers.
+
+#### Authentication Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Console
+    participant Firebase
+    participant API
+    participant NeonDB
+
+    User->>Console: Access Application
+    Console->>Firebase: Check Auth State
+    Firebase-->>Console: Not Authenticated
+    Console->>User: Show Login Page
+
+    User->>Console: Click "Sign in with Google"
+    Console->>Firebase: Initiate OAuth Flow
+    Firebase->>Google: Redirect to Google
+    Google->>Firebase: Return with Auth Code
+    Firebase->>Console: Return ID Token
+
+    Console->>API: API Request + ID Token
+    API->>Firebase: Verify ID Token
+    Firebase-->>API: Token Valid + Claims
+    API->>NeonDB: Get User Data
+    NeonDB-->>API: User Profile
+    API-->>Console: Authorized Response
+```
+
+#### Firebase Configuration
+
+<Tabs items={['Client SDK', 'Admin SDK', 'Security Rules']}>
+  <Tabs.Tab>
+    **Client-Side Configuration**
+
+    ```typescript
+    // lib/firebase/config.ts
+    import { initializeApp, getApps } from 'firebase/app'
+    import { getAuth, connectAuthEmulator } from 'firebase/auth'
+    import { getAnalytics } from 'firebase/analytics'
+
+    const firebaseConfig = {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    }
+
+    // Initialize Firebase
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
+    const auth = getAuth(app)
+
+    // Use emulator in development
+    if (process.env.NODE_ENV === 'development') {
+      connectAuthEmulator(auth, 'http://localhost:9099')
+    }
+
+    // Enable analytics in production
+    const analytics = typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'production' ?
+      getAnalytics(app) : null
+
+    export { app, auth, analytics }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Server-Side Admin SDK**
+
+    ```typescript
+    // lib/firebase/admin.ts
+    import { initializeApp, cert, getApps } from 'firebase-admin/app'
+    import { getAuth } from 'firebase-admin/auth'
+
+    const adminApp = getApps().length ? getApps()[0] : initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n')
+      })
+    })
+
+    export const adminAuth = getAuth(adminApp)
+
+    // Middleware to verify tokens
+    export async function verifyIdToken(token: string) {
+      try {
+        const decodedToken = await adminAuth.verifyIdToken(token)
+        return {
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          emailVerified: decodedToken.email_verified,
+          customClaims: decodedToken
+        }
+      } catch (error) {
+        console.error('Token verification failed:', error)
+        throw new Error('Invalid authentication token')
+      }
+    }
+
+    // Set custom claims for role-based access
+    export async function setUserRole(uid: string, role: string) {
+      await adminAuth.setCustomUserClaims(uid, {
+        role,
+        permissions: getRolePermissions(role)
+      })
+    }
+
+    function getRolePermissions(role: string) {
+      const permissions = {
+        admin: ['read', 'write', 'delete', 'manage_users'],
+        researcher: ['read', 'write', 'export'],
+        clinician: ['read', 'write'],
+        viewer: ['read']
+      }
+      return permissions[role] || []
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Firebase Security Rules**
+
+    ```javascript
+    // firestore.rules
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        // Helper functions
+        function isAuthenticated() {
+          return request.auth != null;
+        }
+
+        function isOwner(userId) {
+          return isAuthenticated() && request.auth.uid == userId;
+        }
+
+        function hasRole(role) {
+          return isAuthenticated() &&
+            request.auth.token.role == role;
+        }
+
+        function hasPermission(permission) {
+          return isAuthenticated() &&
+            permission in request.auth.token.permissions;
+        }
+
+        // User profiles
+        match /users/{userId} {
+          allow read: if isOwner(userId) || hasRole('admin');
+          allow write: if isOwner(userId) &&
+            request.resource.data.role == resource.data.role; // Can't change own role
+          allow write: if hasRole('admin');
+        }
+
+        // Experiments
+        match /experiments/{experimentId} {
+          allow read: if isAuthenticated() &&
+            (resource.data.userId == request.auth.uid ||
+             request.auth.uid in resource.data.sharedWith ||
+             hasRole('admin'));
+          allow create: if isAuthenticated();
+          allow update: if isOwner(resource.data.userId);
+          allow delete: if isOwner(resource.data.userId) || hasRole('admin');
+        }
+
+        // Sessions
+        match /sessions/{sessionId} {
+          allow read: if isAuthenticated();
+          allow write: if hasPermission('write');
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+#### Authentication Providers
+
+<Steps>
+### Configure OAuth Providers
+
+**Google Authentication**
+```typescript
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+
+const googleProvider = new GoogleAuthProvider()
+googleProvider.addScope('profile')
+googleProvider.addScope('email')
+
+export async function signInWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, googleProvider)
+    const user = result.user
+
+    // Get ID token for API calls
+    const idToken = await user.getIdToken()
+
+    // Store in secure HTTP-only cookie
+    await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken })
+    })
+
+    return user
+  } catch (error) {
+    console.error('Google sign-in failed:', error)
+    throw error
+  }
+}
+```
+
+### Implement Email/Password Authentication
+
+```typescript
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification
+} from 'firebase/auth'
+
+export async function signUpWithEmail(email: string, password: string) {
+  try {
+    // Create account
+    const { user } = await createUserWithEmailAndPassword(auth, email, password)
+
+    // Send verification email
+    await sendEmailVerification(user)
+
+    // Create user profile in database
+    await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await user.getIdToken()}`
+      },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        createdAt: new Date().toISOString()
+      })
+    })
+
+    return user
+  } catch (error) {
+    if (error.code === 'auth/email-already-in-use') {
+      throw new Error('Email already registered')
+    }
+    throw error
+  }
+}
+```
+
+### Add Multi-Factor Authentication
+
+```typescript
+import {
+  multiFactor,
+  PhoneAuthProvider,
+  PhoneMultiFactorGenerator
+} from 'firebase/auth'
+
+export async function enrollMFA(phoneNumber: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('No authenticated user')
+
+  const multiFactorSession = await multiFactor(user).getSession()
+
+  // Send verification code
+  const phoneAuthCredential = PhoneAuthProvider.credential(
+    verificationId,
+    verificationCode
+  )
+
+  const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(
+    phoneAuthCredential
+  )
+
+  // Enroll MFA
+  await multiFactor(user).enroll(multiFactorAssertion, 'Phone Number')
+}
+```
+</Steps>
+
+### Traditional Authentication (Neural Engine)
+
+For the Neural Engine API, we use JWT tokens with the following implementation:
 
 <Steps>
 ### Multi-Factor Authentication

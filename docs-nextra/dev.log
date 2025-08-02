@@ -134,3 +134,9 @@
  ✓ Compiled in 3.3s (3287 modules)
  ✓ Compiled in 1979ms (3287 modules)
  GET /docs/troubleshooting 200 in 2747ms
+ GET /docs/device-integration 200 in 436ms
+ GET /docs/deployment 200 in 184ms
+ GET /docs 200 in 66ms
+ GET /docs/get-started 200 in 101ms
+ GET /docs/architecture 200 in 40ms
+ GET /docs 200 in 45ms

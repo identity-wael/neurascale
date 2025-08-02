@@ -2,33 +2,60 @@ import { Tabs, Callout, Table } from 'nextra/components'
 
 # Architecture
 
-NeuraScale is built as a cloud-native, microservices-based platform designed for real-time neural data processing at scale. The architecture prioritizes low latency, high throughput, and clinical-grade reliability.
+NeuraScale is a modern BCI platform with a decoupled architecture that separates the user-facing console from the neural data processing engine. The platform combines best-in-class cloud services for optimal performance, security, and developer experience.
 
-## Core Design Principles
+## Core Architecture Components
 
-1. **Microservices Architecture** - Loosely coupled services with clear domain boundaries
-2. **Event-Driven Communication** - Asynchronous messaging for scalability
-3. **Data Locality** - Process data close to the source to minimize latency
-4. **Horizontal Scalability** - Stateless services that scale linearly
-5. **Fault Tolerance** - Circuit breakers, retries, and graceful degradation
+1. **Console (Frontend)** - Next.js application deployed on Vercel for the user interface
+2. **Authentication** - Firebase Auth for secure user authentication and session management
+3. **User Database** - NeonDB (PostgreSQL) for user data, settings, and session metadata
+4. **Neural Engine** - Python-based backend for real-time BCI data processing
+5. **API Gateway** - RESTful and WebSocket APIs connecting frontend to backend services
 
 ## System Architecture
 
 ```mermaid
 graph TB
-    subgraph "External Clients"
-        EC1[Research Tools]
-        EC2[Clinical Systems]
-        EC3[Consumer Apps]
-        EC4[Neural CLI]
-        EC5[MCP Clients<br/>AI Assistants]
+    subgraph "User Layer"
+        U1[Web Browser]
+        U2[Mobile App]
+        U3[Desktop App]
     end
 
-    subgraph "API Gateway Layer"
-        AG[Cloud Load Balancer<br/>+ Cloud Armor<br/>Rate Limiting • DDoS Protection • SSL Termination]
+    subgraph "Frontend - Vercel"
+        subgraph "NeuraScale Console"
+            NC1[Next.js App<br/>React • TypeScript]
+            NC2[UI Components<br/>Tailwind • shadcn/ui]
+            NC3[State Management<br/>Zustand • React Query]
+            NC4[Real-time Updates<br/>Socket.io Client]
+        end
+        V1[Vercel Edge Network<br/>Global CDN • Edge Functions]
     end
 
-    subgraph "Core Services (GKE)"
+    subgraph "Authentication - Firebase"
+        FB1[Firebase Auth<br/>OAuth Providers]
+        FB2[User Management<br/>Profiles • Permissions]
+        FB3[Session Tokens<br/>JWT • Refresh Tokens]
+    end
+
+    subgraph "User Data - NeonDB"
+        subgraph "PostgreSQL Database"
+            ND1[User Profiles<br/>Settings • Preferences]
+            ND2[Session Metadata<br/>Experiments • Results]
+            ND3[Device Configs<br/>Saved Configurations]
+            ND4[Analysis History<br/>Reports • Exports]
+        end
+        NP1[Neon Proxy<br/>Connection Pooling]
+        NP2[Neon Autoscaling<br/>Compute • Storage]
+    end
+
+    subgraph "API Gateway"
+        AG1[REST API<br/>Express • Node.js]
+        AG2[WebSocket Server<br/>Real-time Streams]
+        AG3[GraphQL API<br/>Query Optimization]
+    end
+
+    subgraph "Neural Engine Backend"
         subgraph "Device Service"
             DS1[Device Manager]
             DS2[Discovery Engine]
@@ -38,79 +65,261 @@ graph TB
         subgraph "Processing Service"
             PS1[Signal Pipeline]
             PS2[Feature Extraction]
-            PS3[ML Inference<br/>Vertex AI]
+            PS3[ML Inference]
         end
 
         subgraph "Data Service"
-            DTS1[Bigtable API]
+            DTS1[Time Series API]
             DTS2[Storage API]
-            DTS3[BigQuery API]
-        end
-
-        subgraph "Support Services"
-            SS1[Neural Ledger<br/>Audit Trail]
-            SS2[MCP Server<br/>Cloud Run]
+            DTS3[Analytics API]
         end
     end
 
-    subgraph "Message Bus"
-        MB[Cloud Pub/Sub<br/>Topics: device.* • processing.* • audit.*]
+    subgraph "Neural Data Storage"
+        NS1[TimescaleDB<br/>Time Series Data]
+        NS2[Redis<br/>Real-time Cache]
+        NS3[Cloud Storage<br/>Raw EEG Files]
+        NS4[PostgreSQL<br/>Analysis Results]
     end
 
-    subgraph "Storage Layer (GCP)"
-        SL1[Bigtable<br/>Time Series Data]
-        SL2[Memorystore<br/>Redis Cache]
-        SL3[Cloud Storage<br/>Raw Files]
-        SL4[BigQuery<br/>Analytics]
-        SL5[Cloud SQL<br/>PostgreSQL]
-    end
+    U1 --> V1
+    U2 --> V1
+    U3 --> V1
 
-    EC1 --> AG
-    EC2 --> AG
-    EC3 --> AG
-    EC4 --> AG
-    EC5 --> SS2
+    V1 --> NC1
+    NC1 --> NC2
+    NC1 --> NC3
+    NC1 --> NC4
 
-    AG --> DS1
-    AG --> PS1
-    AG --> DTS1
-    AG --> SS1
+    NC1 --> FB1
+    FB1 --> FB2
+    FB2 --> FB3
 
-    DS1 --> MB
-    PS1 --> MB
-    DTS1 --> MB
-    SS1 --> MB
+    NC1 --> NP1
+    NP1 --> ND1
+    NP1 --> ND2
+    NP1 --> ND3
+    NP1 --> ND4
 
-    MB --> SL1
-    MB --> SL2
-    MB --> SL3
-    MB --> SL4
-    SS1 --> SL5
+    NC1 --> AG1
+    NC4 --> AG2
+    NC1 --> AG3
 
-    style EC1 fill:#bbdefb,color:#0d47a1
-    style EC2 fill:#bbdefb,color:#0d47a1
-    style EC3 fill:#bbdefb,color:#0d47a1
-    style EC4 fill:#bbdefb,color:#0d47a1
-    style EC5 fill:#bbdefb,color:#0d47a1
-    style AG fill:#34a853,color:#ffffff
-    style DS1 fill:#ea4335,color:#ffffff
-    style PS1 fill:#ea4335,color:#ffffff
-    style DTS1 fill:#ea4335,color:#ffffff
-    style SS1 fill:#ea4335,color:#ffffff
-    style SS2 fill:#ea4335,color:#ffffff
-    style MB fill:#fbbc04,color:#000000
-    style SL1 fill:#4285f4,color:#ffffff
-    style SL2 fill:#4285f4,color:#ffffff
-    style SL3 fill:#4285f4,color:#ffffff
-    style SL4 fill:#4285f4,color:#ffffff
-    style SL5 fill:#4285f4,color:#ffffff
+    AG1 --> DS1
+    AG2 --> PS1
+    AG3 --> DTS1
+
+    DS1 --> NS2
+    PS1 --> NS1
+    DTS1 --> NS3
+    DTS1 --> NS4
+
+    style U1 fill:#e3f2fd,color:#0d47a1
+    style U2 fill:#e3f2fd,color:#0d47a1
+    style U3 fill:#e3f2fd,color:#0d47a1
+    style V1 fill:#000000,color:#ffffff
+    style NC1 fill:#0070f3,color:#ffffff
+    style NC2 fill:#0070f3,color:#ffffff
+    style NC3 fill:#0070f3,color:#ffffff
+    style NC4 fill:#0070f3,color:#ffffff
+    style FB1 fill:#ffa000,color:#ffffff
+    style FB2 fill:#ffa000,color:#ffffff
+    style FB3 fill:#ffa000,color:#ffffff
+    style ND1 fill:#00e5a0,color:#000000
+    style ND2 fill:#00e5a0,color:#000000
+    style ND3 fill:#00e5a0,color:#000000
+    style ND4 fill:#00e5a0,color:#000000
+    style NP1 fill:#00e5a0,color:#000000
+    style NP2 fill:#00e5a0,color:#000000
+    style AG1 fill:#6b7280,color:#ffffff
+    style AG2 fill:#6b7280,color:#ffffff
+    style AG3 fill:#6b7280,color:#ffffff
+    style DS1 fill:#8b5cf6,color:#ffffff
+    style PS1 fill:#8b5cf6,color:#ffffff
+    style DTS1 fill:#8b5cf6,color:#ffffff
+    style NS1 fill:#3b82f6,color:#ffffff
+    style NS2 fill:#ef4444,color:#ffffff
+    style NS3 fill:#10b981,color:#ffffff
+    style NS4 fill:#3b82f6,color:#ffffff
 ```
 
-## Service Architecture
+## Frontend Architecture (Console)
+
+### Vercel Deployment
+
+The NeuraScale Console is a modern web application built with Next.js and deployed on Vercel's edge network for optimal performance and global availability.
+
+```mermaid
+graph LR
+    subgraph "Vercel Infrastructure"
+        VE[Edge Network<br/>150+ PoPs Globally]
+        VF[Edge Functions<br/>API Routes]
+        VS[Static Assets<br/>Immutable Deployments]
+        VC[Edge Config<br/>Feature Flags]
+    end
+
+    subgraph "Console Features"
+        CF1[Dashboard<br/>Real-time Monitoring]
+        CF2[Device Control<br/>Configuration UI]
+        CF3[Data Visualization<br/>Charts & Graphs]
+        CF4[Session Management<br/>Recording Controls]
+        CF5[Analysis Tools<br/>Export & Reports]
+    end
+
+    subgraph "Build Pipeline"
+        GH[GitHub<br/>Source Control]
+        VA[Vercel Analytics<br/>Web Vitals]
+        VB[Build System<br/>Next.js Compiler]
+        VP[Preview Deployments<br/>PR Integration]
+    end
+
+    GH --> VB
+    VB --> VS
+    VB --> VF
+    VS --> VE
+    VF --> VE
+
+    VE --> CF1
+    VE --> CF2
+    VE --> CF3
+    VE --> CF4
+    VE --> CF5
+
+    CF1 --> VA
+    CF2 --> VA
+    CF3 --> VA
+
+    style VE fill:#000000,color:#ffffff
+    style VF fill:#000000,color:#ffffff
+    style VS fill:#000000,color:#ffffff
+    style VC fill:#000000,color:#ffffff
+    style GH fill:#24292e,color:#ffffff
+    style VA fill:#0070f3,color:#ffffff
+    style VB fill:#0070f3,color:#ffffff
+    style VP fill:#0070f3,color:#ffffff
+```
+
+**Key Benefits:**
+- Zero-config deployments with Git integration
+- Automatic HTTPS and custom domains
+- Edge caching and global CDN
+- Serverless functions for API routes
+- Built-in analytics and monitoring
+
+### Firebase Authentication
+
+Firebase provides secure, scalable authentication with support for multiple identity providers and seamless integration with the frontend.
+
+```mermaid
+graph TB
+    subgraph "Identity Providers"
+        IP1[Google OAuth]
+        IP2[GitHub OAuth]
+        IP3[Email/Password]
+        IP4[Magic Links]
+    end
+
+    subgraph "Firebase Auth"
+        FA1[Authentication SDK<br/>Client Libraries]
+        FA2[User Management<br/>Admin SDK]
+        FA3[Security Rules<br/>Access Control]
+        FA4[Custom Claims<br/>Role-Based Access]
+    end
+
+    subgraph "Integration Points"
+        INT1[Next.js Middleware<br/>Route Protection]
+        INT2[API Authentication<br/>Token Verification]
+        INT3[Session Management<br/>Refresh Tokens]
+        INT4[User Context<br/>React Hooks]
+    end
+
+    IP1 --> FA1
+    IP2 --> FA1
+    IP3 --> FA1
+    IP4 --> FA1
+
+    FA1 --> FA2
+    FA2 --> FA3
+    FA3 --> FA4
+
+    FA1 --> INT1
+    FA1 --> INT2
+    FA1 --> INT3
+    FA1 --> INT4
+
+    style IP1 fill:#4285f4,color:#ffffff
+    style IP2 fill:#24292e,color:#ffffff
+    style IP3 fill:#ea4335,color:#ffffff
+    style IP4 fill:#34a853,color:#ffffff
+    style FA1 fill:#ffa000,color:#ffffff
+    style FA2 fill:#ffa000,color:#ffffff
+    style FA3 fill:#ffa000,color:#ffffff
+    style FA4 fill:#ffa000,color:#ffffff
+```
+
+### NeonDB (User Data Storage)
+
+NeonDB provides a serverless PostgreSQL database optimized for modern applications with automatic scaling and branching capabilities.
+
+```mermaid
+graph LR
+    subgraph "NeonDB Features"
+        NF1[Serverless PostgreSQL<br/>Auto-scaling]
+        NF2[Database Branching<br/>Dev/Test Environments]
+        NF3[Point-in-Time Recovery<br/>7-day History]
+        NF4[Connection Pooling<br/>PgBouncer Built-in]
+    end
+
+    subgraph "Data Models"
+        subgraph "User Tables"
+            UT1[users<br/>Profiles & Settings]
+            UT2[organizations<br/>Team Management]
+            UT3[api_keys<br/>Access Tokens]
+        end
+
+        subgraph "Session Tables"
+            ST1[experiments<br/>Session Metadata]
+            ST2[recordings<br/>File References]
+            ST3[analyses<br/>Results & Reports]
+        end
+
+        subgraph "Configuration Tables"
+            CT1[device_configs<br/>Saved Settings]
+            CT2[processing_pipelines<br/>Custom Workflows]
+            CT3[ml_models<br/>User Models]
+        end
+    end
+
+    subgraph "Access Patterns"
+        AP1[Prisma ORM<br/>Type-safe Queries]
+        AP2[Connection Pool<br/>Supavisor]
+        AP3[Read Replicas<br/>Analytics Queries]
+    end
+
+    NF1 --> NF4
+    NF2 --> NF3
+
+    AP1 --> UT1
+    AP1 --> ST1
+    AP1 --> CT1
+
+    AP2 --> AP1
+    AP3 --> ST1
+
+    style NF1 fill:#00e5a0,color:#000000
+    style NF2 fill:#00e5a0,color:#000000
+    style NF3 fill:#00e5a0,color:#000000
+    style NF4 fill:#00e5a0,color:#000000
+    style AP1 fill:#2d3748,color:#ffffff
+    style AP2 fill:#2d3748,color:#ffffff
+    style AP3 fill:#2d3748,color:#ffffff
+```
+
+## Backend Architecture (Neural Engine)
 
 ### Device Service
 
-The Device Service manages all device-related operations and real-time data acquisition.
+The Device Service manages all BCI device connections and real-time data acquisition.
 
 ```mermaid
 graph LR
@@ -831,140 +1040,308 @@ graph TB
   </thead>
   <tbody>
     <Table.Tr>
-      <Table.Td>Backend</Table.Td>
+      <Table.Td>Frontend Framework</Table.Td>
+      <Table.Td>Next.js 14 + React</Table.Td>
+      <Table.Td>Server components, App Router, TypeScript</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>UI Components</Table.Td>
+      <Table.Td>shadcn/ui + Tailwind CSS</Table.Td>
+      <Table.Td>Customizable, accessible, modern design</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>State Management</Table.Td>
+      <Table.Td>Zustand + React Query</Table.Td>
+      <Table.Td>Simple state, server state caching</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Authentication</Table.Td>
+      <Table.Td>Firebase Auth</Table.Td>
+      <Table.Td>Multiple providers, secure, scalable</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>User Database</Table.Td>
+      <Table.Td>NeonDB (PostgreSQL)</Table.Td>
+      <Table.Td>Serverless, branching, auto-scaling</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>ORM</Table.Td>
+      <Table.Td>Prisma</Table.Td>
+      <Table.Td>Type-safe queries, migrations</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Deployment</Table.Td>
+      <Table.Td>Vercel</Table.Td>
+      <Table.Td>Edge network, preview deployments</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>Neural Backend</Table.Td>
       <Table.Td>Python 3.12 + FastAPI</Table.Td>
-      <Table.Td>Async performance, ecosystem</Table.Td>
+      <Table.Td>Async performance, BCI ecosystem</Table.Td>
     </Table.Tr>
     <Table.Tr>
-      <Table.Td>Real-time</Table.Td>
-      <Table.Td>WebSocket + gRPC</Table.Td>
-      <Table.Td>Low latency, bidirectional</Table.Td>
+      <Table.Td>Real-time Comm</Table.Td>
+      <Table.Td>Socket.io + WebSocket</Table.Td>
+      <Table.Td>Bidirectional, fallback support</Table.Td>
     </Table.Tr>
     <Table.Tr>
-      <Table.Td>Message Bus</Table.Td>
-      <Table.Td>Kafka + Redis Pub/Sub</Table.Td>
-      <Table.Td>Scalability, persistence</Table.Td>
-    </Table.Tr>
-    <Table.Tr>
-      <Table.Td>Time Series</Table.Td>
+      <Table.Td>Time Series DB</Table.Td>
       <Table.Td>TimescaleDB</Table.Td>
-      <Table.Td>PostgreSQL compatibility</Table.Td>
+      <Table.Td>PostgreSQL extension, optimized for EEG</Table.Td>
     </Table.Tr>
     <Table.Tr>
-      <Table.Td>Object Store</Table.Td>
-      <Table.Td>S3/MinIO</Table.Td>
-      <Table.Td>Standard API, scalability</Table.Td>
+      <Table.Td>Caching</Table.Td>
+      <Table.Td>Redis</Table.Td>
+      <Table.Td>In-memory performance, pub/sub</Table.Td>
     </Table.Tr>
     <Table.Tr>
-      <Table.Td>Search</Table.Td>
-      <Table.Td>Elasticsearch</Table.Td>
-      <Table.Td>Full-text, aggregations</Table.Td>
+      <Table.Td>File Storage</Table.Td>
+      <Table.Td>Cloud Storage</Table.Td>
+      <Table.Td>Object storage for EEG files</Table.Td>
     </Table.Tr>
     <Table.Tr>
-      <Table.Td>ML Inference</Table.Td>
-      <Table.Td>ONNX Runtime + TensorRT</Table.Td>
-      <Table.Td>Optimized inference</Table.Td>
+      <Table.Td>ML Processing</Table.Td>
+      <Table.Td>NumPy + SciPy + MNE</Table.Td>
+      <Table.Td>Scientific computing, EEG analysis</Table.Td>
     </Table.Tr>
     <Table.Tr>
       <Table.Td>Monitoring</Table.Td>
-      <Table.Td>Prometheus + Grafana</Table.Td>
-      <Table.Td>Industry standard</Table.Td>
+      <Table.Td>Vercel Analytics + Sentry</Table.Td>
+      <Table.Td>Performance tracking, error monitoring</Table.Td>
     </Table.Tr>
   </tbody>
 </Table>
 
 ## Deployment Architecture
 
-### Multi-Project GCP Setup
+### Multi-Environment Setup
 
 ```mermaid
 graph TB
-    subgraph "GitHub Actions"
-        GA[GitHub Actions<br/>CI/CD Pipeline]
-        WIF[Workload Identity<br/>Federation]
+    subgraph "Source Control"
+        GH[GitHub Repository]
+        GHA[GitHub Actions<br/>CI/CD Pipeline]
     end
 
-    subgraph "Development Environment"
-        subgraph "development-neurascale"
-            DEV_GKE[GKE Cluster<br/>Dev Workloads]
-            DEV_DB[Cloud SQL<br/>Dev Database]
-            DEV_BT[Bigtable<br/>Dev Instance]
-            DEV_PS[Pub/Sub<br/>Dev Topics]
+    subgraph "Frontend Deployments"
+        subgraph "Vercel Platform"
+            VP[Preview Deployments<br/>PR Branches]
+            VS[Staging<br/>develop branch]
+            VPR[Production<br/>main branch]
+            VE[Edge Functions<br/>API Routes]
         end
     end
 
-    subgraph "Staging Environment"
-        subgraph "staging-neurascale"
-            STG_GKE[GKE Cluster<br/>Staging Workloads]
-            STG_DB[Cloud SQL<br/>Staging Database]
-            STG_BT[Bigtable<br/>Staging Instance]
-            STG_PS[Pub/Sub<br/>Staging Topics]
+    subgraph "Authentication"
+        subgraph "Firebase Projects"
+            FB_DEV[Firebase Dev<br/>Test Auth]
+            FB_STG[Firebase Staging<br/>UAT Auth]
+            FB_PRD[Firebase Production<br/>Live Auth]
         end
     end
 
-    subgraph "Production Environment"
-        subgraph "production-neurascale"
-            subgraph "us-central1"
-                PROD_GKE_C[GKE Cluster<br/>Production Workloads<br/>n2-standard-16]
-                PROD_DB_C[Cloud SQL<br/>Production Primary<br/>HA Configuration]
-                PROD_BT_C[Bigtable<br/>Production Instance<br/>SSD Storage]
-                PROD_PS_C[Pub/Sub<br/>Production Topics]
-            end
-            subgraph "us-east1"
-                PROD_GKE_E[GKE Cluster<br/>Production Workloads<br/>n2-standard-16]
-                PROD_DB_E[Cloud SQL<br/>Production Replica<br/>Read Replicas]
-                PROD_BT_E[Bigtable<br/>Replication Instance]
-                PROD_PS_E[Pub/Sub<br/>Multi-region Topics]
-            end
+    subgraph "Databases"
+        subgraph "NeonDB Projects"
+            ND_DEV[Neon Dev<br/>Branch Database]
+            ND_STG[Neon Staging<br/>Branch Database]
+            ND_PRD[Neon Production<br/>Main Database]
         end
     end
 
-    subgraph "Shared Services"
-        MON[Cloud Monitoring<br/>Logging & Metrics]
-        SEC[Security Command Center<br/>Threat Detection]
-        REG[Artifact Registry<br/>Container Images]
-        TF[Terraform State<br/>Cloud Storage]
+    subgraph "Neural Engine"
+        subgraph "Development"
+            NE_DEV[Local Docker<br/>Hot Reload]
+        end
+        subgraph "Staging"
+            NE_STG[Cloud Run<br/>Staging Instance]
+        end
+        subgraph "Production"
+            NE_PRD[Cloud Run<br/>Production Instances<br/>Auto-scaling]
+        end
     end
 
-    GA --> WIF
-    WIF --> |develop branch| DEV_GKE
-    WIF --> |PR branches| STG_GKE
-    WIF --> |main branch| PROD_GKE_C
-    WIF --> |main branch| PROD_GKE_E
+    subgraph "Storage"
+        GCS_DEV[Cloud Storage Dev<br/>Test Data]
+        GCS_STG[Cloud Storage Staging<br/>UAT Data]
+        GCS_PRD[Cloud Storage Prod<br/>Live Data]
+    end
 
-    DEV_GKE --> MON
-    STG_GKE --> MON
-    PROD_GKE_C --> MON
-    PROD_GKE_E --> MON
+    GH --> GHA
+    GHA --> VP
+    GHA --> VS
+    GHA --> VPR
 
-    PROD_DB_C -.->|Replication| PROD_DB_E
-    PROD_BT_C -.->|Replication| PROD_BT_E
+    VP --> FB_DEV
+    VS --> FB_STG
+    VPR --> FB_PRD
 
-    style GA fill:#4285f4,color:#fff
-    style WIF fill:#4285f4,color:#fff
-    style DEV_GKE fill:#34a853,color:#fff
-    style STG_GKE fill:#fbbc04,color:#000
-    style PROD_GKE_C fill:#ea4335,color:#fff
-    style PROD_GKE_E fill:#ea4335,color:#fff
-    style MON fill:#4285f4,color:#fff
-    style SEC fill:#ea4335,color:#fff
-    style REG fill:#34a853,color:#fff
-    style TF fill:#fbbc04,color:#000
+    VP --> ND_DEV
+    VS --> ND_STG
+    VPR --> ND_PRD
+
+    VE --> NE_DEV
+    VE --> NE_STG
+    VE --> NE_PRD
+
+    NE_DEV --> GCS_DEV
+    NE_STG --> GCS_STG
+    NE_PRD --> GCS_PRD
+
+    style GH fill:#24292e,color:#ffffff
+    style GHA fill:#2088fc,color:#ffffff
+    style VP fill:#000000,color:#ffffff
+    style VS fill:#000000,color:#ffffff
+    style VPR fill:#000000,color:#ffffff
+    style VE fill:#000000,color:#ffffff
+    style FB_DEV fill:#039be5,color:#ffffff
+    style FB_STG fill:#fb8c00,color:#ffffff
+    style FB_PRD fill:#d32f2f,color:#ffffff
+    style ND_DEV fill:#00c896,color:#ffffff
+    style ND_STG fill:#00e5a0,color:#000000
+    style ND_PRD fill:#00ff88,color:#000000
+    style NE_DEV fill:#4285f4,color:#ffffff
+    style NE_STG fill:#fbbc04,color:#000000
+    style NE_PRD fill:#ea4335,color:#ffffff
+```
+
+### Vercel Deployment Pipeline
+
+```mermaid
+graph LR
+    subgraph "Development Flow"
+        DEV[Local Development<br/>npm run dev]
+        PR[Pull Request<br/>Feature Branch]
+        PD[Preview Deploy<br/>Unique URL]
+        REV[Code Review<br/>Testing]
+    end
+
+    subgraph "Staging Flow"
+        MERGE[Merge to develop]
+        STG[Staging Deploy<br/>staging.neurascale.io]
+        TEST[Integration Testing<br/>E2E Tests]
+    end
+
+    subgraph "Production Flow"
+        MAIN[Merge to main]
+        PROD[Production Deploy<br/>neurascale.io]
+        MON[Monitoring<br/>Analytics]
+    end
+
+    DEV --> PR
+    PR --> PD
+    PD --> REV
+    REV --> MERGE
+    MERGE --> STG
+    STG --> TEST
+    TEST --> MAIN
+    MAIN --> PROD
+    PROD --> MON
+
+    style DEV fill:#0070f3,color:#ffffff
+    style PR fill:#0070f3,color:#ffffff
+    style PD fill:#000000,color:#ffffff
+    style STG fill:#fbbc04,color:#000000
+    style PROD fill:#00c896,color:#ffffff
+```
+
+## Frontend-Backend Integration
+
+### API Architecture
+
+The console communicates with the Neural Engine through a well-defined API layer that handles authentication, data streaming, and session management.
+
+```mermaid
+graph TB
+    subgraph "Console (Vercel)"
+        C1[Next.js App]
+        C2[API Routes<br/>Edge Functions]
+        C3[Socket.io Client]
+    end
+
+    subgraph "API Gateway"
+        AG1[REST Endpoints<br/>/api/v1/*]
+        AG2[WebSocket Server<br/>ws://api.neurascale.io]
+        AG3[Auth Middleware<br/>Firebase Token Verification]
+    end
+
+    subgraph "Neural Engine"
+        NE1[Device Controller]
+        NE2[Stream Manager]
+        NE3[Analysis Pipeline]
+    end
+
+    subgraph "Data Flow"
+        DF1[Control Commands<br/>Start/Stop/Configure]
+        DF2[Real-time Data<br/>EEG Samples @ 250Hz]
+        DF3[Analysis Results<br/>Features/Classifications]
+    end
+
+    C1 --> C2
+    C2 --> AG1
+    C3 --> AG2
+
+    AG1 --> AG3
+    AG2 --> AG3
+
+    AG3 --> NE1
+    AG3 --> NE2
+    AG3 --> NE3
+
+    NE1 --> DF1
+    NE2 --> DF2
+    NE3 --> DF3
+
+    DF1 --> AG1
+    DF2 --> AG2
+    DF3 --> AG1
+
+    style C1 fill:#0070f3,color:#ffffff
+    style C2 fill:#0070f3,color:#ffffff
+    style C3 fill:#0070f3,color:#ffffff
+    style AG1 fill:#6b7280,color:#ffffff
+    style AG2 fill:#6b7280,color:#ffffff
+    style AG3 fill:#ffa000,color:#ffffff
+```
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Console
+    participant Firebase
+    participant NeonDB
+    participant API
+    participant Neural Engine
+
+    User->>Console: Login Request
+    Console->>Firebase: Authenticate with Provider
+    Firebase-->>Console: ID Token + User Info
+    Console->>NeonDB: Store/Update User Profile
+    Console->>API: Request with ID Token
+    API->>Firebase: Verify Token
+    Firebase-->>API: Token Valid
+    API->>Neural Engine: Authorized Request
+    Neural Engine-->>API: Response
+    API-->>Console: Data
+    Console-->>User: Display Results
 ```
 
 ### Disaster Recovery
 
 <Callout type="info">
-  **RTO/RPO Targets:**
-  - RTO (Recovery Time Objective): &lt;1 hour
-  - RPO (Recovery Point Objective): &lt;5 minutes
+  **Service-Specific Recovery:**
+  - **Vercel**: Automatic failover across global edge network
+  - **Firebase**: Multi-region replication, 99.95% SLA
+  - **NeonDB**: Point-in-time recovery, branch restoration
+  - **Neural Engine**: Multi-instance deployment, health checks
 </Callout>
 
 **Backup Strategy:**
-- Continuous replication to standby region
-- Point-in-time recovery for 30 days
-- Automated failover with health checks
-- Regular DR drills
+- NeonDB: Continuous backups with 7-day retention
+- Firebase: Automatic daily backups
+- Cloud Storage: Multi-region replication for EEG files
+- Configuration: Git-based version control
 
 ## Performance Optimization
 

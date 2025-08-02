@@ -2,18 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Check if the request is for /docs
-  if (request.nextUrl.pathname.startsWith('/docs')) {
-    // Create the URL for the docs site
-    const docsUrl = new URL(
-      request.nextUrl.pathname.slice(5) + request.nextUrl.search,
-      'https://docs-nextra-neurascale.vercel.app'
-    );
-
-    // Return a rewrite to the docs site
-    return NextResponse.rewrite(docsUrl);
-  }
-
   // Create response
   const response = NextResponse.next();
 

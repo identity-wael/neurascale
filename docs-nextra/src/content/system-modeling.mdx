@@ -443,6 +443,204 @@ sequenceDiagram
   </Tabs.Tab>
 </Tabs>
 
+## State Diagrams
+
+### Device State Machine
+
+This state diagram shows all possible device states and the transitions between them, including guards and actions.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Disconnected
+
+    Disconnected --> Connecting: connect()
+
+    Connecting --> Connected: handshake_success
+    Connecting --> Error: handshake_failed
+    Connecting --> Disconnected: timeout
+
+    Connected --> Configuring: configure()
+
+    Configuring --> Ready: config_applied
+    Configuring --> Error: config_failed
+
+    Ready --> Streaming: start_stream()
+    Ready --> Disconnected: disconnect()
+
+    Streaming --> Paused: pause()
+    Streaming --> Ready: stop_stream()
+    Streaming --> Error: stream_error
+
+    Paused --> Streaming: resume()
+    Paused --> Ready: stop_stream()
+
+    Error --> Reconnecting: auto_retry [retry_count < 3]
+    Error --> Disconnected: manual_reset
+    Error --> Failed: auto_retry [retry_count >= 3]
+
+    Reconnecting --> Connected: reconnect_success
+    Reconnecting --> Error: reconnect_failed
+
+    Failed --> Disconnected: reset()
+
+    Connected --> Disconnected: connection_lost
+    Ready --> Disconnected: connection_lost
+    Streaming --> Disconnected: connection_lost
+    Paused --> Disconnected: connection_lost
+
+    state Connected {
+        [*] --> Idle
+        Idle --> CheckingImpedance: check_impedance()
+        CheckingImpedance --> Idle: complete
+    }
+
+    state Streaming {
+        [*] --> Active
+        Active --> Buffering: buffer_full
+        Buffering --> Active: buffer_flushed
+    }
+```
+
+<Tabs items={['State Descriptions', 'Transition Events', 'Implementation']}>
+  <Tabs.Tab>
+    **Device States:**
+
+    | State | Description | Allowed Actions |
+    |-------|-------------|-----------------|
+    | **Disconnected** | No active connection to device | Connect |
+    | **Connecting** | Establishing connection | Cancel |
+    | **Connected** | Connected but not configured | Configure, Disconnect, Check Impedance |
+    | **Configuring** | Applying device settings | Cancel |
+    | **Ready** | Configured and ready to stream | Start Stream, Disconnect |
+    | **Streaming** | Actively receiving data | Pause, Stop, Monitor |
+    | **Paused** | Streaming suspended | Resume, Stop |
+    | **Error** | Recoverable error state | Retry, Reset |
+    | **Reconnecting** | Attempting automatic recovery | Cancel |
+    | **Failed** | Unrecoverable error | Manual Reset |
+
+    **Composite States:**
+    - **Connected**: Contains sub-states for impedance checking
+    - **Streaming**: Contains sub-states for buffer management
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **State Transitions:**
+
+    ```python
+    # Transition Guards
+    class TransitionGuards:
+        @staticmethod
+        def can_retry(device: Device) -> bool:
+            return device.retry_count < MAX_RETRIES
+
+        @staticmethod
+        def has_valid_config(device: Device) -> bool:
+            return device.validate_configuration()
+
+        @staticmethod
+        def buffer_available(device: Device) -> bool:
+            return device.buffer.free_space > MIN_BUFFER_SIZE
+
+    # Transition Actions
+    class TransitionActions:
+        @staticmethod
+        async def on_connect(device: Device):
+            device.retry_count = 0
+            await device.initialize_driver()
+
+        @staticmethod
+        async def on_streaming_start(device: Device):
+            await device.buffer.initialize()
+            await device.start_data_thread()
+
+        @staticmethod
+        async def on_error(device: Device, error: Exception):
+            await device.log_error(error)
+            await device.notify_error_handlers(error)
+            device.retry_count += 1
+    ```
+
+    **Event Triggers:**
+    - User actions: `connect()`, `disconnect()`, `start_stream()`, `stop_stream()`
+    - System events: `connection_lost`, `buffer_full`, `data_timeout`
+    - Error events: `handshake_failed`, `config_failed`, `stream_error`
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **State Machine Implementation:**
+
+    ```python
+    from enum import Enum, auto
+    from typing import Optional, Callable
+
+    class DeviceState(Enum):
+        DISCONNECTED = auto()
+        CONNECTING = auto()
+        CONNECTED = auto()
+        CONFIGURING = auto()
+        READY = auto()
+        STREAMING = auto()
+        PAUSED = auto()
+        ERROR = auto()
+        RECONNECTING = auto()
+        FAILED = auto()
+
+    class DeviceStateMachine:
+        def __init__(self, device_id: str):
+            self.device_id = device_id
+            self.state = DeviceState.DISCONNECTED
+            self.retry_count = 0
+            self.state_handlers = {}
+            self.transition_callbacks = []
+
+        def register_state_handler(
+            self,
+            state: DeviceState,
+            handler: Callable
+        ):
+            self.state_handlers[state] = handler
+
+        async def transition_to(
+            self,
+            new_state: DeviceState,
+            event: Optional[str] = None
+        ):
+            old_state = self.state
+
+            # Validate transition
+            if not self._is_valid_transition(old_state, new_state):
+                raise InvalidTransitionError(
+                    f"Cannot transition from {old_state} to {new_state}"
+                )
+
+            # Execute exit actions
+            await self._execute_exit_actions(old_state)
+
+            # Update state
+            self.state = new_state
+
+            # Execute entry actions
+            await self._execute_entry_actions(new_state)
+
+            # Notify callbacks
+            for callback in self.transition_callbacks:
+                await callback(old_state, new_state, event)
+    ```
+
+    **Usage Example:**
+    ```python
+    # neural-engine/src/devices/state_machine.py
+    device_sm = DeviceStateMachine("openbci_001")
+    device_sm.register_state_handler(
+        DeviceState.STREAMING,
+        handle_streaming_state
+    )
+
+    await device_sm.transition_to(DeviceState.CONNECTING)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
 ## Service Architecture
 
 ### Device Service

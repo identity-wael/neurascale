@@ -53,6 +53,15 @@ This starts:
 - TimescaleDB for time-series data
 - Redis for caching and real-time features
 - PostgreSQL for application data
+- MCP Server for AI assistant integration
+
+For production GCP deployment:
+```bash
+cd neural-engine/terraform
+terraform init
+terraform plan
+terraform apply
+```
 
 ### Start the Neural Engine
 
@@ -112,11 +121,14 @@ neurascale/
 │   │   ├── api/            # FastAPI endpoints
 │   │   ├── devices/        # Device interfaces (OpenBCI, Emotiv, etc.)
 │   │   ├── processing/     # Signal processing pipelines
-│   │   └── classification/ # Real-time ML models
+│   │   ├── classification/ # Real-time ML models
+│   │   └── neural_ledger/  # HIPAA-compliant audit trail
+│   ├── terraform/          # GCP infrastructure as code
 │   └── tests/              # Test suite
 ├── console/                # NeuraScale Console UI
 ├── docs-nextra/           # Documentation (you are here!)
-├── infrastructure/        # Terraform & Kubernetes configs
+├── infrastructure/        # Kubernetes & deployment configs
+├── mcp-server/           # Model Context Protocol server
 └── scripts/              # Development tools and utilities
 ```
 
@@ -168,7 +180,7 @@ Now that you have NeuraScale running, explore:
 
 ## Common Commands
 
-<Tabs items={['Neural Engine', 'Development', 'Docker']}>
+<Tabs items={['Neural Engine', 'Neural CLI', 'Development', 'Docker']}>
   <Tabs.Tab>
     ```bash
     # Activate virtual environment
@@ -188,6 +200,25 @@ Now that you have NeuraScale running, explore:
 
     # Type checking
     mypy .
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Using Docker
+    docker run --rm --network neural-engine_neural-net \
+      neurascale/neural-cli:latest list-devices
+
+    # List active streams
+    docker run --rm --network neural-engine_neural-net \
+      neurascale/neural-cli:latest list-streams
+
+    # Monitor device
+    docker run --rm --network neural-engine_neural-net \
+      neurascale/neural-cli:latest monitor --device-id test-device
+
+    # View audit trail
+    docker run --rm --network neural-engine_neural-net \
+      neurascale/neural-cli:latest audit --last 100
     ```
   </Tabs.Tab>
   <Tabs.Tab>
@@ -221,6 +252,9 @@ Now that you have NeuraScale running, explore:
 
     # Clean volumes
     docker-compose down -v
+
+    # Deploy to GKE
+    kubectl apply -f infrastructure/k8s/
     ```
   </Tabs.Tab>
 </Tabs>

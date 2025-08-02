@@ -1229,6 +1229,73 @@ resource "google_compute_security_policy" "neurascale_policy" {
 
 ## Compliance
 
+### HIPAA and SOC 2 Type II Requirements
+
+<Callout type="info">
+  **Why Both HIPAA and SOC 2?** While HIPAA compliance is mandatory for handling Protected Health Information (PHI), SOC 2 Type II certification provides additional assurance about our security controls, operational processes, and data handling practices. Most healthcare organizations require both certifications as they complement each other:
+
+  - **HIPAA** focuses specifically on protecting patient health information
+  - **SOC 2 Type II** validates our overall security posture, availability, processing integrity, confidentiality, and privacy controls
+
+  Together, they demonstrate a comprehensive approach to security and compliance that meets healthcare industry standards.
+</Callout>
+
+### SOC 2 Type II Certification
+
+NeuraScale maintains SOC 2 Type II certification covering all five trust service criteria:
+
+<Tabs items={['Security', 'Availability', 'Processing Integrity', 'Confidentiality', 'Privacy']}>
+  <Tabs.Tab>
+    **Security Controls**
+    - Firewall and intrusion detection systems
+    - Multi-factor authentication enforcement
+    - Regular vulnerability assessments
+    - Security awareness training
+    - Incident response procedures
+    - Change management controls
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Availability Controls**
+    - 99.9% uptime SLA
+    - Redundant infrastructure across regions
+    - Automated failover mechanisms
+    - Disaster recovery procedures
+    - Performance monitoring
+    - Capacity planning
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Processing Integrity**
+    - Data validation controls
+    - Error handling procedures
+    - Quality assurance processes
+    - System monitoring
+    - Output reconciliation
+    - Processing accuracy metrics
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Confidentiality Controls**
+    - Data classification policies
+    - Encryption at rest and in transit
+    - Access control matrices
+    - Non-disclosure agreements
+    - Secure data disposal
+    - Confidentiality training
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Privacy Controls**
+    - Privacy notices and consent
+    - Data subject rights management
+    - Data retention policies
+    - Third-party data sharing controls
+    - Privacy impact assessments
+    - Cross-border data transfer controls
+  </Tabs.Tab>
+</Tabs>
+
 ### HIPAA Compliance
 
 NeuraScale implements comprehensive HIPAA safeguards:
@@ -1420,6 +1487,89 @@ NeuraScale implements comprehensive HIPAA safeguards:
     ```
   </Tabs.Tab>
 </Tabs>
+
+### Integrated Compliance Approach
+
+<Callout type="warning">
+  **Important**: Healthcare organizations typically require both HIPAA compliance and SOC 2 Type II certification. Here's how NeuraScale integrates both frameworks:
+</Callout>
+
+#### Compliance Synergies
+
+| Requirement | HIPAA Implementation | SOC 2 Control | Benefit |
+|-------------|---------------------|---------------|---------|
+| **Access Control** | Minimum necessary standard | CC6.1 - Logical access controls | Unified IAM system |
+| **Encryption** | §164.312(a)(2)(iv) - PHI encryption | CC6.7 - Data transmission controls | Single encryption framework |
+| **Audit Logging** | §164.312(b) - Activity logs | CC7.2 - System monitoring | Consolidated audit trail |
+| **Risk Assessment** | §164.308(a)(1) - Risk analysis | CC3.2 - Risk assessment process | Integrated risk management |
+| **Incident Response** | §164.308(a)(6) - Response procedures | CC7.3 - Incident management | Unified incident handling |
+| **Business Continuity** | §164.308(a)(7) - Contingency plan | A1.2 - Availability commitments | Single DR/BC strategy |
+| **Vendor Management** | Business Associate Agreements | CC9.2 - Vendor risk management | Consolidated vendor controls |
+| **Training** | §164.308(a)(5) - Security training | CC1.4 - Security awareness | Combined training program |
+
+#### Audit and Reporting
+
+```python
+class ComplianceReporting:
+    """Unified compliance reporting for HIPAA and SOC 2"""
+
+    def generate_compliance_report(self, report_type: str, period: str):
+        report = {
+            'generated_at': datetime.utcnow(),
+            'period': period,
+            'type': report_type
+        }
+
+        if report_type == 'HIPAA_AUDIT':
+            report['sections'] = [
+                self.generate_phi_access_report(),
+                self.generate_breach_assessment(),
+                self.generate_baa_status(),
+                self.generate_risk_analysis()
+            ]
+        elif report_type == 'SOC2_ATTESTATION':
+            report['sections'] = [
+                self.generate_control_effectiveness(),
+                self.generate_exception_report(),
+                self.generate_change_management(),
+                self.generate_availability_metrics()
+            ]
+        elif report_type == 'INTEGRATED_COMPLIANCE':
+            # Combined report for healthcare clients
+            report['sections'] = [
+                self.generate_unified_controls(),
+                self.generate_combined_risks(),
+                self.generate_compliance_metrics(),
+                self.generate_attestation_summary()
+            ]
+
+        return report
+
+    def generate_unified_controls(self):
+        """Show how controls satisfy both frameworks"""
+        controls = []
+
+        # Example: Access control satisfies both
+        controls.append({
+            'control_id': 'AC-001',
+            'description': 'Role-based access control with MFA',
+            'hipaa_requirements': ['§164.308(a)(4)', '§164.312(a)(1)'],
+            'soc2_criteria': ['CC6.1', 'CC6.2', 'CC6.3'],
+            'effectiveness': 'Operating effectively',
+            'last_tested': '2024-01-15',
+            'evidence': ['access_logs', 'user_reviews', 'mfa_reports']
+        })
+
+        return controls
+```
+
+#### Key Benefits of Dual Compliance
+
+1. **Enhanced Trust**: Healthcare organizations see both certifications as table stakes
+2. **Reduced Audit Burden**: Many controls overlap, reducing duplicate work
+3. **Comprehensive Coverage**: HIPAA focuses on PHI, SOC 2 covers broader security
+4. **Continuous Monitoring**: SOC 2 requires ongoing control effectiveness
+5. **Third-Party Validation**: Independent auditors verify both frameworks
 
 ### Data Retention and Disposal
 

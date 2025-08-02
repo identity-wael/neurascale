@@ -1008,14 +1008,35 @@ graph TB
 
 ### Compliance Features
 
-<Tabs items={['HIPAA', 'GDPR']}>
+<Tabs items={['SOC 2 Type II', 'HIPAA', 'GDPR']}>
+  <Tabs.Tab>
+    **SOC 2 Type II Certification:**
+
+    **Trust Service Criteria:**
+    - **Security**: Firewall protection, intrusion detection, vulnerability scanning
+    - **Availability**: 99.9% uptime SLA, redundancy, disaster recovery
+    - **Processing Integrity**: Data validation, error handling, quality assurance
+    - **Confidentiality**: Encryption, access matrices, secure disposal
+    - **Privacy**: Consent management, data subject rights, retention policies
+
+    **Key Controls:**
+    - Continuous monitoring and alerting
+    - Change management procedures
+    - Vendor risk assessments
+    - Annual penetration testing
+    - Security awareness training
+  </Tabs.Tab>
+
   <Tabs.Tab>
     **HIPAA Compliance:**
     - End-to-end encryption (AES-256)
     - Audit logging with immutability
     - Access controls (RBAC + ABAC)
-    - Data retention policies
+    - Data retention policies (7 years)
     - Business Associate Agreements
+    - Minimum necessary standard
+    - Breach notification procedures
+    - Physical safeguards for data centers
   </Tabs.Tab>
 
   <Tabs.Tab>
@@ -1025,6 +1046,9 @@ graph TB
     - Data portability
     - Privacy by design
     - Data minimization
+    - Cross-border transfer controls
+    - Data Protection Impact Assessments
+    - 72-hour breach notification
   </Tabs.Tab>
 </Tabs>
 

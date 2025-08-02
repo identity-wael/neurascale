@@ -1,8 +1,8 @@
 /* eslint-env node */
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
-import { Banner, Head } from "nextra/components";
+import { Banner, Head, Search } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
-import "nextra-theme-docs/style.css";
+import "./globals.css";
 
 export const metadata = {
   metadataBase: new URL("https://docs.neurascale.io"),
@@ -117,6 +117,7 @@ export default async function RootLayout({ children }) {
               {new Date().getFullYear()} © NeuraScale. All rights reserved.
             </Footer>
           }
+          search={<Search />}
           editLink="Edit this page on GitHub"
           docsRepositoryBase="https://github.com/identity-wael/neurascale/blob/main/docs-nextra"
           sidebar={{ defaultMenuCollapseLevel: 1 }}

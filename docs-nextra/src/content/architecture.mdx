@@ -205,63 +205,115 @@ graph LR
 
 ### Processing Service
 
-The Processing Service handles all signal processing and feature extraction operations.
+The Processing Service handles all signal processing and feature extraction operations using GCP AI/ML services.
 
 ```mermaid
 graph TB
-    subgraph "Processing Pipeline"
-        subgraph "PreProcessor"
-            PP1[Resampler]
-            PP2[Filter Bank]
-            PP3[Artifact Removal]
+    subgraph "Input Stream"
+        PS1[Pub/Sub<br/>device.data]
+        PS2[Stream Processing<br/>Dataflow]
+    end
+
+    subgraph "Real-Time Processing Pipeline"
+        subgraph "Preprocessing (NumPy/SciPy)"
+            PP1[Resampler<br/>Anti-aliasing]
+            PP2[Filter Bank<br/>Butterworth/Chebyshev]
+            PP3[Artifact Removal<br/>ICA/ASR]
+            PP4[Windowing<br/>Sliding/Overlapping]
         end
 
-        subgraph "Feature Extractor"
+        subgraph "Feature Extraction (MNE-Python)"
             FE1[Spectral Features<br/>FFT, PSD, Wavelets]
-            FE2[Temporal Features<br/>Statistics, Entropy]
+            FE2[Temporal Features<br/>Statistics, Entropy, Hjorth]
             FE3[Connectivity Metrics<br/>Coherence, PLV, PAC]
+            FE4[Time-Frequency<br/>STFT, Morlet Wavelets]
         end
 
-        subgraph "ML Inference"
-            ML1[ONNX Runtime]
-            ML2[TensorRT]
-            ML3[Edge TPU]
+        subgraph "ML Pipeline (Vertex AI)"
+            ML1[Feature Store<br/>Vector Database]
+            ML2[AutoML Models<br/>Tabular Classification]
+            ML3[Custom Models<br/>TensorFlow/PyTorch]
+            ML4[Model Serving<br/>Vertex Endpoints]
         end
 
-        subgraph "Classification"
-            C1[Mental State]
-            C2[Sleep Stage]
-            C3[Motor Imagery]
-            C4[Seizure Predictor]
+        subgraph "Classification Tasks"
+            C1[Mental State<br/>Focus/Relaxation]
+            C2[Sleep Staging<br/>NREM/REM/Wake]
+            C3[Motor Imagery<br/>Left/Right Hand]
+            C4[Seizure Prediction<br/>Pre-ictal Detection]
+            C5[Cognitive Load<br/>Working Memory]
         end
     end
 
+    subgraph "Output"
+        OUT1[Pub/Sub<br/>processing.results]
+        OUT2[Bigtable<br/>Feature Storage]
+        OUT3[BigQuery<br/>Analytics]
+    end
+
+    PS1 --> PS2
+    PS2 --> PP1
+
     PP1 --> PP2
     PP2 --> PP3
-    PP3 --> FE1
-    PP3 --> FE2
-    PP3 --> FE3
+    PP3 --> PP4
+
+    PP4 --> FE1
+    PP4 --> FE2
+    PP4 --> FE3
+    PP4 --> FE4
 
     FE1 --> ML1
     FE2 --> ML1
     FE3 --> ML1
+    FE4 --> ML1
 
-    ML1 --> C1
-    ML1 --> C2
-    ML1 --> C3
-    ML1 --> C4
+    ML1 --> ML2
+    ML1 --> ML3
+    ML2 --> ML4
+    ML3 --> ML4
 
-    style PP1 fill:#e3f2fd,color:#0d47a1
-    style PP2 fill:#e3f2fd,color:#0d47a1
-    style PP3 fill:#e3f2fd,color:#0d47a1
-    style FE1 fill:#f3e5f5,color:#4a148c
-    style FE2 fill:#f3e5f5,color:#4a148c
-    style FE3 fill:#f3e5f5,color:#4a148c
-    style ML1 fill:#e8f5e9,color:#1b5e20
-    style C1 fill:#fff3e0,color:#e65100
-    style C2 fill:#fff3e0,color:#e65100
-    style C3 fill:#fff3e0,color:#e65100
-    style C4 fill:#fff3e0,color:#e65100
+    ML4 --> C1
+    ML4 --> C2
+    ML4 --> C3
+    ML4 --> C4
+    ML4 --> C5
+
+    C1 --> OUT1
+    C2 --> OUT1
+    C3 --> OUT1
+    C4 --> OUT1
+    C5 --> OUT1
+
+    FE1 --> OUT2
+    FE2 --> OUT2
+    FE3 --> OUT2
+    FE4 --> OUT2
+
+    OUT1 --> OUT3
+
+    style PS1 fill:#fbbc04,color:#000000
+    style PS2 fill:#fbbc04,color:#000000
+    style PP1 fill:#4285f4,color:#ffffff
+    style PP2 fill:#4285f4,color:#ffffff
+    style PP3 fill:#4285f4,color:#ffffff
+    style PP4 fill:#4285f4,color:#ffffff
+    style FE1 fill:#34a853,color:#ffffff
+    style FE2 fill:#34a853,color:#ffffff
+    style FE3 fill:#34a853,color:#ffffff
+    style FE4 fill:#34a853,color:#ffffff
+    style ML1 fill:#ea4335,color:#ffffff
+    style ML2 fill:#ea4335,color:#ffffff
+    style ML3 fill:#ea4335,color:#ffffff
+    style ML4 fill:#ea4335,color:#ffffff
+    style C1 fill:#9c27b0,color:#ffffff
+    style C2 fill:#9c27b0,color:#ffffff
+    style C3 fill:#9c27b0,color:#ffffff
+    style C4 fill:#9c27b0,color:#ffffff
+    style C5 fill:#9c27b0,color:#ffffff
+    style OUT1 fill:#fbbc04,color:#000000
+    style OUT2 fill:#4285f4,color:#ffffff
+    style OUT3 fill:#4285f4,color:#ffffff
 ```
 
 ### Data Service

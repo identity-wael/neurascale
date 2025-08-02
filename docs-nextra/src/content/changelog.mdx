@@ -1,0 +1,239 @@
+---
+title: Changelog
+description: Release notes and version history for NeuraScale
+---
+
+import { Callout, Card, Cards } from 'nextra/components'
+
+# Changelog
+
+All notable changes to NeuraScale are documented here. This project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+- Identity federation support using Workload Identity Federation
+- SOC 2 Type II compliance documentation and controls
+- Performance tuning guide with GPU acceleration
+- Comprehensive monitoring and observability stack
+- Pre-commit hooks for code quality enforcement
+
+### Changed
+- Migrated from service account keys to Workload Identity Federation
+- Updated all GCP regions from us-central1 to northamerica-northeast1
+- Replaced planned Bigtable implementation with Cloud SQL PostgreSQL
+
+### Security
+- Enhanced HIPAA compliance with SOC 2 Type II requirements
+- Implemented comprehensive audit logging for PHI access
+- Added automated security scanning in CI/CD pipeline
+
+## [2.0.0] - 2025-01-15
+
+### Added
+- Neural Engine v2 with real-time signal processing
+- Multi-device support (OpenBCI, Muse, Emotiv, NeuroSky)
+- BigQuery integration for analytics and ML training
+- Kubernetes deployment with auto-scaling
+- Firebase authentication for web console
+- Vercel-hosted management console
+
+### Changed
+- Complete architecture redesign for scalability
+- Migrated from monolithic to microservices architecture
+- Upgraded to Python 3.12.11 for all services
+- Implemented event-driven processing with Pub/Sub
+
+### Removed
+- Legacy MATLAB processing pipeline
+- Direct database connections from frontend
+
+## [1.5.0] - 2024-11-01
+
+### Added
+- Cloud SQL PostgreSQL for metadata storage
+- Prometheus metrics collection
+- OpenTelemetry distributed tracing
+- Automated backup and disaster recovery
+
+### Changed
+- Improved signal processing performance by 10x
+- Reduced API latency to < 10ms p95
+- Enhanced error handling and recovery
+
+### Fixed
+- Memory leak in long-running sessions
+- Race condition in concurrent signal processing
+- Incorrect timestamp handling in different timezones
+
+## [1.0.0] - 2024-07-15
+
+### Added
+- Initial release of NeuraScale platform
+- Basic EEG signal processing capabilities
+- REST API for signal submission
+- Web-based visualization dashboard
+- HIPAA-compliant infrastructure
+
+### Security
+- End-to-end encryption for neural data
+- Role-based access control (RBAC)
+- Audit logging for compliance
+
+## Version Guidelines
+
+### Version Format
+We use Semantic Versioning: `MAJOR.MINOR.PATCH`
+
+- **MAJOR**: Incompatible API changes
+- **MINOR**: Backwards-compatible functionality additions
+- **PATCH**: Backwards-compatible bug fixes
+
+### Release Process
+
+1. **Development Phase**
+   - Features developed in feature branches
+   - Merged to `develop` branch after review
+   - Automated testing in CI/CD pipeline
+
+2. **Release Candidate**
+   - Create release branch from `develop`
+   - Deploy to staging environment
+   - Conduct integration testing
+   - Fix any critical issues
+
+3. **Production Release**
+   - Merge release branch to `main`
+   - Tag with version number
+   - Deploy to production
+   - Update documentation
+
+4. **Post-Release**
+   - Monitor metrics and logs
+   - Address any hotfixes needed
+   - Merge fixes back to `develop`
+
+### Breaking Changes Policy
+
+<Callout type="warning">
+Breaking changes are only introduced in major version releases and are announced at least 30 days in advance.
+</Callout>
+
+When introducing breaking changes:
+
+1. Deprecation warnings added in MINOR release
+2. Migration guide published
+3. Support for old version maintained for 6 months
+4. Clear communication to all users
+
+## Migration Guides
+
+### Migrating from 1.x to 2.0
+
+#### API Changes
+
+```python
+# Old API (1.x)
+from neurascale import ProcessingClient
+client = ProcessingClient(api_key="...")
+result = client.process_eeg(data)
+
+# New API (2.0)
+from neurascale import NeuralEngine
+engine = NeuralEngine(api_key="...")
+result = await engine.process_signal(
+    data=data,
+    signal_type="EEG",
+    device_type="OpenBCI"
+)
+```
+
+#### Database Schema Changes
+
+```sql
+-- Migration script for 1.x to 2.0
+ALTER TABLE sessions
+ADD COLUMN device_type VARCHAR(50),
+ADD COLUMN signal_quality FLOAT,
+ADD COLUMN metadata JSONB;
+
+-- Update existing records
+UPDATE sessions
+SET device_type = 'Unknown',
+    signal_quality = 1.0,
+    metadata = '{}'::jsonb
+WHERE device_type IS NULL;
+```
+
+#### Configuration Changes
+
+```yaml
+# Old configuration (1.x)
+neurascale:
+  api_endpoint: https://api.neurascale.com/v1
+  processing_mode: batch
+
+# New configuration (2.0)
+neurascale:
+  api_endpoint: https://api.neurascale.com/v2
+  processing_mode: stream
+  device_config:
+    type: OpenBCI
+    channels: 16
+    sampling_rate: 250
+```
+
+## Deprecation Schedule
+
+### Currently Deprecated
+
+| Feature | Deprecated In | Removal Date | Alternative |
+|---------|--------------|--------------|-------------|
+| `process_eeg()` method | 2.0.0 | 3.0.0 | Use `process_signal()` |
+| Direct DB connections | 2.0.0 | 3.0.0 | Use API endpoints |
+| MATLAB processing | 2.0.0 | Already removed | Python neural engine |
+
+### Upcoming Deprecations
+
+| Feature | Deprecation Date | Removal Date | Alternative |
+|---------|-----------------|--------------|-------------|
+| REST API v1 | 2025-03-01 | 2025-09-01 | REST API v2 |
+| Legacy auth tokens | 2025-04-01 | 2025-10-01 | OAuth 2.0 |
+
+## Support Policy
+
+### Version Support Timeline
+
+- **Current Release (2.0.x)**: Full support
+- **Previous Release (1.5.x)**: Security updates only
+- **Older Releases**: No support
+
+### Getting Support
+
+<Cards>
+  <Card title="Documentation" icon="📚">
+    Check our comprehensive docs first
+  </Card>
+  <Card title="GitHub Issues" icon="🐛">
+    Report bugs and request features
+  </Card>
+  <Card title="Discord Community" icon="💬">
+    Get help from the community
+  </Card>
+  <Card title="Enterprise Support" icon="🏢">
+    Priority support for enterprise customers
+  </Card>
+</Cards>
+
+## Release Notifications
+
+Stay updated with new releases:
+
+1. **GitHub Releases**: Watch our repository for release notifications
+2. **Email Updates**: Subscribe to our release newsletter
+3. **API Headers**: Check `X-API-Version` headers for version info
+4. **Status Page**: Monitor status.neurascale.com for updates
+
+<Callout type="info">
+For enterprise customers, we provide advance notice of releases and dedicated migration support.
+</Callout>

@@ -184,7 +184,7 @@ NeuraScale implements a comprehensive data classification system:
     resource "google_sql_database_instance" "neurascale" {
       name             = "neurascale-prod"
       database_version = "POSTGRES_15"
-      region          = "us-central1"
+      region          = "northamerica-northeast1"
 
       settings {
         tier = "db-n1-standard-4"
@@ -220,7 +220,7 @@ NeuraScale implements a comprehensive data classification system:
 
       cluster {
         cluster_id   = "neurascale-cluster"
-        zone         = "us-central1-a"
+        zone         = "northamerica-northeast1-a"
         num_nodes    = 3
         storage_type = "SSD"
 
@@ -1086,7 +1086,7 @@ resource "google_compute_network" "neurascale_vpc" {
 resource "google_compute_subnetwork" "private_subnet" {
   name          = "neurascale-private"
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-central1"
+  region        = "northamerica-northeast1"
   network       = google_compute_network.neurascale_vpc.id
 
   # Enable private Google access

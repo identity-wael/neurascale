@@ -3,7 +3,7 @@ title: Monitoring & Observability
 description: Monitor and observe NeuraScale's health, performance, and usage
 ---
 
-import { Callout, Card, Cards, Tabs } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 # Monitoring & Observability
 
@@ -20,20 +20,12 @@ NeuraScale implements a multi-layered observability strategy:
 
 ## Stack Components
 
-<Cards>
-  <Card title="Google Cloud Monitoring" icon="📊">
-    Infrastructure metrics, logs, and alerts
-  </Card>
-  <Card title="Prometheus + Grafana" icon="📈">
-    Application metrics and custom dashboards
-  </Card>
-  <Card title="OpenTelemetry" icon="🔍">
-    Distributed tracing and instrumentation
-  </Card>
-  <Card title="Sentry" icon="🐛">
-    Error tracking and performance monitoring
-  </Card>
-</Cards>
+### Stack Components
+
+- **Google Cloud Monitoring**: Infrastructure metrics, logs, and alerts
+- **Prometheus + Grafana**: Application metrics and custom dashboards
+- **OpenTelemetry**: Distributed tracing and instrumentation
+- **Sentry**: Error tracking and performance monitoring
 
 ## Application Monitoring
 
@@ -639,6 +631,33 @@ def create_neural_dashboard(project_id: str):
 ```
 
 ### Kubernetes Monitoring
+
+#### Prometheus Deployment
+
+NeuraScale uses Prometheus for metrics collection from all Neural Engine services. The Prometheus instance is deployed as part of the Helm chart with the following configuration:
+
+- **Scrape Interval**: 15 seconds
+- **Retention**: 30 days
+- **High Availability**: 2 replicas
+- **Service Discovery**: Automatic via Kubernetes annotations
+
+All Neural Engine services expose metrics endpoints:
+- API Gateway: Port 9092 at `/metrics`
+- Device Manager: Port 9091 at `/metrics`
+- Signal Processor: Port 8080 at `/metrics`
+- ML Pipeline: Port 9093 at `/metrics`
+- MCP Server: Port 9094 at `/metrics`
+
+##### Accessing Prometheus
+
+```bash
+# Port-forward to access Prometheus UI
+kubectl port-forward -n neural-engine svc/prometheus 9090:9090
+
+# Access Prometheus at http://localhost:9090
+```
+
+##### Prometheus Configuration
 
 ```yaml
 # neural-engine/kubernetes/monitoring/prometheus-config.yaml

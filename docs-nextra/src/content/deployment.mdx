@@ -2,11 +2,45 @@ import { Steps, Tabs, Callout } from 'nextra/components'
 
 # Deployment Guide
 
-This guide covers deploying NeuraScale across different environments, from local development to production-ready cloud infrastructure on Google Cloud Platform (GCP).
+This comprehensive guide covers deploying both the NeuraScale Console (frontend) and Neural Engine (backend) across different environments.
 
 ## Deployment Overview
 
-NeuraScale uses a multi-environment deployment strategy with infrastructure as code:
+NeuraScale has two main components with separate deployment strategies:
+
+1. **Console (Frontend)** - Next.js app deployed on Vercel
+2. **Neural Engine (Backend)** - Python API deployed on Google Cloud Platform
+
+### Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Frontend - Vercel"
+        CONSOLE[NeuraScale Console<br/>Next.js App]
+        EDGE[Vercel Edge Network<br/>Global CDN]
+    end
+
+    subgraph "Authentication"
+        FIREBASE[Firebase Auth<br/>User Management]
+    end
+
+    subgraph "User Data"
+        NEON[NeonDB<br/>PostgreSQL]
+    end
+
+    subgraph "Backend - GCP"
+        ENGINE[Neural Engine<br/>FastAPI]
+        BIGTABLE[Cloud Bigtable<br/>Time-series Data]
+        PUBSUB[Cloud Pub/Sub<br/>Real-time Streams]
+    end
+
+    CONSOLE --> EDGE
+    EDGE --> FIREBASE
+    EDGE --> NEON
+    EDGE --> ENGINE
+    ENGINE --> BIGTABLE
+    ENGINE --> PUBSUB
+```
 
 <div className="nx-grid nx-mt-6 nx-gap-4 md:nx-grid-cols-3">
   <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
@@ -163,12 +197,12 @@ python -m src.main
 
 The Neural Engine will be available at: http://localhost:8000
 
-### Start Console (Optional)
+### Start Console
 
 ```bash
 cd console
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 The Console will be available at: http://localhost:3000
@@ -189,7 +223,178 @@ curl -X POST http://localhost:8000/api/v1/devices/test-001/stream/start
 ```
 </Steps>
 
-## Staging Deployment
+## Console Deployment (Vercel)
+
+The NeuraScale Console is deployed on Vercel for optimal performance and developer experience.
+
+<Steps>
+### Prerequisites
+
+- Vercel account (free tier works)
+- Firebase project configured
+- NeonDB database created
+- Environment variables ready
+
+### Install Vercel CLI
+
+```bash
+npm i -g vercel
+
+# Or using pnpm
+pnpm add -g vercel
+```
+
+### Configure Environment Variables
+
+Create a `.env.production` file in the console directory:
+
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+
+# NeonDB Configuration
+DATABASE_URL=postgresql://user:password@host/neurascale?sslmode=require
+DIRECT_URL=postgresql://user:password@host/neurascale?sslmode=require
+
+# Neural Engine API
+NEXT_PUBLIC_API_URL=https://api.neurascale.io
+NEXT_PUBLIC_WS_URL=wss://api.neurascale.io
+
+# Firebase Admin (Server-side)
+FIREBASE_ADMIN_PROJECT_ID=your-project-id
+FIREBASE_ADMIN_CLIENT_EMAIL=your-client-email
+FIREBASE_ADMIN_PRIVATE_KEY="your-private-key-here"
+```
+
+### Deploy to Vercel
+
+<Tabs items={['CLI Deployment', 'Git Integration', 'Manual Deploy']}>
+  <Tabs.Tab>
+    **Using Vercel CLI**
+
+    ```bash
+    cd console
+
+    # First deployment
+    vercel
+
+    # Follow prompts:
+    # - Set up and deploy: Y
+    # - Which scope: Select your account
+    # - Link to existing project: N
+    # - Project name: neurascale-console
+    # - Directory: ./
+    # - Override settings: N
+
+    # Production deployment
+    vercel --prod
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **GitHub Integration**
+
+    1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
+    2. Click "Add New Project"
+    3. Import your GitHub repository
+    4. Select the `console` directory as root
+    5. Configure build settings:
+       - Framework: Next.js
+       - Build Command: `pnpm build`
+       - Output Directory: `.next`
+    6. Add environment variables from `.env.production`
+    7. Deploy
+
+    **Automatic Deployments:**
+    - Production: Deploys from `main` branch
+    - Preview: Deploys from pull requests
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Manual Deployment**
+
+    ```bash
+    cd console
+
+    # Build locally
+    pnpm build
+
+    # Upload to Vercel
+    vercel deploy --prebuilt
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Configure Domain
+
+```bash
+# Add custom domain
+vercel domains add neurascale.io
+
+# Set as production domain
+vercel alias neurascale-console.vercel.app neurascale.io
+```
+
+### Environment Configuration
+
+Set environment variables in Vercel dashboard:
+
+1. Go to Project Settings → Environment Variables
+2. Add all variables from `.env.production`
+3. Configure per environment:
+   - Production: For `main` branch
+   - Preview: For all other branches
+   - Development: For local development
+
+### Edge Functions
+
+Configure API routes for server-side operations:
+
+```typescript
+// app/api/auth/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { initializeApp, cert } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
+
+const app = initializeApp({
+  credential: cert({
+    projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n')
+  })
+})
+
+export async function POST(request: NextRequest) {
+  const { idToken } = await request.json()
+
+  try {
+    const decodedToken = await getAuth(app).verifyIdToken(idToken)
+    return NextResponse.json({ uid: decodedToken.uid })
+  } catch (error) {
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+  }
+}
+```
+
+### Monitoring
+
+Vercel provides built-in monitoring:
+
+1. **Analytics**: Core Web Vitals and performance metrics
+2. **Functions**: Edge function logs and performance
+3. **Errors**: Real-time error tracking
+
+Enable in Project Settings → Analytics
+</Steps>
+
+## Backend Deployment (GCP)
+
+### Staging Deployment
 
 Staging environment uses GCP Cloud Run for easy deployment and testing with production-like infrastructure.
 
@@ -560,7 +765,7 @@ curl https://api.neurascale.io/health
 
 ## CI/CD Pipeline
 
-### GitHub Actions Workflow
+### Complete GitHub Actions Workflow
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -573,7 +778,41 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  # Test Console (Frontend)
+  test-console:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          cache-dependency-path: console/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: |
+          cd console
+          pnpm install
+
+      - name: Run tests
+        run: |
+          cd console
+          pnpm test
+          pnpm lint
+          pnpm type-check
+
+      - name: Build
+        run: |
+          cd console
+          pnpm build
+
+  # Test Neural Engine (Backend)
+  test-engine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -592,13 +831,41 @@ jobs:
         run: |
           cd neural-engine
           pytest tests/ --cov=src --cov-report=xml
+          black . --check
+          flake8 .
+          mypy .
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
 
-  deploy-staging:
+  # Deploy Console to Vercel
+  deploy-console:
+    needs: test-console
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Deploy to Vercel (Preview)
+        if: github.ref != 'refs/heads/main'
+        run: |
+          cd console
+          npx vercel --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_SCOPE }}
+
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd console
+          npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_SCOPE }}
+
+  # Deploy Neural Engine to GCP
+  deploy-engine-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: test
+    needs: test-engine
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -610,15 +877,17 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
+          cd neural-engine
           gcloud run deploy neural-engine \
             --source . \
             --platform managed \
             --region us-central1 \
-            --project staging-neurascale
+            --project staging-neurascale \
+            --set-env-vars "ENV=staging"
 
-  deploy-production:
+  deploy-engine-production:
     if: github.ref == 'refs/heads/main'
-    needs: test
+    needs: test-engine
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -646,6 +915,35 @@ jobs:
             --create-namespace \
             --values kubernetes/helm/neural-engine/values-production.yaml \
             --set image.tag=${{ github.sha }}
+```
+
+### Vercel GitHub Integration
+
+For automatic deployments, connect your GitHub repository to Vercel:
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import your repository
+3. Configure:
+   - Root Directory: `console`
+   - Framework Preset: Next.js
+   - Build Command: `pnpm build`
+   - Install Command: `pnpm install`
+
+### Environment Secrets
+
+Configure these secrets in GitHub:
+
+```yaml
+# Vercel Deployment
+VERCEL_TOKEN: your-vercel-token
+VERCEL_SCOPE: your-team-or-username
+
+# GCP Deployment
+GCP_SA_KEY_STAGING: staging-service-account-key
+GCP_SA_KEY_PRODUCTION: production-service-account-key
+
+# Firebase Admin (for API routes)
+FIREBASE_ADMIN_KEY: firebase-admin-sdk-key
 ```
 
 ## Rollback Procedures

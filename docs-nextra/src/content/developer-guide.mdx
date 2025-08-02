@@ -2,9 +2,381 @@ import { Steps, Tabs, Callout } from 'nextra/components'
 
 # Developer Guide
 
-This guide provides practical examples and tutorials for integrating with NeuraScale, covering everything from basic device connection to advanced real-time neural classification.
+This comprehensive guide covers development for both the NeuraScale Console (frontend) and Neural Engine (backend), providing practical examples and tutorials for building BCI applications.
 
-## Quick Start Integration
+## Console Development (Frontend)
+
+The NeuraScale Console is a Next.js application that provides a modern web interface for device management, data visualization, and experiment control.
+
+### Getting Started with Console Development
+
+<Steps>
+### Setup Development Environment
+
+```bash
+cd console
+
+# Install dependencies
+pnpm install
+
+# Copy environment template
+cp .env.example .env.local
+
+# Start development server
+pnpm dev
+```
+
+The console will be available at http://localhost:3000
+
+### Project Structure
+
+```
+console/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Authentication routes
+│   ├── (dashboard)/       # Dashboard routes
+│   ├── api/               # API routes
+│   └── layout.tsx         # Root layout
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── dashboard/        # Dashboard components
+│   └── visualization/    # Data viz components
+├── lib/                   # Utilities
+│   ├── firebase/         # Firebase config
+│   ├── hooks/            # React hooks
+│   └── utils/            # Helper functions
+├── prisma/               # Database schema
+└── public/               # Static assets
+```
+
+### Key Technologies
+
+- **Framework**: Next.js 14 with App Router
+- **UI Components**: shadcn/ui + Tailwind CSS
+- **State Management**: Zustand + React Query
+- **Authentication**: Firebase Auth
+- **Database**: Prisma + NeonDB
+- **Real-time**: Socket.io client
+- **Charts**: Recharts + D3.js
+</Steps>
+
+### Building UI Components
+
+#### Creating a Device Card Component
+
+```tsx
+// components/dashboard/device-card.tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Activity, Wifi, WifiOff } from "lucide-react"
+
+interface DeviceCardProps {
+  device: {
+    id: string
+    name: string
+    type: string
+    status: 'connected' | 'disconnected' | 'connecting'
+    batteryLevel?: number
+    signalQuality?: number
+  }
+  onConnect: () => void
+  onDisconnect: () => void
+}
+
+export function DeviceCard({ device, onConnect, onDisconnect }: DeviceCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-lg">{device.name}</CardTitle>
+        <Badge variant={device.status === 'connected' ? 'success' : 'secondary'}>
+          {device.status}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Type</span>
+            <span className="font-medium">{device.type}</span>
+          </div>
+
+          {device.batteryLevel !== undefined && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Battery</span>
+              <span className="font-medium">{device.batteryLevel}%</span>
+            </div>
+          )}
+
+          {device.signalQuality !== undefined && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Signal Quality</span>
+              <div className="flex items-center gap-1">
+                <Activity className="h-4 w-4" />
+                <span className="font-medium">{device.signalQuality}%</span>
+              </div>
+            </div>
+          )}
+
+          <Button
+            className="w-full"
+            variant={device.status === 'connected' ? 'destructive' : 'default'}
+            onClick={device.status === 'connected' ? onDisconnect : onConnect}
+          >
+            {device.status === 'connected' ? (
+              <>
+                <WifiOff className="mr-2 h-4 w-4" />
+                Disconnect
+              </>
+            ) : (
+              <>
+                <Wifi className="mr-2 h-4 w-4" />
+                Connect
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+#### Real-time Data Visualization
+
+```tsx
+// components/visualization/eeg-chart.tsx
+import { useEffect, useRef } from 'react'
+import { Line } from 'recharts'
+import { useSocket } from '@/lib/hooks/use-socket'
+
+interface EEGChartProps {
+  deviceId: string
+  channels: number[]
+}
+
+export function EEGChart({ deviceId, channels }: EEGChartProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { socket, isConnected } = useSocket()
+  const bufferRef = useRef<number[][]>([])
+
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    const handleData = (data: any) => {
+      if (data.deviceId !== deviceId) return
+
+      // Add data to buffer
+      bufferRef.current.push(data.samples)
+
+      // Keep only last 1000 samples
+      if (bufferRef.current.length > 1000) {
+        bufferRef.current.shift()
+      }
+
+      // Draw on canvas
+      drawEEG()
+    }
+
+    socket.on('eeg:data', handleData)
+
+    return () => {
+      socket.off('eeg:data', handleData)
+    }
+  }, [socket, isConnected, deviceId])
+
+  const drawEEG = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Draw each channel
+    channels.forEach((channel, index) => {
+      const yOffset = (canvas.height / channels.length) * index
+
+      ctx.beginPath()
+      ctx.strokeStyle = `hsl(${index * 360 / channels.length}, 70%, 50%)`
+      ctx.lineWidth = 1
+
+      bufferRef.current.forEach((sample, x) => {
+        const y = yOffset + (sample[channel] * 50) // Scale amplitude
+        if (x === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      })
+
+      ctx.stroke()
+    })
+  }
+
+  return (
+    <div className="relative w-full h-64 bg-background rounded-lg border">
+      <canvas
+        ref={canvasRef}
+        width={1000}
+        height={256}
+        className="w-full h-full"
+      />
+      {!isConnected && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+          <p className="text-muted-foreground">Waiting for connection...</p>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### Authentication with Firebase
+
+```tsx
+// lib/firebase/auth.tsx
+import { createContext, useContext, useEffect, useState } from 'react'
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  User
+} from 'firebase/auth'
+import { app } from './config'
+
+interface AuthContextType {
+  user: User | null
+  loading: boolean
+  signInWithGoogle: () => Promise<void>
+  signOut: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType | null>(null)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const auth = getAuth(app)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
+      setLoading(false)
+    })
+
+    return unsubscribe
+  }, [auth])
+
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider()
+    await signInWithPopup(auth, provider)
+  }
+
+  const signOut = async () => {
+    await auth.signOut()
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+  return context
+}
+```
+
+### Database Operations with Prisma
+
+```typescript
+// app/api/experiments/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getAuth } from '@/lib/firebase/admin'
+
+export async function GET(request: NextRequest) {
+  try {
+    // Verify authentication
+    const token = request.headers.get('authorization')?.split(' ')[1]
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const decodedToken = await getAuth().verifyIdToken(token)
+    const userId = decodedToken.uid
+
+    // Get user's experiments
+    const experiments = await prisma.experiment.findMany({
+      where: { userId },
+      include: {
+        sessions: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            duration: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    return NextResponse.json(experiments)
+  } catch (error) {
+    console.error('Error fetching experiments:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const token = request.headers.get('authorization')?.split(' ')[1]
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const decodedToken = await getAuth().verifyIdToken(token)
+    const userId = decodedToken.uid
+
+    const body = await request.json()
+
+    // Create new experiment
+    const experiment = await prisma.experiment.create({
+      data: {
+        name: body.name,
+        description: body.description,
+        userId,
+        deviceType: body.deviceType,
+        configuration: body.configuration
+      }
+    })
+
+    return NextResponse.json(experiment, { status: 201 })
+  } catch (error) {
+    console.error('Error creating experiment:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Backend Development (Neural Engine)
+
+### Quick Start Integration
 
 ### Python SDK
 

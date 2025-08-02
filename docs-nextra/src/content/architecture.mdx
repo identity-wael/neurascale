@@ -565,31 +565,112 @@ graph LR
 
 ```mermaid
 graph TB
-    LB[Load Balancer]
-
-    subgraph "Service Instances"
-        I1[Instance 1<br/>Worker Pool]
-        I2[Instance 2<br/>Worker Pool]
-        I3[Instance 3<br/>Worker Pool]
+    subgraph "External Traffic"
+        ET[Cloud Load Balancer<br/>+ Cloud Armor]
     end
 
-    subgraph "Shared Storage"
-        SS[Storage Layer]
+    subgraph "GKE Cluster - Regional"
+        subgraph "Control Plane"
+            CP[Kubernetes API<br/>HA Masters]
+            HPA[Horizontal Pod<br/>Autoscaler]
+            VPA[Vertical Pod<br/>Autoscaler]
+            CA[Cluster<br/>Autoscaler]
+        end
+
+        subgraph "Node Pool 1 - General"
+            subgraph "Zone A"
+                N1A[n2-standard-4<br/>4 vCPU, 16GB RAM]
+                P1A[Device Service<br/>2-10 replicas]
+                P2A[API Service<br/>3-20 replicas]
+            end
+
+            subgraph "Zone B"
+                N1B[n2-standard-4<br/>4 vCPU, 16GB RAM]
+                P1B[Device Service<br/>2-10 replicas]
+                P2B[API Service<br/>3-20 replicas]
+            end
+
+            subgraph "Zone C"
+                N1C[n2-standard-4<br/>4 vCPU, 16GB RAM]
+                P1C[Device Service<br/>2-10 replicas]
+                P2C[API Service<br/>3-20 replicas]
+            end
+        end
+
+        subgraph "Node Pool 2 - ML/GPU"
+            subgraph "GPU Zone A"
+                N2A[n1-highmem-4<br/>+ T4 GPU]
+                P3A[ML Service<br/>1-5 replicas]
+            end
+
+            subgraph "GPU Zone B"
+                N2B[n1-highmem-4<br/>+ T4 GPU]
+                P3B[ML Service<br/>1-5 replicas]
+            end
+        end
+
+        subgraph "Node Pool 3 - Memory"
+            N3[n2-highmem-8<br/>8 vCPU, 64GB RAM]
+            P4[Processing Service<br/>2-8 replicas]
+        end
     end
 
-    LB --> I1
-    LB --> I2
-    LB --> I3
+    subgraph "Autoscaling Metrics"
+        M1[CPU Usage<br/>>70%]
+        M2[Memory Usage<br/>>80%]
+        M3[Pub/Sub Queue<br/>>1000 msgs]
+        M4[Custom Metrics<br/>Device Count]
+    end
 
-    I1 --> SS
-    I2 --> SS
-    I3 --> SS
+    subgraph "Managed Services"
+        MS1[Cloud SQL<br/>Auto-failover]
+        MS2[Bigtable<br/>Auto-scaling]
+        MS3[Pub/Sub<br/>Unlimited Scale]
+        MS4[Cloud Storage<br/>∞ Scale]
+    end
 
-    style LB fill:#c8e6c9,color:#1b5e20
-    style I1 fill:#e3f2fd,color:#0d47a1
-    style I2 fill:#e3f2fd,color:#0d47a1
-    style I3 fill:#e3f2fd,color:#0d47a1
-    style SS fill:#f3e5f5,color:#4a148c
+    ET --> CP
+    CP --> HPA
+    CP --> VPA
+    CP --> CA
+
+    HPA --> P1A
+    HPA --> P2A
+    HPA --> P3A
+    HPA --> P4
+
+    CA --> N1A
+    CA --> N1B
+    CA --> N1C
+    CA --> N2A
+    CA --> N2B
+    CA --> N3
+
+    M1 --> HPA
+    M2 --> HPA
+    M3 --> HPA
+    M4 --> HPA
+
+    P1A --> MS1
+    P2A --> MS2
+    P3A --> MS3
+    P4 --> MS4
+
+    style ET fill:#34a853,color:#ffffff
+    style CP fill:#ea4335,color:#ffffff
+    style HPA fill:#fbbc04,color:#000000
+    style VPA fill:#fbbc04,color:#000000
+    style CA fill:#fbbc04,color:#000000
+    style N1A fill:#4285f4,color:#ffffff
+    style N1B fill:#4285f4,color:#ffffff
+    style N1C fill:#4285f4,color:#ffffff
+    style N2A fill:#9c27b0,color:#ffffff
+    style N2B fill:#9c27b0,color:#ffffff
+    style N3 fill:#4285f4,color:#ffffff
+    style MS1 fill:#0f9d58,color:#ffffff
+    style MS2 fill:#0f9d58,color:#ffffff
+    style MS3 fill:#0f9d58,color:#ffffff
+    style MS4 fill:#0f9d58,color:#ffffff
 ```
 
 ### Resource Allocation

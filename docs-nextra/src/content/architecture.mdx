@@ -318,42 +318,74 @@ graph TB
 
 ### Data Service
 
-The Data Service manages data persistence, retrieval, and analytics with automatic tiering.
+The Data Service manages data persistence, retrieval, and analytics using GCP's multi-tier storage architecture.
 
 ```mermaid
 graph LR
-    subgraph "Data Architecture"
-        subgraph "Hot Storage"
-            H1[Redis<br/>Latest 5 min]
-            H2[TimescaleDB<br/>Last 24 hours]
+    subgraph "Data Ingestion"
+        IN1[Pub/Sub<br/>Real-time Stream]
+        IN2[Dataflow<br/>ETL Pipeline]
+        IN3[Transfer Service<br/>Batch Import]
+    end
+
+    subgraph "Multi-Tier Storage Architecture"
+        subgraph "Hot Tier (Real-time)"
+            H1[Memorystore Redis<br/>Latest 5 min<br/>Sub-ms Access]
+            H2[Bigtable<br/>Last 24 hours<br/>1-10ms Access]
         end
 
-        subgraph "Warm Storage"
-            W1[TimescaleDB<br/>Last 30 days]
-            W2[Compressed Chunks]
+        subgraph "Warm Tier (Recent)"
+            W1[Bigtable<br/>Last 30 days<br/>Column Families]
+            W2[Cloud SQL<br/>Metadata & Sessions<br/>PostgreSQL HA]
         end
 
-        subgraph "Cold Storage"
-            C1[S3/MinIO<br/>Historical]
-            C2[Parquet Format]
-            C3[Iceberg Tables]
+        subgraph "Cold Tier (Historical)"
+            C1[Cloud Storage<br/>Nearline Class<br/>30+ days]
+            C2[BigQuery<br/>Analytics Warehouse<br/>Partitioned Tables]
+            C3[Archive Storage<br/>Coldline Class<br/>1+ year]
         end
     end
 
-    H1 --> H2
+    subgraph "Data Access Patterns"
+        AP1[Direct API<br/>Low Latency]
+        AP2[Batch Export<br/>CSV/Parquet]
+        AP3[BigQuery ML<br/>Analytics]
+        AP4[Dataproc<br/>Spark/Hadoop]
+    end
+
+    IN1 --> H1
+    IN1 --> H2
+    IN2 --> W1
+    IN3 --> C1
+
+    H1 --> W1
     H2 --> W1
-    W1 --> W2
-    W2 --> C1
+    W1 --> C1
+    W2 --> C2
     C1 --> C2
     C2 --> C3
 
-    style H1 fill:#ffebee,color:#b71c1c
-    style H2 fill:#ffebee,color:#b71c1c
-    style W1 fill:#fff3e0,color:#e65100
-    style W2 fill:#fff3e0,color:#e65100
-    style C1 fill:#e3f2fd,color:#0d47a1
-    style C2 fill:#e3f2fd,color:#0d47a1
-    style C3 fill:#e3f2fd,color:#0d47a1
+    H1 --> AP1
+    H2 --> AP1
+    W1 --> AP1
+    C2 --> AP3
+    C1 --> AP2
+    C2 --> AP4
+
+    style IN1 fill:#fbbc04,color:#000000
+    style IN2 fill:#fbbc04,color:#000000
+    style IN3 fill:#fbbc04,color:#000000
+    style H1 fill:#ea4335,color:#ffffff
+    style H2 fill:#ea4335,color:#ffffff
+    style W1 fill:#4285f4,color:#ffffff
+    style W2 fill:#4285f4,color:#ffffff
+    style C1 fill:#34a853,color:#ffffff
+    style C2 fill:#34a853,color:#ffffff
+    style C3 fill:#34a853,color:#ffffff
+    style AP1 fill:#9c27b0,color:#ffffff
+    style AP2 fill:#9c27b0,color:#ffffff
+    style AP3 fill:#9c27b0,color:#ffffff
+    style AP4 fill:#9c27b0,color:#ffffff
 ```
 
 ## Data Flow & Latency

@@ -114,47 +114,87 @@ The Device Service manages all device-related operations and real-time data acqu
 
 ```mermaid
 graph LR
-    subgraph "Device Service Components"
-        DR[Device Registry]
-        CP[Connection Pool]
-        SE[Streaming Engine]
-        HM[Health Monitor]
+    subgraph "Device Service Architecture"
+        DR[Device Registry<br/>PostgreSQL]
+        CP[Connection Pool<br/>Async Manager]
+        SE[Streaming Engine<br/>Ring Buffers]
+        HM[Health Monitor<br/>Prometheus]
+        PS[Pub/Sub Client<br/>Publisher]
     end
 
-    subgraph "Device Types"
-        D1[Serial Devices]
-        D2[Bluetooth LE]
-        D3[WiFi Devices]
-        D4[LSL Streams]
+    subgraph "Supported Devices"
+        subgraph "Consumer BCIs"
+            D1[OpenBCI<br/>Cyton/Ganglion]
+            D2[Emotiv<br/>EPOC+/Insight]
+            D3[Muse<br/>Muse 2/S]
+            D4[NeuroSky<br/>MindWave]
+        end
+
+        subgraph "Research Systems"
+            D5[g.tec<br/>g.USBamp]
+            D6[BrainProducts<br/>actiCHamp]
+            D7[ANT Neuro<br/>eego™]
+            D8[BioSemi<br/>ActiveTwo]
+        end
+
+        subgraph "Clinical Arrays"
+            D9[Blackrock<br/>Utah Array]
+            D10[Plexon<br/>OmniPlex]
+            D11[Custom LSL<br/>Lab Streaming]
+        end
     end
 
-    subgraph "Features"
-        F1[Discovery]
-        F2[Retry Logic]
-        F3[Impedance Check]
-        F4[Signal Quality]
-        F5[Multi-device Sync]
+    subgraph "Device Features"
+        F1[Auto-Discovery<br/>mDNS/USB]
+        F2[Retry Logic<br/>Exponential Backoff]
+        F3[Impedance Check<br/>Real-time]
+        F4[Signal Quality<br/>SNR Monitoring]
+        F5[Multi-device Sync<br/>NTP/PTP]
+        F6[Hot Swap<br/>Zero Downtime]
     end
 
     D1 --> DR
     D2 --> DR
     D3 --> DR
     D4 --> DR
+    D5 --> DR
+    D6 --> DR
+    D7 --> DR
+    D8 --> DR
+    D9 --> DR
+    D10 --> DR
+    D11 --> DR
 
     DR --> CP
     CP --> SE
     SE --> HM
+    SE --> PS
+    PS -.-> |"Topics:<br/>device.connected<br/>device.data<br/>device.status"| PubSub[Cloud Pub/Sub]
 
     HM --> F1
     HM --> F2
     HM --> F3
     HM --> F4
     HM --> F5
+    HM --> F6
 
-    style DR fill:#fff3e0,color:#e65100
-    style CP fill:#fff3e0,color:#e65100
-    style SE fill:#fff3e0,color:#e65100
-    style HM fill:#fff3e0,color:#e65100
+    style DR fill:#ea4335,color:#ffffff
+    style CP fill:#ea4335,color:#ffffff
+    style SE fill:#ea4335,color:#ffffff
+    style HM fill:#ea4335,color:#ffffff
+    style PS fill:#ea4335,color:#ffffff
+    style PubSub fill:#fbbc04,color:#000000
+    style D1 fill:#e3f2fd,color:#0d47a1
+    style D2 fill:#e3f2fd,color:#0d47a1
+    style D3 fill:#e3f2fd,color:#0d47a1
+    style D4 fill:#e3f2fd,color:#0d47a1
+    style D5 fill:#e8f5e9,color:#1b5e20
+    style D6 fill:#e8f5e9,color:#1b5e20
+    style D7 fill:#e8f5e9,color:#1b5e20
+    style D8 fill:#e8f5e9,color:#1b5e20
+    style D9 fill:#fce4ec,color:#880e4f
+    style D10 fill:#fce4ec,color:#880e4f
+    style D11 fill:#fce4ec,color:#880e4f
 ```
 
 **Technical Specifications:**

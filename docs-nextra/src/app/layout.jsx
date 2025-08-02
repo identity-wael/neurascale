@@ -28,7 +28,15 @@ export default async function RootLayout({ children }) {
   const navbar = (
     <Navbar
       logo={
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            cursor: "pointer",
+          }}
+          onClick={() => (window.location.href = "https://neurascale.io")}
+        >
           <span
             style={{
               fontSize: "20px",
@@ -102,7 +110,7 @@ export default async function RootLayout({ children }) {
           </div>
         </div>
       }
-      logoLink="https://neurascale.io"
+      logoLink={false}
       projectLink="https://github.com/identity-wael/neurascale"
     />
   );

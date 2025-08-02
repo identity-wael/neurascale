@@ -1,0 +1,490 @@
+# Third-Party Integrations
+
+NeuraScale integrates with various third-party services to enhance functionality, analytics, and user experience.
+
+## Google Analytics 4
+
+### Overview
+
+Google Analytics 4 (GA4) provides comprehensive analytics for understanding user behavior, conversions, and site performance.
+
+### Setup Guide
+
+1. **Create GA4 Property**:
+   - Go to [Google Analytics](https://analytics.google.com)
+   - Create Property → NeuraScale
+   - Configure time zone and currency
+
+2. **Configure Data Stream**:
+   - Platform: Web
+   - Website URL: https://neurascale.io
+   - Copy Measurement ID: `G-XXXXXXXXXX`
+
+3. **Environment Variable**:
+   ```bash
+   NEXT_PUBLIC_GA4_MEASUREMENT_ID=G-XXXXXXXXXX
+   ```
+
+### Event Tracking
+
+#### Automatic Events (Enhanced Measurement)
+
+- `page_view` - Page navigation
+- `scroll` - 90% scroll depth
+- `click` - Outbound links
+- `file_download` - Documentation downloads
+
+#### Custom Events
+
+```javascript
+// User signup
+gtag("event", "sign_up", {
+  method: "email"
+});
+
+// API key generation
+gtag("event", "api_key_generated", {
+  api_tier: "free"
+});
+
+// Documentation interaction
+gtag("event", "documentation_view", {
+  doc_category: "neural-engine",
+  doc_page: "getting-started"
+});
+```
+
+### Conversions Setup
+
+Mark these events as conversions:
+- `contact_form` - Contact form submissions
+- `sign_up` - User registrations
+- `demo_request` - Demo requests
+- `api_key_generated` - API activations
+
+### Privacy Compliance
+
+- Cookie consent banner implementation
+- User opt-out respecting
+- Data retention: 14 months
+- IP anonymization enabled
+
+## Google Ads
+
+### Setup
+
+1. **Link GA4 to Google Ads**:
+   - GA4 Admin → Product Links → Google Ads
+   - Enable conversion import
+   - Enable auto-tagging
+
+2. **Conversion Tracking**:
+   - Import GA4 conversions
+   - Set conversion values
+   - Configure attribution models
+
+### Remarketing
+
+Create audiences in GA4:
+- **Technical Users**: Viewed documentation
+- **High-Intent**: Visited pricing page
+- **Cart Abandoners**: Started but didn't complete signup
+
+### Campaign Tracking
+
+Use UTM parameters:
+```
+https://neurascale.io?utm_source=google&utm_medium=cpc&utm_campaign=neural-api
+```
+
+## Google Maps Integration
+
+### Use Cases
+
+1. **Clinic Locator**: Find NeuraScale-enabled clinics
+2. **Device Tracking**: Track BCI device locations
+3. **Service Coverage**: Display coverage areas
+
+### Implementation
+
+```javascript
+// Initialize Maps
+const map = new google.maps.Map(document.getElementById("map"), {
+  center: { lat: 43.653226, lng: -79.3831843 }, // Toronto
+  zoom: 12,
+});
+
+// Add clinic markers
+clinics.forEach(clinic => {
+  new google.maps.Marker({
+    position: clinic.location,
+    map: map,
+    title: clinic.name,
+    icon: '/images/clinic-marker.png'
+  });
+});
+```
+
+### API Configuration
+
+```bash
+# Environment variable
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-api-key
+```
+
+### Features
+
+- Clinic search with filters
+- Real-time device locations
+- Route optimization for mobile units
+- Heatmaps for usage analytics
+
+## Sanity CMS
+
+### Overview
+
+Sanity provides structured content management for:
+- Documentation
+- Blog posts
+- Case studies
+- Team profiles
+- Product updates
+
+### Schema Examples
+
+#### Blog Post Schema
+
+```javascript
+export default {
+  name: 'blogPost',
+  title: 'Blog Post',
+  type: 'document',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: Rule => Rule.required()
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96
+      }
+    },
+    {
+      name: 'author',
+      title: 'Author',
+      type: 'reference',
+      to: {type: 'author'}
+    },
+    {
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Research', value: 'research'},
+          {title: 'Product Update', value: 'product'},
+          {title: 'Case Study', value: 'case-study'},
+          {title: 'Tutorial', value: 'tutorial'}
+        ]
+      }
+    },
+    {
+      name: 'content',
+      title: 'Content',
+      type: 'blockContent'
+    },
+    {
+      name: 'publishedAt',
+      title: 'Published at',
+      type: 'datetime'
+    }
+  ]
+}
+```
+
+#### Case Study Schema
+
+```javascript
+export default {
+  name: 'caseStudy',
+  title: 'Case Study',
+  type: 'document',
+  fields: [
+    {
+      name: 'client',
+      title: 'Client Name',
+      type: 'string'
+    },
+    {
+      name: 'challenge',
+      title: 'Challenge',
+      type: 'text'
+    },
+    {
+      name: 'solution',
+      title: 'Solution',
+      type: 'blockContent'
+    },
+    {
+      name: 'results',
+      title: 'Results',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          {name: 'metric', type: 'string'},
+          {name: 'value', type: 'string'}
+        ]
+      }]
+    },
+    {
+      name: 'testimonial',
+      title: 'Client Testimonial',
+      type: 'text'
+    }
+  ]
+}
+```
+
+### Integration Setup
+
+1. **Install Sanity**:
+   ```bash
+   npm install @sanity/client @sanity/image-url
+   ```
+
+2. **Configure Client**:
+   ```javascript
+   import sanityClient from '@sanity/client'
+
+   export const client = sanityClient({
+     projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+     dataset: 'production',
+     apiVersion: '2024-01-01',
+     useCdn: true,
+   })
+   ```
+
+3. **Fetch Content**:
+   ```javascript
+   // Get all blog posts
+   const posts = await client.fetch(`
+     *[_type == "blogPost"] | order(publishedAt desc) {
+       title,
+       slug,
+       author->,
+       category,
+       publishedAt,
+       "excerpt": content[0].children[0].text
+     }
+   `)
+   ```
+
+### Content Workflow
+
+1. **Draft State**: Content starts as draft
+2. **Review**: Technical and medical review
+3. **Approval**: Final approval from stakeholders
+4. **Publishing**: Scheduled or immediate
+5. **Versioning**: Track content changes
+
+## Firebase Integration
+
+### Authentication
+
+Already integrated for:
+- User authentication
+- Role-based access control
+- Session management
+- Social login providers
+
+### Additional Services
+
+#### Cloud Messaging (FCM)
+
+For real-time notifications:
+
+```javascript
+// Request permission
+const permission = await Notification.requestPermission();
+
+// Get token
+const token = await getToken(messaging, {
+  vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+});
+
+// Handle messages
+onMessage(messaging, (payload) => {
+  console.log('Message received:', payload);
+  // Show notification
+});
+```
+
+#### Remote Config
+
+For feature flags and A/B testing:
+
+```javascript
+import { getRemoteConfig, fetchAndActivate } from 'firebase/remote-config';
+
+const remoteConfig = getRemoteConfig(app);
+remoteConfig.defaultConfig = {
+  ml_model_version: 'v1.0',
+  enable_beta_features: false,
+};
+
+await fetchAndActivate(remoteConfig);
+const modelVersion = getValue(remoteConfig, 'ml_model_version');
+```
+
+## Monitoring Integrations
+
+### Prometheus
+
+Already deployed for metrics collection:
+- Service health metrics
+- Neural processing performance
+- API latency tracking
+- Resource utilization
+
+### Grafana
+
+Dashboard integration for:
+- Real-time system monitoring
+- Neural signal quality metrics
+- ML model performance
+- User activity analytics
+
+### PagerDuty
+
+For incident management:
+
+```javascript
+// PagerDuty integration
+const incident = await pagerduty.createIncident({
+  title: 'High API Error Rate',
+  service_id: 'neural-engine-api',
+  urgency: 'high',
+  details: {
+    error_rate: '15%',
+    affected_endpoints: ['/api/v1/process']
+  }
+});
+```
+
+## Payment Processing
+
+### Stripe Integration
+
+For subscription management:
+
+```javascript
+// Create subscription
+const subscription = await stripe.subscriptions.create({
+  customer: customerId,
+  items: [{
+    price: 'price_neural_api_pro'
+  }],
+  payment_behavior: 'default_incomplete',
+  expand: ['latest_invoice.payment_intent']
+});
+```
+
+### Webhook Handling
+
+```javascript
+// Handle Stripe webhooks
+app.post('/webhook/stripe', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const event = stripe.webhooks.constructEvent(
+    req.body,
+    sig,
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      await handlePaymentSuccess(event.data.object);
+      break;
+    case 'subscription.updated':
+      await updateSubscription(event.data.object);
+      break;
+  }
+});
+```
+
+## Best Practices
+
+### Security
+
+1. **API Keys**: Store in environment variables
+2. **Webhooks**: Verify signatures
+3. **CORS**: Configure allowed origins
+4. **Rate Limiting**: Implement for all integrations
+
+### Performance
+
+1. **Lazy Loading**: Load integrations on-demand
+2. **Caching**: Cache third-party responses
+3. **Retries**: Implement exponential backoff
+4. **Timeouts**: Set reasonable timeouts
+
+### Monitoring
+
+1. **Error Tracking**: Log integration failures
+2. **Metrics**: Track API usage and latency
+3. **Alerts**: Set up for critical failures
+4. **Health Checks**: Regular validation
+
+### Data Privacy
+
+1. **Consent**: Get user consent for tracking
+2. **Anonymization**: Remove PII where possible
+3. **Retention**: Follow data retention policies
+4. **Access Control**: Limit integration permissions
+
+## Testing Integrations
+
+### Unit Tests
+
+```javascript
+// Mock external services
+jest.mock('@sanity/client');
+jest.mock('firebase/auth');
+
+test('fetches blog posts from Sanity', async () => {
+  const mockPosts = [/* test data */];
+  client.fetch.mockResolvedValue(mockPosts);
+
+  const posts = await getBlogPosts();
+  expect(posts).toEqual(mockPosts);
+});
+```
+
+### Integration Tests
+
+```javascript
+// Test with real services in staging
+test.skip('sends analytics event to GA4', async () => {
+  await sendEvent('test_event', { value: 123 });
+  // Verify in GA4 DebugView
+});
+```
+
+## Support
+
+For integration issues:
+- Check service status pages
+- Review API documentation
+- Contact support teams
+- Use sandbox/test environments
+
+---
+
+For detailed setup instructions for each integration, refer to the specific service documentation or contact the NeuraScale integration team.

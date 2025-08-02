@@ -1,0 +1,413 @@
+# Contributing to NeuraScale
+
+Thank you for your interest in contributing to NeuraScale! We welcome contributions from the community and are grateful for any help you can provide.
+
+## Code of Conduct
+
+By participating in this project, you agree to abide by our Code of Conduct:
+
+- Be respectful and inclusive
+- Welcome newcomers and help them get started
+- Focus on constructive criticism
+- Respect differing viewpoints and experiences
+
+## How to Contribute
+
+### Reporting Bugs
+
+1. **Check existing issues** to avoid duplicates
+2. **Use the bug report template**
+3. **Include**:
+   - Clear description
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Screenshots if applicable
+   - Environment details
+
+### Suggesting Features
+
+1. **Check the roadmap** first
+2. **Open a discussion** before creating an issue
+3. **Provide**:
+   - Use case explanation
+   - Proposed solution
+   - Alternative approaches
+   - Mockups/examples if possible
+
+### Contributing Code
+
+#### 1. Fork and Clone
+
+```bash
+# Fork on GitHub, then:
+git clone https://github.com/YOUR_USERNAME/neurascale.git
+cd neurascale
+git remote add upstream https://github.com/identity-wael/neurascale.git
+```
+
+#### 2. Create a Branch
+
+```bash
+# Update main branch
+git checkout main
+git pull upstream main
+
+# Create feature branch
+git checkout -b feature/your-feature-name
+```
+
+Branch naming conventions:
+
+- `feature/` - New features
+- `fix/` - Bug fixes
+- `docs/` - Documentation
+- `refactor/` - Code refactoring
+- `test/` - Test improvements
+
+#### 3. Set Up Development Environment
+
+For the neural engine:
+
+```bash
+# Set up virtual environment
+cd neural-engine
+source venv/bin/activate  # Must use Python 3.12.11
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+For the documentation:
+
+```bash
+# Navigate to docs
+cd docs-nextra
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+#### 4. Make Your Changes
+
+- Follow existing code style
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
+
+#### 5. Commit Guidelines
+
+We use conventional commits:
+
+```bash
+# Format
+<type>(<scope>): <subject>
+
+# Examples
+feat(neural-engine): add BrainFlow device support
+fix(api): resolve WebSocket connection timeout
+docs(readme): update setup instructions
+```
+
+Types:
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `style`: Code style changes
+- `refactor`: Code refactoring
+- `test`: Test changes
+- `chore`: Build/tool changes
+
+#### 6. Update Mindmeld
+
+**IMPORTANT**: Always update mindmeld with your changes before committing:
+
+```bash
+cd /Users/weg/NeuraScale/neurascale
+python3 letta-memory/agents/fast_mindmeld.py code "Brief description of what you implemented"
+```
+
+#### 7. Test Your Changes
+
+For neural engine:
+
+```bash
+# Run tests
+pytest
+
+# Type checking
+mypy .
+
+# Linting
+flake8 .
+black .
+```
+
+For documentation:
+
+```bash
+# Build test
+npm run build
+
+# Check links
+npm run check-links
+```
+
+#### 8. Submit Pull Request
+
+1. Push your branch:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. Open PR on GitHub
+3. Fill out PR template
+4. Link related issues
+5. Wait for review
+
+### Pull Request Guidelines
+
+#### PR Title Format
+
+```
+<type>(<scope>): <description>
+
+# Examples
+feat(neural-engine): implement wavelet denoising
+fix(auth): resolve Firebase session timeout
+```
+
+#### PR Description Should Include
+
+- **What**: Brief description of changes
+- **Why**: Motivation and context
+- **How**: Technical approach
+- **Testing**: How you tested changes
+- **Screenshots**: For UI changes
+- **Breaking Changes**: If any
+
+#### PR Checklist
+
+- [ ] Code follows project style guide
+- [ ] Tests pass locally
+- [ ] Documentation updated
+- [ ] No console errors/warnings
+- [ ] Pre-commit hooks pass
+- [ ] Mindmeld updated
+
+## Development Guidelines
+
+### Python Code Style (Neural Engine)
+
+#### Type Hints
+
+```python
+from typing import List, Dict, Optional
+import numpy as np
+
+def process_neural_signal(
+    signal: np.ndarray,
+    sampling_rate: int,
+    filters: Optional[List[str]] = None
+) -> Dict[str, np.ndarray]:
+    """Process neural signal with optional filters."""
+    # Implementation
+```
+
+#### Error Handling
+
+```python
+from neural_engine.exceptions import SignalProcessingError
+
+try:
+    result = process_signal(data)
+except SignalProcessingError as e:
+    logger.error(f"Signal processing failed: {e}")
+    raise
+```
+
+#### File Organization
+
+```
+neural-engine/
+├── src/
+│   ├── api/           # API endpoints
+│   ├── core/          # Core processing logic
+│   ├── datasets/      # Dataset management
+│   ├── devices/       # Device interfaces
+│   ├── ml/           # Machine learning models
+│   └── security/     # Security implementations
+└── tests/            # Test files
+```
+
+### Testing Guidelines
+
+#### Unit Tests
+
+```python
+# test_signal_processor.py
+import pytest
+from neural_engine.core import SignalProcessor
+
+def test_signal_filtering():
+    processor = SignalProcessor()
+    signal = generate_test_signal()
+    filtered = processor.filter(signal, method="bandpass")
+    assert filtered.shape == signal.shape
+```
+
+#### Integration Tests
+
+```python
+# test_api_integration.py
+def test_device_registration(test_client):
+    response = test_client.post("/api/v1/devices", json={
+        "type": "OpenBCI",
+        "channels": 8
+    })
+    assert response.status_code == 201
+```
+
+### Documentation Standards
+
+#### Code Comments
+
+```python
+def decode_neural_intent(
+    signal: np.ndarray,
+    model: NeuralDecoder,
+    confidence_threshold: float = 0.8
+) -> DecodingResult:
+    """
+    Decode neural intent from brain signals.
+
+    Args:
+        signal: Neural signal array of shape (channels, samples)
+        model: Pre-trained neural decoder model
+        confidence_threshold: Minimum confidence for valid prediction
+
+    Returns:
+        DecodingResult containing intent and confidence score
+
+    Raises:
+        DecodingError: If signal quality is insufficient
+    """
+    # Implementation
+```
+
+#### API Documentation
+
+Always include OpenAPI documentation:
+
+```python
+@router.post("/process", response_model=ProcessingResult)
+async def process_neural_data(
+    data: NeuralData,
+    background_tasks: BackgroundTasks
+):
+    """
+    Process neural data through the ML pipeline.
+
+    - **data**: Neural signal data with metadata
+    - **returns**: Processing results including predictions
+    """
+    # Implementation
+```
+
+## Review Process
+
+### What We Look For
+
+1. **Code Quality**
+   - Clean, readable code
+   - Proper error handling
+   - Performance considerations
+   - Security best practices
+
+2. **Testing**
+   - Adequate test coverage
+   - Edge cases handled
+   - No broken existing tests
+
+3. **Documentation**
+   - Code comments where needed
+   - README updates
+   - API documentation
+
+4. **Compliance**
+   - HIPAA requirements met
+   - SOC 2 considerations
+   - No hardcoded secrets
+
+### Review Timeline
+
+- Initial review: 1-2 business days
+- Follow-up reviews: 1 business day
+- Complex PRs may take longer
+
+## Getting Help
+
+### Resources
+
+- [Documentation](https://neurascale.io/docs)
+- [GitHub Discussions](https://github.com/identity-wael/neurascale/discussions)
+- [Discord Community](#) (Coming soon)
+
+### Asking Questions
+
+1. Search existing issues/discussions
+2. Provide context and code examples
+3. Be specific about the problem
+4. Share error messages/logs
+
+## Virtual Environment Management
+
+**CRITICAL**: This project uses Python 3.12.11 exclusively. Do NOT use Python 3.12.5 or any other version.
+
+To set up or fix virtual environments:
+
+```bash
+./scripts/dev-tools/setup-venvs.sh
+```
+
+Always verify your Python version:
+
+```bash
+python --version  # Should show Python 3.12.11
+```
+
+## Pre-commit Hooks
+
+The project uses pre-commit hooks. Install them:
+
+```bash
+pre-commit install
+```
+
+Hooks include:
+- Black (Python formatting)
+- Flake8 (Python linting)
+- Prettier (JS/TS formatting)
+- Terraform fmt
+
+## Recognition
+
+Contributors will be:
+
+- Listed in our README
+- Mentioned in release notes
+- Invited to contributor meetings
+- Given credit in presentations
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+Thank you for contributing to NeuraScale!

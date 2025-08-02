@@ -394,33 +394,71 @@ Enable in Project Settings → Analytics
 
 ## Backend Deployment (GCP)
 
+### Multi-Project Architecture
+
+NeuraScale uses a three-project GCP architecture with centralized Terraform state:
+
+| Project | ID | Purpose | Region |
+|---------|-----|---------|--------|
+| **Development** | `development-neurascale` | Feature development | `northamerica-northeast1` |
+| **Staging** | `staging-neurascale` | Integration testing | `northamerica-northeast1` |
+| **Production** | `production-neurascale` | Live environment | `northamerica-northeast1` |
+| **State Management** | `neurascale` (Project ID: 555656387124) | Terraform state bucket | `US` |
+
+<Callout type="info">
+  **Important**: Terraform state is stored in the `neurascale-terraform-state` bucket in the `neurascale` project. All environments share this state bucket with different prefixes.
+</Callout>
+
+### Infrastructure Components
+
+The Terraform modules deploy the following GCP services:
+
+**Data Storage & Processing:**
+- **Cloud SQL PostgreSQL**: Application metadata, session data, user management
+- **BigQuery**: Analytics data warehouse with partitioned tables for neural sessions
+- **Artifact Registry**: Docker images for all services
+- **Cloud Storage**: Function source code, backups, and exports
+
+**Real-time Processing:**
+- **Pub/Sub Topics**: Separate topics for each signal type (EEG, EMG, LFP, etc.)
+- **Cloud Functions**: Event-driven processing (Note: Bigtable integration planned)
+- **Dead Letter Queues**: Failed message handling
+
+**Deployment Targets:**
+- **Cloud Run**: MCP server and API services
+- **GKE** (Production only): High-availability neural engine deployment
+- **Cloud Functions**: Signal processing pipelines
+
+**Security & Operations:**
+- **Secret Manager**: API keys and sensitive configuration
+- **Cloud KMS**: Encryption keys for data at rest
+- **VPC**: Private networking with service connections
+- **Redis (Memorystore)**: Caching layer
+
 ### Staging Deployment
 
-Staging environment uses GCP Cloud Run for easy deployment and testing with production-like infrastructure.
-
 <Steps>
-### Setup GCP Project
+### Prerequisites
 
 ```bash
+# Ensure you're authenticated
+gcloud auth login
+gcloud auth application-default login
+
 # Set staging project
 gcloud config set project staging-neurascale
-
-# Enable required APIs
-gcloud services enable \
-  run.googleapis.com \
-  bigtable.googleapis.com \
-  pubsub.googleapis.com \
-  sql-component.googleapis.com \
-  secretmanager.googleapis.com
 ```
 
-### Deploy Infrastructure
+### Deploy Infrastructure with Terraform
 
 ```bash
 cd neural-engine/terraform
 
-# Initialize Terraform for staging
+# Initialize with staging backend configuration
 terraform init -backend-config=backend-configs/staging.hcl
+
+# Review staging variables
+cat environments/staging.tfvars
 
 # Plan deployment
 terraform plan -var-file="environments/staging.tfvars"
@@ -429,65 +467,140 @@ terraform plan -var-file="environments/staging.tfvars"
 terraform apply -var-file="environments/staging.tfvars"
 ```
 
-**Resources Created:**
-- Cloud Run service for Neural Engine
-- Bigtable instance for time-series data
-- Cloud SQL (PostgreSQL) for metadata
-- Pub/Sub topics for real-time streaming
-- Secret Manager for configuration
-- Redis instance for caching
+**Key Staging Configuration:**
+```hcl
+# From staging.tfvars
+project_id  = "staging-neurascale"
+environment = "staging"
+region      = "northamerica-northeast1"
 
-### Deploy Application
+# Reduced resources for cost optimization
+db_tier     = "db-g1-small"
+redis_tier  = "BASIC"
+enable_gke_cluster = false  # Cloud Run only in staging
+```
+
+### Build and Push Images to Artifact Registry
 
 ```bash
-# Build and deploy to Cloud Run
+# Configure Docker for Artifact Registry
+gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+
+# Build Neural Engine image
+cd neural-engine
+docker build -t northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/neural-engine:latest .
+
+# Push to Artifact Registry
+docker push northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/neural-engine:latest
+
+# Build and push MCP Server
+cd ../mcp-server
+docker build -t northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest .
+docker push northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest
+```
+
+### Deploy to Cloud Run
+
+```bash
+# Deploy Neural Engine API
 gcloud run deploy neural-engine \
-  --source . \
+  --image northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/neural-engine:latest \
   --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars ENV=staging \
+  --region northamerica-northeast1 \
+  --service-account neural-ingestion-stag@staging-neurascale.iam.gserviceaccount.com \
+  --set-env-vars ENV=staging,PROJECT_ID=staging-neurascale \
   --memory 2Gi \
   --cpu 2 \
-  --max-instances 10
+  --min-instances 0 \
+  --max-instances 10 \
+  --no-allow-unauthenticated
+
+# Deploy MCP Server (if enabled)
+gcloud run deploy mcp-server \
+  --image northamerica-northeast1-docker.pkg.dev/staging-neurascale/neural-engine-staging/mcp-server:latest \
+  --platform managed \
+  --region northamerica-northeast1 \
+  --service-account neural-ingestion-stag@staging-neurascale.iam.gserviceaccount.com \
+  --memory 512Mi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 3
 ```
 
-### Configure Secrets
+### Configure Database and Secrets
 
 ```bash
-# Store database connection string
-gcloud secrets create db-connection-string \
-  --data-file=staging-db-config.txt
+# Get Cloud SQL instance connection name
+INSTANCE_CONNECTION=$(gcloud sql instances describe staging-neural-postgres \
+  --format='value(connectionName)')
 
-# Store API keys
-gcloud secrets create api-keys \
-  --data-file=staging-api-keys.json
+# Update Cloud Run service with Cloud SQL proxy
+gcloud run services update neural-engine \
+  --add-cloudsql-instances=$INSTANCE_CONNECTION \
+  --region northamerica-northeast1
 
-# Grant Cloud Run access to secrets
-gcloud run services add-iam-policy-binding neural-engine \
-  --member=serviceAccount:neural-engine@staging-neurascale.iam.gserviceaccount.com \
-  --role=roles/secretmanager.secretAccessor
+# Create secrets for database credentials
+echo -n "postgresql://neural_user:PASSWORD@localhost/neural_db?host=/cloudsql/$INSTANCE_CONNECTION" | \
+  gcloud secrets create db-connection-string --data-file=-
+
+# Grant access to secrets
+gcloud secrets add-iam-policy-binding db-connection-string \
+  --member="serviceAccount:neural-ingestion-stag@staging-neurascale.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+
+# Update Cloud Run to use secrets
+gcloud run services update neural-engine \
+  --update-secrets=DATABASE_URL=db-connection-string:latest \
+  --region northamerica-northeast1
 ```
 
-### Test Deployment
+### Deploy Cloud Functions for Signal Processing
 
 ```bash
-# Get service URL
+# Deploy function for each signal type
+for SIGNAL in eeg emg lfp spikes ecog accelerometer; do
+  gcloud functions deploy process-${SIGNAL}-staging \
+    --gen2 \
+    --runtime python312 \
+    --region northamerica-northeast1 \
+    --source neural-engine/functions/signal_processor \
+    --entry-point process_signal \
+    --trigger-topic neural-data-${SIGNAL}-staging \
+    --service-account neural-ingestion-stag@staging-neurascale.iam.gserviceaccount.com \
+    --set-env-vars SIGNAL_TYPE=${SIGNAL},ENV=staging \
+    --memory 512MB \
+    --timeout 60s
+done
+```
+
+### Verify Deployment
+
+```bash
+# Get Cloud Run service URL
 SERVICE_URL=$(gcloud run services describe neural-engine \
-  --region=us-central1 \
+  --region=northamerica-northeast1 \
   --format='value(status.url)')
 
-# Health check
-curl $SERVICE_URL/health
+# Get auth token
+AUTH_TOKEN=$(gcloud auth print-identity-token)
 
-# API test
-curl $SERVICE_URL/api/v1/status
+# Health check
+curl -H "Authorization: Bearer $AUTH_TOKEN" $SERVICE_URL/health
+
+# Check BigQuery datasets
+bq ls --project_id=staging-neurascale
+
+# Check Pub/Sub topics
+gcloud pubsub topics list --project=staging-neurascale
+
+# Verify Cloud SQL
+gcloud sql instances describe staging-neural-postgres
 ```
 </Steps>
 
 ## Production Deployment
 
-Production deployment uses Google Kubernetes Engine (GKE) with Helm charts for high availability, auto-scaling, and production-grade features.
+Production uses GKE for the Neural Engine with enhanced security and high availability.
 
 <Steps>
 ### Setup Production Environment
@@ -496,38 +609,65 @@ Production deployment uses Google Kubernetes Engine (GKE) with Helm charts for h
 # Set production project
 gcloud config set project production-neurascale
 
-# Enable required APIs
-gcloud services enable \
-  container.googleapis.com \
-  bigtable.googleapis.com \
-  sql-component.googleapis.com \
-  monitoring.googleapis.com \
-  logging.googleapis.com
+# Verify APIs are enabled (should be done via Terraform)
+gcloud services list --enabled
 ```
 
-### Deploy Infrastructure
+### Deploy Infrastructure with Terraform
 
 ```bash
 cd neural-engine/terraform
 
-# Initialize for production
+# Initialize for production with approval workflow
 terraform init -backend-config=backend-configs/production.hcl
 
-# Plan with production variables
-terraform plan -var-file="environments/production.tfvars"
+# Review production configuration
+cat environments/production.tfvars
 
-# Apply infrastructure (requires approval)
-terraform apply -var-file="environments/production.tfvars"
+# Plan deployment (save plan for review)
+terraform plan -var-file="environments/production.tfvars" -out=production.tfplan
+
+# Apply after approval
+terraform apply production.tfplan
 ```
 
-**Production Infrastructure:**
-- **GKE Cluster**: 3 nodes, auto-scaling 1-10
-- **Bigtable Cluster**: Multi-region replication
-- **Cloud SQL**: High availability with read replicas
-- **Redis Cluster**: 3 nodes with failover
-- **Load Balancer**: Global HTTPS load balancer
-- **Monitoring**: Cloud Monitoring and Alerting
-- **Backup**: Automated daily backups
+**Production Configuration Highlights:**
+```hcl
+# From production.tfvars
+project_id  = "production-neurascale"
+environment = "production"
+region      = "northamerica-northeast1"
+
+# GKE Configuration
+enable_gke_cluster = true
+gke_general_machine_type = "n2-standard-4"
+gke_neural_machine_type = "n2-highmem-8"
+enable_gpu_pool = true
+gpu_type = "nvidia-tesla-t4"
+
+# High Availability
+enable_db_high_availability = true
+db_tier = "db-n1-standard-4"
+redis_tier = "STANDARD_HA"
+
+# Enhanced Security
+enable_enhanced_security = true
+enable_kms_encryption = true
+enable_binary_authorization = true
+enable_vpc_service_controls = true
+
+# Data Retention
+data_retention_days = 2555  # 7 years for HIPAA
+```
+
+**Production Infrastructure Created:**
+- **GKE Cluster**: Auto-scaling node pools with GPU support
+- **Cloud SQL PostgreSQL**: HA configuration with automated backups
+- **BigQuery**: Partitioned tables for analytics with 7-year retention
+- **Redis (Memorystore)**: High-availability caching
+- **Cloud KMS**: Customer-managed encryption keys
+- **VPC Service Controls**: Security perimeter for data protection
+- **Artifact Registry**: Production image repository
 
 ### Connect to GKE Cluster
 
@@ -644,6 +784,253 @@ curl https://api.neurascale.io/health
 ```
 </Steps>
 
+## Pre-commit Hooks and Quality Checks
+
+NeuraScale enforces code quality through comprehensive pre-commit hooks:
+
+### Pre-commit Configuration
+
+```yaml
+# .pre-commit-config.yaml highlights
+repos:
+  # General code quality
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+
+  # Security scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    hooks:
+      - id: gitleaks
+
+  # Frontend formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    hooks:
+      - id: prettier
+        files: \.(js|jsx|ts|tsx|json|css|scss|md)$
+
+  # Python formatting (neural-engine)
+  - repo: local
+    hooks:
+      - id: black-neural-engine
+        name: black
+        entry: scripts/dev-tools/run-black.sh
+        language: system
+        types: [python]
+        files: ^neural-engine/.*\.py$
+
+  # Terraform formatting
+  - repo: https://github.com/terraform-linters/tflint
+    hooks:
+      - id: terraform-fmt
+        files: \.tf$
+```
+
+### Local Development Setup
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install hooks
+pre-commit install
+
+# Run manually on all files
+pre-commit run --all-files
+
+# Skip hooks temporarily (not recommended)
+git commit --no-verify -m "Emergency fix"
+```
+
+<Callout type="warning">
+  **Python Version**: The black formatter requires Python 3.12.11. The `run-black.sh` script ensures it runs in the correct virtual environment.
+</Callout>
+
+## CI/CD Pipeline
+
+### Build Process
+
+The build process creates Docker images and pushes them to Artifact Registry:
+
+```mermaid
+graph LR
+    A[Git Push] --> B[Trigger Build]
+    B --> C[Build Docker Images]
+    C --> D[Run Tests]
+    D --> E[Security Scan]
+    E --> F[Push to Artifact Registry]
+    F --> G[Deploy to Environment]
+
+    style A fill:#4285F4,color:#fff
+    style C fill:#34A853,color:#fff
+    style E fill:#EA4335,color:#fff
+    style G fill:#FBBC04,color:#000
+```
+
+### Artifact Registry Structure
+
+```
+northamerica-northeast1-docker.pkg.dev/
+├── development-neurascale/
+│   └── neural-engine-development/
+│       ├── neural-engine:latest
+│       ├── neural-engine:v1.2.3
+│       └── mcp-server:latest
+├── staging-neurascale/
+│   └── neural-engine-staging/
+│       ├── neural-engine:latest
+│       ├── neural-engine:v1.2.3
+│       └── mcp-server:latest
+└── production-neurascale/
+    └── neural-engine-production/
+        ├── neural-engine:v1.2.3  # No latest tag in prod
+        └── mcp-server:v1.2.3
+```
+
+### Deployment Pipeline
+
+<Tabs items={['Cloud Run', 'Cloud Functions', 'GKE']}>
+  <Tabs.Tab>
+    **Cloud Run Deployment**
+
+    Used for API services and MCP server:
+
+    ```bash
+    # Build and push image
+    docker build -t $REGION-docker.pkg.dev/$PROJECT/neural-engine-$ENV/service:$VERSION .
+    docker push $REGION-docker.pkg.dev/$PROJECT/neural-engine-$ENV/service:$VERSION
+
+    # Deploy new revision
+    gcloud run deploy service-name \
+      --image $REGION-docker.pkg.dev/$PROJECT/neural-engine-$ENV/service:$VERSION \
+      --region $REGION \
+      --platform managed \
+      --revision-suffix v${VERSION//./-}
+
+    # Gradual rollout
+    gcloud run services update-traffic service-name \
+      --to-revisions LATEST=10 \
+      --region $REGION
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Cloud Functions Deployment**
+
+    Used for event-driven signal processing:
+
+    ```bash
+    # Deploy function from source
+    gcloud functions deploy process-signal-$ENV \
+      --gen2 \
+      --runtime python312 \
+      --source ./functions/signal_processor \
+      --entry-point process_signal \
+      --trigger-topic neural-data-$SIGNAL_TYPE-$ENV \
+      --region $REGION
+
+    # Deploy from Cloud Storage
+    zip -r function.zip .
+    gsutil cp function.zip gs://$PROJECT-functions-$ENV/
+
+    gcloud functions deploy process-signal-$ENV \
+      --source gs://$PROJECT-functions-$ENV/function.zip
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **GKE Deployment (Production)**
+
+    Uses Helm for complex deployments:
+
+    ```bash
+    # Build and push image
+    docker build -t $REGION-docker.pkg.dev/$PROJECT/neural-engine-prod/neural-engine:$VERSION .
+    docker push $REGION-docker.pkg.dev/$PROJECT/neural-engine-prod/neural-engine:$VERSION
+
+    # Update Helm values
+    helm upgrade neural-engine ./helm/neural-engine \
+      --namespace neural-engine \
+      --set image.tag=$VERSION \
+      --set image.repository=$REGION-docker.pkg.dev/$PROJECT/neural-engine-prod/neural-engine \
+      --wait
+
+    # Blue-green deployment
+    kubectl set image deployment/neural-engine-canary \
+      neural-engine=$REGION-docker.pkg.dev/$PROJECT/neural-engine-prod/neural-engine:$VERSION \
+      -n neural-engine
+
+    # Monitor canary
+    kubectl rollout status deployment/neural-engine-canary -n neural-engine
+
+    # Promote to production
+    kubectl set image deployment/neural-engine \
+      neural-engine=$REGION-docker.pkg.dev/$PROJECT/neural-engine-prod/neural-engine:$VERSION \
+      -n neural-engine
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### GitHub Actions Workflow (Planned)
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy NeuraScale
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGION: northamerica-northeast1
+  STATE_BUCKET: neurascale-terraform-state
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.12.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.11'
+      - name: Run tests
+        run: |
+          cd neural-engine
+          pip install -r requirements-dev.txt
+          pytest tests/
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy to environment
+        run: |
+          # Logic to deploy based on branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENV=production
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            ENV=staging
+          else
+            ENV=development
+          fi
+
+          # Deploy using appropriate method
+          ./scripts/deploy.sh $ENV
+```
+
 ## Deployment Environments
 
 ### Environment Configuration
@@ -695,32 +1082,33 @@ curl https://api.neurascale.io/health
 
     | Resource | Configuration | Purpose |
     |----------|---------------|---------|
-    | **Compute** | Cloud Run (2 CPU, 2GB) | Integration testing |
-    | **Database** | Cloud SQL (db-n1-standard-2) | Production-like |
-    | **Time-series** | Bigtable (1 node) | Scalability testing |
-    | **Cache** | Memorystore Redis (1GB) | Performance testing |
-    | **Message Queue** | Pub/Sub | Real message queue |
-    | **Storage** | Cloud Storage | Cloud integration |
+    | **Compute** | Cloud Run (2 CPU, 2GB) | API services |
+    | **Functions** | Cloud Functions Gen2 | Signal processing |
+    | **Database** | Cloud SQL (db-g1-small) | Metadata storage |
+    | **Analytics** | BigQuery (staging dataset) | Data warehouse |
+    | **Cache** | Redis Basic (2GB) | Session caching |
+    | **Message Queue** | Pub/Sub | Event streaming |
+    | **Storage** | Cloud Storage | Backups/exports |
 
-    ```bash
-    # Terraform variables for staging
+    ```hcl
+    # Key staging configuration
     project_id = "staging-neurascale"
-    region = "us-central1"
+    region = "northamerica-northeast1"
     environment = "staging"
 
     # Cloud Run
-    cloud_run_cpu = 2
-    cloud_run_memory = "2Gi"
-    cloud_run_max_instances = 10
+    mcp_min_instances = 0
+    mcp_max_instances = 3
+    enable_mcp_cloud_run = true
 
-    # Bigtable
-    bigtable_num_nodes = 1
-    bigtable_storage_type = "HDD"
+    # Database
+    db_tier = "db-g1-small"
+    db_disk_size = 50
+    enable_db_high_availability = false
 
-    # Cloud SQL
-    db_tier = "db-n1-standard-2"
-    db_disk_size = 20
-    db_backup_enabled = true
+    # Analytics
+    bigquery_location = "US"
+    default_table_expiration_days = 90
     ```
   </Tabs.Tab>
 
@@ -730,38 +1118,174 @@ curl https://api.neurascale.io/health
     | Resource | Configuration | Purpose |
     |----------|---------------|---------|
     | **Compute** | GKE (3-20 nodes) | High availability |
-    | **Database** | Cloud SQL HA (db-n1-standard-4) | Mission critical |
-    | **Time-series** | Bigtable cluster (3 nodes) | High performance |
-    | **Cache** | Redis cluster (3 nodes) | High availability |
-    | **Message Queue** | Pub/Sub (multi-region) | Reliability |
-    | **Storage** | Cloud Storage (multi-region) | Data durability |
+    | **Functions** | Cloud Functions Gen2 | Event processing |
+    | **Database** | Cloud SQL HA (db-n1-standard-4) | Primary datastore |
+    | **Analytics** | BigQuery (prod dataset) | 7-year retention |
+    | **Cache** | Redis HA (10GB) | High-performance cache |
+    | **Message Queue** | Pub/Sub | Mission-critical streaming |
+    | **Storage** | Cloud Storage (multi-region) | Backups & archives |
+    | **Security** | Cloud KMS, VPC-SC | Enhanced protection |
 
-    ```bash
-    # Terraform variables for production
+    ```hcl
+    # Key production configuration
     project_id = "production-neurascale"
-    region = "us-central1"
+    region = "northamerica-northeast1"
     environment = "production"
 
     # GKE
-    gke_num_nodes = 3
-    gke_min_nodes = 1
-    gke_max_nodes = 20
-    gke_machine_type = "n1-standard-4"
-    gke_preemptible = false
+    enable_gke_cluster = true
+    gke_general_machine_type = "n2-standard-4"
+    gke_neural_machine_type = "n2-highmem-8"
+    enable_gpu_pool = true
 
-    # Bigtable
-    bigtable_num_nodes = 3
-    bigtable_storage_type = "SSD"
-    bigtable_replication_enabled = true
-
-    # Cloud SQL
+    # Database
     db_tier = "db-n1-standard-4"
     db_disk_size = 100
-    db_ha_enabled = true
-    db_backup_retention_days = 30
+    enable_db_high_availability = true
+    backup_retention_count = 30
+
+    # Analytics
+    bigquery_location = "US"
+    data_retention_days = 2555  # 7 years HIPAA
+    session_retention_days = 2555
+
+    # Security
+    enable_kms_encryption = true
+    enable_binary_authorization = true
+    enable_vpc_service_controls = true
     ```
   </Tabs.Tab>
 </Tabs>
+
+## Data Infrastructure
+
+### Cloud SQL PostgreSQL
+
+NeuraScale uses Cloud SQL PostgreSQL for application metadata, session management, and user data:
+
+```sql
+-- Core tables structure
+CREATE SCHEMA IF NOT EXISTS neural;
+
+-- Device registry
+CREATE TABLE neural.devices (
+    device_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_type VARCHAR(50) NOT NULL,
+    device_name VARCHAR(255) NOT NULL,
+    manufacturer VARCHAR(100),
+    model VARCHAR(100),
+    serial_number VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sessions table
+CREATE TABLE neural.sessions (
+    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_id UUID REFERENCES neural.devices(device_id),
+    patient_id VARCHAR(255),  -- De-identified
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    duration_seconds INTEGER,
+    channel_count INTEGER,
+    sampling_rate FLOAT,
+    data_quality_score FLOAT,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Annotations
+CREATE TABLE neural.annotations (
+    annotation_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID REFERENCES neural.sessions(session_id),
+    timestamp TIMESTAMP NOT NULL,
+    annotation_type VARCHAR(50),
+    description TEXT,
+    metadata JSONB,
+    created_by VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for performance
+CREATE INDEX idx_sessions_patient ON neural.sessions(patient_id);
+CREATE INDEX idx_sessions_device ON neural.sessions(device_id);
+CREATE INDEX idx_sessions_time ON neural.sessions(start_time, end_time);
+CREATE INDEX idx_annotations_session ON neural.annotations(session_id);
+```
+
+### BigQuery Analytics
+
+BigQuery serves as the data warehouse for analytics and ML training:
+
+```sql
+-- Dataset: {environment}_neural_analytics
+
+-- Partitioned sessions table
+CREATE TABLE `project.dataset.neural_sessions`
+PARTITION BY DATE(session_timestamp)
+CLUSTER BY patient_id, device_type, signal_type
+AS SELECT
+  session_id,
+  session_timestamp,
+  patient_id,
+  device_type,
+  signal_type,
+  duration_seconds,
+  channel_count,
+  sampling_rate,
+  data_quality_score,
+  annotations
+FROM source_data;
+
+-- Aggregated metrics table (hourly partitioned)
+CREATE TABLE `project.dataset.neural_metrics`
+PARTITION BY TIMESTAMP_TRUNC(timestamp, HOUR)
+CLUSTER BY session_id, metric_type
+AS SELECT
+  timestamp,
+  session_id,
+  metric_type,
+  channel_id,
+  value,
+  frequency_band,
+  metadata
+FROM metrics_stream;
+
+-- ML training dataset
+CREATE TABLE `project.dataset.ml_training_data` (
+  sample_id STRING,
+  features ARRAY<FLOAT64>,
+  label STRING,
+  split STRING,  -- train/validation/test
+  created_timestamp TIMESTAMP
+);
+```
+
+### Data Flow Architecture
+
+```mermaid
+graph LR
+    A[Neural Devices] --> B[Pub/Sub Topics]
+    B --> C[Cloud Functions]
+    C --> D[Cloud SQL]
+    C --> E[BigQuery Streaming]
+
+    D --> F[Session Metadata]
+    E --> G[Analytics Warehouse]
+
+    G --> H[ML Training]
+    G --> I[Dashboards]
+    G --> J[Research Export]
+
+    style A fill:#4285F4,color:#fff
+    style D fill:#34A853,color:#fff
+    style E fill:#EA4335,color:#fff
+    style G fill:#FBBC04,color:#000
+```
+
+<Callout type="info">
+  **Note on Bigtable**: While Bigtable is referenced in the documentation as a future option for high-throughput time-series data, the current implementation uses Cloud SQL for metadata and BigQuery for analytics. Bigtable integration is planned for scenarios requiring sub-millisecond latency on massive datasets.
+</Callout>
 
 ## CI/CD Pipeline
 

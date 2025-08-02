@@ -4,4 +4,7 @@ export default {
   architecture: "",
   "system-modeling": "",
   features: "",
+  api: "",
+  deployment: "",
+  security: "",
 };

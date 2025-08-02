@@ -1,10 +1,7 @@
 import nextra from 'nextra'
 
 const withNextra = nextra({
-  latex: true,
-  flexsearch: {
-    codeblocks: false
-  }
+  latex: true
 })
 
 export default withNextra({

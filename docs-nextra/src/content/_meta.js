@@ -4,4 +4,6 @@ export default {
   features: "",
   themes: "",
   advanced: "",
+  api: "NeuraScale API Documentation",
+  deployment: "Deployment Guide",
 };

@@ -8,15 +8,116 @@ This guide will help you get up and running with NeuraScale in minutes.
 
 Before you begin, ensure you have the following installed:
 
+### Core Requirements
 - **Python** 3.12.11 (exact version required) - [Download](https://www.python.org/downloads/)
 - **Node.js** 18.x or higher - [Download](https://nodejs.org/)
 - **pnpm** 9.x or higher - [Installation guide](https://pnpm.io/installation)
 - **Docker** & Docker Compose - [Download](https://www.docker.com/)
 - **Git** - [Download](https://git-scm.com/)
 
+### For GCP Deployment
+- **Google Cloud SDK** - [Installation guide](https://cloud.google.com/sdk/docs/install)
+- **Terraform** 1.5.x or higher - [Download](https://www.terraform.io/downloads)
+- **kubectl** - [Installation guide](https://kubernetes.io/docs/tasks/tools/)
+- **Helm** 3.x - [Installation guide](https://helm.sh/docs/intro/install/)
+
 <Callout type="warning">
   Python version must be exactly 3.12.11. Other versions may cause compatibility issues.
 </Callout>
+
+### GCP Setup
+
+<Steps>
+### Install Google Cloud SDK
+
+<Tabs items={['macOS', 'Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```bash
+    # Using Homebrew
+    brew install --cask google-cloud-sdk
+
+    # Or download from https://cloud.google.com/sdk/docs/install
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Add the Cloud SDK distribution URI as a package source
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+
+    # Import the Google Cloud public key
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+    # Update and install the SDK
+    sudo apt-get update && sudo apt-get install google-cloud-cli
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Download and run the installer from: https://cloud.google.com/sdk/docs/install#windows
+  </Tabs.Tab>
+</Tabs>
+
+### Authenticate with GCP
+
+```bash
+# Login to GCP
+gcloud auth login
+
+# Set default project (use your environment)
+gcloud config set project development-neurascale
+
+# Configure application default credentials
+gcloud auth application-default login
+```
+
+### Install Terraform
+
+<Tabs items={['macOS', 'Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```bash
+    # Using Homebrew
+    brew install terraform
+
+    # Verify installation
+    terraform --version
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Add HashiCorp GPG key
+    wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+    # Add HashiCorp repo
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+    # Install Terraform
+    sudo apt update && sudo apt install terraform
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Download from: https://www.terraform.io/downloads
+
+    Or use Chocolatey:
+    ```powershell
+    choco install terraform
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Configure GCP Permissions
+
+Ensure your GCP account has the following roles:
+- `roles/owner` or `roles/editor` for development
+- `roles/iam.serviceAccountUser` for service account impersonation
+- `roles/storage.admin` for Terraform state management
+
+For production deployments, use the service account:
+```bash
+gcloud iam service-accounts keys create ~/key.json \
+  --iam-account=github-actions@neurascale.iam.gserviceaccount.com
+
+export GOOGLE_APPLICATION_CREDENTIALS=~/key.json
+```
+</Steps>
 
 ## Quick Start
 
@@ -43,7 +144,11 @@ This script will:
 
 ### Start Infrastructure Services
 
-Launch the required infrastructure services:
+Choose your deployment method:
+
+**Local Development**
+
+Launch the required infrastructure services locally:
 
 ```bash
 docker-compose up -d
@@ -55,17 +160,35 @@ This starts:
 - PostgreSQL for application data
 - MCP Server for AI assistant integration
 
-For production GCP deployment:
+**GCP Deployment**
+
+For production GCP deployment, we use a multi-environment Terraform setup:
+
 ```bash
 cd neural-engine/terraform
-terraform init
-terraform plan
-terraform apply
+
+# Initialize with environment-specific backend
+terraform init -backend-config=backend-configs/development.hcl
+
+# Plan with environment variables
+terraform plan -var-file="environments/development.tfvars"
+
+# Apply infrastructure
+terraform apply -var-file="environments/development.tfvars"
 ```
+
+**GCP Resources Created:**
+- **Bigtable**: For high-performance time-series neural data storage
+- **Pub/Sub**: Topics and subscriptions for each signal type (EEG, EMG, etc.)
+- **Cloud Run**: MCP Server deployment
+- **Artifact Registry**: Docker image storage
+- **Cloud SQL**: PostgreSQL for metadata and session data
+- **Secret Manager**: API keys and sensitive configuration
+- **GKE**: Kubernetes cluster for Neural Engine (production only)
 
 ### Start the Neural Engine
 
-<Tabs items={['Development', 'Production']}>
+<Tabs items={['Development', 'Staging', 'Production']}>
   <Tabs.Tab>
     ```bash
     cd neural-engine
@@ -77,6 +200,19 @@ terraform apply
     ```bash
     cd neural-engine
     source venv/bin/activate
+    # Configure for staging environment
+    export ENV=staging
+    export GCP_PROJECT=staging-neurascale
+    uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 2
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    cd neural-engine
+    source venv/bin/activate
+    # Configure for production environment
+    export ENV=production
+    export GCP_PROJECT=production-neurascale
     uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
     ```
   </Tabs.Tab>
@@ -112,6 +248,22 @@ curl -X POST http://localhost:8000/api/v1/devices/test-device/stream/start
 You should see synthetic neural data streaming in the logs.
 </Steps>
 
+## Deployment Environments
+
+NeuraScale uses a multi-environment GCP setup:
+
+| Environment | Project ID | Branch | Purpose |
+|------------|------------|--------|---------|
+| Development | `development-neurascale` | `develop` | Feature development and testing |
+| Staging | `staging-neurascale` | PR branches | Integration testing and validation |
+| Production | `production-neurascale` | `main` | Live production environment |
+
+Each environment has:
+- Isolated GCP project with separate billing
+- Environment-specific Terraform state in GCS
+- Automated deployment via GitHub Actions
+- Cross-project IAM for service accounts
+
 ## Project Structure
 
 ```
@@ -124,10 +276,22 @@ neurascale/
 │   │   ├── classification/ # Real-time ML models
 │   │   └── neural_ledger/  # HIPAA-compliant audit trail
 │   ├── terraform/          # GCP infrastructure as code
+│   │   ├── modules/        # Reusable Terraform modules
+│   │   │   ├── neural-ingestion/  # Pub/Sub, Bigtable, Cloud Functions
+│   │   │   ├── mcp-server/        # Cloud Run MCP deployment
+│   │   │   ├── networking/        # VPC and service connections
+│   │   │   ├── gke/              # Kubernetes cluster config
+│   │   │   └── database/          # Cloud SQL, Redis, BigQuery
+│   │   ├── environments/   # Environment-specific configs
+│   │   └── backend-configs/# Terraform state backends
 │   └── tests/              # Test suite
 ├── console/                # NeuraScale Console UI
 ├── docs-nextra/           # Documentation (you are here!)
 ├── infrastructure/        # Kubernetes & deployment configs
+│   ├── cross-project-iam/ # IAM setup across GCP projects
+│   └── k8s/              # Kubernetes manifests
+├── kubernetes/            # Helm charts
+│   └── helm/neural-engine/# Neural Engine Helm chart
 ├── mcp-server/           # Model Context Protocol server
 └── scripts/              # Development tools and utilities
 ```
@@ -253,8 +417,12 @@ Now that you have NeuraScale running, explore:
     # Clean volumes
     docker-compose down -v
 
-    # Deploy to GKE
-    kubectl apply -f infrastructure/k8s/
+    # Deploy to GKE using Helm
+    helm upgrade --install neural-engine \
+      kubernetes/helm/neural-engine/ \
+      --values kubernetes/helm/neural-engine/values.yaml \
+      --namespace neural-engine \
+      --create-namespace
     ```
   </Tabs.Tab>
 </Tabs>

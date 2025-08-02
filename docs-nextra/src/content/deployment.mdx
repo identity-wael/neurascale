@@ -396,18 +396,106 @@ Enable in Project Settings → Analytics
 
 ### Multi-Project Architecture
 
-NeuraScale uses a three-project GCP architecture with centralized Terraform state:
+NeuraScale uses a four-project GCP architecture with centralized services and identity management:
 
 | Project | ID | Purpose | Region |
 |---------|-----|---------|--------|
+| **Central Services** | `neurascale` (Project ID: 555656387124) | Identity federation, Terraform state, shared services | `US` |
 | **Development** | `development-neurascale` | Feature development | `northamerica-northeast1` |
 | **Staging** | `staging-neurascale` | Integration testing | `northamerica-northeast1` |
 | **Production** | `production-neurascale` | Live environment | `northamerica-northeast1` |
-| **State Management** | `neurascale` (Project ID: 555656387124) | Terraform state bucket | `US` |
 
 <Callout type="info">
-  **Important**: Terraform state is stored in the `neurascale-terraform-state` bucket in the `neurascale` project. All environments share this state bucket with different prefixes.
+  **Central Services Project**: The `neurascale` project serves as the hub for:
+  - **Identity Federation**: Workload Identity Federation for GitHub Actions
+  - **Terraform State**: Centralized state bucket (`neurascale-terraform-state`)
+  - **Cross-Project IAM**: Service accounts and permissions management
+  - **Shared Resources**: Domain verification, organization-level policies
 </Callout>
+
+### Identity Federation Architecture
+
+```mermaid
+graph TB
+    subgraph "External Identity Providers"
+        GH[GitHub Actions<br/>OIDC Provider]
+        AD[Azure AD<br/>Future]
+        OK[Okta<br/>Future]
+    end
+
+    subgraph "neurascale Project"
+        WIF[Workload Identity<br/>Federation]
+        POOL[Identity Pool<br/>github-actions-pool]
+        PROV[Provider<br/>github-actions-provider]
+        SA[Service Account<br/>github-actions@neurascale]
+    end
+
+    subgraph "Environment Projects"
+        DEV[development-neurascale<br/>Dev Resources]
+        STG[staging-neurascale<br/>Staging Resources]
+        PRD[production-neurascale<br/>Prod Resources]
+    end
+
+    GH --> WIF
+    WIF --> POOL
+    POOL --> PROV
+    PROV --> SA
+
+    SA --> DEV
+    SA --> STG
+    SA --> PRD
+
+    style GH fill:#24292e,color:#ffffff
+    style WIF fill:#4285f4,color:#ffffff
+    style POOL fill:#34a853,color:#ffffff
+    style SA fill:#ea4335,color:#ffffff
+```
+
+### Setting Up Workload Identity Federation
+
+```bash
+# Variables
+PROJECT_ID="neurascale"
+PROJECT_NUMBER="555656387124"
+POOL_NAME="github-actions-pool"
+PROVIDER_NAME="github-actions-provider"
+SA_NAME="github-actions"
+
+# Create workload identity pool
+gcloud iam workload-identity-pools create $POOL_NAME \
+  --project=$PROJECT_ID \
+  --location="global" \
+  --display-name="GitHub Actions Pool"
+
+# Create workload identity provider
+gcloud iam workload-identity-pools providers create-oidc $PROVIDER_NAME \
+  --project=$PROJECT_ID \
+  --location="global" \
+  --workload-identity-pool=$POOL_NAME \
+  --display-name="GitHub Actions Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-condition="assertion.repository_owner=='identity-wael'"
+
+# Create service account
+gcloud iam service-accounts create $SA_NAME \
+  --project=$PROJECT_ID \
+  --display-name="GitHub Actions Service Account"
+
+# Allow workload identity to impersonate service account
+gcloud iam service-accounts add-iam-policy-binding \
+  ${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com \
+  --project=$PROJECT_ID \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/attribute.repository/identity-wael/neurascale"
+
+# Grant permissions to other projects
+for ENV_PROJECT in development-neurascale staging-neurascale production-neurascale; do
+  gcloud projects add-iam-policy-binding $ENV_PROJECT \
+    --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/editor"
+done
+```
 
 ### Infrastructure Components
 
@@ -1386,18 +1474,22 @@ jobs:
           npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} \
             --scope=${{ secrets.VERCEL_SCOPE }}
 
-  # Deploy Neural Engine to GCP
+  # Deploy Neural Engine to GCP using Workload Identity Federation
   deploy-engine-staging:
     if: github.ref == 'refs/heads/develop'
     needs: test-engine
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'  # Required for Workload Identity Federation
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Google Cloud
+      - name: Authenticate to Google Cloud with Workload Identity
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY_STAGING }}
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
       - name: Deploy to Cloud Run
         run: |
@@ -1405,7 +1497,7 @@ jobs:
           gcloud run deploy neural-engine \
             --source . \
             --platform managed \
-            --region us-central1 \
+            --region northamerica-northeast1 \
             --project staging-neurascale \
             --set-env-vars "ENV=staging"
 
@@ -1414,13 +1506,17 @@ jobs:
     needs: test-engine
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: 'read'
+      id-token: 'write'  # Required for Workload Identity Federation
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Google Cloud
+      - name: Authenticate to Google Cloud with Workload Identity
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY_PRODUCTION }}
+          workload_identity_provider: 'projects/555656387124/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions@neurascale.iam.gserviceaccount.com'
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
@@ -1430,7 +1526,7 @@ jobs:
       - name: Deploy to GKE
         run: |
           gcloud container clusters get-credentials neural-engine-prod \
-            --region us-central1 \
+            --region northamerica-northeast1 \
             --project production-neurascale
 
           helm upgrade --install neural-engine \

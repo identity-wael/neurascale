@@ -1,0 +1,1253 @@
+import { Tabs, Callout, Steps } from 'nextra/components'
+
+# Device Integration Guide
+
+This comprehensive guide covers integration with 30+ BCI devices supported by NeuraScale, from consumer-grade headsets to clinical-grade arrays.
+
+## Supported Device Categories
+
+NeuraScale supports a wide range of brain-computer interface devices across different categories:
+
+### Consumer BCI Devices
+- **OpenBCI** (Cyton, Ganglion, Cyton+Daisy)
+- **Emotiv** (EPOC+, Insight, EPOC X)
+- **Muse** (Muse 2, Muse S)
+- **NeuroSky** (MindWave, MindWave Mobile)
+
+### Research-Grade Systems
+- **g.tec** (g.USBamp, g.Nautilus, g.HIamp)
+- **BrainProducts** (actiCHamp, LiveAmp, QuickAmp)
+- **ANT Neuro** (eego™ systems)
+- **BioSemi** (ActiveTwo)
+
+### Clinical Arrays
+- **Blackrock** (Utah Array, CerePlex)
+- **Plexon** (OmniPlex)
+- **Ripple** (Grapevine)
+- **Custom LSL streams**
+
+## OpenBCI Integration
+
+OpenBCI devices are among the most popular research-grade BCI systems, offering excellent value and flexibility.
+
+<Tabs items={['Cyton Board', 'Ganglion Board', 'Cyton+Daisy', 'WiFi Shield']}>
+  <Tabs.Tab>
+    **OpenBCI Cyton (8-channel EEG)**
+
+    The Cyton board is OpenBCI's flagship 8-channel biosensing board.
+
+    <Steps>
+    ### Hardware Setup
+
+    1. **Assemble the Cyton Board**
+       - Attach the USB dongle to your computer
+       - Power on the Cyton board
+       - Ensure the blue LED is blinking (pairing mode)
+
+    2. **Electrode Preparation**
+       ```bash
+       # Standard 10-20 electrode positions for 8 channels
+       # Fp1, Fp2, C3, C4, P7, P8, O1, O2
+       ```
+
+    3. **Connect Electrodes**
+       - Use gold cup electrodes with Ten20 paste
+       - Connect ground electrode to ear lobe or mastoid
+       - Verify impedances are below 5kΩ
+
+    ### Software Integration
+
+    ```python
+    from neurascale import NeuraScaleClient
+    from neurascale.devices import OpenBCICyton
+
+    # Initialize client
+    client = NeuraScaleClient(api_key="your-api-key")
+
+    # Configure Cyton device
+    cyton_config = {
+        "device_id": "openbci_cyton_001",
+        "connection": {
+            "port": "/dev/ttyUSB0",  # Linux/macOS
+            # "port": "COM3",        # Windows
+            "baudrate": 115200,
+            "timeout": 5.0
+        },
+        "acquisition": {
+            "sample_rate": 250,  # Hz
+            "channels": [1, 2, 3, 4, 5, 6, 7, 8],
+            "gain": 24,  # 24x gain
+            "bias": True,
+            "srb2": True
+        },
+        "filters": {
+            "notch": 60,      # Power line noise
+            "highpass": 0.5,  # Remove DC drift
+            "lowpass": 100    # Anti-aliasing
+        }
+    }
+
+    # Connect device
+    cyton = await client.devices.connect("openbci_cyton_001", cyton_config)
+    print(f"Connected to {cyton.name}")
+
+    # Start data streaming
+    stream = await cyton.start_stream()
+
+    async for data_packet in stream:
+        print(f"Timestamp: {data_packet.timestamp}")
+        print(f"Channels: {[ch.value for ch in data_packet.channels]}")
+
+        # Process data in real-time
+        await process_eeg_data(data_packet)
+    ```
+
+    ### Advanced Configuration
+
+    ```python
+    # Custom channel configuration
+    channel_config = {
+        1: {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+        2: {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+        3: {"gain": 12, "input_type": "normal", "bias": True, "srb2": False},  # Different gain
+        4: {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+        5: {"gain": 24, "input_type": "shorted", "bias": False, "srb2": False},  # Test channel
+        6: {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+        7: {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+        8: {"gain": 24, "input_type": "bias_meas", "bias": False, "srb2": False}  # Bias measurement
+    }
+
+    # Apply channel configuration
+    await cyton.configure_channels(channel_config)
+
+    # Enable test signals for calibration
+    await cyton.enable_test_signal(frequency=10, amplitude=1.0)  # 10Hz, 1µV
+
+    # Check impedances
+    impedances = await cyton.measure_impedance()
+    for channel, impedance in impedances.items():
+        print(f"Channel {channel}: {impedance/1000:.1f}kΩ")
+    ```
+
+    ### Troubleshooting
+
+    **Common Issues:**
+    - **Device not found**: Check USB permissions and drivers
+    - **Poor signal quality**: Verify electrode contact and impedances
+    - **Data dropouts**: Check USB cable and interference sources
+
+    ```python
+    # Diagnostic function
+    async def diagnose_cyton(device):
+        # Check firmware version
+        firmware = await device.get_firmware_version()
+        print(f"Firmware: {firmware}")
+
+        # Test board functionality
+        board_test = await device.run_board_test()
+        print(f"Board test: {'PASS' if board_test else 'FAIL'}")
+
+        # Check signal quality
+        quality = await device.assess_signal_quality(duration=10)
+        for ch, q in quality.items():
+            status = "GOOD" if q > 0.8 else "POOR"
+            print(f"Channel {ch}: {q:.2f} ({status})")
+    ```
+    </Steps>
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **OpenBCI Ganglion (4-channel EEG)**
+
+    The Ganglion is a low-cost, wireless 4-channel biosensing board.
+
+    <Steps>
+    ### Hardware Setup
+
+    1. **Bluetooth Pairing**
+       - Enable Bluetooth on your computer
+       - Power on the Ganglion board
+       - Look for "Ganglion-XXXX" in Bluetooth devices
+
+    2. **Electrode Setup**
+       - Use dry electrodes or standard cup electrodes
+       - 4 channels typically placed at C3, C4, Cz, and POz
+
+    ### Software Integration
+
+    ```python
+    from neurascale.devices import OpenBCIGanglion
+
+    # Configure Ganglion device
+    ganglion_config = {
+        "device_id": "openbci_ganglion_001",
+        "connection": {
+            "method": "bluetooth",
+            "mac_address": "00:11:22:33:44:55",  # Device MAC address
+            "timeout": 10.0,
+            "auto_reconnect": True
+        },
+        "acquisition": {
+            "sample_rate": 200,  # Fixed 200 Hz for Ganglion
+            "channels": [1, 2, 3, 4],
+            "accelerometer": True,  # Include motion data
+            "impedance_check": True
+        },
+        "filters": {
+            "notch": 60,
+            "highpass": 1.0,
+            "lowpass": 50,
+            "enable_digital_filters": True
+        }
+    }
+
+    # Connect and stream
+    ganglion = await client.devices.connect("openbci_ganglion_001", ganglion_config)
+
+    # Monitor battery level
+    battery_level = await ganglion.get_battery_level()
+    print(f"Battery: {battery_level}%")
+
+    # Stream data with motion sensors
+    stream = await ganglion.start_stream()
+
+    async for packet in stream:
+        eeg_data = packet.eeg_channels  # 4 EEG channels
+        accel_data = packet.accelerometer  # 3-axis accelerometer
+
+        print(f"EEG: {[ch.value for ch in eeg_data]}")
+        print(f"Accel: {accel_data.x:.2f}, {accel_data.y:.2f}, {accel_data.z:.2f}")
+    ```
+
+    ### Wireless Optimization
+
+    ```python
+    # Optimize for wireless performance
+    wireless_config = {
+        "connection_interval": 7.5,  # milliseconds
+        "supervision_timeout": 20000,  # milliseconds
+        "slave_latency": 0,
+        "scan_window": 100,  # milliseconds
+        "scan_interval": 200  # milliseconds
+    }
+
+    await ganglion.configure_bluetooth(wireless_config)
+
+    # Monitor connection quality
+    async def monitor_connection():
+        while True:
+            stats = await ganglion.get_connection_stats()
+            print(f"RSSI: {stats.rssi}dBm")
+            print(f"Packet loss: {stats.packet_loss:.2%}")
+            print(f"Latency: {stats.latency:.1f}ms")
+
+            if stats.rssi < -80:
+                print("Warning: Weak signal strength")
+
+            await asyncio.sleep(5)
+    ```
+    </Steps>
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **OpenBCI Cyton+Daisy (16-channel EEG)**
+
+    The Cyton+Daisy combination provides 16 channels for high-density EEG.
+
+    <Steps>
+    ### Hardware Setup
+
+    1. **Daisy Module Connection**
+       - Connect Daisy module to Cyton board
+       - Ensure secure connection of ribbon cable
+       - Power on the combined system
+
+    2. **16-Channel Electrode Layout**
+       ```python
+       # Standard 16-channel 10-20 layout
+       electrode_layout = {
+           "cyton_channels": {
+               1: "Fp1", 2: "Fp2", 3: "C3", 4: "C4",
+               5: "P7", 6: "P8", 7: "O1", 8: "O2"
+           },
+           "daisy_channels": {
+               9: "F7", 10: "F8", 11: "F3", 12: "F4",
+               13: "T7", 14: "T8", 15: "P3", 16: "P4"
+           }
+       }
+       ```
+
+    ### Software Integration
+
+    ```python
+    # Configure 16-channel system
+    cyton_daisy_config = {
+        "device_id": "openbci_daisy_001",
+        "connection": {
+            "port": "/dev/ttyUSB0",
+            "baudrate": 115200,
+            "daisy_module": True
+        },
+        "acquisition": {
+            "sample_rate": 125,  # Reduced for 16 channels
+            "channels": list(range(1, 17)),
+            "channel_layout": electrode_layout
+        },
+        "synchronization": {
+            "enable": True,
+            "sync_pin": "D17",
+            "sync_frequency": 1.0  # 1 Hz sync pulse
+        }
+    }
+
+    # Connect 16-channel system
+    daisy_system = await client.devices.connect("openbci_daisy_001", cyton_daisy_config)
+
+    # Configure individual channels
+    for channel in range(1, 17):
+        await daisy_system.configure_channel(
+            channel=channel,
+            gain=24,
+            input_type="normal",
+            bias=True,
+            srb2=True if channel <= 8 else False  # Different config for Daisy
+        )
+
+    # Stream 16-channel data
+    stream = await daisy_system.start_stream()
+
+    async for packet in stream:
+        # Process all 16 channels
+        channel_data = {
+            electrode_layout["cyton_channels"][ch]: packet.channels[ch-1].value
+            for ch in range(1, 9)
+        }
+        channel_data.update({
+            electrode_layout["daisy_channels"][ch]: packet.channels[ch-1].value
+            for ch in range(9, 17)
+        })
+
+        # High-density analysis
+        await analyze_hd_eeg(channel_data)
+    ```
+
+    ### Synchronization and Timing
+
+    ```python
+    # External synchronization setup
+    sync_config = {
+        "external_trigger": {
+            "enable": True,
+            "pin": "D11",
+            "trigger_mode": "rising_edge",
+            "debounce": 10  # milliseconds
+        },
+        "sync_output": {
+            "enable": True,
+            "pin": "D17",
+            "frequency": 1.0,  # Hz
+            "pulse_width": 100  # milliseconds
+        }
+    }
+
+    await daisy_system.configure_sync(sync_config)
+
+    # Handle sync events
+    async def handle_sync_events(packet):
+        if packet.has_sync_event:
+            event_time = packet.sync_timestamp
+            event_type = packet.sync_event_type
+            print(f"Sync event: {event_type} at {event_time}")
+
+            # Mark event in data stream
+            await client.events.add_marker(
+                timestamp=event_time,
+                event_type=event_type,
+                session_id=packet.session_id
+            )
+    ```
+    </Steps>
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **OpenBCI WiFi Shield**
+
+    The WiFi Shield enables wireless streaming for Cyton boards.
+
+    <Steps>
+    ### WiFi Shield Setup
+
+    1. **Network Configuration**
+       ```python
+       # Configure WiFi connection
+       wifi_config = {
+           "ssid": "YourNetworkName",
+           "password": "YourNetworkPassword",
+           "security": "WPA2",  # WPA2, WPA, WEP, or OPEN
+           "ip_mode": "dhcp"    # dhcp or static
+       }
+
+       await cyton.configure_wifi(wifi_config)
+       ```
+
+    2. **Network Discovery**
+       ```python
+       # Discover WiFi-enabled boards on network
+       devices = await client.devices.discover_wifi_boards()
+       for device in devices:
+           print(f"Found: {device.name} at {device.ip_address}")
+       ```
+
+    ### Streaming Over WiFi
+
+    ```python
+    # Connect via WiFi
+    wifi_config = {
+        "device_id": "openbci_wifi_001",
+        "connection": {
+            "method": "wifi",
+            "ip_address": "192.168.1.100",
+            "port": 80,
+            "protocol": "tcp"  # tcp or udp
+        },
+        "network": {
+            "buffer_size": 2048,
+            "timeout": 5.0,
+            "keepalive": True,
+            "compression": True
+        }
+    }
+
+    wifi_cyton = await client.devices.connect("openbci_wifi_001", wifi_config)
+
+    # Monitor network performance
+    async def monitor_wifi_performance():
+        while True:
+            stats = await wifi_cyton.get_network_stats()
+            print(f"Throughput: {stats.throughput:.1f} kbps")
+            print(f"Latency: {stats.latency:.1f} ms")
+            print(f"Packet loss: {stats.packet_loss:.2%}")
+
+            if stats.latency > 50:
+                print("Warning: High network latency")
+
+            await asyncio.sleep(10)
+
+    # Start monitoring task
+    monitor_task = asyncio.create_task(monitor_wifi_performance())
+
+    # Stream data
+    stream = await wifi_cyton.start_stream()
+    async for packet in stream:
+        await process_data(packet)
+    ```
+
+    ### Advanced WiFi Features
+
+    ```python
+    # TCP vs UDP comparison
+    protocols = {
+        "tcp": {
+            "reliable": True,
+            "ordered": True,
+            "overhead": "higher",
+            "latency": "higher"
+        },
+        "udp": {
+            "reliable": False,
+            "ordered": False,
+            "overhead": "lower",
+            "latency": "lower"
+        }
+    }
+
+    # Choose protocol based on application
+    if real_time_critical:
+        protocol = "udp"
+        await wifi_cyton.set_protocol("udp")
+    else:
+        protocol = "tcp"
+        await wifi_cyton.set_protocol("tcp")
+
+    # Handle packet loss with UDP
+    if protocol == "udp":
+        packet_buffer = {}
+        expected_sequence = 0
+
+        async def handle_udp_packet(packet):
+            nonlocal expected_sequence
+
+            if packet.sequence_number == expected_sequence:
+                # In-order packet
+                await process_packet(packet)
+                expected_sequence += 1
+
+                # Check buffer for next packets
+                while expected_sequence in packet_buffer:
+                    buffered_packet = packet_buffer.pop(expected_sequence)
+                    await process_packet(buffered_packet)
+                    expected_sequence += 1
+            else:
+                # Out-of-order packet, buffer it
+                packet_buffer[packet.sequence_number] = packet
+    ```
+    </Steps>
+  </Tabs.Tab>
+</Tabs>
+
+## Emotiv Integration
+
+Emotiv devices offer consumer-friendly BCI solutions with advanced signal processing.
+
+<Tabs items={['EPOC+', 'Insight', 'EPOC X']}>
+  <Tabs.Tab>
+    **Emotiv EPOC+ (14-channel EEG)**
+
+    <Steps>
+    ### Setup and Authentication
+
+    1. **Emotiv Account Setup**
+       - Create account at emotiv.com
+       - Obtain Client ID and Client Secret
+       - Purchase appropriate license
+
+    2. **Device Authentication**
+       ```python
+       from neurascale.devices import EmotivEPOCPlus
+
+       # Configure authentication
+       emotiv_auth = {
+           "client_id": "your_client_id",
+           "client_secret": "your_client_secret",
+           "license_key": "your_license_key"
+       }
+
+       # Initialize EPOC+ device
+       epoc_config = {
+           "device_id": "emotiv_epoc_plus_001",
+           "authentication": emotiv_auth,
+           "acquisition": {
+               "sample_rate": 128,  # Fixed for EPOC+
+               "channels": [
+                   "AF3", "F7", "F3", "FC5", "T7", "P7", "O1",
+                   "O2", "P8", "T8", "FC6", "F4", "F8", "AF4"
+               ],
+               "motion_sensors": True,
+               "contact_quality": True
+           }
+       }
+
+       epoc = await client.devices.connect("emotiv_epoc_plus_001", epoc_config)
+       ```
+
+    ### Contact Quality Monitoring
+
+    ```python
+    # Real-time contact quality monitoring
+    async def monitor_contact_quality():
+        while True:
+            quality = await epoc.get_contact_quality()
+
+            print("Contact Quality:")
+            for electrode, q in quality.items():
+                status = "GOOD" if q > 80 else "FAIR" if q > 50 else "POOR"
+                print(f"  {electrode}: {q}% ({status})")
+
+            # Alert on poor contact
+            poor_contacts = [e for e, q in quality.items() if q < 50]
+            if poor_contacts:
+                print(f"Warning: Poor contact on {poor_contacts}")
+
+            await asyncio.sleep(5)
+
+    # Start monitoring
+    quality_task = asyncio.create_task(monitor_contact_quality())
+    ```
+
+    ### Data Streaming with Motion
+
+    ```python
+    # Stream EEG and motion data
+    stream = await epoc.start_stream()
+
+    async for packet in stream:
+        # EEG data (14 channels)
+        eeg_data = packet.eeg_channels
+
+        # Motion data
+        gyro = packet.gyroscope  # 3-axis gyroscope
+        accel = packet.accelerometer  # 3-axis accelerometer
+
+        # Contact quality (updated every second)
+        if packet.has_contact_quality:
+            contact_quality = packet.contact_quality
+
+        # Process combined data
+        await process_multimodal_data({
+            'eeg': eeg_data,
+            'motion': {'gyro': gyro, 'accel': accel},
+            'quality': contact_quality
+        })
+    ```
+
+    ### Advanced Features
+
+    ```python
+    # Enable advanced Emotiv features
+    await epoc.enable_performance_metrics()
+    await epoc.enable_facial_expressions()
+    await epoc.enable_mental_commands()
+
+    # Get performance metrics
+    performance = await epoc.get_performance_metrics()
+    print(f"Attention: {performance.attention:.2f}")
+    print(f"Meditation: {performance.meditation:.2f}")
+    print(f"Engagement: {performance.engagement:.2f}")
+
+    # Detect facial expressions
+    expressions = await epoc.get_facial_expressions()
+    if expressions.blink > 0.5:
+        print("Eye blink detected")
+    if expressions.smile > 0.7:
+        print("Smile detected")
+
+    # Mental commands (requires training)
+    commands = await epoc.get_mental_commands()
+    if commands.push > 0.8:
+        print("Push command detected")
+    ```
+    </Steps>
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Emotiv Insight (5-channel EEG)**
+
+    <Steps>
+    ### Insight Configuration
+
+    ```python
+    # Configure Insight device
+    insight_config = {
+        "device_id": "emotiv_insight_001",
+        "authentication": emotiv_auth,
+        "acquisition": {
+            "sample_rate": 128,
+            "channels": ["AF3", "AF4", "T7", "T8", "Pz"],
+            "dry_electrodes": True,
+            "auto_calibration": True
+        },
+        "wireless": {
+            "bluetooth_version": "4.0",
+            "connection_stability": "high",
+            "auto_reconnect": True
+        }
+    }
+
+    insight = await client.devices.connect("emotiv_insight_001", insight_config)
+    ```
+
+    ### Battery Management
+
+    ```python
+    # Monitor battery status
+    async def monitor_battery():
+        while True:
+            battery = await insight.get_battery_status()
+
+            print(f"Battery Level: {battery.level}%")
+            print(f"Charging: {'Yes' if battery.charging else 'No'}")
+            print(f"Time Remaining: {battery.time_remaining} hours")
+
+            if battery.level < 20:
+                print("Warning: Low battery!")
+                # Optionally reduce sampling rate to conserve power
+                await insight.set_power_mode("low_power")
+
+            await asyncio.sleep(60)  # Check every minute
+    ```
+
+    ### Simple Stream Processing
+
+    ```python
+    # Simplified streaming for Insight
+    stream = await insight.start_stream()
+
+    async for packet in stream:
+        # 5-channel EEG data
+        channels = {
+            "AF3": packet.channels[0].value,
+            "AF4": packet.channels[1].value,
+            "T7": packet.channels[2].value,
+            "T8": packet.channels[3].value,
+            "Pz": packet.channels[4].value
+        }
+
+        # Basic signal quality check
+        if all(abs(v) < 200 for v in channels.values()):  # Within ±200µV
+            await process_clean_data(channels)
+        else:
+            print("Artifact detected, skipping packet")
+    ```
+    </Steps>
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Emotiv EPOC X (14-channel High-Resolution)**
+
+    <Steps>
+    ### EPOC X Advanced Features
+
+    ```python
+    # Configure EPOC X with advanced features
+    epoc_x_config = {
+        "device_id": "emotiv_epoc_x_001",
+        "authentication": emotiv_auth,
+        "acquisition": {
+            "sample_rate": 256,  # Higher rate for EPOC X
+            "channels": [
+                "AF3", "F7", "F3", "FC5", "T7", "P7", "O1", "O2",
+                "P8", "T8", "FC6", "F4", "F8", "AF4", "FC1", "FC2"
+            ],
+            "density_mode": "high",
+            "electrode_type": "saline"
+        },
+        "advanced": {
+            "head_tracking": True,
+            "facial_expression": True,
+            "mental_commands": True,
+            "performance_metrics": True
+        }
+    }
+
+    epoc_x = await client.devices.connect("emotiv_epoc_x_001", epoc_x_config)
+    ```
+
+    ### Multi-Modal Data Processing
+
+    ```python
+    # Process all data modalities
+    async def process_epoc_x_data():
+        stream = await epoc_x.start_stream()
+
+        async for packet in stream:
+            # High-resolution EEG (256 Hz)
+            eeg_data = packet.eeg_channels
+
+            # Head tracking data
+            head_position = packet.head_tracking
+
+            # Facial expressions
+            expressions = packet.facial_expressions
+
+            # Mental commands
+            commands = packet.mental_commands
+
+            # Performance metrics
+            performance = packet.performance_metrics
+
+            # Combine all modalities for analysis
+            multimodal_data = {
+                'timestamp': packet.timestamp,
+                'eeg': eeg_data,
+                'head_position': {
+                    'x': head_position.x,
+                    'y': head_position.y,
+                    'z': head_position.z,
+                    'pitch': head_position.pitch,
+                    'yaw': head_position.yaw,
+                    'roll': head_position.roll
+                },
+                'expressions': {
+                    'blink': expressions.blink,
+                    'wink_left': expressions.wink_left,
+                    'wink_right': expressions.wink_right,
+                    'smile': expressions.smile,
+                    'frown': expressions.frown
+                },
+                'commands': {
+                    'push': commands.push,
+                    'pull': commands.pull,
+                    'lift': commands.lift,
+                    'drop': commands.drop
+                },
+                'performance': {
+                    'attention': performance.attention,
+                    'meditation': performance.meditation,
+                    'engagement': performance.engagement,
+                    'excitement': performance.excitement,
+                    'stress': performance.stress
+                }
+            }
+
+            await analyze_multimodal_bci(multimodal_data)
+
+    # Train mental commands
+    async def train_mental_commands():
+        # Start training session
+        training = await epoc_x.start_mental_command_training()
+
+        # Train individual commands
+        for command in ["push", "pull", "lift", "drop"]:
+            print(f"Training {command} command...")
+            print("Think about the action when ready...")
+
+            await training.train_command(
+                command=command,
+                duration=10,  # 10 seconds
+                trials=5      # 5 training trials
+            )
+
+            accuracy = await training.test_command(command)
+            print(f"{command} accuracy: {accuracy:.1%}")
+
+        # Save trained model
+        await training.save_model("my_mental_commands.model")
+    ```
+    </Steps>
+  </Tabs.Tab>
+</Tabs>
+
+## Research-Grade Systems
+
+### g.tec Integration
+
+<Tabs items={['g.USBamp', 'g.Nautilus', 'g.HIamp']}>
+  <Tabs.Tab>
+    **g.tec g.USBamp (16-channel)**
+
+    ```python
+    from neurascale.devices import GtecUSBamp
+
+    # Configure g.USBamp
+    gusb_config = {
+        "device_id": "gtec_usbamp_001",
+        "connection": {
+            "serial_number": "UA-2019.05.15",
+            "driver_version": "3.20.02"
+        },
+        "acquisition": {
+            "sample_rate": 512,  # Up to 38.4 kHz
+            "channels": list(range(1, 17)),  # 16 channels
+            "input_range": 500,  # µV
+            "reference": "common",  # common, differential, single-ended
+            "ground": "channel_16"
+        },
+        "filters": {
+            "notch": [50, 100],  # Multiple notch filters
+            "highpass": 0.1,
+            "lowpass": 100,
+            "bandstop": [[49, 51], [99, 101]]  # Precise frequency bands
+        },
+        "triggers": {
+            "digital_inputs": True,
+            "analog_trigger": {
+                "enable": True,
+                "channel": "AIN1",
+                "threshold": 2.5  # Volts
+            }
+        }
+    }
+
+    gusb = await client.devices.connect("gtec_usbamp_001", gusb_config)
+
+    # High-precision streaming
+    stream = await gusb.start_stream()
+
+    async for packet in stream:
+        # High-resolution data (24-bit ADC)
+        eeg_data = packet.channels  # 16 channels
+        digital_triggers = packet.digital_inputs
+        analog_trigger = packet.analog_trigger
+
+        # Process triggers
+        if any(digital_triggers):
+            trigger_channels = [i for i, t in enumerate(digital_triggers) if t]
+            await handle_digital_triggers(trigger_channels, packet.timestamp)
+
+        if analog_trigger > gusb_config["triggers"]["analog_trigger"]["threshold"]:
+            await handle_analog_trigger(analog_trigger, packet.timestamp)
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **g.tec g.Nautilus (32-channel Wireless)**
+
+    ```python
+    # Configure g.Nautilus wireless system
+    nautilus_config = {
+        "device_id": "gtec_nautilus_001",
+        "connection": {
+            "method": "wireless",
+            "pairing_code": "123456",
+            "encryption": True
+        },
+        "acquisition": {
+            "sample_rate": 500,
+            "channels": list(range(1, 33)),  # 32 channels
+            "accelerometer": True,
+            "counter": True,
+            "validation_indicator": True
+        },
+        "wireless": {
+            "frequency_band": "2.4GHz",
+            "channel": "auto",
+            "power_level": "high",
+            "latency_mode": "low"
+        }
+    }
+
+    nautilus = await client.devices.connect("gtec_nautilus_001", nautilus_config)
+
+    # Monitor wireless quality
+    async def monitor_wireless():
+        while True:
+            stats = await nautilus.get_wireless_stats()
+            print(f"Signal Strength: {stats.rssi} dBm")
+            print(f"Data Rate: {stats.data_rate} Mbps")
+            print(f"Packet Error Rate: {stats.per:.2%}")
+
+            await asyncio.sleep(5)
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **g.tec g.HIamp (256-channel High-Density)**
+
+    ```python
+    # Configure high-density system
+    hiamp_config = {
+        "device_id": "gtec_hiamp_001",
+        "connection": {
+            "interface": "usb3",
+            "aggregation_mode": True  # Multiple units
+        },
+        "acquisition": {
+            "sample_rate": 4800,  # High sampling rate
+            "channels": list(range(1, 257)),  # 256 channels
+            "resolution": "24bit",
+            "input_range": 100,  # µV
+            "dc_coupling": False
+        },
+        "high_density": {
+            "electrode_layout": "256_channel_geodesic",
+            "reference_scheme": "average",
+            "impedance_measurement": {
+                "enable": True,
+                "frequency": 10,  # Hz
+                "current": 10  # nA
+            }
+        }
+    }
+
+    hiamp = await client.devices.connect("gtec_hiamp_001", hiamp_config)
+
+    # Handle high-throughput data
+    async def process_hd_data():
+        stream = await hiamp.start_stream()
+        buffer = []
+
+        async for packet in stream:
+            buffer.append(packet)
+
+            # Process in chunks for efficiency
+            if len(buffer) >= 100:  # 100 packets ~ 20ms at 4800Hz
+                await process_hd_chunk(buffer)
+                buffer.clear()
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### BrainProducts Integration
+
+```python
+from neurascale.devices import BrainProductsAmp
+
+# Configure BrainProducts actiCHamp
+actichamp_config = {
+    "device_id": "bp_actichamp_001",
+    "connection": {
+        "interface": "usb",
+        "serial_number": "17010768"
+    },
+    "acquisition": {
+        "sample_rate": 1000,
+        "channels": list(range(1, 65)),  # 64 channels
+        "resolution": "24bit",
+        "input_range": "±100mV",
+        "dc_coupling": True
+    },
+    "modules": {
+        "aux_box": True,
+        "trigger_box": True,
+        "impedance_meter": True
+    },
+    "triggers": {
+        "parallel_port": True,
+        "serial_triggers": True,
+        "network_triggers": True
+    }
+}
+
+actichamp = await client.devices.connect("bp_actichamp_001", actichamp_config)
+
+# Real-time impedance monitoring
+async def monitor_impedances():
+    while True:
+        impedances = await actichamp.measure_all_impedances()
+
+        high_impedance = []
+        for ch, imp in impedances.items():
+            if imp > 50000:  # 50kΩ threshold
+                high_impedance.append(f"{ch}: {imp/1000:.1f}kΩ")
+
+        if high_impedance:
+            print(f"High impedance electrodes: {', '.join(high_impedance)}")
+
+        await asyncio.sleep(30)  # Check every 30 seconds
+```
+
+## LSL Stream Integration
+
+Lab Streaming Layer (LSL) provides a unified interface for various devices.
+
+```python
+from neurascale.devices import LSLStream
+from pylsl import resolve_streams
+
+# Discover available LSL streams
+available_streams = resolve_streams(timeout=5.0)
+print("Available LSL streams:")
+for stream in available_streams:
+    print(f"  {stream.name()} ({stream.type()}) - {stream.channel_count()} channels")
+
+# Configure LSL device
+lsl_config = {
+    "device_id": "lsl_eeg_001",
+    "stream": {
+        "name": "EEG_Stream",
+        "type": "EEG",
+        "source_id": "myuniquesourceid"
+    },
+    "buffering": {
+        "max_buflen": 360,  # 6 minutes
+        "max_chunklen": 0,  # No chunking
+        "recover": True
+    },
+    "clock_sync": {
+        "enable": True,
+        "correction_interval": 5.0
+    }
+}
+
+# Connect to LSL stream
+lsl_device = await client.devices.connect("lsl_eeg_001", lsl_config)
+
+# Handle clock synchronization
+async def sync_clocks():
+    while True:
+        # Get time correction
+        correction = await lsl_device.get_time_correction()
+        print(f"Clock offset: {correction:.3f}s")
+
+        if abs(correction) > 0.01:  # 10ms threshold
+            print("Warning: Large clock offset detected")
+
+        await asyncio.sleep(30)
+
+# Stream with timestamp correction
+stream = await lsl_device.start_stream()
+
+async for packet in stream:
+    # Apply time correction
+    corrected_timestamp = packet.timestamp + await lsl_device.get_time_correction()
+
+    # Process synchronized data
+    await process_synchronized_data(packet.data, corrected_timestamp)
+```
+
+## Multi-Device Synchronization
+
+### Hardware Synchronization
+
+```python
+# Synchronize multiple devices with hardware triggers
+sync_config = {
+    "master_device": "gtec_usbamp_001",
+    "slave_devices": [
+        "openbci_cyton_001",
+        "emotiv_epoc_001"
+    ],
+    "sync_method": "hardware_trigger",
+    "sync_frequency": 1.0,  # 1 Hz sync pulses
+    "sync_pin": "digital_out_1"
+}
+
+# Configure master device
+master = await client.devices.get("gtec_usbamp_001")
+await master.configure_sync_output(
+    pin="digital_out_1",
+    frequency=1.0,
+    pulse_width=100  # milliseconds
+)
+
+# Configure slave devices
+for slave_id in sync_config["slave_devices"]:
+    slave = await client.devices.get(slave_id)
+    await slave.configure_sync_input(
+        pin="digital_in_1",
+        trigger_mode="rising_edge"
+    )
+
+# Start synchronized recording
+session = await client.sessions.create_multi_device(
+    devices=sync_config["master_device"] + sync_config["slave_devices"],
+    sync_config=sync_config
+)
+
+await session.start_synchronized_recording()
+```
+
+### Software Synchronization
+
+```python
+# Software-based synchronization using NTP
+from neurascale.sync import SoftwareSync
+
+sync_manager = SoftwareSync()
+
+# Add devices to sync group
+sync_group = await sync_manager.create_group("experiment_001")
+await sync_group.add_device("openbci_cyton_001")
+await sync_group.add_device("emotiv_epoc_001")
+await sync_group.add_device("muse_001")
+
+# Enable NTP synchronization
+await sync_group.enable_ntp_sync(
+    ntp_server="pool.ntp.org",
+    sync_interval=60  # seconds
+)
+
+# Start synchronized streaming
+streams = await sync_group.start_synchronized_streams()
+
+# Process synchronized data
+async def process_multi_device_data():
+    async for synchronized_packet in streams:
+        # All devices have synchronized timestamps
+        device_data = {}
+        for device_id, packet in synchronized_packet.items():
+            device_data[device_id] = {
+                'timestamp': packet.timestamp,
+                'data': packet.channels,
+                'sync_quality': packet.sync_quality
+            }
+
+        # Check synchronization quality
+        timestamps = [data['timestamp'] for data in device_data.values()]
+        max_offset = max(timestamps) - min(timestamps)
+
+        if max_offset < 10:  # 10ms tolerance
+            await process_synchronized_data(device_data)
+        else:
+            print(f"Warning: Sync offset {max_offset:.1f}ms")
+```
+
+<Callout type="info">
+  For detailed device-specific configuration options and troubleshooting, refer to the manufacturer's documentation and our [Troubleshooting Guide](/docs/troubleshooting).
+</Callout>
+
+## Best Practices
+
+### Device Selection Guidelines
+
+1. **Research Applications**
+   - Use research-grade systems (g.tec, BrainProducts) for publication-quality data
+   - Consider channel count requirements (8-256 channels)
+   - Ensure adequate sampling rate (250-2000 Hz for EEG)
+
+2. **Clinical Applications**
+   - Choose FDA-approved devices for clinical trials
+   - Prioritize reliability and support
+   - Consider infection control requirements
+
+3. **Consumer Applications**
+   - Emotiv/Muse for ease of use
+   - OpenBCI for customization and cost-effectiveness
+   - Consider wireless connectivity needs
+
+### Performance Optimization
+
+```python
+# Optimize for real-time performance
+optimization_config = {
+    "buffer_management": {
+        "buffer_size": "minimal",  # Minimize latency
+        "double_buffering": True,
+        "memory_mapping": True
+    },
+    "processing": {
+        "parallel_channels": True,
+        "gpu_acceleration": False,  # CPU often faster for small datasets
+        "vectorization": True
+    },
+    "network": {
+        "tcp_nodelay": True,
+        "socket_buffer_size": 65536,
+        "compression": False  # Trade bandwidth for latency
+    }
+}
+
+# Apply optimizations
+await client.configure_performance(optimization_config)
+```
+
+### Quality Assurance
+
+```python
+# Implement comprehensive quality checks
+class QualityMonitor:
+    def __init__(self, device):
+        self.device = device
+        self.quality_thresholds = {
+            "impedance": 50000,  # 50kΩ
+            "signal_range": 200,  # ±200µV
+            "packet_loss": 0.01,  # 1%
+            "sync_offset": 10     # 10ms
+        }
+
+    async def check_signal_quality(self, packet):
+        issues = []
+
+        # Check impedances
+        if hasattr(packet, 'impedance'):
+            high_impedance = [
+                ch for ch, imp in packet.impedance.items()
+                if imp > self.quality_thresholds["impedance"]
+            ]
+            if high_impedance:
+                issues.append(f"High impedance: {high_impedance}")
+
+        # Check signal range
+        for channel in packet.channels:
+            if abs(channel.value) > self.quality_thresholds["signal_range"]:
+                issues.append(f"Saturation on channel {channel.number}")
+
+        # Check packet loss
+        if packet.packet_loss > self.quality_thresholds["packet_loss"]:
+            issues.append(f"Packet loss: {packet.packet_loss:.2%}")
+
+        return issues
+
+    async def monitor_continuously(self):
+        stream = await self.device.start_stream()
+
+        async for packet in stream:
+            issues = await self.check_signal_quality(packet)
+            if issues:
+                print(f"Quality issues detected: {', '.join(issues)}")
+                await self.handle_quality_issues(issues)
+
+# Use quality monitor
+monitor = QualityMonitor(device)
+monitor_task = asyncio.create_task(monitor.monitor_continuously())
+```

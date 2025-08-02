@@ -1,0 +1,1163 @@
+import { Steps, Tabs, Callout } from 'nextra/components'
+
+# Developer Guide
+
+This guide provides practical examples and tutorials for integrating with NeuraScale, covering everything from basic device connection to advanced real-time neural classification.
+
+## Quick Start Integration
+
+### Python SDK
+
+The Python SDK is the recommended way to integrate with NeuraScale for research and clinical applications.
+
+<Steps>
+### Install the SDK
+
+```bash
+pip install neurascale-sdk
+```
+
+### Initialize Connection
+
+```python
+from neurascale import NeuraScaleClient
+import asyncio
+
+# Initialize client
+client = NeuraScaleClient(
+    api_key="your-api-key",
+    base_url="https://api.neurascale.io"
+)
+
+# Test connection
+async def test_connection():
+    status = await client.health.check()
+    print(f"NeuraScale status: {status}")
+
+asyncio.run(test_connection())
+```
+
+### Connect Your First Device
+
+```python
+async def connect_device():
+    # List available devices
+    devices = await client.devices.list()
+    print(f"Found {len(devices)} devices")
+
+    # Connect to OpenBCI device
+    device = await client.devices.connect(
+        device_id="openbci_001",
+        config={
+            "sample_rate": 250,
+            "channels": [1, 2, 3, 4, 5, 6, 7, 8],
+            "filters": {
+                "notch": 60,
+                "bandpass": [0.5, 100]
+            }
+        }
+    )
+
+    print(f"Connected to {device.name}")
+    return device
+
+device = asyncio.run(connect_device())
+```
+
+### Start Real-time Streaming
+
+```python
+async def stream_data():
+    # Start streaming
+    stream = await client.streams.start(
+        device_id="openbci_001",
+        session_name="my_first_recording"
+    )
+
+    # Process real-time data
+    async for data_packet in stream:
+        print(f"Received {len(data_packet.channels)} channels")
+        print(f"Timestamp: {data_packet.timestamp}")
+
+        # Process your data here
+        for channel in data_packet.channels:
+            print(f"Channel {channel.number}: {channel.value:.3f}µV")
+
+        # Stop after 100 packets for demo
+        if data_packet.sequence_number > 100:
+            break
+
+    # Stop streaming
+    await stream.stop()
+
+asyncio.run(stream_data())
+```
+</Steps>
+
+## Language-Specific SDKs
+
+<Tabs items={['Python', 'JavaScript/TypeScript', 'MATLAB', 'R']}>
+  <Tabs.Tab>
+    **Python SDK - Advanced Usage**
+
+    ```python
+    from neurascale import NeuraScaleClient
+    from neurascale.analysis import MotorImageryClassifier
+    from neurascale.preprocessing import SignalProcessor
+    import numpy as np
+
+    class NeuraScaleApp:
+        def __init__(self, api_key: str):
+            self.client = NeuraScaleClient(api_key=api_key)
+            self.processor = SignalProcessor()
+            self.classifier = MotorImageryClassifier()
+
+        async def setup_session(self):
+            """Setup a new recording session"""
+            self.session = await self.client.sessions.create(
+                name="Motor Imagery Training",
+                participant_id="participant_001",
+                protocol="motor_imagery_4class",
+                metadata={
+                    "condition": "training",
+                    "experimenter": "researcher_01"
+                }
+            )
+
+        async def real_time_classification(self):
+            """Real-time motor imagery classification"""
+
+            # Configure preprocessing
+            self.processor.configure(
+                notch_filter=60,
+                bandpass=[8, 30],  # Focus on mu and beta bands
+                window_size=2.0,   # 2-second windows
+                overlap=0.5        # 50% overlap
+            )
+
+            # Start streaming
+            stream = await self.client.streams.start(
+                device_id="openbci_001",
+                session_id=self.session.id
+            )
+
+            async for data_packet in stream:
+                # Preprocess signal
+                processed = self.processor.process(data_packet.raw_data)
+
+                # Extract features
+                features = self.processor.extract_features(
+                    processed,
+                    feature_types=['psd', 'csp', 'band_power']
+                )
+
+                # Classify movement intention
+                prediction = await self.classifier.predict(features)
+
+                print(f"Prediction: {prediction.label}")
+                print(f"Confidence: {prediction.confidence:.2f}")
+
+                # Send feedback to user interface
+                await self.send_feedback(prediction)
+
+        async def send_feedback(self, prediction):
+            """Send real-time feedback"""
+            feedback = {
+                "timestamp": prediction.timestamp,
+                "direction": prediction.label,
+                "confidence": prediction.confidence,
+                "feedback_type": "visual_cursor"
+            }
+
+            await self.client.feedback.send(feedback)
+
+    # Usage
+    app = NeuraScaleApp("your-api-key")
+    asyncio.run(app.setup_session())
+    asyncio.run(app.real_time_classification())
+    ```
+
+    **Batch Processing Example**
+
+    ```python
+    from neurascale.analysis import BatchProcessor
+    from datetime import datetime, timedelta
+
+    async def analyze_historical_data():
+        """Analyze stored neural data"""
+
+        # Query data from last week
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=7)
+
+        data = await client.data.query(
+            session_ids=["session_123", "session_124"],
+            start_time=start_time,
+            end_time=end_time,
+            channels=[1, 2, 3, 4]
+        )
+
+        # Process in batches
+        processor = BatchProcessor()
+        results = await processor.analyze(
+            data=data,
+            analysis_type="spectral_analysis",
+            parameters={
+                "frequency_bands": {
+                    "delta": [0.5, 4],
+                    "theta": [4, 8],
+                    "alpha": [8, 13],
+                    "beta": [13, 30],
+                    "gamma": [30, 100]
+                }
+            }
+        )
+
+        # Export results
+        await client.data.export(
+            results,
+            format="hdf5",
+            destination="gs://my-bucket/analysis-results/"
+        )
+
+        return results
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **JavaScript/TypeScript SDK**
+
+    ```typescript
+    import { NeuraScaleClient, StreamConfig } from '@neurascale/sdk';
+    import { SignalProcessor, FeatureExtractor } from '@neurascale/analysis';
+
+    class NeuraScaleWebApp {
+        private client: NeuraScaleClient;
+        private processor: SignalProcessor;
+
+        constructor(apiKey: string) {
+            this.client = new NeuraScaleClient({
+                apiKey,
+                baseURL: 'https://api.neurascale.io'
+            });
+            this.processor = new SignalProcessor();
+        }
+
+        async connectDevice(deviceId: string): Promise<void> {
+            try {
+                const device = await this.client.devices.connect(deviceId, {
+                    sampleRate: 250,
+                    channels: [1, 2, 3, 4, 5, 6, 7, 8],
+                    filters: {
+                        notch: 60,
+                        bandpass: [0.5, 100]
+                    }
+                });
+
+                console.log(`Connected to ${device.name}`);
+            } catch (error) {
+                console.error('Connection failed:', error);
+                throw error;
+            }
+        }
+
+        async startRealTimeAnalysis(): Promise<void> {
+            const stream = await this.client.streams.create({
+                deviceId: 'openbci_001',
+                sessionName: 'web-session',
+                realTimeProcessing: true
+            });
+
+            // Real-time data processing
+            stream.onData((packet) => {
+                const processed = this.processor.process(packet.data);
+
+                // Update UI with real-time visualization
+                this.updateVisualization(processed);
+
+                // Detect artifacts
+                const artifacts = this.processor.detectArtifacts(processed);
+                if (artifacts.length > 0) {
+                    this.handleArtifacts(artifacts);
+                }
+            });
+
+            stream.onError((error) => {
+                console.error('Stream error:', error);
+                this.handleStreamError(error);
+            });
+
+            await stream.start();
+        }
+
+        private updateVisualization(data: ProcessedData): void {
+            // Update charts, spectrograms, etc.
+            const chart = document.getElementById('neural-chart');
+            if (chart) {
+                // Update visualization library (e.g., Chart.js, D3.js)
+                this.renderNeuralData(chart, data);
+            }
+        }
+
+        private async handleArtifacts(artifacts: Artifact[]): Promise<void> {
+            // Log artifacts for quality control
+            await this.client.sessions.addAnnotation({
+                type: 'artifact_detected',
+                timestamp: Date.now(),
+                metadata: { artifacts }
+            });
+        }
+
+        async exportData(sessionId: string, format: 'csv' | 'json' | 'edf'): Promise<Blob> {
+            const exportRequest = await this.client.data.export({
+                sessionId,
+                format,
+                channels: 'all',
+                preprocessing: {
+                    removeArtifacts: true,
+                    applyFilters: true
+                }
+            });
+
+            // Poll for completion
+            let exportResult = await this.client.exports.get(exportRequest.id);
+            while (exportResult.status === 'processing') {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                exportResult = await this.client.exports.get(exportRequest.id);
+            }
+
+            if (exportResult.status === 'completed') {
+                return fetch(exportResult.downloadUrl).then(r => r.blob());
+            } else {
+                throw new Error(`Export failed: ${exportResult.error}`);
+            }
+        }
+    }
+
+    // Usage in a web application
+    const app = new NeuraScaleWebApp('your-api-key');
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await app.connectDevice('openbci_001');
+            await app.startRealTimeAnalysis();
+        } catch (error) {
+            console.error('Initialization failed:', error);
+        }
+    });
+    ```
+
+    **React Component Example**
+
+    ```tsx
+    import React, { useState, useEffect } from 'react';
+    import { NeuraScaleClient } from '@neurascale/sdk';
+
+    interface NeuralDataProps {
+        apiKey: string;
+        deviceId: string;
+    }
+
+    export const NeuralDataComponent: React.FC<NeuralDataProps> = ({
+        apiKey,
+        deviceId
+    }) => {
+        const [client] = useState(() => new NeuraScaleClient({ apiKey }));
+        const [isConnected, setIsConnected] = useState(false);
+        const [data, setData] = useState<number[][]>([]);
+        const [isStreaming, setIsStreaming] = useState(false);
+
+        useEffect(() => {
+            connectToDevice();
+        }, [deviceId]);
+
+        const connectToDevice = async () => {
+            try {
+                await client.devices.connect(deviceId);
+                setIsConnected(true);
+            } catch (error) {
+                console.error('Connection failed:', error);
+            }
+        };
+
+        const startStreaming = async () => {
+            const stream = await client.streams.create({ deviceId });
+
+            stream.onData((packet) => {
+                setData(prevData => {
+                    // Keep last 1000 samples
+                    const newData = [...prevData, packet.channels.map(c => c.value)];
+                    return newData.slice(-1000);
+                });
+            });
+
+            await stream.start();
+            setIsStreaming(true);
+        };
+
+        const stopStreaming = async () => {
+            await client.streams.stop();
+            setIsStreaming(false);
+        };
+
+        return (
+            <div className="neural-data-component">
+                <div className="status">
+                    <p>Device: {isConnected ? 'Connected' : 'Disconnected'}</p>
+                    <p>Streaming: {isStreaming ? 'Active' : 'Stopped'}</p>
+                </div>
+
+                <div className="controls">
+                    <button
+                        onClick={startStreaming}
+                        disabled={!isConnected || isStreaming}
+                    >
+                        Start Streaming
+                    </button>
+                    <button
+                        onClick={stopStreaming}
+                        disabled={!isStreaming}
+                    >
+                        Stop Streaming
+                    </button>
+                </div>
+
+                <div className="data-display">
+                    <h3>Real-time Neural Data</h3>
+                    <p>Samples received: {data.length}</p>
+                    {/* Add chart component here */}
+                </div>
+            </div>
+        );
+    };
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **MATLAB Integration**
+
+    ```matlab
+    %% NeuraScale MATLAB Integration Example
+
+    % Initialize NeuraScale client
+    addpath('neurascale-matlab-sdk');
+    client = NeuraScaleClient('your-api-key');
+
+    % Connect to device
+    device_config = struct();
+    device_config.sample_rate = 250;
+    device_config.channels = [1, 2, 3, 4, 5, 6, 7, 8];
+    device_config.filters = struct('notch', 60, 'bandpass', [0.5, 100]);
+
+    device = client.devices.connect('openbci_001', device_config);
+    fprintf('Connected to %s\n', device.name);
+
+    %% Real-time data acquisition
+    function real_time_acquisition()
+        % Configure session
+        session_config = struct();
+        session_config.name = 'MATLAB Recording';
+        session_config.duration = 300; % 5 minutes
+
+        session = client.sessions.create(session_config);
+
+        % Start streaming
+        stream = client.streams.start('openbci_001', session.id);
+
+        % Initialize data buffer
+        buffer_size = 1000;
+        data_buffer = zeros(8, buffer_size);
+        buffer_index = 1;
+
+        % Real-time processing loop
+        while stream.is_active()
+            % Get next data packet
+            packet = stream.get_next_packet();
+
+            if ~isempty(packet)
+                % Add to buffer
+                data_buffer(:, buffer_index) = packet.channels;
+                buffer_index = buffer_index + 1;
+
+                % Process when buffer is full
+                if buffer_index > buffer_size
+                    process_buffer(data_buffer);
+                    buffer_index = 1;
+                end
+            end
+
+            % Small delay to prevent excessive CPU usage
+            pause(0.001);
+        end
+
+        % Stop streaming
+        stream.stop();
+    end
+
+    %% Signal processing functions
+    function process_buffer(data)
+        % Apply preprocessing
+        fs = 250; % Sampling frequency
+
+        % Remove DC offset
+        data_centered = data - mean(data, 2);
+
+        % Apply notch filter (60 Hz)
+        [b, a] = iirnotch(60/(fs/2), 60/(fs/2)/10);
+        data_notched = filtfilt(b, a, data_centered')';
+
+        % Apply bandpass filter (8-30 Hz for motor imagery)
+        [b, a] = butter(4, [8, 30]/(fs/2), 'bandpass');
+        data_filtered = filtfilt(b, a, data_notched')';
+
+        % Extract features
+        features = extract_features(data_filtered, fs);
+
+        % Classify (if model is trained)
+        if exist('trained_model', 'var')
+            prediction = classify_movement(features, trained_model);
+            fprintf('Predicted movement: %s (confidence: %.2f)\n', ...
+                    prediction.label, prediction.confidence);
+        end
+
+        % Update real-time plot
+        update_real_time_plot(data_filtered);
+    end
+
+    function features = extract_features(data, fs)
+        % Extract power spectral density features
+        window_length = 2 * fs; % 2-second windows
+        overlap = 0.5 * window_length;
+
+        features = [];
+        for ch = 1:size(data, 1)
+            [psd, f] = pwelch(data(ch, :), window_length, overlap, [], fs);
+
+            % Extract band powers
+            alpha_power = bandpower(psd, f, [8, 13], 'psd');
+            beta_power = bandpower(psd, f, [13, 30], 'psd');
+
+            features = [features, alpha_power, beta_power];
+        end
+    end
+
+    function update_real_time_plot(data)
+        persistent fig ax
+
+        if isempty(fig) || ~isvalid(fig)
+            fig = figure('Name', 'Real-time Neural Data');
+            ax = axes(fig);
+        end
+
+        % Plot last 500 samples
+        time = (1:size(data, 2)) / 250; % Time in seconds
+        plot(ax, time, data');
+        xlabel(ax, 'Time (s)');
+        ylabel(ax, 'Amplitude (µV)');
+        title(ax, 'Real-time EEG Signals');
+        legend(ax, arrayfun(@(x) sprintf('Ch %d', x), 1:8, 'UniformOutput', false));
+        drawnow;
+    end
+
+    %% Export data for analysis
+    function export_session_data(session_id, output_file)
+        % Export session data to MATLAB format
+        data = client.data.export(session_id, 'matlab');
+
+        % Save to file
+        save(output_file, 'data', '-v7.3');
+        fprintf('Data exported to %s\n', output_file);
+    end
+
+    %% Main execution
+    try
+        real_time_acquisition();
+    catch ME
+        fprintf('Error: %s\n', ME.message);
+    end
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **R Package Integration**
+
+    ```r
+    # Install and load NeuraScale R package
+    # install.packages("devtools")
+    # devtools::install_github("neurascale/neurascale-r")
+
+    library(neurascale)
+    library(signal)
+    library(ggplot2)
+    library(dplyr)
+
+    # Initialize client
+    client <- NeuraScaleClient$new(api_key = "your-api-key")
+
+    # Connect to device
+    connect_device <- function() {
+        device_config <- list(
+            sample_rate = 250,
+            channels = c(1, 2, 3, 4, 5, 6, 7, 8),
+            filters = list(
+                notch = 60,
+                bandpass = c(0.5, 100)
+            )
+        )
+
+        device <- client$devices$connect("openbci_001", device_config)
+        cat("Connected to", device$name, "\n")
+        return(device)
+    }
+
+    # Data analysis functions
+    analyze_neural_data <- function(session_id) {
+        # Fetch data
+        data <- client$data$query(
+            session_ids = session_id,
+            channels = c(1, 2, 3, 4)
+        )
+
+        # Convert to data frame
+        df <- as.data.frame(data$samples)
+        df$time <- seq(0, by = 1/250, length.out = nrow(df))
+
+        # Preprocessing
+        df_processed <- df %>%
+            mutate(
+                # Remove DC offset
+                across(starts_with("channel"), ~ .x - mean(.x)),
+                # Apply simple moving average
+                across(starts_with("channel"), ~ filter(.x, rep(1/5, 5), sides = 2))
+            ) %>%
+            na.omit()
+
+        return(df_processed)
+    }
+
+    # Spectral analysis
+    spectral_analysis <- function(data, fs = 250) {
+        results <- list()
+
+        for (channel in grep("channel", names(data), value = TRUE)) {
+            signal_data <- data[[channel]]
+
+            # Compute power spectral density
+            psd_result <- pwelch(signal_data, fs = fs, nperseg = fs * 2)
+
+            results[[channel]] <- data.frame(
+                frequency = psd_result$freq,
+                power = psd_result$spec
+            )
+        }
+
+        return(results)
+    }
+
+    # Visualization
+    plot_neural_data <- function(data) {
+        # Time domain plot
+        data_long <- data %>%
+            select(time, starts_with("channel")) %>%
+            pivot_longer(cols = starts_with("channel"),
+                        names_to = "channel",
+                        values_to = "amplitude")
+
+        p1 <- ggplot(data_long, aes(x = time, y = amplitude, color = channel)) +
+            geom_line(alpha = 0.7) +
+            facet_wrap(~ channel, scales = "free_y", ncol = 2) +
+            labs(title = "Neural Signals - Time Domain",
+                 x = "Time (s)",
+                 y = "Amplitude (µV)") +
+            theme_minimal() +
+            theme(legend.position = "none")
+
+        return(p1)
+    }
+
+    plot_spectral_data <- function(spectral_results) {
+        # Combine all channels
+        combined_data <- bind_rows(spectral_results, .id = "channel")
+
+        p2 <- ggplot(combined_data, aes(x = frequency, y = power, color = channel)) +
+            geom_line() +
+            scale_y_log10() +
+            xlim(0, 50) +  # Focus on 0-50 Hz
+            labs(title = "Power Spectral Density",
+                 x = "Frequency (Hz)",
+                 y = "Power (log scale)") +
+            theme_minimal()
+
+        return(p2)
+    }
+
+    # Statistical analysis
+    band_power_analysis <- function(spectral_results) {
+        bands <- list(
+            delta = c(0.5, 4),
+            theta = c(4, 8),
+            alpha = c(8, 13),
+            beta = c(13, 30),
+            gamma = c(30, 50)
+        )
+
+        results <- data.frame()
+
+        for (channel_name in names(spectral_results)) {
+            channel_data <- spectral_results[[channel_name]]
+
+            for (band_name in names(bands)) {
+                band_range <- bands[[band_name]]
+                band_indices <- which(channel_data$frequency >= band_range[1] &
+                                     channel_data$frequency <= band_range[2])
+
+                band_power <- sum(channel_data$power[band_indices])
+
+                results <- rbind(results, data.frame(
+                    channel = channel_name,
+                    band = band_name,
+                    power = band_power
+                ))
+            }
+        }
+
+        return(results)
+    }
+
+    # Main analysis workflow
+    main_analysis <- function(session_id) {
+        # Analyze data
+        cat("Fetching neural data...\n")
+        neural_data <- analyze_neural_data(session_id)
+
+        cat("Performing spectral analysis...\n")
+        spectral_results <- spectral_analysis(neural_data)
+
+        cat("Calculating band powers...\n")
+        band_powers <- band_power_analysis(spectral_results)
+
+        # Generate plots
+        cat("Creating visualizations...\n")
+        time_plot <- plot_neural_data(neural_data)
+        spectral_plot <- plot_spectral_data(spectral_results)
+
+        # Print results
+        print(time_plot)
+        print(spectral_plot)
+
+        # Summary statistics
+        cat("\nBand Power Summary:\n")
+        print(band_powers %>%
+              group_by(band) %>%
+              summarise(
+                  mean_power = mean(power),
+                  sd_power = sd(power),
+                  .groups = 'drop'
+              ))
+
+        return(list(
+            data = neural_data,
+            spectral = spectral_results,
+            band_powers = band_powers
+        ))
+    }
+
+    # Example usage
+    tryCatch({
+        device <- connect_device()
+
+        # Run analysis on a session
+        session_id <- "session_123"
+        results <- main_analysis(session_id)
+
+        cat("Analysis completed successfully!\n")
+
+    }, error = function(e) {
+        cat("Error:", e$message, "\n")
+    })
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Integration Patterns
+
+### Real-time Processing Pipeline
+
+```python
+from neurascale import NeuraScaleClient
+from neurascale.processing import ProcessingPipeline
+import asyncio
+
+class RealTimeProcessor:
+    def __init__(self, api_key: str):
+        self.client = NeuraScaleClient(api_key=api_key)
+        self.pipeline = ProcessingPipeline()
+
+    def setup_pipeline(self):
+        """Configure processing pipeline"""
+        self.pipeline.add_stage("artifact_removal", {
+            "method": "ICA",
+            "n_components": 8
+        })
+
+        self.pipeline.add_stage("filtering", {
+            "notch": 60,
+            "bandpass": [0.5, 100],
+            "filter_type": "butterworth",
+            "order": 4
+        })
+
+        self.pipeline.add_stage("feature_extraction", {
+            "features": ["psd", "band_power", "hjorth"],
+            "window_size": 2.0,
+            "overlap": 0.5
+        })
+
+        self.pipeline.add_stage("classification", {
+            "model": "motor_imagery_4class",
+            "confidence_threshold": 0.7
+        })
+
+    async def process_stream(self, device_id: str):
+        """Process real-time neural data stream"""
+
+        # Start streaming
+        stream = await self.client.streams.start(device_id)
+
+        async for data_packet in stream:
+            # Process through pipeline
+            result = await self.pipeline.process(data_packet)
+
+            # Handle results
+            if result.stage == "classification":
+                prediction = result.output
+                await self.handle_prediction(prediction)
+
+            # Store intermediate results if needed
+            if result.store_intermediate:
+                await self.client.data.store_processed(result)
+
+    async def handle_prediction(self, prediction):
+        """Handle classification results"""
+        print(f"Movement detected: {prediction.label}")
+        print(f"Confidence: {prediction.confidence:.2f}")
+
+        # Send to external system
+        if prediction.confidence > 0.8:
+            await self.send_control_signal(prediction.label)
+
+    async def send_control_signal(self, movement: str):
+        """Send control signal to external device"""
+        control_data = {
+            "command": movement,
+            "timestamp": time.time(),
+            "source": "neurascale"
+        }
+
+        # Send via webhook, WebSocket, or direct API call
+        await self.client.external.send_command(control_data)
+
+# Usage
+processor = RealTimeProcessor("your-api-key")
+processor.setup_pipeline()
+asyncio.run(processor.process_stream("openbci_001"))
+```
+
+### Batch Processing for Research
+
+```python
+from neurascale import NeuraScaleClient
+from neurascale.analysis import BatchAnalyzer
+import pandas as pd
+import numpy as np
+
+class ResearchAnalyzer:
+    def __init__(self, api_key: str):
+        self.client = NeuraScaleClient(api_key=api_key)
+        self.analyzer = BatchAnalyzer()
+
+    async def analyze_experiment(self, experiment_id: str):
+        """Analyze complete experiment dataset"""
+
+        # Get all sessions from experiment
+        sessions = await self.client.experiments.get_sessions(experiment_id)
+
+        results = []
+        for session in sessions:
+            session_result = await self.analyze_session(session.id)
+            results.append(session_result)
+
+        # Combine results
+        combined_results = pd.concat(results, ignore_index=True)
+
+        # Perform group analysis
+        group_stats = self.perform_group_analysis(combined_results)
+
+        # Export results
+        await self.export_results(experiment_id, combined_results, group_stats)
+
+        return combined_results, group_stats
+
+    async def analyze_session(self, session_id: str):
+        """Analyze single session"""
+
+        # Fetch session data
+        data = await self.client.data.query(
+            session_ids=[session_id],
+            preprocessing={
+                "remove_artifacts": True,
+                "apply_filters": True,
+                "epoch_events": True
+            }
+        )
+
+        # Configure analysis
+        self.analyzer.configure({
+            "time_frequency_analysis": {
+                "method": "morlet_wavelet",
+                "frequencies": np.logspace(np.log10(1), np.log10(100), 50),
+                "n_cycles": 7
+            },
+            "connectivity_analysis": {
+                "methods": ["coherence", "pli", "wpli"],
+                "frequency_bands": {
+                    "theta": [4, 8],
+                    "alpha": [8, 13],
+                    "beta": [13, 30]
+                }
+            },
+            "event_related_analysis": {
+                "baseline": [-0.5, 0],
+                "time_window": [-1, 2],
+                "conditions": ["left_hand", "right_hand", "feet", "tongue"]
+            }
+        })
+
+        # Run analysis
+        results = await self.analyzer.analyze(data)
+
+        return results
+
+    def perform_group_analysis(self, data: pd.DataFrame):
+        """Perform statistical analysis across participants"""
+
+        # Group-level statistics
+        group_stats = {
+            "participant_count": data['participant_id'].nunique(),
+            "total_trials": len(data),
+            "mean_accuracy": data['accuracy'].mean(),
+            "std_accuracy": data['accuracy'].std()
+        }
+
+        # ANOVA for condition effects
+        from scipy.stats import f_oneway
+        conditions = data['condition'].unique()
+        condition_groups = [data[data['condition'] == cond]['accuracy']
+                          for cond in conditions]
+
+        f_stat, p_value = f_oneway(*condition_groups)
+        group_stats['anova_f'] = f_stat
+        group_stats['anova_p'] = p_value
+
+        return group_stats
+
+    async def export_results(self, experiment_id: str, data: pd.DataFrame, stats: dict):
+        """Export results in multiple formats"""
+
+        # Export to cloud storage
+        await self.client.data.export(
+            data,
+            format="parquet",
+            destination=f"gs://research-data/{experiment_id}/results.parquet"
+        )
+
+        # Generate report
+        report = self.generate_report(data, stats)
+        await self.client.reports.create(
+            experiment_id=experiment_id,
+            report_type="analysis_summary",
+            content=report
+        )
+
+# Usage for research
+analyzer = ResearchAnalyzer("your-api-key")
+results, stats = asyncio.run(analyzer.analyze_experiment("exp_001"))
+```
+
+## Error Handling and Best Practices
+
+### Robust Connection Management
+
+```python
+import asyncio
+import logging
+from neurascale import NeuraScaleClient, ConnectionError, DeviceError
+
+class RobustNeuraScaleClient:
+    def __init__(self, api_key: str, max_retries: int = 3):
+        self.client = NeuraScaleClient(api_key=api_key)
+        self.max_retries = max_retries
+        self.logger = logging.getLogger(__name__)
+
+    async def connect_with_retry(self, device_id: str, config: dict):
+        """Connect to device with automatic retry"""
+
+        for attempt in range(self.max_retries):
+            try:
+                device = await self.client.devices.connect(device_id, config)
+                self.logger.info(f"Connected to {device_id} on attempt {attempt + 1}")
+                return device
+
+            except ConnectionError as e:
+                self.logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                else:
+                    raise
+
+            except DeviceError as e:
+                self.logger.error(f"Device error: {e}")
+                # Don't retry on device errors
+                raise
+
+    async def safe_stream_processing(self, device_id: str):
+        """Stream processing with error recovery"""
+
+        while True:
+            try:
+                stream = await self.client.streams.start(device_id)
+
+                async for data_packet in stream:
+                    await self.process_packet(data_packet)
+
+            except ConnectionError:
+                self.logger.warning("Stream connection lost, attempting to reconnect...")
+                await asyncio.sleep(1)
+                continue
+
+            except Exception as e:
+                self.logger.error(f"Unexpected error in stream processing: {e}")
+                await asyncio.sleep(5)
+                continue
+
+    async def process_packet(self, packet):
+        """Process individual data packet with error handling"""
+        try:
+            # Your processing logic here
+            processed_data = self.preprocess(packet.data)
+            result = await self.analyze(processed_data)
+            await self.store_result(result)
+
+        except Exception as e:
+            self.logger.error(f"Error processing packet: {e}")
+            # Log bad packet for debugging
+            await self.log_error_packet(packet, str(e))
+
+    async def log_error_packet(self, packet, error_msg: str):
+        """Log problematic packets for debugging"""
+        error_data = {
+            "timestamp": packet.timestamp,
+            "sequence_number": packet.sequence_number,
+            "error": error_msg,
+            "packet_data": packet.to_dict()
+        }
+
+        await self.client.debug.log_error(error_data)
+```
+
+### Performance Optimization
+
+```python
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import numpy as np
+
+class OptimizedProcessor:
+    def __init__(self, api_key: str):
+        self.client = NeuraScaleClient(api_key=api_key)
+        self.executor = ThreadPoolExecutor(max_workers=4)
+        self.buffer = collections.deque(maxlen=1000)
+
+    async def optimized_streaming(self, device_id: str):
+        """Optimized streaming with concurrent processing"""
+
+        stream = await self.client.streams.start(device_id)
+
+        # Process packets concurrently
+        tasks = []
+
+        async for packet in stream:
+            # Add to buffer
+            self.buffer.append(packet)
+
+            # Process in background
+            task = asyncio.create_task(self.process_packet_async(packet))
+            tasks.append(task)
+
+            # Limit concurrent tasks
+            if len(tasks) >= 10:
+                done, pending = await asyncio.wait(
+                    tasks,
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+                tasks = list(pending)
+
+    async def process_packet_async(self, packet):
+        """Process packet using thread pool for CPU-intensive tasks"""
+
+        # CPU-intensive processing in thread pool
+        loop = asyncio.get_event_loop()
+        processed = await loop.run_in_executor(
+            self.executor,
+            self.cpu_intensive_processing,
+            packet.data
+        )
+
+        # I/O operations in async context
+        await self.store_processed_data(processed)
+
+    def cpu_intensive_processing(self, data: np.ndarray) -> np.ndarray:
+        """CPU-intensive signal processing"""
+        # Example: Complex filtering, feature extraction, etc.
+        from scipy import signal
+
+        # Apply multiple filters
+        filtered = signal.filtfilt(*signal.butter(4, [0.5, 100], fs=250), data)
+
+        # Extract features
+        features = self.extract_complex_features(filtered)
+
+        return features
+
+    def extract_complex_features(self, data: np.ndarray) -> np.ndarray:
+        """Extract complex features from neural data"""
+        features = []
+
+        # Time domain features
+        features.extend([
+            np.mean(data, axis=1),
+            np.std(data, axis=1),
+            np.var(data, axis=1)
+        ])
+
+        # Frequency domain features
+        freqs, psd = signal.welch(data, fs=250, axis=1)
+        features.append(np.mean(psd, axis=1))
+
+        return np.concatenate(features)
+```
+
+<Callout type="info">
+  This developer guide provides practical examples for integrating with NeuraScale across multiple programming languages. For more advanced use cases, see our [API Documentation](/docs/api) and [System Modeling](/docs/system-modeling) sections.
+</Callout>
+
+## Next Steps
+
+1. **Get API Keys**: Sign up at [neurascale.io](https://neurascale.io) to get your API credentials
+2. **Try Examples**: Start with the quick start examples for your preferred language
+3. **Read API Docs**: Review the complete [API documentation](/docs/api) for detailed reference
+4. **Join Community**: Connect with other developers in our [GitHub Discussions](https://github.com/identity-wael/neurascale/discussions)
+5. **Get Support**: Contact [support@neurascale.io](mailto:support@neurascale.io) for technical assistance
+
+Ready to build the future of brain-computer interfaces? Let's get started!

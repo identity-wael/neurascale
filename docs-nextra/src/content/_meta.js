@@ -5,6 +5,12 @@ export default {
   "system-modeling": "",
   features: "",
   api: "",
+  "developer-guide": "",
+  "device-integration": "",
+  configuration: "",
   deployment: "",
   security: "",
+  "clinical-workflows": "",
+  "ml-development": "",
+  troubleshooting: "",
 };

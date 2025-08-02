@@ -1,0 +1,1106 @@
+import { Tabs, Callout, Steps } from 'nextra/components'
+
+# Clinical Workflows
+
+This guide covers clinical applications of NeuraScale, including HIPAA compliance, patient data management, and specialized clinical protocols for various neurological conditions.
+
+## Clinical Overview
+
+NeuraScale provides a comprehensive platform for clinical brain-computer interface applications, designed to meet healthcare standards and regulatory requirements.
+
+### Clinical Use Cases
+
+- **Epilepsy Monitoring**: Continuous seizure detection and prediction
+- **Stroke Rehabilitation**: Motor imagery training and recovery assessment
+- **Sleep Disorders**: Automated sleep staging and apnea detection
+- **Locked-in Syndrome**: Communication interface development
+- **Cognitive Assessment**: Attention, memory, and executive function evaluation
+- **Neurofeedback Therapy**: Real-time brain training protocols
+
+### Regulatory Compliance
+
+<Callout type="info">
+  NeuraScale is designed to support HIPAA, GDPR, and FDA validation requirements. Always consult with your institution's compliance team before implementing clinical protocols.
+</Callout>
+
+## Patient Data Management
+
+### HIPAA-Compliant Setup
+
+<Steps>
+### Configure HIPAA Compliance
+
+```python
+from neurascale import NeuraScaleClient
+from neurascale.clinical import HIPAACompliantClient
+
+# Initialize HIPAA-compliant client
+clinical_client = HIPAACompliantClient(
+    api_key="your-api-key",
+    compliance_mode="strict",
+    audit_logging=True,
+    encryption_level="high"
+)
+
+# Configure patient data handling
+patient_config = {
+    "de_identification": {
+        "method": "safe_harbor",  # safe_harbor, expert_determination
+        "remove_identifiers": True,
+        "date_shifting": True,
+        "age_threshold": 89  # Report as ">89" for patients over 89
+    },
+    "access_controls": {
+        "role_based": True,
+        "minimum_necessary": True,
+        "authorization_required": True
+    },
+    "audit_trail": {
+        "log_all_access": True,
+        "log_modifications": True,
+        "log_exports": True,
+        "retention_period": 2555  # 7 years in days
+    }
+}
+
+await clinical_client.configure_compliance(patient_config)
+```
+
+### Create Patient Record
+
+```python
+# Create anonymized patient record
+patient_data = {
+    "patient_id": "P001_ANON",  # Anonymized ID
+    "demographics": {
+        "age_range": "25-30",  # Age ranges instead of exact age
+        "gender": "F",
+        "handedness": "right"
+    },
+    "medical_history": {
+        "diagnosis": "epilepsy",
+        "icd10_code": "G40.9",
+        "onset_date": "2020-Q2",  # Quarter instead of exact date
+        "medications": ["levetiracetam", "lamotrigine"]
+    },
+    "consent": {
+        "research_participation": True,
+        "data_sharing": False,
+        "contact_future": True,
+        "signed_date": "2024-01-15",
+        "hipaa_authorization": True
+    }
+}
+
+patient = await clinical_client.patients.create(patient_data)
+print(f"Patient created: {patient.anonymous_id}")
+```
+
+### Secure Session Management
+
+```python
+# Create clinical session with enhanced security
+session_config = {
+    "patient_id": patient.anonymous_id,
+    "protocol": "epilepsy_monitoring",
+    "clinician_id": "DR_SMITH_001",
+    "location": "EEG_LAB_1",
+    "security": {
+        "access_level": "clinical",
+        "encryption": "AES-256",
+        "audit_required": True
+    },
+    "clinical_metadata": {
+        "indication": "seizure_monitoring",
+        "seizure_free_days": 14,
+        "medication_compliance": "good",
+        "sleep_deprivation": False
+    }
+}
+
+clinical_session = await clinical_client.sessions.create_clinical(session_config)
+```
+</Steps>
+
+## Epilepsy Monitoring
+
+### Continuous Seizure Detection
+
+<Tabs items={['Setup', 'Real-time Detection', 'Alert System', 'Data Analysis']}>
+  <Tabs.Tab>
+    **Epilepsy Monitoring Setup**
+
+    ```python
+    from neurascale.clinical.epilepsy import SeizureDetector, EpilepsyProtocol
+
+    # Configure epilepsy monitoring protocol
+    epilepsy_config = {
+        "patient_profile": {
+            "seizure_type": "focal",  # focal, generalized, unknown
+            "seizure_frequency": "weekly",
+            "aura_present": True,
+            "seizure_duration_avg": 120,  # seconds
+            "post_ictal_duration": 300   # seconds
+        },
+        "monitoring": {
+            "duration": 72,  # hours
+            "device_type": "clinical_eeg",
+            "channels": 32,
+            "sampling_rate": 500,
+            "video_sync": True
+        },
+        "detection": {
+            "algorithms": ["svm", "lstm", "spectral"],
+            "sensitivity": 0.95,
+            "specificity": 0.90,
+            "detection_delay_max": 5  # seconds
+        }
+    }
+
+    # Initialize epilepsy protocol
+    epilepsy_protocol = EpilepsyProtocol(epilepsy_config)
+    seizure_detector = SeizureDetector(
+        model_type="ensemble",
+        patient_specific=True
+    )
+
+    # Train patient-specific model if data available
+    if patient.has_historical_data:
+        training_data = await clinical_client.data.get_patient_seizures(
+            patient_id=patient.anonymous_id,
+            include_interictal=True
+        )
+        await seizure_detector.train_patient_model(training_data)
+    ```
+
+    **Clinical Device Configuration**
+
+    ```python
+    # Configure clinical EEG system
+    clinical_eeg_config = {
+        "device_id": "clinical_eeg_001",
+        "device_type": "brainproducts_actichamp",
+        "acquisition": {
+            "sample_rate": 500,
+            "channels": [
+                # Standard 10-20 system for epilepsy monitoring
+                "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8",
+                "T7", "C3", "Cz", "C4", "T8",
+                "P7", "P3", "Pz", "P4", "P8",
+                "O1", "Oz", "O2",
+                # Additional temporal chains
+                "F9", "F10", "T9", "T10", "P9", "P10",
+                # Sphenoidal electrodes
+                "Sp1", "Sp2",
+                # ECG and EMG for artifact detection
+                "ECG", "EMG1", "EMG2", "EOG"
+            ],
+            "reference": "average",
+            "ground": "AFz"
+        },
+        "clinical_features": {
+            "impedance_monitoring": True,
+            "safety_limits": {
+                "max_voltage": 100,  # µV
+                "max_impedance": 5000  # Ω
+            },
+            "artifact_detection": {
+                "muscle": True,
+                "eye_movement": True,
+                "movement": True,
+                "electrode_pop": True
+            }
+        }
+    }
+
+    clinical_eeg = await clinical_client.devices.connect(
+        "clinical_eeg_001",
+        clinical_eeg_config
+    )
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Real-time Seizure Detection**
+
+    ```python
+    # Real-time seizure detection pipeline
+    async def monitor_for_seizures():
+        stream = await clinical_eeg.start_stream()
+
+        # Initialize detection buffer
+        detection_buffer = []
+        buffer_duration = 30  # seconds
+
+        async for packet in stream:
+            # Add to detection buffer
+            detection_buffer.append(packet)
+
+            # Maintain buffer size
+            if len(detection_buffer) > buffer_duration * clinical_eeg.sample_rate:
+                detection_buffer.pop(0)
+
+            # Run detection every second
+            if len(detection_buffer) >= clinical_eeg.sample_rate:
+                current_time = packet.timestamp
+
+                # Extract features for detection
+                features = await extract_seizure_features(detection_buffer)
+
+                # Run seizure detection
+                detection_result = await seizure_detector.detect(features)
+
+                if detection_result.seizure_detected:
+                    await handle_seizure_detection(detection_result, current_time)
+
+                # Check for seizure evolution
+                if detection_result.confidence > 0.7:
+                    await monitor_seizure_evolution(detection_result)
+
+    async def extract_seizure_features(buffer):
+        """Extract features relevant to seizure detection"""
+
+        # Convert buffer to numpy array
+        data = np.array([[ch.value for ch in packet.channels] for packet in buffer])
+
+        features = {}
+
+        # Spectral features
+        frequencies, psd = signal.welch(data, fs=500, axis=0)
+
+        # Delta (0.5-4 Hz) power
+        delta_power = np.trapz(psd[1:9], frequencies[1:9], axis=0)
+
+        # Theta (4-8 Hz) power
+        theta_power = np.trapz(psd[8:17], frequencies[8:17], axis=0)
+
+        # Alpha (8-13 Hz) power
+        alpha_power = np.trapz(psd[17:26], frequencies[17:26], axis=0)
+
+        # Beta (13-30 Hz) power
+        beta_power = np.trapz(psd[26:60], frequencies[26:60], axis=0)
+
+        # Gamma (30-100 Hz) power
+        gamma_power = np.trapz(psd[60:200], frequencies[60:200], axis=0)
+
+        features['spectral'] = {
+            'delta_power': delta_power,
+            'theta_power': theta_power,
+            'alpha_power': alpha_power,
+            'beta_power': beta_power,
+            'gamma_power': gamma_power
+        }
+
+        # Line length (measure of signal complexity)
+        line_length = np.sum(np.abs(np.diff(data, axis=0)), axis=0)
+        features['line_length'] = line_length
+
+        # Variance
+        variance = np.var(data, axis=0)
+        features['variance'] = variance
+
+        # Cross-correlation between channels
+        correlation_matrix = np.corrcoef(data.T)
+        features['correlation'] = correlation_matrix
+
+        # Entropy measures
+        from scipy.stats import entropy
+        hist_counts = [np.histogram(data[:, ch], bins=50)[0] for ch in range(data.shape[1])]
+        channel_entropy = [entropy(counts + 1e-10) for counts in hist_counts]
+        features['entropy'] = channel_entropy
+
+        return features
+
+    async def handle_seizure_detection(detection_result, timestamp):
+        """Handle detected seizure event"""
+
+        # Log seizure detection
+        seizure_event = {
+            "timestamp": timestamp,
+            "confidence": detection_result.confidence,
+            "seizure_type": detection_result.predicted_type,
+            "affected_channels": detection_result.channels,
+            "severity": detection_result.severity
+        }
+
+        await clinical_client.events.log_seizure(seizure_event)
+
+        # Send immediate alert
+        await send_clinical_alert(
+            alert_type="seizure_detected",
+            patient_id=patient.anonymous_id,
+            details=seizure_event
+        )
+
+        # Trigger video capture if available
+        if clinical_eeg.has_video_sync:
+            await clinical_eeg.start_video_capture(
+                pre_event_duration=30,  # seconds
+                post_event_duration=300  # seconds
+            )
+
+        # Increase sampling rate for detailed analysis
+        await clinical_eeg.set_sample_rate(1000)  # Increase to 1kHz
+
+        print(f"SEIZURE DETECTED at {timestamp}")
+        print(f"Confidence: {detection_result.confidence:.2f}")
+        print(f"Type: {detection_result.predicted_type}")
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Clinical Alert System**
+
+    ```python
+    from neurascale.clinical.alerts import ClinicalAlertSystem
+
+    # Configure clinical alert system
+    alert_config = {
+        "recipients": {
+            "primary_physician": {
+                "name": "Dr. Sarah Johnson",
+                "email": "s.johnson@hospital.org",
+                "phone": "+1-555-0123",
+                "pager": "555-9999",
+                "priority": "high"
+            },
+            "neurologist": {
+                "name": "Dr. Michael Chen",
+                "email": "m.chen@hospital.org",
+                "phone": "+1-555-0124",
+                "priority": "high"
+            },
+            "eeg_tech": {
+                "name": "Sarah Williams",
+                "email": "s.williams@hospital.org",
+                "phone": "+1-555-0125",
+                "priority": "medium"
+            },
+            "nursing_station": {
+                "email": "nursing-neuro@hospital.org",
+                "phone": "+1-555-0100",
+                "priority": "high"
+            }
+        },
+        "alert_types": {
+            "seizure_detected": {
+                "urgency": "immediate",
+                "channels": ["pager", "phone", "email"],
+                "escalation_time": 300  # 5 minutes
+            },
+            "status_change": {
+                "urgency": "medium",
+                "channels": ["email"],
+                "escalation_time": 1800  # 30 minutes
+            },
+            "technical_issue": {
+                "urgency": "low",
+                "channels": ["email"],
+                "escalation_time": 3600  # 1 hour
+            }
+        }
+    }
+
+    alert_system = ClinicalAlertSystem(alert_config)
+
+    async def send_clinical_alert(alert_type, patient_id, details):
+        """Send HIPAA-compliant clinical alert"""
+
+        # Prepare anonymized alert message
+        alert_message = {
+            "alert_type": alert_type,
+            "patient_code": patient_id,  # Already anonymized
+            "timestamp": details["timestamp"],
+            "location": "EEG Lab 1",
+            "urgency": alert_config["alert_types"][alert_type]["urgency"]
+        }
+
+        # Add specific details based on alert type
+        if alert_type == "seizure_detected":
+            alert_message.update({
+                "confidence": details["confidence"],
+                "seizure_type": details["seizure_type"],
+                "severity": details["severity"],
+                "duration": details.get("duration", "ongoing")
+            })
+
+        # Send to appropriate recipients
+        recipients = alert_config["recipients"]
+        alert_urgency = alert_config["alert_types"][alert_type]["urgency"]
+
+        for recipient_id, recipient in recipients.items():
+            if recipient["priority"] == "high" or alert_urgency == "immediate":
+                await alert_system.send_alert(
+                    recipient=recipient,
+                    message=alert_message,
+                    channels=alert_config["alert_types"][alert_type]["channels"]
+                )
+
+        # Log alert in audit trail
+        await clinical_client.audit.log_alert(
+            alert_type=alert_type,
+            recipients=[r["name"] for r in recipients.values()],
+            message=alert_message
+        )
+
+    # Monitor alert acknowledgments
+    async def monitor_alert_acknowledgments():
+        while True:
+            pending_alerts = await alert_system.get_pending_alerts()
+
+            for alert in pending_alerts:
+                if alert.time_since_sent > alert.escalation_time:
+                    # Escalate to next level
+                    await alert_system.escalate_alert(alert)
+
+                    # Log escalation
+                    await clinical_client.audit.log_escalation(
+                        alert_id=alert.id,
+                        escalation_level=alert.escalation_level
+                    )
+
+            await asyncio.sleep(60)  # Check every minute
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Post-Seizure Analysis**
+
+    ```python
+    async def analyze_seizure_event(seizure_id):
+        """Comprehensive seizure analysis for clinical review"""
+
+        # Retrieve seizure data
+        seizure_data = await clinical_client.events.get_seizure(seizure_id)
+
+        # Analyze seizure characteristics
+        analysis = {
+            "temporal": await analyze_seizure_timing(seizure_data),
+            "spatial": await analyze_seizure_localization(seizure_data),
+            "morphology": await analyze_seizure_morphology(seizure_data),
+            "propagation": await analyze_seizure_propagation(seizure_data)
+        }
+
+        return analysis
+
+    async def analyze_seizure_timing(seizure_data):
+        """Analyze temporal characteristics of seizure"""
+
+        # Extract pre-ictal, ictal, and post-ictal periods
+        pre_ictal = seizure_data.get_pre_ictal_data(duration=60)  # 1 minute
+        ictal = seizure_data.get_ictal_data()
+        post_ictal = seizure_data.get_post_ictal_data(duration=300)  # 5 minutes
+
+        timing_analysis = {
+            "onset_time": seizure_data.onset_timestamp,
+            "duration": seizure_data.duration,
+            "offset_time": seizure_data.offset_timestamp,
+            "pre_ictal_changes": {
+                "duration": 60,
+                "power_changes": await analyze_power_changes(pre_ictal),
+                "connectivity_changes": await analyze_connectivity_changes(pre_ictal)
+            },
+            "ictal_evolution": {
+                "phases": await identify_seizure_phases(ictal),
+                "frequency_evolution": await analyze_frequency_evolution(ictal)
+            },
+            "post_ictal_suppression": {
+                "present": await detect_post_ictal_suppression(post_ictal),
+                "duration": await measure_suppression_duration(post_ictal)
+            }
+        }
+
+        return timing_analysis
+
+    async def analyze_seizure_localization(seizure_data):
+        """Determine seizure localization for surgical planning"""
+
+        # Source localization using multiple methods
+        localization_methods = {
+            "dipole_fitting": await dipole_source_localization(seizure_data),
+            "beamforming": await beamforming_localization(seizure_data),
+            "coherence_analysis": await coherence_localization(seizure_data)
+        }
+
+        # Combine results for consensus localization
+        consensus_localization = await combine_localization_results(localization_methods)
+
+        localization_analysis = {
+            "seizure_onset_zone": consensus_localization["onset_zone"],
+            "propagation_pattern": consensus_localization["propagation"],
+            "confidence": consensus_localization["confidence"],
+            "methods_agreement": consensus_localization["agreement"],
+            "clinical_correlation": await correlate_with_mri(consensus_localization)
+        }
+
+        return localization_analysis
+
+    async def generate_clinical_report(seizure_analysis):
+        """Generate comprehensive clinical report"""
+
+        report = {
+            "patient_id": patient.anonymous_id,
+            "report_date": datetime.now().isoformat(),
+            "seizure_summary": {
+                "total_seizures": len(seizure_analysis),
+                "seizure_types": await classify_seizure_types(seizure_analysis),
+                "frequency_pattern": await analyze_seizure_frequency(seizure_analysis)
+            },
+            "clinical_findings": {
+                "localization": seizure_analysis["spatial"],
+                "seizure_evolution": seizure_analysis["temporal"],
+                "morphology": seizure_analysis["morphology"]
+            },
+            "recommendations": await generate_clinical_recommendations(seizure_analysis),
+            "medication_suggestions": await suggest_medication_changes(seizure_analysis)
+        }
+
+        # Generate formatted clinical report
+        formatted_report = await format_clinical_report(report)
+
+        # Save to secure clinical storage
+        await clinical_client.reports.save_clinical_report(
+            patient_id=patient.anonymous_id,
+            report_type="seizure_analysis",
+            report_data=formatted_report,
+            access_level="clinical"
+        )
+
+        return formatted_report
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Stroke Rehabilitation
+
+### Motor Imagery Training
+
+```python
+from neurascale.clinical.rehabilitation import MotorImageryTherapy
+
+# Configure stroke rehabilitation protocol
+stroke_config = {
+    "patient_profile": {
+        "stroke_type": "ischemic",  # ischemic, hemorrhagic
+        "affected_hemisphere": "left",
+        "time_since_stroke": 90,  # days
+        "motor_impairment": {
+            "upper_extremity": "moderate",
+            "hand_function": "severe",
+            "fugl_meyer_score": 35  # out of 66
+        }
+    },
+    "therapy_protocol": {
+        "sessions_per_week": 3,
+        "session_duration": 45,  # minutes
+        "total_weeks": 12,
+        "progression_criteria": {
+            "accuracy_threshold": 0.70,
+            "consistency_required": 5  # consecutive sessions
+        }
+    },
+    "neurofeedback": {
+        "feedback_type": "visual_cursor",
+        "update_rate": 10,  # Hz
+        "trial_duration": 4,  # seconds
+        "rest_duration": 3   # seconds
+    }
+}
+
+# Initialize motor imagery therapy
+mi_therapy = MotorImageryTherapy(stroke_config)
+
+async def conduct_therapy_session():
+    """Conduct a motor imagery therapy session"""
+
+    # Pre-session assessment
+    baseline = await assess_motor_function(patient)
+
+    # Configure BCI for motor imagery
+    mi_bci_config = {
+        "channels": ["C3", "C4", "Cz", "FC1", "FC2", "CP1", "CP2"],
+        "frequency_bands": {
+            "mu": [8, 12],
+            "beta": [16, 24]
+        },
+        "classification": {
+            "classes": ["left_hand", "right_hand", "rest"],
+            "feature_extraction": "csp",  # Common Spatial Patterns
+            "classifier": "lda"
+        }
+    }
+
+    # Start therapy session
+    session = await mi_therapy.start_session(
+        patient_id=patient.anonymous_id,
+        config=mi_bci_config
+    )
+
+    # Calibration phase
+    print("Starting calibration...")
+    calibration_data = await mi_therapy.run_calibration(
+        trials_per_class=20,
+        instruction_duration=2,
+        imagery_duration=4
+    )
+
+    # Train classifier
+    classifier = await mi_therapy.train_classifier(calibration_data)
+    accuracy = await mi_therapy.validate_classifier(classifier)
+
+    print(f"Classifier accuracy: {accuracy:.2%}")
+
+    if accuracy < 0.60:
+        print("Accuracy too low, adjusting parameters...")
+        # Adjust parameters and retrain
+        classifier = await mi_therapy.retrain_with_adjustments(
+            calibration_data,
+            adjustments={"feature_selection": True, "regularization": 0.1}
+        )
+
+    # Online therapy phase
+    print("Starting online therapy...")
+    therapy_results = await mi_therapy.run_online_therapy(
+        classifier=classifier,
+        trials=60,
+        feedback_enabled=True
+    )
+
+    # Post-session assessment
+    post_assessment = await assess_motor_function(patient)
+
+    # Log session results
+    session_summary = {
+        "date": datetime.now().isoformat(),
+        "duration": therapy_results["duration"],
+        "accuracy": therapy_results["accuracy"],
+        "improvement": post_assessment["score"] - baseline["score"],
+        "patient_feedback": therapy_results["patient_feedback"]
+    }
+
+    await clinical_client.sessions.log_therapy_session(
+        patient_id=patient.anonymous_id,
+        session_type="motor_imagery",
+        results=session_summary
+    )
+
+async def assess_motor_function(patient):
+    """Assess motor function using standardized scales"""
+
+    # Fugl-Meyer Assessment (automated components)
+    fm_assessment = await conduct_fugl_meyer_assessment(patient)
+
+    # Action Research Arm Test (ARAT)
+    arat_score = await conduct_arat_assessment(patient)
+
+    # Nine-Hole Peg Test
+    peg_test = await conduct_peg_test(patient)
+
+    assessment = {
+        "fugl_meyer": fm_assessment,
+        "arat": arat_score,
+        "nine_hole_peg": peg_test,
+        "overall_score": calculate_composite_score([
+            fm_assessment, arat_score, peg_test
+        ])
+    }
+
+    return assessment
+```
+
+### Progress Tracking
+
+```python
+async def track_rehabilitation_progress():
+    """Track long-term rehabilitation progress"""
+
+    # Get all therapy sessions for patient
+    sessions = await clinical_client.sessions.get_patient_sessions(
+        patient_id=patient.anonymous_id,
+        session_type="motor_imagery"
+    )
+
+    # Analyze progress trends
+    progress_analysis = {
+        "accuracy_trend": analyze_accuracy_trend(sessions),
+        "motor_improvement": analyze_motor_improvement(sessions),
+        "session_consistency": analyze_session_consistency(sessions),
+        "plateau_detection": detect_learning_plateau(sessions)
+    }
+
+    # Generate progress report
+    progress_report = await generate_progress_report(progress_analysis)
+
+    # Adjust therapy parameters if needed
+    if progress_analysis["plateau_detection"]["plateau_detected"]:
+        new_parameters = await suggest_parameter_adjustments(sessions)
+        await mi_therapy.update_parameters(new_parameters)
+
+    return progress_report
+
+def analyze_accuracy_trend(sessions):
+    """Analyze BCI accuracy improvement over time"""
+
+    accuracies = [session["accuracy"] for session in sessions]
+    dates = [session["date"] for session in sessions]
+
+    # Linear regression to find trend
+    from scipy import stats
+    slope, intercept, r_value, p_value, std_err = stats.linregress(
+        range(len(accuracies)), accuracies
+    )
+
+    trend_analysis = {
+        "initial_accuracy": accuracies[0] if accuracies else 0,
+        "current_accuracy": accuracies[-1] if accuracies else 0,
+        "improvement_rate": slope,
+        "correlation": r_value,
+        "significance": p_value < 0.05,
+        "total_improvement": accuracies[-1] - accuracies[0] if len(accuracies) > 1 else 0
+    }
+
+    return trend_analysis
+```
+
+## Sleep Study Protocols
+
+### Automated Sleep Staging
+
+```python
+from neurascale.clinical.sleep import SleepStudyProtocol
+
+# Configure sleep study
+sleep_config = {
+    "study_type": "diagnostic",  # diagnostic, titration, split_night
+    "channels": {
+        "eeg": ["F4-M1", "C4-M1", "O2-M1"],  # Standard sleep EEG
+        "eog": ["ROC-M1", "LOC-M1"],         # Eye movements
+        "emg": ["chin", "left_leg", "right_leg"],  # Muscle activity
+        "respiratory": ["airflow", "chest", "abdomen"],
+        "cardiac": ["ECG"],
+        "oxygen": ["SpO2"]
+    },
+    "staging": {
+        "epoch_duration": 30,  # seconds
+        "algorithm": "aasm_2017",  # AASM 2017 criteria
+        "automatic_staging": True,
+        "manual_review": True
+    }
+}
+
+sleep_protocol = SleepStudyProtocol(sleep_config)
+
+async def conduct_sleep_study():
+    """Conduct overnight sleep study"""
+
+    # Start sleep monitoring
+    study_session = await sleep_protocol.start_study(
+        patient_id=patient.anonymous_id,
+        study_date=datetime.now()
+    )
+
+    # Monitor in real-time
+    async def monitor_sleep():
+        stream = await study_session.start_monitoring()
+
+        async for epoch in stream:
+            # 30-second epochs
+            sleep_stage = await sleep_protocol.classify_epoch(epoch)
+
+            # Detect sleep events
+            events = await sleep_protocol.detect_events(epoch)
+
+            # Log stage and events
+            await study_session.log_epoch(
+                stage=sleep_stage,
+                events=events,
+                quality=epoch.signal_quality
+            )
+
+            # Real-time alerts for significant events
+            if events:
+                for event in events:
+                    if event.type == "apnea" and event.duration > 30:
+                        await send_clinical_alert(
+                            "prolonged_apnea",
+                            patient.anonymous_id,
+                            {"duration": event.duration}
+                        )
+
+    # Run overnight monitoring
+    await monitor_sleep()
+
+    # Generate sleep report
+    sleep_report = await generate_sleep_report(study_session)
+
+    return sleep_report
+
+async def analyze_sleep_architecture(study_session):
+    """Analyze sleep architecture and generate clinical metrics"""
+
+    epochs = await study_session.get_all_epochs()
+
+    # Calculate sleep metrics
+    sleep_metrics = {
+        "total_recording_time": len(epochs) * 0.5,  # minutes
+        "total_sleep_time": sum(1 for e in epochs if e.stage != "wake") * 0.5,
+        "sleep_efficiency": calculate_sleep_efficiency(epochs),
+        "sleep_onset_latency": calculate_sleep_onset_latency(epochs),
+        "rem_onset_latency": calculate_rem_onset_latency(epochs),
+        "stage_percentages": calculate_stage_percentages(epochs),
+        "arousal_index": calculate_arousal_index(epochs),
+        "ahi": calculate_apnea_hypopnea_index(epochs)  # Apnea-Hypopnea Index
+    }
+
+    return sleep_metrics
+```
+
+## Quality Assurance and Validation
+
+### Clinical Data Validation
+
+```python
+from neurascale.clinical.validation import ClinicalDataValidator
+
+class ClinicalQualityAssurance:
+    def __init__(self):
+        self.validator = ClinicalDataValidator()
+        self.quality_thresholds = {
+            "signal_quality": 0.85,
+            "impedance_max": 5000,  # 5kΩ
+            "artifact_percentage_max": 0.15,
+            "data_completeness_min": 0.95
+        }
+
+    async def validate_clinical_session(self, session_id):
+        """Comprehensive validation of clinical session data"""
+
+        validation_results = {
+            "session_id": session_id,
+            "validation_timestamp": datetime.now().isoformat(),
+            "tests_performed": [],
+            "passed": True,
+            "issues": []
+        }
+
+        # 1. Signal Quality Assessment
+        signal_quality = await self.validator.assess_signal_quality(session_id)
+        validation_results["tests_performed"].append("signal_quality")
+
+        if signal_quality["average_quality"] < self.quality_thresholds["signal_quality"]:
+            validation_results["passed"] = False
+            validation_results["issues"].append({
+                "type": "signal_quality",
+                "severity": "warning",
+                "message": f"Signal quality {signal_quality['average_quality']:.2f} below threshold"
+            })
+
+        # 2. Impedance Check
+        impedance_data = await self.validator.check_impedances(session_id)
+        validation_results["tests_performed"].append("impedance_check")
+
+        high_impedance_channels = [
+            ch for ch, imp in impedance_data.items()
+            if imp > self.quality_thresholds["impedance_max"]
+        ]
+
+        if high_impedance_channels:
+            validation_results["passed"] = False
+            validation_results["issues"].append({
+                "type": "high_impedance",
+                "severity": "error",
+                "message": f"High impedance on channels: {high_impedance_channels}"
+            })
+
+        # 3. Artifact Assessment
+        artifact_analysis = await self.validator.analyze_artifacts(session_id)
+        validation_results["tests_performed"].append("artifact_analysis")
+
+        if artifact_analysis["percentage"] > self.quality_thresholds["artifact_percentage_max"]:
+            validation_results["issues"].append({
+                "type": "excessive_artifacts",
+                "severity": "warning",
+                "message": f"Artifacts present in {artifact_analysis['percentage']:.1%} of data"
+            })
+
+        # 4. Data Completeness
+        completeness = await self.validator.check_data_completeness(session_id)
+        validation_results["tests_performed"].append("data_completeness")
+
+        if completeness < self.quality_thresholds["data_completeness_min"]:
+            validation_results["passed"] = False
+            validation_results["issues"].append({
+                "type": "incomplete_data",
+                "severity": "error",
+                "message": f"Data completeness {completeness:.1%} below minimum threshold"
+            })
+
+        # 5. Clinical Protocol Compliance
+        protocol_compliance = await self.validator.check_protocol_compliance(session_id)
+        validation_results["tests_performed"].append("protocol_compliance")
+
+        if not protocol_compliance["compliant"]:
+            validation_results["issues"].extend([
+                {
+                    "type": "protocol_violation",
+                    "severity": "error",
+                    "message": violation
+                }
+                for violation in protocol_compliance["violations"]
+            ])
+
+        # Log validation results
+        await clinical_client.audit.log_validation(validation_results)
+
+        return validation_results
+
+    async def generate_quality_report(self, validation_results):
+        """Generate clinical quality assurance report"""
+
+        report = {
+            "validation_summary": validation_results,
+            "quality_score": self.calculate_quality_score(validation_results),
+            "recommendations": self.generate_recommendations(validation_results),
+            "clinical_usability": self.assess_clinical_usability(validation_results)
+        }
+
+        return report
+
+# Clinical audit trail
+async def maintain_audit_trail():
+    """Maintain comprehensive audit trail for clinical compliance"""
+
+    audit_events = [
+        "patient_access",
+        "data_modification",
+        "report_generation",
+        "data_export",
+        "system_login",
+        "configuration_change"
+    ]
+
+    for event_type in audit_events:
+        await clinical_client.audit.configure_logging(
+            event_type=event_type,
+            log_level="detailed",
+            retention_period=2555,  # 7 years
+            encryption=True
+        )
+```
+
+## Regulatory Documentation
+
+### FDA Validation Support
+
+```python
+# Generate FDA-compliant documentation
+async def generate_fda_documentation():
+    """Generate documentation for FDA submission"""
+
+    fda_docs = {
+        "device_description": await generate_device_description(),
+        "clinical_protocol": await generate_clinical_protocol(),
+        "safety_analysis": await generate_safety_analysis(),
+        "efficacy_data": await generate_efficacy_data(),
+        "quality_system": await generate_quality_system_docs(),
+        "risk_analysis": await generate_risk_analysis()
+    }
+
+    # Compile comprehensive submission package
+    submission_package = await compile_fda_submission(fda_docs)
+
+    return submission_package
+
+async def generate_clinical_protocol():
+    """Generate clinical protocol documentation"""
+
+    protocol = {
+        "title": "Clinical Evaluation of NeuraScale BCI System",
+        "objectives": {
+            "primary": "Demonstrate safety and efficacy for intended use",
+            "secondary": ["User satisfaction", "System reliability", "Clinical workflow integration"]
+        },
+        "study_design": {
+            "type": "prospective_clinical_study",
+            "duration": "12_months",
+            "sample_size": 50,
+            "inclusion_criteria": [...],
+            "exclusion_criteria": [...]
+        },
+        "endpoints": {
+            "primary": "Classification accuracy > 70%",
+            "secondary": ["System uptime > 99%", "User satisfaction > 4/5"]
+        },
+        "statistical_plan": {
+            "power_analysis": "80% power to detect 10% difference",
+            "alpha_level": 0.05,
+            "analysis_method": "intention_to_treat"
+        }
+    }
+
+    return protocol
+```
+
+<Callout type="warning">
+  Clinical applications require proper medical oversight, institutional review board approval, and compliance with local regulations. This documentation provides technical guidance only and should not replace proper clinical protocols.
+</Callout>
+
+## Integration with Hospital Systems
+
+### HL7 FHIR Integration
+
+```python
+from neurascale.clinical.integration import HL7FHIRInterface
+
+# Configure hospital system integration
+hospital_integration = {
+    "ehr_system": "epic",  # epic, cerner, allscripts
+    "fhir_server": "https://fhir.hospital.org/R4",
+    "authentication": {
+        "method": "oauth2",
+        "client_id": "neurascale_client",
+        "scopes": ["patient/read", "observation/write", "diagnosticreport/write"]
+    }
+}
+
+fhir_client = HL7FHIRInterface(hospital_integration)
+
+async def sync_with_ehr():
+    """Synchronize NeuraScale data with hospital EHR"""
+
+    # Get patient data from EHR
+    patient_fhir = await fhir_client.get_patient(patient.hospital_id)
+
+    # Create FHIR observation for EEG data
+    eeg_observation = {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+            {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                        "code": "survey"
+                    }
+                ]
+            }
+        ],
+        "code": {
+            "coding": [
+                {
+                    "system": "http://loinc.org",
+                    "code": "54649-5",
+                    "display": "EEG study"
+                }
+            ]
+        },
+        "subject": {"reference": f"Patient/{patient.hospital_id}"},
+        "effectiveDateTime": session.start_time.isoformat(),
+        "valueString": "Normal EEG with no epileptiform activity"
+    }
+
+    # Submit to EHR
+    await fhir_client.create_observation(eeg_observation)
+```
+
+This comprehensive clinical workflow documentation provides healthcare professionals with the necessary guidance to implement NeuraScale in clinical settings while maintaining compliance with healthcare regulations and standards.

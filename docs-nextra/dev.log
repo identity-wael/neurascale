@@ -94,3 +94,43 @@
  GET /docs 200 in 80ms
  ✓ Compiled in 443ms (3275 modules)
  GET /docs 200 in 202ms
+ GET /docs/get-started 200 in 103ms
+ GET /docs 200 in 46ms
+ GET /docs/api 200 in 249ms
+ GET /docs 200 in 47ms
+ GET /docs/features 200 in 161ms
+ GET /docs 200 in 44ms
+ GET /docs/security 200 in 421ms
+ GET /docs 200 in 45ms
+ GET /docs/features 200 in 134ms
+ GET /docs 200 in 46ms
+ ✓ Compiled in 1155ms (3277 modules)
+ GET /docs 200 in 272ms
+ GET /docs/developer-guide 200 in 408ms
+ GET /docs 200 in 48ms
+ ✓ Compiled in 729ms (3279 modules)
+ GET /docs 200 in 230ms
+ ✓ Compiled in 727ms (3281 modules)
+ GET /docs 200 in 265ms
+ ✓ Compiled in 796ms (3283 modules)
+ GET /docs 200 in 274ms
+ ✓ Compiled in 829ms (3285 modules)
+ GET /docs 200 in 298ms
+ ✓ Compiled in 1222ms (3287 modules)
+ ✓ Compiled in 897ms (3287 modules)
+ GET /docs 200 in 1456ms
+ ✓ Compiled in 281ms (3287 modules)
+ GET /docs 200 in 408ms
+ GET /docs/developer-guide 200 in 431ms
+ GET /docs/device-integration 200 in 402ms
+ GET /docs/configuration 200 in 340ms
+ GET /docs/deployment 200 in 196ms
+ GET /docs/security 200 in 416ms
+ GET /docs/deployment 200 in 141ms
+ GET /docs/security 200 in 361ms
+ GET /docs/clinical-workflows 200 in 344ms
+ GET /docs/ml-development 200 in 900ms
+ GET /docs/troubleshooting 200 in 220ms
+ ✓ Compiled in 3.3s (3287 modules)
+ ✓ Compiled in 1979ms (3287 modules)
+ GET /docs/troubleshooting 200 in 2747ms

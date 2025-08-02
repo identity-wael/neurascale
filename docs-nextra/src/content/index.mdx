@@ -1,4 +1,4 @@
-import { Table } from 'nextra/components'
+import { Table, Tabs } from 'nextra/components'
 
 # Introduction
 
@@ -235,54 +235,73 @@ graph TB
 
 ## Platform Status
 
-### Implementation Progress
+### Roadmap
 
-#### Completed Phases (Foundation & Integration)
+<Tabs items={['Completed', 'In Progress', 'Upcoming']} defaultIndex={0}>
+  <Tabs.Tab>
+    #### Foundation & Integration (Phases 1-8)
 
-- **Phase 1**: Core Infrastructure Setup
-- **Phase 2**: Data Models & Storage Layer
-- **Phase 3**: Basic Signal Processing Pipeline
-- **Phase 4**: User Management & Authentication
-- **Phase 5**: Device Interfaces & LSL Integration
-- **Phase 6**: Clinical Workflow Management
-- **Phase 7**: Advanced Signal Processing
-- **Phase 8**: Real-time Classification & Prediction
+    - **Phase 1**: Core Infrastructure Setup
+    - **Phase 2**: Data Models & Storage Layer
+    - **Phase 3**: Basic Signal Processing Pipeline
+    - **Phase 4**: User Management & Authentication
+    - **Phase 5**: Device Interfaces & LSL Integration
+    - **Phase 6**: Clinical Workflow Management
+    - **Phase 7**: Advanced Signal Processing
+    - **Phase 8**: Real-time Classification & Prediction
 
-#### Completed Phases (Intelligence)
+    #### Intelligence (Phases 9-12)
 
-- **Phase 9**: Performance Monitoring & Analytics
-- **Phase 10**: Security & Compliance Layer
-- **Phase 11**: NVIDIA Omniverse Integration
-- **Phase 12**: API Implementation & Enhancement
+    - **Phase 9**: Performance Monitoring & Analytics
+    - **Phase 10**: Security & Compliance Layer
+    - **Phase 11**: NVIDIA Omniverse Integration
+    - **Phase 12**: API Implementation & Enhancement
 
-#### Completed Phases (Infrastructure)
+    #### Infrastructure (Phases 13-15)
 
-- **Phase 13**: MCP Server Implementation
-- **Phase 14**: Terraform Infrastructure
-- **Phase 15**: Kubernetes Deployment (Current)
+    - **Phase 13**: MCP Server Implementation
+    - **Phase 14**: Terraform Infrastructure
+    - **Phase 15**: Kubernetes Deployment
+  </Tabs.Tab>
 
-#### In Progress
+  <Tabs.Tab>
+    #### Phase 16: Docker Containerization Enhancement
 
-- **Phase 16**: Docker Containerization Enhancement (Q1 2025)
-  - Multi-stage optimized builds
-  - Security hardening
-  - Registry management
+    **Timeline**: Q1 2025
 
-#### Upcoming
+    - Multi-stage optimized builds
+    - Security hardening with minimal base images
+    - Container registry management
+    - Vulnerability scanning integration
+    - Size optimization strategies
+  </Tabs.Tab>
 
-- **Phase 17**: CI/CD Pipeline (Q1 2025)
-  - GitHub Actions workflows
-  - GitLab CI integration
-  - ArgoCD for GitOps
+  <Tabs.Tab>
+    #### Phase 17: CI/CD Pipeline (Q1 2025)
 
-- **Phase 18-20**: Quality Assurance (Q2 2025)
-  - Unit Testing Suite
-  - Integration Testing
-  - Performance Testing
+    - GitHub Actions workflows
+    - GitLab CI integration
+    - ArgoCD for GitOps
+    - Automated testing pipelines
+    - Multi-environment deployments
 
-- **Phase 21-22**: Delivery (Q3 2025)
-  - Documentation & Training
-  - Full System Integration Test
+    #### Phases 18-20: Quality Assurance (Q2 2025)
+
+    - Comprehensive Unit Testing Suite
+    - Integration Testing Framework
+    - Performance Testing & Benchmarks
+    - Load Testing Infrastructure
+    - Security Testing Suite
+
+    #### Phases 21-22: Delivery (Q3 2025)
+
+    - Complete Documentation & Training Materials
+    - Full System Integration Testing
+    - Production Readiness Review
+    - Launch Preparation
+    - Post-Launch Support Plan
+  </Tabs.Tab>
+</Tabs>
 
 ## Quick Start
 

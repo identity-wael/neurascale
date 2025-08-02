@@ -102,6 +102,7 @@ export default async function RootLayout({ children }) {
           </div>
         </div>
       }
+      logoLink="https://neurascale.io"
       projectLink="https://github.com/identity-wael/neurascale"
     />
   );

@@ -14,6 +14,56 @@ NeuraScale provides a complete machine learning development environment specific
 - **Model Management**: Version control, A/B testing, and deployment pipelines
 - **Performance Monitoring**: Track model performance in production
 
+## Supported ML Models
+
+### Pre-trained Models Available
+
+NeuraScale provides several state-of-the-art neural network architectures optimized for BCI applications:
+
+#### 1. **EEGNet** (Lawhern et al., 2018)
+- **Purpose**: Compact CNN for EEG classification
+- **Applications**: Motor imagery, P300 detection, error-related potentials
+- **Parameters**: ~2,600 (extremely lightweight)
+- **Accuracy**: 75-85% on motor imagery tasks
+- **Channels**: 8-64 channels supported
+
+#### 2. **ShallowConvNet** (Schirrmeister et al., 2017)
+- **Purpose**: Shallow CNN optimized for oscillatory features
+- **Applications**: Motor imagery, sleep stage classification
+- **Parameters**: ~47,000
+- **Accuracy**: 80-90% on motor imagery tasks
+- **Channels**: 16-128 channels supported
+
+#### 3. **DeepConvNet** (Schirrmeister et al., 2017)
+- **Purpose**: Deep CNN for complex pattern recognition
+- **Applications**: Seizure detection, emotion recognition
+- **Parameters**: ~287,000
+- **Accuracy**: 85-92% on complex tasks
+- **Channels**: 32-256 channels supported
+
+#### 4. **Hybrid Models**
+- **CNN-LSTM**: For temporal sequence analysis
+- **Transformer-based**: For long-range dependencies
+- **Graph Neural Networks**: For spatial relationships
+
+### Task-Specific Models
+
+#### Motor Imagery Classification
+- 2-class (left/right hand)
+- 4-class (left/right hand, feet, tongue)
+- Multi-class (up to 10 movements)
+
+#### Clinical Applications
+- **Seizure Detection**: Real-time epileptic seizure detection
+- **Sleep Stage Classification**: 5-stage sleep analysis
+- **Cognitive Load Assessment**: Mental workload estimation
+- **Emotion Recognition**: Valence/arousal classification
+
+#### Communication & Control
+- **P300 Speller**: Character selection for communication
+- **SSVEP Decoder**: Steady-state visual evoked potentials
+- **ERD/ERS Detection**: Event-related (de)synchronization
+
 ## Getting Started with ML
 
 ### Setting up the ML Environment

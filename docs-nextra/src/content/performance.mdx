@@ -3,7 +3,7 @@ title: Performance Tuning
 description: Optimize NeuraScale for maximum performance and efficiency
 ---
 
-import { Callout, Card, Cards, Tabs } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 # Performance Tuning
 
@@ -908,20 +908,12 @@ def track_performance(operation: str):
 
 ## Best Practices
 
-<Cards>
-  <Card title="Profile First" icon="🔍">
-    Always profile before optimizing. Use tools like cProfile, py-spy, and Chrome DevTools.
-  </Card>
-  <Card title="Cache Aggressively" icon="💾">
-    Implement caching at multiple levels: CDN, API, database, and application.
-  </Card>
-  <Card title="Batch Operations" icon="📦">
-    Process data in batches to reduce overhead and improve throughput.
-  </Card>
-  <Card title="Async Everything" icon="⚡">
-    Use async/await for I/O operations to maximize concurrency.
-  </Card>
-</Cards>
+### Key Optimization Strategies
+
+- **Profile First**: Always profile before optimizing. Use tools like cProfile, py-spy, and Chrome DevTools.
+- **Cache Aggressively**: Implement caching at multiple levels: CDN, API, database, and application.
+- **Batch Operations**: Process data in batches to reduce overhead and improve throughput.
+- **Async Everything**: Use async/await for I/O operations to maximize concurrency.
 
 ## Performance Checklist
 

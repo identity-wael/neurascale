@@ -12,5 +12,8 @@ export default {
   security: "",
   "clinical-workflows": "",
   "ml-development": "",
+  performance: "",
+  monitoring: "",
   troubleshooting: "",
+  "release-notes": "Release Notes",
 };

@@ -707,30 +707,94 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "Security Layers"
-        L7[WAF - Web Application Firewall]
-        L6[API Gateway - Rate Limiting]
-        L5[TLS 1.3 Encryption]
-        L4[Network Segmentation]
-        L3[Service Authentication]
-        L2[Data Encryption at Rest]
-        L1[Audit Logging]
+    subgraph "Edge Security"
+        ES1[Cloud Armor<br/>DDoS Protection]
+        ES2[Cloud CDN<br/>Edge Caching]
+        ES3[SSL/TLS Policy<br/>TLS 1.3 Only]
     end
 
-    L7 --> L6
-    L6 --> L5
-    L5 --> L4
-    L4 --> L3
-    L3 --> L2
-    L2 --> L1
+    subgraph "Network Security"
+        NS1[VPC Security<br/>Private Google Access]
+        NS2[Cloud Firewall<br/>Ingress/Egress Rules]
+        NS3[Private Service Connect<br/>Internal Traffic]
+        NS4[Cloud NAT<br/>Egress Control]
+    end
 
-    style L7 fill:#ffebee,color:#b71c1c
-    style L6 fill:#ffe0b2,color:#e65100
-    style L5 fill:#fff3e0,color:#f57c00
-    style L4 fill:#f3e5f5,color:#6a1b9a
-    style L3 fill:#e8eaf6,color:#3f51b5
-    style L2 fill:#e3f2fd,color:#0288d1
-    style L1 fill:#e0f2f1,color:#00695c
+    subgraph "Identity & Access"
+        IA1[Cloud IAM<br/>Service Accounts]
+        IA2[Workload Identity<br/>GKE Integration]
+        IA3[Binary Authorization<br/>Container Security]
+        IA4[Cloud Identity<br/>SSO/MFA]
+    end
+
+    subgraph "Data Security"
+        DS1[Cloud KMS<br/>Encryption Keys]
+        DS2[Secret Manager<br/>API Keys/Creds]
+        DS3[Data Loss Prevention<br/>PII Scanning]
+        DS4[CMEK<br/>Customer Keys]
+    end
+
+    subgraph "Monitoring & Compliance"
+        MC1[Cloud Audit Logs<br/>Immutable Trail]
+        MC2[Security Command Center<br/>Threat Detection]
+        MC3[Cloud Asset Inventory<br/>Resource Tracking]
+        MC4[Neural Ledger<br/>HIPAA Audit Trail]
+    end
+
+    subgraph "Runtime Security"
+        RS1[Container Analysis<br/>Vulnerability Scanning]
+        RS2[GKE Security<br/>Pod Security Policy]
+        RS3[Istio Service Mesh<br/>mTLS]
+        RS4[Cloud Trace<br/>Request Tracking]
+    end
+
+    ES1 --> NS1
+    ES2 --> NS1
+    ES3 --> NS1
+
+    NS1 --> IA1
+    NS2 --> IA1
+    NS3 --> IA1
+    NS4 --> IA1
+
+    IA1 --> DS1
+    IA2 --> DS1
+    IA3 --> DS1
+    IA4 --> DS1
+
+    DS1 --> MC1
+    DS2 --> MC1
+    DS3 --> MC1
+    DS4 --> MC1
+
+    MC1 --> RS1
+    MC2 --> RS1
+    MC3 --> RS1
+    MC4 --> RS1
+
+    style ES1 fill:#ea4335,color:#ffffff
+    style ES2 fill:#ea4335,color:#ffffff
+    style ES3 fill:#ea4335,color:#ffffff
+    style NS1 fill:#fbbc04,color:#000000
+    style NS2 fill:#fbbc04,color:#000000
+    style NS3 fill:#fbbc04,color:#000000
+    style NS4 fill:#fbbc04,color:#000000
+    style IA1 fill:#4285f4,color:#ffffff
+    style IA2 fill:#4285f4,color:#ffffff
+    style IA3 fill:#4285f4,color:#ffffff
+    style IA4 fill:#4285f4,color:#ffffff
+    style DS1 fill:#34a853,color:#ffffff
+    style DS2 fill:#34a853,color:#ffffff
+    style DS3 fill:#34a853,color:#ffffff
+    style DS4 fill:#34a853,color:#ffffff
+    style MC1 fill:#9c27b0,color:#ffffff
+    style MC2 fill:#9c27b0,color:#ffffff
+    style MC3 fill:#9c27b0,color:#ffffff
+    style MC4 fill:#9c27b0,color:#ffffff
+    style RS1 fill:#00acc1,color:#ffffff
+    style RS2 fill:#00acc1,color:#ffffff
+    style RS3 fill:#00acc1,color:#ffffff
+    style RS4 fill:#00acc1,color:#ffffff
 ```
 
 ### Compliance Features

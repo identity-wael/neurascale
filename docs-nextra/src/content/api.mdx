@@ -1,0 +1,977 @@
+import { Tabs, Callout } from 'nextra/components'
+
+# API Documentation
+
+NeuraScale provides comprehensive APIs for integrating with brain-computer interface devices, managing neural data, and building applications. Our API ecosystem includes REST, GraphQL, WebSocket, and gRPC interfaces to support various integration patterns.
+
+## API Overview
+
+<div className="nx-grid nx-mt-6 nx-gap-4 md:nx-grid-cols-2 lg:nx-grid-cols-4">
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">REST API v2</h3>
+    <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Standard HTTP operations for device management and data access
+    </div>
+    <a href="#rest-api" className="nx-text-primary-600 nx-text-sm">
+      Documentation →
+    </a>
+  </div>
+
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">GraphQL API</h3>
+    <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Flexible queries with real-time subscriptions
+    </div>
+    <a href="#graphql-api" className="nx-text-primary-600 nx-text-sm">
+      Documentation →
+    </a>
+  </div>
+
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">WebSocket API</h3>
+    <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      Real-time bidirectional communication for streaming data
+    </div>
+    <a href="#websocket-api" className="nx-text-primary-600 nx-text-sm">
+      Documentation →
+    </a>
+  </div>
+
+  <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
+    <h3 className="nx-font-semibold nx-mb-2">gRPC API</h3>
+    <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
+      High-performance streaming for real-time applications
+    </div>
+    <a href="#grpc-api" className="nx-text-primary-600 nx-text-sm">
+      Documentation →
+    </a>
+  </div>
+</div>
+
+## Quick Start
+
+### Authentication
+
+All API requests require authentication using JWT tokens:
+
+```bash
+# Get access token
+curl -X POST https://api.neurascale.io/v2/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your-email@example.com", "password": "your-password"}'
+
+# Use token in requests
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  https://api.neurascale.io/v2/devices
+```
+
+### Base URLs
+
+| Environment | Base URL |
+|-------------|----------|
+| Production | `https://api.neurascale.io` |
+| Staging | `https://staging-api.neurascale.io` |
+| Development | `http://localhost:8000` |
+
+### Rate Limits
+
+| API Type | Rate Limit | Notes |
+|----------|------------|-------|
+| REST API | 1,000 requests/hour | Per user token |
+| GraphQL | 500 queries/hour | Complexity-weighted |
+| WebSocket | 10 connections | Per user |
+| gRPC | Unlimited | Production use only |
+
+## REST API v2
+
+Our REST API follows OpenAPI 3.0 specification and provides standard HTTP operations for all platform resources.
+
+<Tabs items={['Devices', 'Sessions', 'Data', 'Analysis']}>
+  <Tabs.Tab>
+    **Device Management Endpoints**
+
+    ```bash
+    # List all devices
+    GET /v2/devices
+
+    # Get device details
+    GET /v2/devices/{device_id}
+
+    # Start device streaming
+    POST /v2/devices/{device_id}/stream/start
+
+    # Stop device streaming
+    POST /v2/devices/{device_id}/stream/stop
+
+    # Update device configuration
+    PATCH /v2/devices/{device_id}/config
+    ```
+
+    **Example: Connect OpenBCI Device**
+
+    ```javascript
+    const response = await fetch('https://api.neurascale.io/v2/devices/openbci_001/stream/start', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sample_rate: 250,
+        channels: [1, 2, 3, 4, 5, 6, 7, 8],
+        filters: {
+          notch: 60,
+          highpass: 0.5,
+          lowpass: 100
+        }
+      })
+    });
+
+    const result = await response.json();
+    console.log('Stream started:', result.stream_id);
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Session Management Endpoints**
+
+    ```bash
+    # Create new session
+    POST /v2/sessions
+
+    # List sessions
+    GET /v2/sessions?limit=20&offset=0
+
+    # Get session details
+    GET /v2/sessions/{session_id}
+
+    # Update session metadata
+    PATCH /v2/sessions/{session_id}
+
+    # Delete session
+    DELETE /v2/sessions/{session_id}
+    ```
+
+    **Example: Create Recording Session**
+
+    ```python
+    import requests
+
+    session_data = {
+        "name": "Motor Imagery Session",
+        "patient_id": "patient_123",
+        "device_ids": ["openbci_001"],
+        "duration_minutes": 30,
+        "protocol": "motor_imagery_4class",
+        "metadata": {
+            "condition": "baseline",
+            "experimenter": "Dr. Smith"
+        }
+    }
+
+    response = requests.post(
+        "https://api.neurascale.io/v2/sessions",
+        headers={"Authorization": "Bearer YOUR_TOKEN"},
+        json=session_data
+    )
+
+    session = response.json()
+    print(f"Created session: {session['id']}")
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Data Access Endpoints**
+
+    ```bash
+    # Query time-series data
+    GET /v2/data/timeseries?session_id={id}&start={iso_time}&end={iso_time}
+
+    # Get session recordings
+    GET /v2/sessions/{session_id}/recordings
+
+    # Export data in various formats
+    POST /v2/data/export
+
+    # Get real-time data stream
+    GET /v2/data/stream/{stream_id}
+    ```
+
+    **Example: Query Neural Data**
+
+    ```python
+    from datetime import datetime, timedelta
+    import pandas as pd
+
+    # Query last hour of data
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(hours=1)
+
+    params = {
+        "session_id": "session_123",
+        "start": start_time.isoformat(),
+        "end": end_time.isoformat(),
+        "channels": "1,2,3,4",
+        "format": "json"
+    }
+
+    response = requests.get(
+        "https://api.neurascale.io/v2/data/timeseries",
+        headers={"Authorization": "Bearer YOUR_TOKEN"},
+        params=params
+    )
+
+    data = response.json()
+    df = pd.DataFrame(data['samples'])
+    print(f"Retrieved {len(df)} samples")
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Analysis Endpoints**
+
+    ```bash
+    # Run analysis on session
+    POST /v2/analysis/sessions/{session_id}/analyze
+
+    # Get analysis results
+    GET /v2/analysis/results/{analysis_id}
+
+    # List available models
+    GET /v2/analysis/models
+
+    # Deploy custom model
+    POST /v2/analysis/models/deploy
+    ```
+
+    **Example: Motor Imagery Classification**
+
+    ```javascript
+    const analysis = await fetch('https://api.neurascale.io/v2/analysis/sessions/session_123/analyze', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model_type: 'motor_imagery_4class',
+        parameters: {
+          window_size: 2.0,
+          overlap: 0.5,
+          frequency_bands: {
+            mu: [8, 12],
+            beta: [16, 24]
+          }
+        }
+      })
+    });
+
+    const result = await analysis.json();
+    console.log('Analysis started:', result.analysis_id);
+
+    // Poll for results
+    const checkResults = async (analysisId) => {
+      const response = await fetch(`https://api.neurascale.io/v2/analysis/results/${analysisId}`, {
+        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+      });
+
+      const results = await response.json();
+      if (results.status === 'completed') {
+        console.log('Classification accuracy:', results.metrics.accuracy);
+        console.log('Predictions:', results.predictions);
+      }
+    };
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## GraphQL API
+
+Our GraphQL API provides a unified interface for querying related data efficiently with strong typing and real-time subscriptions.
+
+### GraphQL Endpoint
+
+```
+POST https://api.neurascale.io/graphql
+```
+
+### Schema Overview
+
+<Tabs items={['Queries', 'Mutations', 'Subscriptions']}>
+  <Tabs.Tab>
+    **Common Queries**
+
+    ```graphql
+    # Get devices with recent sessions
+    query GetDevicesWithSessions {
+      devices {
+        id
+        name
+        status
+        sessions(last: 5) {
+          id
+          name
+          startTime
+          status
+          recordings {
+            id
+            duration
+            sampleCount
+            quality
+          }
+        }
+      }
+    }
+
+    # Query specific session data
+    query GetSessionData($sessionId: ID!) {
+      session(id: $sessionId) {
+        id
+        name
+        startTime
+        endTime
+        device {
+          id
+          name
+          type
+        }
+        recordings {
+          id
+          channelCount
+          sampleRate
+          duration
+          artifacts {
+            type
+            startTime
+            endTime
+          }
+        }
+        analysis {
+          id
+          modelType
+          accuracy
+          predictions {
+            timestamp
+            label
+            confidence
+          }
+        }
+      }
+    }
+
+    # Search sessions with filters
+    query SearchSessions($filters: SessionFilters) {
+      sessions(filters: $filters) {
+        edges {
+          node {
+            id
+            name
+            startTime
+            tags
+            metadata
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Mutations for Data Modification**
+
+    ```graphql
+    # Create new session
+    mutation CreateSession($input: CreateSessionInput!) {
+      createSession(input: $input) {
+        session {
+          id
+          name
+          status
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+
+    # Start device streaming
+    mutation StartStreaming($deviceId: ID!, $config: StreamConfig!) {
+      startStreaming(deviceId: $deviceId, config: $config) {
+        streamId
+        status
+        errors {
+          code
+          message
+        }
+      }
+    }
+
+    # Update session metadata
+    mutation UpdateSession($id: ID!, $input: UpdateSessionInput!) {
+      updateSession(id: $id, input: $input) {
+        session {
+          id
+          name
+          metadata
+          updatedAt
+        }
+      }
+    }
+
+    # Deploy ML model
+    mutation DeployModel($input: DeployModelInput!) {
+      deployModel(input: $input) {
+        deployment {
+          id
+          modelId
+          version
+          status
+          endpoint
+        }
+        errors {
+          field
+          message
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Real-time Subscriptions**
+
+    ```graphql
+    # Subscribe to device status changes
+    subscription DeviceStatusUpdates($deviceIds: [ID!]) {
+      deviceStatusUpdated(deviceIds: $deviceIds) {
+        deviceId
+        status
+        timestamp
+        metadata {
+          batteryLevel
+          signalQuality
+        }
+      }
+    }
+
+    # Subscribe to real-time neural data
+    subscription NeuralDataStream($sessionId: ID!) {
+      neuralDataReceived(sessionId: $sessionId) {
+        timestamp
+        deviceId
+        channels {
+          number
+          value
+          quality
+        }
+        events {
+          type
+          timestamp
+          metadata
+        }
+      }
+    }
+
+    # Subscribe to analysis results
+    subscription AnalysisResults($sessionId: ID!) {
+      analysisCompleted(sessionId: $sessionId) {
+        analysisId
+        modelType
+        status
+        results {
+          accuracy
+          predictions {
+            timestamp
+            label
+            confidence
+          }
+        }
+      }
+    }
+
+    # Subscribe to session events
+    subscription SessionEvents($sessionId: ID!) {
+      sessionEventOccurred(sessionId: $sessionId) {
+        type
+        timestamp
+        data
+        source
+      }
+    }
+    ```
+
+    **Example: Real-time Data Subscription**
+
+    ```javascript
+    import { createClient } from 'graphql-ws';
+
+    const client = createClient({
+      url: 'wss://api.neurascale.io/graphql',
+      connectionParams: {
+        Authorization: 'Bearer YOUR_TOKEN',
+      },
+    });
+
+    const subscription = client.iterate({
+      query: `
+        subscription NeuralDataStream($sessionId: ID!) {
+          neuralDataReceived(sessionId: $sessionId) {
+            timestamp
+            channels {
+              number
+              value
+              quality
+            }
+          }
+        }
+      `,
+      variables: { sessionId: 'session_123' },
+    });
+
+    for await (const result of subscription) {
+      console.log('Real-time data:', result.data.neuralDataReceived);
+      // Process neural data in real-time
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## WebSocket API
+
+For real-time bidirectional communication, our WebSocket API provides low-latency streaming of neural data and events.
+
+### Connection
+
+```javascript
+const ws = new WebSocket('wss://api.neurascale.io/ws');
+
+// Authentication
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    type: 'auth',
+    token: 'YOUR_ACCESS_TOKEN'
+  }));
+};
+
+// Handle messages
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  console.log('Received:', message);
+};
+```
+
+### Message Types
+
+<Tabs items={['Data Streaming', 'Device Control', 'Events']}>
+  <Tabs.Tab>
+    **Neural Data Streaming**
+
+    ```javascript
+    // Subscribe to data stream
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      topic: 'neural_data',
+      session_id: 'session_123'
+    }));
+
+    // Real-time data message format
+    {
+      "type": "neural_data",
+      "timestamp": 1705317045123,
+      "device_id": "openbci_001",
+      "session_id": "session_123",
+      "channels": [
+        { "number": 1, "value": 1.23, "quality": 0.98 },
+        { "number": 2, "value": 4.56, "quality": 0.99 },
+        { "number": 3, "value": 7.89, "quality": 0.97 }
+      ],
+      "events": [
+        {
+          "type": "stimulus",
+          "timestamp": 1705317045120,
+          "data": { "stimulus_id": "stim_001" }
+        }
+      ]
+    }
+
+    // Batch data for efficiency
+    {
+      "type": "neural_data_batch",
+      "batch_id": "batch_123",
+      "timestamp_start": 1705317045000,
+      "timestamp_end": 1705317049000,
+      "sample_count": 1000,
+      "compressed_data": "base64_encoded_data"
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Device Control Messages**
+
+    ```javascript
+    // Start streaming
+    ws.send(JSON.stringify({
+      type: 'device_control',
+      action: 'start_stream',
+      device_id: 'openbci_001',
+      config: {
+        sample_rate: 250,
+        channels: [1, 2, 3, 4],
+        filters: {
+          notch: 60,
+          bandpass: [0.5, 100]
+        }
+      }
+    }));
+
+    // Update configuration
+    ws.send(JSON.stringify({
+      type: 'device_control',
+      action: 'update_config',
+      device_id: 'openbci_001',
+      config: {
+        sample_rate: 500
+      }
+    }));
+
+    // Device response
+    {
+      "type": "device_response",
+      "device_id": "openbci_001",
+      "action": "start_stream",
+      "status": "success",
+      "stream_id": "stream_456",
+      "message": "Streaming started successfully"
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Event Handling**
+
+    ```javascript
+    // System events
+    {
+      "type": "system_event",
+      "event": "device_connected",
+      "device_id": "openbci_001",
+      "timestamp": 1705317045123,
+      "metadata": {
+        "firmware_version": "3.1.2",
+        "battery_level": 0.85
+      }
+    }
+
+    // Session events
+    {
+      "type": "session_event",
+      "session_id": "session_123",
+      "event": "recording_started",
+      "timestamp": 1705317045123,
+      "user_id": "user_456"
+    }
+
+    // Error events
+    {
+      "type": "error",
+      "error_code": "DEVICE_DISCONNECTED",
+      "message": "Device connection lost",
+      "device_id": "openbci_001",
+      "timestamp": 1705317045123,
+      "retry_suggested": true
+    }
+
+    // Custom event subscription
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      topic: 'custom_events',
+      filters: {
+        event_types: ['marker', 'annotation'],
+        session_id: 'session_123'
+      }
+    }));
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## gRPC API
+
+For high-performance applications requiring low latency and efficient binary protocol, our gRPC API provides streaming interfaces.
+
+### Protocol Buffers
+
+```protobuf
+// neural_service.proto
+syntax = "proto3";
+
+package neurascale.v1;
+
+service NeuralService {
+  // Streaming neural data
+  rpc StreamNeuralData(StreamRequest) returns (stream NeuralDataPacket);
+
+  // Bidirectional device control
+  rpc DeviceControl(stream DeviceCommand) returns (stream DeviceResponse);
+
+  // Analysis service
+  rpc AnalyzeData(AnalysisRequest) returns (AnalysisResponse);
+}
+
+message NeuralDataPacket {
+  string device_id = 1;
+  int64 timestamp = 2;
+  repeated ChannelData channels = 3;
+  repeated Event events = 4;
+}
+
+message ChannelData {
+  int32 channel_number = 1;
+  float value = 2;
+  float quality = 3;
+}
+
+message Event {
+  string type = 1;
+  int64 timestamp = 2;
+  map<string, string> metadata = 3;
+}
+```
+
+### Client Examples
+
+<Tabs items={['Python', 'Go', 'Java']}>
+  <Tabs.Tab>
+    **Python gRPC Client**
+
+    ```python
+    import grpc
+    from neurascale.v1 import neural_service_pb2_grpc, neural_service_pb2
+
+    # Create channel with authentication
+    credentials = grpc.ssl_channel_credentials()
+    call_credentials = grpc.access_token_call_credentials('YOUR_TOKEN')
+    composite_credentials = grpc.composite_channel_credentials(
+        credentials, call_credentials
+    )
+
+    channel = grpc.secure_channel(
+        'api.neurascale.io:443',
+        composite_credentials
+    )
+
+    # Create service stub
+    stub = neural_service_pb2_grpc.NeuralServiceStub(channel)
+
+    # Stream neural data
+    request = neural_service_pb2.StreamRequest(
+        session_id='session_123',
+        device_ids=['openbci_001']
+    )
+
+    try:
+        for packet in stub.StreamNeuralData(request):
+            print(f"Received data from {packet.device_id}")
+            for channel in packet.channels:
+                print(f"  Channel {channel.channel_number}: {channel.value}")
+    except grpc.RpcError as e:
+        print(f"Error: {e.code()} - {e.details()}")
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Go gRPC Client**
+
+    ```go
+    package main
+
+    import (
+        "context"
+        "crypto/tls"
+        "io"
+        "log"
+
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/credentials"
+        "google.golang.org/grpc/credentials/oauth"
+
+        pb "github.com/neurascale/api/proto/v1"
+    )
+
+    func main() {
+        // Setup TLS credentials
+        creds := credentials.NewTLS(&tls.Config{})
+
+        // Setup OAuth2 token
+        perRPC := oauth.NewOauthAccess(&oauth2.Token{
+            AccessToken: "YOUR_TOKEN",
+        })
+
+        // Create connection
+        conn, err := grpc.Dial(
+            "api.neurascale.io:443",
+            grpc.WithTransportCredentials(creds),
+            grpc.WithPerRPCCredentials(perRPC),
+        )
+        if err != nil {
+            log.Fatalf("Failed to connect: %v", err)
+        }
+        defer conn.Close()
+
+        // Create client
+        client := pb.NewNeuralServiceClient(conn)
+
+        // Stream neural data
+        stream, err := client.StreamNeuralData(context.Background(), &pb.StreamRequest{
+            SessionId: "session_123",
+            DeviceIds: []string{"openbci_001"},
+        })
+        if err != nil {
+            log.Fatalf("Failed to stream: %v", err)
+        }
+
+        for {
+            packet, err := stream.Recv()
+            if err == io.EOF {
+                break
+            }
+            if err != nil {
+                log.Fatalf("Stream error: %v", err)
+            }
+
+            log.Printf("Received packet from %s with %d channels",
+                packet.DeviceId, len(packet.Channels))
+        }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Java gRPC Client**
+
+    ```java
+    import io.grpc.*;
+    import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+    import io.grpc.stub.StreamObserver;
+
+    public class NeuralClient {
+        private final NeuralServiceGrpc.NeuralServiceStub asyncStub;
+
+        public NeuralClient(Channel channel) {
+            asyncStub = NeuralServiceGrpc.newStub(channel);
+        }
+
+        public void streamNeuralData(String sessionId, String[] deviceIds) {
+            StreamRequest request = StreamRequest.newBuilder()
+                .setSessionId(sessionId)
+                .addAllDeviceIds(Arrays.asList(deviceIds))
+                .build();
+
+            StreamObserver<NeuralDataPacket> responseObserver =
+                new StreamObserver<NeuralDataPacket>() {
+                    @Override
+                    public void onNext(NeuralDataPacket packet) {
+                        System.out.println("Received data from: " + packet.getDeviceId());
+                        for (ChannelData channel : packet.getChannelsList()) {
+                            System.out.printf("  Channel %d: %.3f%n",
+                                channel.getChannelNumber(), channel.getValue());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        System.err.println("Stream error: " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("Stream completed");
+                    }
+                };
+
+            asyncStub.streamNeuralData(request, responseObserver);
+        }
+
+        public static void main(String[] args) {
+            // Setup channel with credentials
+            ManagedChannel channel = NettyChannelBuilder
+                .forAddress("api.neurascale.io", 443)
+                .sslContext(GrpcSslContexts.forClient().build())
+                .build();
+
+            NeuralClient client = new NeuralClient(channel);
+            client.streamNeuralData("session_123", new String[]{"openbci_001"});
+
+            // Keep alive
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            channel.shutdown();
+        }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Error Handling
+
+### HTTP Status Codes
+
+| Code | Description | Common Causes |
+|------|-------------|---------------|
+| 200 | Success | Request completed successfully |
+| 201 | Created | Resource created successfully |
+| 400 | Bad Request | Invalid request format or parameters |
+| 401 | Unauthorized | Missing or invalid authentication |
+| 403 | Forbidden | Insufficient permissions |
+| 404 | Not Found | Resource does not exist |
+| 409 | Conflict | Resource conflict (e.g., device already in use) |
+| 422 | Unprocessable Entity | Valid request but business logic error |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Server-side error |
+| 503 | Service Unavailable | Service temporarily unavailable |
+
+### Error Response Format
+
+```json
+{
+  "error": {
+    "code": "DEVICE_NOT_FOUND",
+    "message": "Device with ID 'openbci_001' not found",
+    "details": {
+      "resource_type": "device",
+      "resource_id": "openbci_001",
+      "available_devices": ["openbci_002", "emotiv_001"]
+    },
+    "request_id": "req_123456789",
+    "timestamp": "2024-01-15T10:30:45.123Z"
+  }
+}
+```
+
+### Common Error Codes
+
+| Code | Description | Resolution |
+|------|-------------|------------|
+| `INVALID_TOKEN` | JWT token is invalid or expired | Refresh token or re-authenticate |
+| `DEVICE_NOT_FOUND` | Specified device doesn't exist | Check device ID and availability |
+| `DEVICE_BUSY` | Device is already in use | Wait or use different device |
+| `SESSION_NOT_FOUND` | Session doesn't exist | Verify session ID |
+| `INSUFFICIENT_PERMISSIONS` | User lacks required permissions | Contact administrator |
+| `RATE_LIMIT_EXCEEDED` | Too many requests | Implement backoff and retry |
+| `STREAM_UNAVAILABLE` | Data stream is not active | Start streaming first |
+| `INVALID_CONFIGURATION` | Device configuration is invalid | Check configuration parameters |
+
+<Callout type="info">
+  For detailed API documentation including all endpoints, parameters, and examples, visit our interactive API documentation at [docs.neurascale.io/api](https://docs.neurascale.io/api).
+</Callout>

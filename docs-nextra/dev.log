@@ -1,0 +1,71 @@
+
+> dev
+> next dev
+
+ ⚠ Warning: Found multiple lockfiles. Selecting /Users/weg/NeuraScale/neurascale/pnpm-lock.yaml.
+   Consider removing the lockfiles at:
+   * /Users/weg/NeuraScale/neurascale/docs-nextra/package-lock.json
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://172.20.7.170:3000
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1071ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.3s (2022 modules)
+ GET / 307 in 2946ms
+ ✓ Compiled in 604ms (1511 modules)
+ ✓ Compiled in 18ms
+ ○ Compiling /docs/[[...mdxPath]] ...
+ ✓ Compiled /docs/[[...mdxPath]] in 6.7s (5503 modules)
+ GET /docs 200 in 8271ms
+ GET /docs/api 200 in 268ms
+ GET /docs/features 200 in 172ms
+ GET /docs 200 in 51ms
+ ✓ Compiled in 381ms (3272 modules)
+ GET /docs 200 in 279ms
+ GET /docs/api 200 in 263ms
+ GET /docs/system-modeling/overview 200 in 15ms
+ GET /docs/api 200 in 223ms
+ ✓ Compiled in 450ms (3272 modules)
+ GET /docs/api 200 in 404ms
+ GET /docs/system-modeling/overview 200 in 17ms
+ ✓ Compiled in 363ms (3272 modules)
+ GET /docs/api 200 in 960ms
+ GET /docs/api 200 in 243ms
+ ✓ Compiled in 252ms (3272 modules)
+ GET /docs/api 200 in 516ms
+ ✓ Compiled in 911ms (3274 modules)
+ GET /docs/api 200 in 479ms
+ ✓ Compiled in 207ms (3275 modules)
+ GET /docs/api 200 in 513ms
+ ✓ Compiled in 254ms (3275 modules)
+ GET /docs/api 200 in 422ms
+ GET /docs/deployment 200 in 173ms
+ ✓ Compiled in 234ms (3275 modules)
+ GET /docs/api 200 in 377ms
+ GET /docs 200 in 41ms
+ ✓ Compiled in 1007ms (3277 modules)
+ GET /docs 200 in 428ms
+ ✓ Compiled in 713ms (3277 modules)
+ GET /docs 200 in 213ms
+ ✓ Compiled in 200ms (3276 modules)
+ GET /docs 200 in 209ms
+ ✓ Compiled in 383ms (3276 modules)
+ GET /docs 200 in 256ms
+ ✓ Compiled in 226ms (3275 modules)
+ GET /docs 200 in 207ms
+ ✓ Compiled in 755ms (3275 modules)
+ GET /docs 200 in 243ms
+ ✓ Compiled in 218ms (3275 modules)
+ ✓ Compiled in 227ms (3275 modules)
+ GET /docs 200 in 224ms
+ GET /docs/api 200 in 255ms
+ GET /docs/deployment 200 in 174ms
+ GET /docs/security 200 in 430ms
+ ✓ Compiled in 1839ms (3275 modules)
+ ✓ Compiled in 1109ms (3275 modules)
+ GET /docs/security 200 in 2039ms

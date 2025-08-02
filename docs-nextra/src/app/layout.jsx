@@ -102,6 +102,7 @@ export default async function RootLayout({ children }) {
           </div>
         </div>
       }
+      projectLink="https://github.com/identity-wael/neurascale"
     />
   );
   const pageMap = await getPageMap();
@@ -113,7 +114,7 @@ export default async function RootLayout({ children }) {
           navbar={navbar}
           footer={
             <Footer>
-              MIT {new Date().getFullYear()} © NeuraScale. All rights reserved.
+              {new Date().getFullYear()} © NeuraScale. All rights reserved.
             </Footer>
           }
           editLink="Edit this page on GitHub"

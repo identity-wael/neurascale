@@ -1,5 +1,22 @@
 import { Tabs, Callout, Table } from 'nextra/components'
 
+export const StatusBadge = ({ status }) => {
+  const colors = {
+    'available': 'nx-bg-green-100 nx-text-green-800 dark:nx-bg-green-900 dark:nx-text-green-200',
+    'beta': 'nx-bg-blue-100 nx-text-blue-800 dark:nx-bg-blue-900 dark:nx-text-blue-200',
+    'coming-soon': 'nx-bg-yellow-100 nx-text-yellow-800 dark:nx-bg-yellow-900 dark:nx-text-yellow-200',
+    'planned': 'nx-bg-gray-100 nx-text-gray-800 dark:nx-bg-gray-900 dark:nx-text-gray-200'
+  }
+  return (
+    <span className={`nx-inline-flex nx-items-center nx-px-2.5 nx-py-0.5 nx-rounded-full nx-text-xs nx-font-medium ${colors[status] || colors.planned}`}>
+      {status === 'available' && '✓ Available'}
+      {status === 'beta' && '🔧 Beta'}
+      {status === 'coming-soon' && '🚀 Coming Soon'}
+      {status === 'planned' && '📅 Planned'}
+    </span>
+  )
+}
+
 # Architecture
 
 NeuraScale is a modern BCI platform with a decoupled architecture that separates the user-facing console from the neural data processing engine. The platform combines best-in-class cloud services for optimal performance, security, and developer experience.
@@ -11,6 +28,76 @@ NeuraScale is a modern BCI platform with a decoupled architecture that separates
 3. **User Database** - NeonDB (PostgreSQL) for user data, settings, and session metadata
 4. **Neural Engine** - Python-based backend for real-time BCI data processing
 5. **API Gateway** - RESTful and WebSocket APIs connecting frontend to backend services
+
+## Implementation Status
+
+<div className="nx-mt-6">
+  <table className="nx-w-full nx-table-auto nx-border-collapse">
+    <thead>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <th className="nx-text-left nx-p-2">Component</th>
+        <th className="nx-text-left nx-p-2">Status</th>
+        <th className="nx-text-left nx-p-2">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Frontend Console</strong></td>
+        <td className="nx-p-2"><StatusBadge status="beta" /></td>
+        <td className="nx-p-2 nx-text-sm">Core UI deployed on Vercel, active development</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Firebase Auth</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Fully integrated with Google OAuth</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>NeonDB</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Production database for user data</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Neural Engine Core</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Device management, signal processing framework</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>REST API</strong></td>
+        <td className="nx-p-2"><StatusBadge status="available" /></td>
+        <td className="nx-p-2 nx-text-sm">Device control and data access endpoints</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>WebSocket API</strong></td>
+        <td className="nx-p-2"><StatusBadge status="beta" /></td>
+        <td className="nx-p-2 nx-text-sm">Real-time streaming in development</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>ML Pipeline</strong></td>
+        <td className="nx-p-2"><StatusBadge status="coming-soon" /></td>
+        <td className="nx-p-2 nx-text-sm">Model framework ready, training models</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>Cloud Deployment</strong></td>
+        <td className="nx-p-2"><StatusBadge status="coming-soon" /></td>
+        <td className="nx-p-2 nx-text-sm">GCP infrastructure being configured</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>TimescaleDB</strong></td>
+        <td className="nx-p-2"><StatusBadge status="planned" /></td>
+        <td className="nx-p-2 nx-text-sm">Time-series storage for neural data</td>
+      </tr>
+      <tr className="nx-border-b nx-border-gray-200 dark:nx-border-gray-800">
+        <td className="nx-p-2"><strong>BigQuery Analytics</strong></td>
+        <td className="nx-p-2"><StatusBadge status="planned" /></td>
+        <td className="nx-p-2 nx-text-sm">Large-scale data analysis platform</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<Callout type="info">
+  The platform is under active development with core functionality available for testing. Production deployment with full cloud infrastructure coming soon.
+</Callout>
 
 ## System Architecture
 

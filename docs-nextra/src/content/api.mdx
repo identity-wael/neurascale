@@ -1,5 +1,22 @@
 import { Tabs, Callout } from 'nextra/components'
 
+export const StatusBadge = ({ status }) => {
+  const colors = {
+    'available': 'nx-bg-green-100 nx-text-green-800 dark:nx-bg-green-900 dark:nx-text-green-200',
+    'beta': 'nx-bg-blue-100 nx-text-blue-800 dark:nx-bg-blue-900 dark:nx-text-blue-200',
+    'coming-soon': 'nx-bg-yellow-100 nx-text-yellow-800 dark:nx-bg-yellow-900 dark:nx-text-yellow-200',
+    'planned': 'nx-bg-gray-100 nx-text-gray-800 dark:nx-bg-gray-900 dark:nx-text-gray-200'
+  }
+  return (
+    <span className={`nx-inline-flex nx-items-center nx-px-2.5 nx-py-0.5 nx-rounded-full nx-text-xs nx-font-medium ${colors[status] || colors.planned}`}>
+      {status === 'available' && '✓ Available'}
+      {status === 'beta' && '🔧 Beta'}
+      {status === 'coming-soon' && '🚀 Coming Soon'}
+      {status === 'planned' && '📅 Planned'}
+    </span>
+  )
+}
+
 # API Documentation
 
 NeuraScale provides comprehensive APIs for integrating with brain-computer interface devices, managing neural data, and building applications. Our API ecosystem includes REST, GraphQL, WebSocket, and gRPC interfaces to support various integration patterns.
@@ -8,7 +25,10 @@ NeuraScale provides comprehensive APIs for integrating with brain-computer inter
 
 <div className="nx-grid nx-mt-6 nx-gap-4 md:nx-grid-cols-2 lg:nx-grid-cols-4">
   <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
-    <h3 className="nx-font-semibold nx-mb-2">REST API v2</h3>
+    <div className="nx-flex nx-items-center nx-justify-between nx-mb-2">
+      <h3 className="nx-font-semibold">REST API v2</h3>
+      <StatusBadge status="available" />
+    </div>
     <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
       Standard HTTP operations for device management and data access
     </div>
@@ -18,7 +38,10 @@ NeuraScale provides comprehensive APIs for integrating with brain-computer inter
   </div>
 
   <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
-    <h3 className="nx-font-semibold nx-mb-2">GraphQL API</h3>
+    <div className="nx-flex nx-items-center nx-justify-between nx-mb-2">
+      <h3 className="nx-font-semibold">GraphQL API</h3>
+      <StatusBadge status="coming-soon" />
+    </div>
     <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
       Flexible queries with real-time subscriptions
     </div>
@@ -28,7 +51,10 @@ NeuraScale provides comprehensive APIs for integrating with brain-computer inter
   </div>
 
   <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
-    <h3 className="nx-font-semibold nx-mb-2">WebSocket API</h3>
+    <div className="nx-flex nx-items-center nx-justify-between nx-mb-2">
+      <h3 className="nx-font-semibold">WebSocket API</h3>
+      <StatusBadge status="beta" />
+    </div>
     <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
       Real-time bidirectional communication for streaming data
     </div>
@@ -38,7 +64,10 @@ NeuraScale provides comprehensive APIs for integrating with brain-computer inter
   </div>
 
   <div className="nx-border nx-border-gray-200 dark:nx-border-gray-800 nx-rounded-lg nx-p-4">
-    <h3 className="nx-font-semibold nx-mb-2">gRPC API</h3>
+    <div className="nx-flex nx-items-center nx-justify-between nx-mb-2">
+      <h3 className="nx-font-semibold">gRPC API</h3>
+      <StatusBadge status="planned" />
+    </div>
     <div className="nx-text-sm nx-text-gray-600 dark:nx-text-gray-400 nx-mb-2">
       High-performance streaming for real-time applications
     </div>
@@ -67,11 +96,11 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
 
 ### Base URLs
 
-| Environment | Base URL |
-|-------------|----------|
-| Production | `https://api.neurascale.io` |
-| Staging | `https://staging-api.neurascale.io` |
-| Development | `http://localhost:8000` |
+| Environment | Base URL | Status |
+|-------------|----------|--------|
+| Production | `https://api.neurascale.io` | <StatusBadge status="coming-soon" /> |
+| Staging | `https://staging-api.neurascale.io` | <StatusBadge status="coming-soon" /> |
+| Development | `http://localhost:8000` | <StatusBadge status="available" /> |
 
 ### Rate Limits
 
@@ -82,9 +111,13 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
 | WebSocket | 10 connections | Per user |
 | gRPC | Unlimited | Production use only |
 
-## REST API v2
+## REST API v2 <StatusBadge status="available" />
 
 Our REST API follows OpenAPI 3.0 specification and provides standard HTTP operations for all platform resources.
+
+<Callout type="info">
+  The REST API is currently available for local development. Production deployment coming soon with full authentication and rate limiting.
+</Callout>
 
 <Tabs items={['Devices', 'Sessions', 'Data', 'Analysis']}>
   <Tabs.Tab>
@@ -285,9 +318,13 @@ Our REST API follows OpenAPI 3.0 specification and provides standard HTTP operat
   </Tabs.Tab>
 </Tabs>
 
-## GraphQL API
+## GraphQL API <StatusBadge status="coming-soon" />
 
 Our GraphQL API provides a unified interface for querying related data efficiently with strong typing and real-time subscriptions.
+
+<Callout type="warning">
+  GraphQL API is under active development and will be available in the next release. The schema and examples below show the planned implementation.
+</Callout>
 
 ### GraphQL Endpoint
 
@@ -543,9 +580,13 @@ POST https://api.neurascale.io/graphql
   </Tabs.Tab>
 </Tabs>
 
-## WebSocket API
+## WebSocket API <StatusBadge status="beta" />
 
 For real-time bidirectional communication, our WebSocket API provides low-latency streaming of neural data and events.
+
+<Callout type="info">
+  WebSocket API is currently in beta with core functionality available. Full production features including compression and advanced event filtering coming soon.
+</Callout>
 
 ### Connection
 
@@ -702,9 +743,13 @@ ws.onmessage = (event) => {
   </Tabs.Tab>
 </Tabs>
 
-## gRPC API
+## gRPC API <StatusBadge status="planned" />
 
 For high-performance applications requiring low latency and efficient binary protocol, our gRPC API provides streaming interfaces.
+
+<Callout type="warning">
+  gRPC API is planned for future release to support high-frequency neural data streaming. The protocol buffers and examples below show the planned implementation.
+</Callout>
 
 ### Protocol Buffers
 

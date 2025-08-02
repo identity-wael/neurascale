@@ -15,5 +15,7 @@ export default {
   performance: "",
   monitoring: "",
   troubleshooting: "",
+  contributing: "",
+  integrations: "Third-Party Integrations",
   "release-notes": "Release Notes",
 };

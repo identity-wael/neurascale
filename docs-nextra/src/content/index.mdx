@@ -4,50 +4,6 @@ import { Table, Tabs } from 'nextra/components'
 
 Welcome to the official documentation for **NeuraScale**, a comprehensive Brain-Computer Interface (BCI) platform providing real-time neural data acquisition, processing, and analysis with sub-100ms latency.
 
-## Latest: Phase 15 - Kubernetes Deployment Complete
-
-We've successfully deployed NeuraScale to production with enterprise-grade Kubernetes orchestration:
-
-### Production Kubernetes Infrastructure
-
-- **Google Kubernetes Engine (GKE)** with auto-scaling node pools
-- **Helm charts** for all services with version management
-- **Service mesh** with Istio for traffic management and observability
-- **Auto-scaling** configurations for pods and nodes based on load
-- **Health checks** and self-healing with liveness/readiness probes
-
-### Complete Microservices Architecture
-
-- **Neural Engine API** deployed as scalable microservice
-- **WebSocket servers** with session affinity for real-time streaming
-- **Background workers** for signal processing and ML inference
-- **Message queue** integration with Kafka for event streaming
-- **Distributed caching** with Redis cluster
-
-### High Availability & Reliability
-
-- **Multi-zone deployment** across 3 availability zones
-- **Zero-downtime deployments** with rolling updates
-- **Circuit breakers** and retry logic for fault tolerance
-- **Backup and disaster recovery** with automated snapshots
-- **99.9% uptime SLA** achieved in production
-
-### Monitoring & Observability
-
-- **Prometheus metrics** collection with custom dashboards
-- **Grafana visualizations** for system and business metrics
-- **Distributed tracing** with Jaeger for request flow analysis
-- **Centralized logging** with ELK stack (Elasticsearch, Logstash, Kibana)
-- **Alerting** with PagerDuty integration
-
-### Security Enhancements
-
-- **Network policies** for pod-to-pod communication
-- **TLS encryption** for all internal service communication
-- **Secrets management** with Google Secret Manager
-- **RBAC policies** for Kubernetes access control
-- **Security scanning** with Trivy for container vulnerabilities
-
 ## Platform Overview
 
 ### What is NeuraScale?
@@ -257,23 +213,18 @@ graph TB
     - **Phase 11**: NVIDIA Omniverse Integration
     - **Phase 12**: API Implementation & Enhancement
 
-    #### Infrastructure (Phases 13-15)
+    #### Infrastructure (Phases 13-16)
 
     - **Phase 13**: MCP Server Implementation
     - **Phase 14**: Terraform Infrastructure
     - **Phase 15**: Kubernetes Deployment
+    - **Phase 16**: Docker Containerization Enhancement
   </Tabs.Tab>
 
   <Tabs.Tab>
-    #### Phase 16: Docker Containerization Enhancement
+    #### Currently In Progress
 
-    **Timeline**: Q1 2025
-
-    - Multi-stage optimized builds
-    - Security hardening with minimal base images
-    - Container registry management
-    - Vulnerability scanning integration
-    - Size optimization strategies
+    No phases currently in active development. See upcoming phases for planned work.
   </Tabs.Tab>
 
   <Tabs.Tab>

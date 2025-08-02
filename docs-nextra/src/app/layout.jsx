@@ -2,6 +2,7 @@
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
 import { Banner, Head, Search } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
+import { LogoLink } from "../components/LogoLink";
 import "./globals.css";
 
 export const metadata = {
@@ -28,81 +29,93 @@ export default async function RootLayout({ children }) {
   const navbar = (
     <Navbar
       logo={
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span
-            style={{
-              fontSize: "20px",
-              fontWeight: "800",
-              letterSpacing: "0.05em",
-              fontFamily:
-                "Proxima Nova, -apple-system, BlinkMacSystemFont, sans-serif",
-            }}
-          >
-            <span style={{ color: "#eeeeee" }}>NEURA</span>
-            <span style={{ color: "#4185f4" }}>SCALE</span>
-          </span>
-          <div
-            style={{
-              width: "1px",
-              height: "24px",
-              backgroundColor: "rgba(255,255,255,0.2)",
-            }}
-          />
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg
-              style={{ height: "24px", width: "auto" }}
-              viewBox="0 0 536.229 536.229"
-              fill="white"
-              fillOpacity="0.8"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g>
-                <g>
-                  <rect y="130.031" width="58.206" height="276.168" />
-                  <rect
-                    x="95.356"
-                    y="130.031"
-                    width="58.206"
-                    height="190.712"
-                  />
-                  <rect
-                    x="190.712"
-                    y="130.031"
-                    width="58.206"
-                    height="276.168"
-                  />
-                  <rect
-                    x="381.425"
-                    y="217.956"
-                    width="58.212"
-                    height="188.236"
-                  />
-                  <rect
-                    x="381.425"
-                    y="130.031"
-                    width="154.805"
-                    height="58.206"
-                  />
-                  <rect x="286.074" y="217.956" width="58.2" height="188.236" />
-                  <rect x="286.074" y="130.031" width="58.2" height="58.206" />
-                </g>
-              </g>
-            </svg>
+        <LogoLink>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <span
               style={{
-                fontSize: "14px",
-                color: "rgba(255,255,255,0.7)",
+                fontSize: "20px",
+                fontWeight: "800",
+                letterSpacing: "0.05em",
                 fontFamily:
-                  "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
-                fontWeight: 500,
+                  "Proxima Nova, -apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              Massachusetts Institute of Technology
+              <span style={{ color: "#eeeeee" }}>NEURA</span>
+              <span style={{ color: "#4185f4" }}>SCALE</span>
             </span>
+            <div
+              style={{
+                width: "1px",
+                height: "24px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+              }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <svg
+                style={{ height: "24px", width: "auto" }}
+                viewBox="0 0 536.229 536.229"
+                fill="white"
+                fillOpacity="0.8"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g>
+                  <g>
+                    <rect y="130.031" width="58.206" height="276.168" />
+                    <rect
+                      x="95.356"
+                      y="130.031"
+                      width="58.206"
+                      height="190.712"
+                    />
+                    <rect
+                      x="190.712"
+                      y="130.031"
+                      width="58.206"
+                      height="276.168"
+                    />
+                    <rect
+                      x="381.425"
+                      y="217.956"
+                      width="58.212"
+                      height="188.236"
+                    />
+                    <rect
+                      x="381.425"
+                      y="130.031"
+                      width="154.805"
+                      height="58.206"
+                    />
+                    <rect
+                      x="286.074"
+                      y="217.956"
+                      width="58.2"
+                      height="188.236"
+                    />
+                    <rect
+                      x="286.074"
+                      y="130.031"
+                      width="58.2"
+                      height="58.206"
+                    />
+                  </g>
+                </g>
+              </svg>
+              <span
+                style={{
+                  fontSize: "14px",
+                  color: "rgba(255,255,255,0.7)",
+                  fontFamily:
+                    "Neue Haas Grotesk Medium, -apple-system, BlinkMacSystemFont, sans-serif",
+                  fontWeight: 500,
+                }}
+              >
+                Massachusetts Institute of Technology
+              </span>
+            </div>
           </div>
-        </div>
+        </LogoLink>
       }
-      logoLink="https://neurascale.io"
+      logoLink={false}
       projectLink="https://github.com/identity-wael/neurascale"
     />
   );

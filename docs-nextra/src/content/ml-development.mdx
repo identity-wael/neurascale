@@ -1,0 +1,1941 @@
+import { Tabs, Callout, Steps } from 'nextra/components'
+
+# ML Model Development Guide
+
+This comprehensive guide covers developing, training, and deploying machine learning models for brain-computer interface applications using NeuraScale's ML platform.
+
+## Overview
+
+NeuraScale provides a complete machine learning development environment specifically designed for neural data analysis, featuring:
+
+- **Pre-trained Models**: Ready-to-use models for common BCI tasks
+- **Custom Model Training**: Build domain-specific models
+- **Real-time Inference**: Deploy models for live neural data processing
+- **Model Management**: Version control, A/B testing, and deployment pipelines
+- **Performance Monitoring**: Track model performance in production
+
+## Getting Started with ML
+
+### Setting up the ML Environment
+
+```python
+from neurascale.ml import MLClient, ModelRegistry
+from neurascale.ml.preprocessing import NeuraPreprocessor
+from neurascale.ml.models import BCIClassifier
+from neurascale.ml.training import TrainingPipeline
+
+# Initialize ML client
+ml_client = MLClient(
+    api_key="your-api-key",
+    compute_backend="gpu",  # cpu, gpu, tpu
+    distributed=False
+)
+
+# Configure ML environment
+ml_config = {
+    "environment": {
+        "framework": "pytorch",  # pytorch, tensorflow, sklearn
+        "accelerator": "cuda",   # cuda, cpu, mps (Apple Silicon)
+        "precision": "mixed",    # full, mixed, half
+        "memory_optimization": True
+    },
+    "data": {
+        "batch_size": 32,
+        "num_workers": 4,
+        "prefetch_factor": 2,
+        "pin_memory": True
+    },
+    "training": {
+        "checkpoint_frequency": 100,
+        "early_stopping": True,
+        "patience": 10,
+        "metric": "accuracy"
+    }
+}
+
+await ml_client.configure(ml_config)
+```
+
+### Model Registry and Pre-trained Models
+
+```python
+# Access model registry
+registry = ModelRegistry(ml_client)
+
+# List available pre-trained models
+available_models = await registry.list_models()
+print("Available pre-trained models:")
+for model in available_models:
+    print(f"  {model.name}: {model.description}")
+    print(f"    Task: {model.task_type}")
+    print(f"    Accuracy: {model.validation_accuracy:.2%}")
+    print(f"    Channels: {model.channel_requirements}")
+
+# Load a pre-trained model
+motor_imagery_model = await registry.load_model(
+    model_name="motor_imagery_4class_v2.1",
+    version="latest"
+)
+
+print(f"Model loaded: {motor_imagery_model.name}")
+print(f"Classes: {motor_imagery_model.classes}")
+print(f"Input shape: {motor_imagery_model.input_shape}")
+```
+
+## Data Preparation and Preprocessing
+
+### Neural Data Preprocessing Pipeline
+
+<Tabs items={['Basic Preprocessing', 'Advanced Filtering', 'Feature Engineering', 'Data Augmentation']}>
+  <Tabs.Tab>
+    **Basic Neural Data Preprocessing**
+
+    ```python
+    from neurascale.ml.preprocessing import (
+        NeuraPreprocessor,
+        SignalProcessor,
+        EpochExtractor
+    )
+
+    # Initialize preprocessor
+    preprocessor = NeuraPreprocessor(
+        sample_rate=250,
+        channels=["C3", "C4", "Cz", "FC1", "FC2", "CP1", "CP2"],
+        target_length=2.0  # 2 seconds
+    )
+
+    # Configure preprocessing pipeline
+    preprocessing_steps = [
+        {
+            "name": "resampling",
+            "type": "resample",
+            "parameters": {"target_rate": 250}
+        },
+        {
+            "name": "filtering",
+            "type": "bandpass",
+            "parameters": {
+                "low_freq": 8,
+                "high_freq": 30,
+                "filter_type": "butterworth",
+                "order": 4
+            }
+        },
+        {
+            "name": "artifact_removal",
+            "type": "ica",
+            "parameters": {
+                "n_components": 7,
+                "method": "fastica",
+                "max_iter": 200
+            }
+        },
+        {
+            "name": "normalization",
+            "type": "z_score",
+            "parameters": {"axis": "time"}
+        }
+    ]
+
+    # Apply preprocessing
+    async def preprocess_data(raw_data):
+        """Preprocess raw neural data for ML training"""
+
+        processed_data = raw_data.copy()
+
+        for step in preprocessing_steps:
+            print(f"Applying {step['name']}...")
+
+            if step["type"] == "resample":
+                processed_data = await preprocessor.resample(
+                    processed_data,
+                    step["parameters"]["target_rate"]
+                )
+
+            elif step["type"] == "bandpass":
+                processed_data = await preprocessor.bandpass_filter(
+                    processed_data,
+                    step["parameters"]["low_freq"],
+                    step["parameters"]["high_freq"],
+                    order=step["parameters"]["order"]
+                )
+
+            elif step["type"] == "ica":
+                processed_data = await preprocessor.apply_ica(
+                    processed_data,
+                    n_components=step["parameters"]["n_components"]
+                )
+
+            elif step["type"] == "z_score":
+                processed_data = await preprocessor.z_score_normalize(
+                    processed_data,
+                    axis=step["parameters"]["axis"]
+                )
+
+        return processed_data
+
+    # Example usage
+    raw_eeg_data = await ml_client.data.load_session("session_123")
+    processed_data = await preprocess_data(raw_eeg_data)
+
+    print(f"Raw data shape: {raw_eeg_data.shape}")
+    print(f"Processed data shape: {processed_data.shape}")
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Advanced Signal Processing**
+
+    ```python
+    from neurascale.ml.preprocessing import AdvancedProcessor
+    from scipy import signal
+    import numpy as np
+
+    class AdvancedNeuraProcessor:
+        def __init__(self, sample_rate=250):
+            self.sample_rate = sample_rate
+            self.processor = AdvancedProcessor()
+
+        async def apply_csp(self, data, labels, n_components=4):
+            """Apply Common Spatial Patterns (CSP) for motor imagery"""
+
+            from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+            from mne.decoding import CSP
+
+            # Initialize CSP
+            csp = CSP(
+                n_components=n_components,
+                reg=None,
+                log=True,
+                norm_trace=False
+            )
+
+            # Fit CSP to training data
+            csp_features = csp.fit_transform(data, labels)
+
+            # Store CSP filters for later use
+            self.csp_filters = csp.filters_
+            self.csp_patterns = csp.patterns_
+
+            return csp_features
+
+        async def apply_spatial_filtering(self, data, method="car"):
+            """Apply spatial filtering techniques"""
+
+            if method == "car":
+                # Common Average Reference
+                car_data = data - np.mean(data, axis=1, keepdims=True)
+                return car_data
+
+            elif method == "laplacian":
+                # Surface Laplacian
+                return await self.processor.surface_laplacian(data)
+
+            elif method == "bipolar":
+                # Bipolar montage
+                return await self.processor.bipolar_montage(data)
+
+        async def detect_and_remove_artifacts(self, data, method="auto"):
+            """Advanced artifact detection and removal"""
+
+            artifacts_detected = {}
+            cleaned_data = data.copy()
+
+            # Eye blink detection
+            eye_artifacts = await self.detect_eye_artifacts(data)
+            if eye_artifacts["detected"]:
+                cleaned_data = await self.remove_eye_artifacts(
+                    cleaned_data,
+                    eye_artifacts["components"]
+                )
+                artifacts_detected["eye_blinks"] = len(eye_artifacts["components"])
+
+            # Muscle artifact detection
+            muscle_artifacts = await self.detect_muscle_artifacts(data)
+            if muscle_artifacts["detected"]:
+                cleaned_data = await self.remove_muscle_artifacts(
+                    cleaned_data,
+                    muscle_artifacts["frequency_bands"]
+                )
+                artifacts_detected["muscle"] = muscle_artifacts["severity"]
+
+            # Movement artifact detection
+            movement_artifacts = await self.detect_movement_artifacts(data)
+            if movement_artifacts["detected"]:
+                cleaned_data = await self.remove_movement_artifacts(
+                    cleaned_data,
+                    movement_artifacts["time_segments"]
+                )
+                artifacts_detected["movement"] = len(movement_artifacts["time_segments"])
+
+            return cleaned_data, artifacts_detected
+
+        async def extract_time_frequency_features(self, data):
+            """Extract time-frequency domain features"""
+
+            features = {}
+
+            # Morlet wavelet transform
+            frequencies = np.logspace(np.log10(4), np.log10(40), 20)  # 4-40 Hz
+            wavelet_coeffs = await self.processor.morlet_wavelet(
+                data,
+                frequencies=frequencies,
+                n_cycles=7
+            )
+
+            # Power spectral density
+            freqs, psd = signal.welch(
+                data,
+                fs=self.sample_rate,
+                window='hanning',
+                nperseg=256,
+                noverlap=128
+            )
+
+            # Band power features
+            band_powers = await self.calculate_band_powers(psd, freqs)
+
+            # Spectral entropy
+            spectral_entropy = await self.calculate_spectral_entropy(psd)
+
+            features.update({
+                "wavelet_coeffs": wavelet_coeffs,
+                "psd": psd,
+                "band_powers": band_powers,
+                "spectral_entropy": spectral_entropy
+            })
+
+            return features
+
+        async def calculate_band_powers(self, psd, freqs):
+            """Calculate power in specific frequency bands"""
+
+            bands = {
+                "delta": (0.5, 4),
+                "theta": (4, 8),
+                "alpha": (8, 13),
+                "beta": (13, 30),
+                "gamma": (30, 50)
+            }
+
+            band_powers = {}
+            for band_name, (low, high) in bands.items():
+                band_mask = (freqs >= low) & (freqs <= high)
+                band_power = np.trapz(psd[band_mask], freqs[band_mask], axis=0)
+                band_powers[band_name] = band_power
+
+            return band_powers
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Feature Engineering**
+
+    ```python
+    from neurascale.ml.features import FeatureExtractor
+    from scipy.stats import entropy, skew, kurtosis
+
+    class NeuraFeatureExtractor:
+        def __init__(self, sample_rate=250):
+            self.sample_rate = sample_rate
+            self.extractor = FeatureExtractor()
+
+        async def extract_all_features(self, data):
+            """Extract comprehensive feature set for ML"""
+
+            features = {}
+
+            # Time domain features
+            time_features = await self.extract_time_domain_features(data)
+            features.update({"time": time_features})
+
+            # Frequency domain features
+            freq_features = await self.extract_frequency_features(data)
+            features.update({"frequency": freq_features})
+
+            # Connectivity features
+            connectivity_features = await self.extract_connectivity_features(data)
+            features.update({"connectivity": connectivity_features})
+
+            # Nonlinear features
+            nonlinear_features = await self.extract_nonlinear_features(data)
+            features.update({"nonlinear": nonlinear_features})
+
+            return features
+
+        async def extract_time_domain_features(self, data):
+            """Extract time domain statistical features"""
+
+            time_features = {}
+
+            # Basic statistical measures
+            time_features["mean"] = np.mean(data, axis=1)
+            time_features["std"] = np.std(data, axis=1)
+            time_features["variance"] = np.var(data, axis=1)
+            time_features["skewness"] = skew(data, axis=1)
+            time_features["kurtosis"] = kurtosis(data, axis=1)
+
+            # Signal amplitude measures
+            time_features["rms"] = np.sqrt(np.mean(data**2, axis=1))
+            time_features["peak_to_peak"] = np.ptp(data, axis=1)
+            time_features["zero_crossings"] = await self.count_zero_crossings(data)
+
+            # Signal complexity measures
+            time_features["line_length"] = np.sum(np.abs(np.diff(data, axis=1)), axis=1)
+            time_features["activity"] = np.var(np.diff(data, axis=1), axis=1)
+            time_features["mobility"] = await self.calculate_hjorth_mobility(data)
+            time_features["complexity"] = await self.calculate_hjorth_complexity(data)
+
+            return time_features
+
+        async def extract_frequency_features(self, data):
+            """Extract frequency domain features"""
+
+            freq_features = {}
+
+            # Power spectral density
+            freqs, psd = signal.welch(
+                data,
+                fs=self.sample_rate,
+                window='hanning',
+                nperseg=256
+            )
+
+            # Band powers
+            band_powers = await self.calculate_relative_band_powers(psd, freqs)
+            freq_features.update(band_powers)
+
+            # Spectral characteristics
+            freq_features["spectral_centroid"] = await self.calculate_spectral_centroid(psd, freqs)
+            freq_features["spectral_bandwidth"] = await self.calculate_spectral_bandwidth(psd, freqs)
+            freq_features["spectral_rolloff"] = await self.calculate_spectral_rolloff(psd, freqs)
+            freq_features["spectral_entropy"] = entropy(psd + 1e-10, axis=0)
+
+            # Peak frequency analysis
+            freq_features["peak_frequency"] = freqs[np.argmax(psd, axis=0)]
+            freq_features["alpha_peak"] = await self.find_alpha_peak(psd, freqs)
+
+            return freq_features
+
+        async def extract_connectivity_features(self, data):
+            """Extract connectivity and synchronization features"""
+
+            connectivity_features = {}
+
+            # Cross-correlation
+            correlation_matrix = np.corrcoef(data)
+            connectivity_features["mean_correlation"] = np.mean(correlation_matrix[np.triu_indices_from(correlation_matrix, k=1)])
+            connectivity_features["max_correlation"] = np.max(correlation_matrix[np.triu_indices_from(correlation_matrix, k=1)])
+
+            # Coherence analysis
+            coherence_matrix = await self.calculate_coherence_matrix(data)
+            connectivity_features["mean_coherence"] = np.mean(coherence_matrix)
+            connectivity_features["coherence_std"] = np.std(coherence_matrix)
+
+            # Phase synchronization
+            phase_sync = await self.calculate_phase_synchronization(data)
+            connectivity_features["phase_synchronization"] = phase_sync
+
+            # Graph theory measures
+            graph_measures = await self.calculate_graph_measures(correlation_matrix)
+            connectivity_features.update(graph_measures)
+
+            return connectivity_features
+
+        async def extract_nonlinear_features(self, data):
+            """Extract nonlinear dynamics features"""
+
+            nonlinear_features = {}
+
+            # Entropy measures
+            nonlinear_features["sample_entropy"] = await self.calculate_sample_entropy(data)
+            nonlinear_features["approximate_entropy"] = await self.calculate_approximate_entropy(data)
+            nonlinear_features["permutation_entropy"] = await self.calculate_permutation_entropy(data)
+
+            # Fractal dimensions
+            nonlinear_features["hurst_exponent"] = await self.calculate_hurst_exponent(data)
+            nonlinear_features["detrended_fluctuation"] = await self.calculate_dfa(data)
+
+            # Lyapunov exponents
+            nonlinear_features["largest_lyapunov"] = await self.calculate_largest_lyapunov(data)
+
+            return nonlinear_features
+
+        async def create_feature_vector(self, features, feature_selection=None):
+            """Create flat feature vector for ML algorithms"""
+
+            feature_vector = []
+            feature_names = []
+
+            for domain, domain_features in features.items():
+                for feature_name, feature_values in domain_features.items():
+                    if isinstance(feature_values, np.ndarray):
+                        # Handle multi-dimensional features
+                        if feature_values.ndim == 1:
+                            # Per-channel features
+                            for ch_idx, value in enumerate(feature_values):
+                                feature_vector.append(value)
+                                feature_names.append(f"{domain}_{feature_name}_ch{ch_idx}")
+                        else:
+                            # Matrix features (e.g., connectivity)
+                            flat_values = feature_values.flatten()
+                            feature_vector.extend(flat_values)
+                            for idx in range(len(flat_values)):
+                                feature_names.append(f"{domain}_{feature_name}_{idx}")
+                    else:
+                        # Scalar features
+                        feature_vector.append(feature_values)
+                        feature_names.append(f"{domain}_{feature_name}")
+
+            feature_vector = np.array(feature_vector)
+
+            # Apply feature selection if specified
+            if feature_selection:
+                selected_indices = await self.apply_feature_selection(
+                    feature_vector,
+                    feature_selection
+                )
+                feature_vector = feature_vector[selected_indices]
+                feature_names = [feature_names[i] for i in selected_indices]
+
+            return feature_vector, feature_names
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Data Augmentation for Neural Data**
+
+    ```python
+    from neurascale.ml.augmentation import NeuraAugmentor
+
+    class NeuraDataAugmentor:
+        def __init__(self, sample_rate=250):
+            self.sample_rate = sample_rate
+            self.augmentor = NeuraAugmentor()
+
+        async def augment_dataset(self, data, labels, augmentation_factor=2):
+            """Augment neural dataset to increase training samples"""
+
+            augmented_data = []
+            augmented_labels = []
+
+            # Original data
+            augmented_data.append(data)
+            augmented_labels.append(labels)
+
+            for aug_idx in range(augmentation_factor):
+                print(f"Generating augmentation {aug_idx + 1}/{augmentation_factor}")
+
+                # Apply different augmentation techniques
+                aug_data = data.copy()
+
+                # 1. Temporal jittering
+                aug_data = await self.apply_temporal_jitter(aug_data)
+
+                # 2. Amplitude scaling
+                aug_data = await self.apply_amplitude_scaling(aug_data)
+
+                # 3. Frequency domain augmentation
+                aug_data = await self.apply_frequency_augmentation(aug_data)
+
+                # 4. Channel dropout
+                aug_data = await self.apply_channel_dropout(aug_data)
+
+                # 5. Gaussian noise injection
+                aug_data = await self.add_realistic_noise(aug_data)
+
+                augmented_data.append(aug_data)
+                augmented_labels.append(labels)
+
+            # Combine all augmented data
+            final_data = np.concatenate(augmented_data, axis=0)
+            final_labels = np.concatenate(augmented_labels, axis=0)
+
+            return final_data, final_labels
+
+        async def apply_temporal_jitter(self, data, max_shift=0.1):
+            """Apply small temporal shifts to simulate timing variations"""
+
+            max_shift_samples = int(max_shift * self.sample_rate)
+            jittered_data = np.zeros_like(data)
+
+            for trial_idx in range(data.shape[0]):
+                # Random shift for each trial
+                shift = np.random.randint(-max_shift_samples, max_shift_samples + 1)
+
+                if shift > 0:
+                    jittered_data[trial_idx, :, shift:] = data[trial_idx, :, :-shift]
+                elif shift < 0:
+                    jittered_data[trial_idx, :, :shift] = data[trial_idx, :, -shift:]
+                else:
+                    jittered_data[trial_idx] = data[trial_idx]
+
+            return jittered_data
+
+        async def apply_amplitude_scaling(self, data, scale_range=(0.8, 1.2)):
+            """Apply random amplitude scaling to simulate individual differences"""
+
+            scaled_data = data.copy()
+
+            for trial_idx in range(data.shape[0]):
+                for ch_idx in range(data.shape[1]):
+                    # Random scale factor per channel per trial
+                    scale_factor = np.random.uniform(scale_range[0], scale_range[1])
+                    scaled_data[trial_idx, ch_idx] *= scale_factor
+
+            return scaled_data
+
+        async def apply_frequency_augmentation(self, data):
+            """Apply frequency domain augmentations"""
+
+            augmented_data = data.copy()
+
+            for trial_idx in range(data.shape[0]):
+                # Random frequency shift
+                freq_shift = np.random.uniform(-2, 2)  # ±2 Hz
+                augmented_data[trial_idx] = await self.frequency_shift(
+                    data[trial_idx],
+                    freq_shift
+                )
+
+            return augmented_data
+
+        async def apply_channel_dropout(self, data, dropout_prob=0.1):
+            """Randomly drop channels to improve robustness"""
+
+            dropped_data = data.copy()
+
+            for trial_idx in range(data.shape[0]):
+                # Randomly select channels to drop
+                n_channels = data.shape[1]
+                n_drop = int(n_channels * dropout_prob)
+
+                if n_drop > 0:
+                    drop_channels = np.random.choice(
+                        n_channels,
+                        size=n_drop,
+                        replace=False
+                    )
+                    dropped_data[trial_idx, drop_channels, :] = 0
+
+            return dropped_data
+
+        async def add_realistic_noise(self, data, noise_level=0.05):
+            """Add realistic noise based on actual EEG characteristics"""
+
+            noisy_data = data.copy()
+
+            for trial_idx in range(data.shape[0]):
+                # Generate colored noise (1/f characteristics)
+                noise = await self.generate_colored_noise(
+                    data.shape[1:],
+                    alpha=1,  # 1/f noise
+                    noise_level=noise_level
+                )
+
+                noisy_data[trial_idx] += noise
+
+            return noisy_data
+
+        async def generate_mixup_augmentation(self, data, labels, alpha=0.2):
+            """Generate mixup augmentation for neural data"""
+
+            mixup_data = []
+            mixup_labels = []
+
+            for i in range(len(data)):
+                # Select random pair for mixing
+                j = np.random.randint(0, len(data))
+
+                # Generate mixing parameter
+                lam = np.random.beta(alpha, alpha)
+
+                # Mix data
+                mixed_trial = lam * data[i] + (1 - lam) * data[j]
+
+                # Mix labels (for soft labels)
+                mixed_label = lam * labels[i] + (1 - lam) * labels[j]
+
+                mixup_data.append(mixed_trial)
+                mixup_labels.append(mixed_label)
+
+            return np.array(mixup_data), np.array(mixup_labels)
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Model Development
+
+### Building Custom BCI Models
+
+<Tabs items={['Deep Learning Models', 'Traditional ML', 'Ensemble Methods', 'Transfer Learning']}>
+  <Tabs.Tab>
+    **Deep Learning Models for BCI**
+
+    ```python
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    from neurascale.ml.models import BaseBCIModel
+
+    class EEGNet(BaseBCIModel):
+        """EEGNet architecture for EEG classification"""
+
+        def __init__(self, n_classes=4, n_channels=64, n_timepoints=128):
+            super(EEGNet, self).__init__()
+
+            self.n_classes = n_classes
+            self.n_channels = n_channels
+            self.n_timepoints = n_timepoints
+
+            # Temporal convolution
+            self.temporal_conv = nn.Conv2d(
+                1, 16,
+                kernel_size=(1, 64),
+                padding=(0, 32),
+                bias=False
+            )
+            self.temporal_bn = nn.BatchNorm2d(16)
+
+            # Spatial convolution (depthwise)
+            self.spatial_conv = nn.Conv2d(
+                16, 32,
+                kernel_size=(n_channels, 1),
+                groups=16,
+                bias=False
+            )
+            self.spatial_bn = nn.BatchNorm2d(32)
+
+            # Separable convolution
+            self.separable_conv1 = nn.Conv2d(
+                32, 32,
+                kernel_size=(1, 16),
+                padding=(0, 8),
+                groups=32,
+                bias=False
+            )
+            self.separable_conv2 = nn.Conv2d(32, 16, kernel_size=1, bias=False)
+            self.separable_bn = nn.BatchNorm2d(16)
+
+            # Calculate output size after convolutions
+            self.feature_size = self._get_conv_output_size()
+
+            # Classification head
+            self.classifier = nn.Linear(self.feature_size, n_classes)
+            self.dropout = nn.Dropout(0.25)
+
+        def _get_conv_output_size(self):
+            """Calculate the output size after convolutions"""
+            with torch.no_grad():
+                x = torch.zeros(1, 1, self.n_channels, self.n_timepoints)
+                x = self._forward_features(x)
+                return x.numel()
+
+        def _forward_features(self, x):
+            """Forward pass through feature extraction layers"""
+
+            # Temporal convolution
+            x = self.temporal_conv(x)
+            x = self.temporal_bn(x)
+
+            # Spatial convolution
+            x = self.spatial_conv(x)
+            x = self.spatial_bn(x)
+            x = F.elu(x)
+            x = F.avg_pool2d(x, kernel_size=(1, 4))
+            x = self.dropout(x)
+
+            # Separable convolution
+            x = self.separable_conv1(x)
+            x = self.separable_conv2(x)
+            x = self.separable_bn(x)
+            x = F.elu(x)
+            x = F.avg_pool2d(x, kernel_size=(1, 8))
+            x = self.dropout(x)
+
+            return x
+
+        def forward(self, x):
+            # Input shape: (batch_size, n_channels, n_timepoints)
+            # Add channel dimension for conv2d
+            x = x.unsqueeze(1)  # (batch_size, 1, n_channels, n_timepoints)
+
+            # Feature extraction
+            x = self._forward_features(x)
+
+            # Flatten for classification
+            x = x.view(x.size(0), -1)
+
+            # Classification
+            x = self.classifier(x)
+
+            return x
+
+    class ShallowConvNet(BaseBCIModel):
+        """Shallow ConvNet for motor imagery classification"""
+
+        def __init__(self, n_classes=4, n_channels=64, n_timepoints=1000):
+            super(ShallowConvNet, self).__init__()
+
+            self.n_classes = n_classes
+            self.n_channels = n_channels
+            self.n_timepoints = n_timepoints
+
+            # Temporal convolution
+            self.temporal_conv = nn.Conv2d(
+                1, 40,
+                kernel_size=(1, 25),
+                bias=False
+            )
+
+            # Spatial convolution
+            self.spatial_conv = nn.Conv2d(
+                40, 40,
+                kernel_size=(n_channels, 1),
+                bias=False
+            )
+
+            self.bn = nn.BatchNorm2d(40)
+            self.dropout = nn.Dropout(0.5)
+
+            # Calculate feature size
+            self.feature_size = self._get_conv_output_size()
+
+            # Classification head
+            self.classifier = nn.Linear(self.feature_size, n_classes)
+
+        def _get_conv_output_size(self):
+            with torch.no_grad():
+                x = torch.zeros(1, 1, self.n_channels, self.n_timepoints)
+                x = self._forward_features(x)
+                return x.numel()
+
+        def _forward_features(self, x):
+            # Temporal convolution
+            x = self.temporal_conv(x)
+
+            # Spatial convolution
+            x = self.spatial_conv(x)
+
+            # Batch normalization
+            x = self.bn(x)
+
+            # Square activation
+            x = x ** 2
+
+            # Average pooling
+            x = F.avg_pool2d(x, kernel_size=(1, 75), stride=(1, 15))
+
+            # Log activation
+            x = torch.log(torch.clamp(x, min=1e-6))
+
+            # Dropout
+            x = self.dropout(x)
+
+            return x
+
+        def forward(self, x):
+            x = x.unsqueeze(1)  # Add channel dimension
+            x = self._forward_features(x)
+            x = x.view(x.size(0), -1)  # Flatten
+            x = self.classifier(x)
+            return x
+
+    class DeepConvNet(BaseBCIModel):
+        """Deep ConvNet for EEG classification"""
+
+        def __init__(self, n_classes=4, n_channels=64, n_timepoints=1000):
+            super(DeepConvNet, self).__init__()
+
+            self.n_classes = n_classes
+            self.n_channels = n_channels
+
+            # Block 1
+            self.conv1 = nn.Conv2d(1, 25, kernel_size=(1, 10), bias=False)
+            self.conv2 = nn.Conv2d(25, 25, kernel_size=(n_channels, 1), bias=False)
+            self.bn1 = nn.BatchNorm2d(25)
+
+            # Block 2
+            self.conv3 = nn.Conv2d(25, 50, kernel_size=(1, 10), bias=False)
+            self.bn2 = nn.BatchNorm2d(50)
+
+            # Block 3
+            self.conv4 = nn.Conv2d(50, 100, kernel_size=(1, 10), bias=False)
+            self.bn3 = nn.BatchNorm2d(100)
+
+            # Block 4
+            self.conv5 = nn.Conv2d(100, 200, kernel_size=(1, 10), bias=False)
+            self.bn4 = nn.BatchNorm2d(200)
+
+            self.dropout = nn.Dropout(0.5)
+
+            # Calculate feature size
+            self.feature_size = self._get_conv_output_size()
+
+            # Classification
+            self.classifier = nn.Linear(self.feature_size, n_classes)
+
+        def _conv_block(self, x, conv_layer, bn_layer, pool_size=(1, 3)):
+            x = conv_layer(x)
+            x = bn_layer(x)
+            x = F.elu(x)
+            x = F.max_pool2d(x, kernel_size=pool_size)
+            x = self.dropout(x)
+            return x
+
+        def _get_conv_output_size(self):
+            with torch.no_grad():
+                x = torch.zeros(1, 1, self.n_channels, 1000)  # Use fixed size for calculation
+                x = self._forward_features(x)
+                return x.numel()
+
+        def _forward_features(self, x):
+            # Block 1
+            x = self.conv1(x)
+            x = self.conv2(x)
+            x = self.bn1(x)
+            x = F.elu(x)
+            x = F.max_pool2d(x, kernel_size=(1, 3))
+            x = self.dropout(x)
+
+            # Block 2
+            x = self._conv_block(x, self.conv3, self.bn2)
+
+            # Block 3
+            x = self._conv_block(x, self.conv4, self.bn3)
+
+            # Block 4
+            x = self._conv_block(x, self.conv5, self.bn4)
+
+            return x
+
+        def forward(self, x):
+            x = x.unsqueeze(1)
+            x = self._forward_features(x)
+            x = x.view(x.size(0), -1)
+            x = self.classifier(x)
+            return x
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Traditional Machine Learning Models**
+
+    ```python
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+    from sklearn.svm import SVC
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.pipeline import Pipeline
+    from neurascale.ml.models import TraditionalBCIModel
+
+    class MotorImageryClassifier(TraditionalBCIModel):
+        """Traditional ML classifier for motor imagery"""
+
+        def __init__(self, algorithm="lda", **kwargs):
+            super().__init__()
+            self.algorithm = algorithm
+            self.kwargs = kwargs
+            self.model = None
+            self.preprocessing_pipeline = None
+
+        def build_model(self):
+            """Build the classification model"""
+
+            if self.algorithm == "lda":
+                self.model = LinearDiscriminantAnalysis(
+                    solver=self.kwargs.get("solver", "svd"),
+                    shrinkage=self.kwargs.get("shrinkage", None)
+                )
+
+            elif self.algorithm == "svm":
+                self.model = SVC(
+                    C=self.kwargs.get("C", 1.0),
+                    kernel=self.kwargs.get("kernel", "rbf"),
+                    gamma=self.kwargs.get("gamma", "scale"),
+                    probability=True
+                )
+
+            elif self.algorithm == "random_forest":
+                self.model = RandomForestClassifier(
+                    n_estimators=self.kwargs.get("n_estimators", 100),
+                    max_depth=self.kwargs.get("max_depth", None),
+                    random_state=42
+                )
+
+            return self.model
+
+        async def prepare_features(self, data, method="csp_lda"):
+            """Prepare features for traditional ML"""
+
+            if method == "csp_lda":
+                features = await self.extract_csp_features(data)
+            elif method == "spectral":
+                features = await self.extract_spectral_features(data)
+            elif method == "combined":
+                csp_features = await self.extract_csp_features(data)
+                spectral_features = await self.extract_spectral_features(data)
+                features = np.concatenate([csp_features, spectral_features], axis=1)
+
+            return features
+
+        async def extract_csp_features(self, data, n_components=4):
+            """Extract Common Spatial Pattern features"""
+
+            from mne.decoding import CSP
+
+            if not hasattr(self, 'csp_filter'):
+                # Initialize CSP during training
+                self.csp_filter = CSP(
+                    n_components=n_components,
+                    reg=None,
+                    log=True
+                )
+
+            # Apply CSP transformation
+            csp_features = self.csp_filter.transform(data)
+
+            return csp_features
+
+        async def extract_spectral_features(self, data):
+            """Extract power spectral density features"""
+
+            features = []
+
+            for trial in data:
+                trial_features = []
+
+                for channel in trial:
+                    # Calculate PSD
+                    freqs, psd = signal.welch(
+                        channel,
+                        fs=250,
+                        window='hanning',
+                        nperseg=128
+                    )
+
+                    # Extract band powers
+                    bands = {
+                        'mu': (8, 12),
+                        'beta': (16, 24),
+                        'low_gamma': (30, 40)
+                    }
+
+                    for band_name, (low, high) in bands.items():
+                        band_mask = (freqs >= low) & (freqs <= high)
+                        band_power = np.mean(psd[band_mask])
+                        trial_features.append(band_power)
+
+                features.append(trial_features)
+
+            return np.array(features)
+
+        async def train(self, X, y):
+            """Train the traditional ML model"""
+
+            # Prepare features
+            X_features = await self.prepare_features(X)
+
+            # Build and train model
+            self.build_model()
+
+            # Fit CSP filter if using CSP features
+            if hasattr(self, 'csp_filter'):
+                self.csp_filter.fit(X, y)
+                X_features = self.csp_filter.transform(X)
+
+            # Train classifier
+            self.model.fit(X_features, y)
+
+            return self
+
+        async def predict(self, X):
+            """Make predictions"""
+
+            X_features = await self.prepare_features(X)
+
+            if hasattr(self, 'csp_filter'):
+                X_features = self.csp_filter.transform(X)
+
+            predictions = self.model.predict(X_features)
+            probabilities = self.model.predict_proba(X_features)
+
+            return {
+                "predictions": predictions,
+                "probabilities": probabilities,
+                "confidence": np.max(probabilities, axis=1)
+            }
+
+    class P300Classifier(TraditionalBCIModel):
+        """P300 speller classifier"""
+
+        def __init__(self, decimation_factor=8):
+            super().__init__()
+            self.decimation_factor = decimation_factor
+            self.model = LinearDiscriminantAnalysis()
+
+        async def extract_p300_features(self, data, events):
+            """Extract features for P300 classification"""
+
+            # Epoch data around P300 events
+            epoch_length = int(0.8 * 250)  # 800ms at 250Hz
+
+            epochs = []
+            labels = []
+
+            for event_time, event_type in events:
+                start_idx = int(event_time * 250)
+                end_idx = start_idx + epoch_length
+
+                if end_idx < data.shape[1]:
+                    epoch = data[:, start_idx:end_idx]
+
+                    # Decimate to reduce dimensionality
+                    epoch_decimated = epoch[:, ::self.decimation_factor]
+
+                    # Flatten channels and timepoints
+                    features = epoch_decimated.flatten()
+
+                    epochs.append(features)
+                    labels.append(1 if event_type == "target" else 0)
+
+            return np.array(epochs), np.array(labels)
+
+        async def train(self, data, events):
+            """Train P300 classifier"""
+
+            X, y = await self.extract_p300_features(data, events)
+            self.model.fit(X, y)
+
+            return self
+
+        async def predict(self, data, events):
+            """Predict P300 responses"""
+
+            X, _ = await self.extract_p300_features(data, events)
+            predictions = self.model.predict_proba(X)[:, 1]  # P300 probability
+
+            return predictions
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Ensemble Methods**
+
+    ```python
+    from neurascale.ml.ensemble import BCIEnsemble
+    import torch
+    import numpy as np
+
+    class AdvancedBCIEnsemble(BCIEnsemble):
+        """Advanced ensemble for BCI classification"""
+
+        def __init__(self, base_models=None):
+            super().__init__()
+
+            if base_models is None:
+                # Default ensemble with diverse models
+                self.base_models = {
+                    'eegnet': EEGNet(n_classes=4),
+                    'shallow_conv': ShallowConvNet(n_classes=4),
+                    'lda_csp': MotorImageryClassifier(algorithm='lda'),
+                    'svm_spectral': MotorImageryClassifier(algorithm='svm'),
+                    'random_forest': MotorImageryClassifier(algorithm='random_forest')
+                }
+            else:
+                self.base_models = base_models
+
+            self.meta_learner = None
+            self.voting_weights = None
+
+        async def train_ensemble(self, X_train, y_train, X_val, y_val,
+                               ensemble_method="stacking"):
+            """Train ensemble of BCI models"""
+
+            print("Training base models...")
+            base_predictions = {}
+
+            # Train each base model
+            for name, model in self.base_models.items():
+                print(f"Training {name}...")
+
+                if hasattr(model, 'train'):
+                    # Custom training method
+                    await model.train(X_train, y_train)
+                else:
+                    # Standard sklearn-like training
+                    model.fit(X_train, y_train)
+
+                # Get validation predictions
+                if hasattr(model, 'predict'):
+                    val_pred = await model.predict(X_val)
+                    if isinstance(val_pred, dict):
+                        base_predictions[name] = val_pred['probabilities']
+                    else:
+                        base_predictions[name] = val_pred
+                else:
+                    base_predictions[name] = model.predict_proba(X_val)
+
+            # Train meta-learner based on ensemble method
+            if ensemble_method == "stacking":
+                await self.train_stacking(base_predictions, y_val)
+            elif ensemble_method == "weighted_voting":
+                await self.train_weighted_voting(base_predictions, y_val)
+            elif ensemble_method == "dynamic_weighting":
+                await self.train_dynamic_weighting(base_predictions, y_val)
+
+            return self
+
+        async def train_stacking(self, base_predictions, y_true):
+            """Train stacking meta-learner"""
+
+            from sklearn.linear_model import LogisticRegression
+
+            # Combine base model predictions as features
+            meta_features = np.column_stack([
+                pred for pred in base_predictions.values()
+            ])
+
+            # Train meta-learner
+            self.meta_learner = LogisticRegression(random_state=42)
+            self.meta_learner.fit(meta_features, y_true)
+
+            print("Stacking meta-learner trained")
+
+        async def train_weighted_voting(self, base_predictions, y_true):
+            """Train weighted voting ensemble"""
+
+            from sklearn.metrics import accuracy_score
+
+            # Calculate individual model accuracies
+            accuracies = {}
+            for name, pred in base_predictions.items():
+                if pred.ndim > 1:
+                    pred_labels = np.argmax(pred, axis=1)
+                else:
+                    pred_labels = pred
+                acc = accuracy_score(y_true, pred_labels)
+                accuracies[name] = acc
+
+            # Calculate weights based on accuracy
+            total_acc = sum(accuracies.values())
+            self.voting_weights = {
+                name: acc / total_acc
+                for name, acc in accuracies.items()
+            }
+
+            print(f"Voting weights: {self.voting_weights}")
+
+        async def train_dynamic_weighting(self, base_predictions, y_true):
+            """Train dynamic weighting based on confidence"""
+
+            # This method adjusts weights based on prediction confidence
+            # during inference rather than using fixed weights
+            self.dynamic_weights = True
+
+            # Store base model performance metrics
+            self.model_metrics = {}
+            for name, pred in base_predictions.items():
+                if pred.ndim > 1:
+                    pred_labels = np.argmax(pred, axis=1)
+                    confidence = np.max(pred, axis=1)
+                else:
+                    pred_labels = pred
+                    confidence = np.abs(pred)
+
+                self.model_metrics[name] = {
+                    'accuracy': accuracy_score(y_true, pred_labels),
+                    'avg_confidence': np.mean(confidence)
+                }
+
+        async def predict_ensemble(self, X, method="stacking"):
+            """Make ensemble predictions"""
+
+            # Get base model predictions
+            base_predictions = {}
+            for name, model in self.base_models.items():
+                if hasattr(model, 'predict'):
+                    pred = await model.predict(X)
+                    if isinstance(pred, dict):
+                        base_predictions[name] = pred['probabilities']
+                    else:
+                        base_predictions[name] = pred
+                else:
+                    base_predictions[name] = model.predict_proba(X)
+
+            # Combine predictions based on method
+            if method == "stacking" and self.meta_learner is not None:
+                ensemble_pred = await self.predict_stacking(base_predictions)
+            elif method == "weighted_voting" and self.voting_weights is not None:
+                ensemble_pred = await self.predict_weighted_voting(base_predictions)
+            elif method == "dynamic_weighting":
+                ensemble_pred = await self.predict_dynamic_weighting(base_predictions)
+            else:
+                # Simple average voting
+                ensemble_pred = await self.predict_average_voting(base_predictions)
+
+            return ensemble_pred
+
+        async def predict_stacking(self, base_predictions):
+            """Predict using stacking ensemble"""
+
+            # Prepare meta-features
+            meta_features = np.column_stack([
+                pred for pred in base_predictions.values()
+            ])
+
+            # Meta-learner prediction
+            ensemble_prob = self.meta_learner.predict_proba(meta_features)
+            ensemble_pred = self.meta_learner.predict(meta_features)
+
+            return {
+                'predictions': ensemble_pred,
+                'probabilities': ensemble_prob,
+                'confidence': np.max(ensemble_prob, axis=1)
+            }
+
+        async def predict_weighted_voting(self, base_predictions):
+            """Predict using weighted voting"""
+
+            weighted_probs = np.zeros_like(list(base_predictions.values())[0])
+
+            for name, pred in base_predictions.items():
+                weight = self.voting_weights[name]
+                weighted_probs += weight * pred
+
+            ensemble_pred = np.argmax(weighted_probs, axis=1)
+
+            return {
+                'predictions': ensemble_pred,
+                'probabilities': weighted_probs,
+                'confidence': np.max(weighted_probs, axis=1)
+            }
+
+        async def predict_dynamic_weighting(self, base_predictions):
+            """Predict using dynamic weighting based on confidence"""
+
+            n_samples = list(base_predictions.values())[0].shape[0]
+            n_classes = list(base_predictions.values())[0].shape[1]
+
+            ensemble_probs = np.zeros((n_samples, n_classes))
+
+            for i in range(n_samples):
+                # Calculate dynamic weights for this sample
+                sample_weights = {}
+                total_weight = 0
+
+                for name, pred in base_predictions.items():
+                    confidence = np.max(pred[i])
+                    accuracy = self.model_metrics[name]['accuracy']
+
+                    # Weight based on confidence and historical accuracy
+                    weight = confidence * accuracy
+                    sample_weights[name] = weight
+                    total_weight += weight
+
+                # Normalize weights
+                if total_weight > 0:
+                    for name in sample_weights:
+                        sample_weights[name] /= total_weight
+
+                # Weighted combination
+                for name, pred in base_predictions.items():
+                    weight = sample_weights[name]
+                    ensemble_probs[i] += weight * pred[i]
+
+            ensemble_pred = np.argmax(ensemble_probs, axis=1)
+
+            return {
+                'predictions': ensemble_pred,
+                'probabilities': ensemble_probs,
+                'confidence': np.max(ensemble_probs, axis=1)
+            }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Transfer Learning for BCI**
+
+    ```python
+    from neurascale.ml.transfer import BCITransferLearning
+    import torch
+    import torch.nn as nn
+
+    class BCITransferLearning:
+        """Transfer learning for BCI applications"""
+
+        def __init__(self, source_model, target_task):
+            self.source_model = source_model
+            self.target_task = target_task
+            self.adaptation_method = None
+
+        async def adapt_to_new_subject(self, target_data, target_labels,
+                                     method="fine_tuning"):
+            """Adapt pre-trained model to new subject"""
+
+            if method == "fine_tuning":
+                adapted_model = await self.fine_tune_model(
+                    target_data, target_labels
+                )
+            elif method == "feature_adaptation":
+                adapted_model = await self.adapt_features(
+                    target_data, target_labels
+                )
+            elif method == "domain_adaptation":
+                adapted_model = await self.domain_adaptation(
+                    target_data, target_labels
+                )
+            elif method == "meta_learning":
+                adapted_model = await self.meta_learning_adaptation(
+                    target_data, target_labels
+                )
+
+            return adapted_model
+
+        async def fine_tune_model(self, target_data, target_labels,
+                                freeze_layers=None):
+            """Fine-tune pre-trained model on target subject"""
+
+            # Clone the source model
+            adapted_model = copy.deepcopy(self.source_model)
+
+            # Freeze specified layers
+            if freeze_layers:
+                for name, param in adapted_model.named_parameters():
+                    if any(layer in name for layer in freeze_layers):
+                        param.requires_grad = False
+
+            # Modify final layer for target task if needed
+            if hasattr(adapted_model, 'classifier'):
+                n_features = adapted_model.classifier.in_features
+                n_classes = len(np.unique(target_labels))
+                adapted_model.classifier = nn.Linear(n_features, n_classes)
+
+            # Fine-tune with lower learning rate
+            optimizer = torch.optim.Adam(
+                adapted_model.parameters(),
+                lr=1e-4,  # Lower learning rate for fine-tuning
+                weight_decay=1e-5
+            )
+
+            criterion = nn.CrossEntropyLoss()
+
+            # Training loop
+            adapted_model.train()
+            for epoch in range(50):  # Fewer epochs for fine-tuning
+                for batch_data, batch_labels in self.create_batches(
+                    target_data, target_labels, batch_size=16
+                ):
+                    optimizer.zero_grad()
+                    outputs = adapted_model(batch_data)
+                    loss = criterion(outputs, batch_labels)
+                    loss.backward()
+                    optimizer.step()
+
+                if epoch % 10 == 0:
+                    print(f"Fine-tuning epoch {epoch}, loss: {loss.item():.4f}")
+
+            return adapted_model
+
+        async def adapt_features(self, target_data, target_labels):
+            """Adapt features while keeping classifier fixed"""
+
+            # Extract features from source model
+            source_features = self.extract_features(target_data)
+
+            # Train adaptation layer
+            adaptation_layer = nn.Linear(
+                source_features.shape[1],
+                source_features.shape[1]
+            )
+
+            optimizer = torch.optim.Adam(
+                adaptation_layer.parameters(),
+                lr=1e-3
+            )
+
+            criterion = nn.MSELoss()
+
+            # Self-supervised adaptation using reconstruction
+            for epoch in range(100):
+                optimizer.zero_grad()
+                adapted_features = adaptation_layer(source_features)
+                loss = criterion(adapted_features, source_features)
+                loss.backward()
+                optimizer.step()
+
+            # Create adapted model
+            class AdaptedModel(nn.Module):
+                def __init__(self, source_model, adaptation_layer):
+                    super().__init__()
+                    self.source_model = source_model
+                    self.adaptation_layer = adaptation_layer
+
+                def forward(self, x):
+                    features = self.source_model.extract_features(x)
+                    adapted_features = self.adaptation_layer(features)
+                    return self.source_model.classifier(adapted_features)
+
+            return AdaptedModel(self.source_model, adaptation_layer)
+
+        async def domain_adaptation(self, target_data, target_labels):
+            """Domain adaptation using adversarial training"""
+
+            # Domain adversarial network
+            class DomainClassifier(nn.Module):
+                def __init__(self, feature_dim):
+                    super().__init__()
+                    self.classifier = nn.Sequential(
+                        nn.Linear(feature_dim, 100),
+                        nn.ReLU(),
+                        nn.Linear(100, 2)  # Source vs Target domain
+                    )
+
+                def forward(self, x):
+                    return self.classifier(x)
+
+            # Create domain classifier
+            feature_dim = self.source_model.get_feature_dim()
+            domain_classifier = DomainClassifier(feature_dim)
+
+            # Gradient reversal layer
+            class GradientReversalFunction(torch.autograd.Function):
+                @staticmethod
+                def forward(ctx, x, alpha):
+                    ctx.alpha = alpha
+                    return x.view_as(x)
+
+                @staticmethod
+                def backward(ctx, grad_output):
+                    output = grad_output.neg() * ctx.alpha
+                    return output, None
+
+            # Training with domain adversarial loss
+            optimizer_feat = torch.optim.Adam(
+                self.source_model.feature_extractor.parameters()
+            )
+            optimizer_domain = torch.optim.Adam(
+                domain_classifier.parameters()
+            )
+
+            domain_criterion = nn.CrossEntropyLoss()
+
+            for epoch in range(100):
+                # Domain adaptation training
+                alpha = 2. / (1. + np.exp(-10 * epoch / 100)) - 1
+
+                # Train domain classifier
+                source_features = self.source_model.extract_features(source_data)
+                target_features = self.source_model.extract_features(target_data)
+
+                domain_loss = self.train_domain_classifier(
+                    source_features, target_features,
+                    domain_classifier, optimizer_domain
+                )
+
+                # Train feature extractor adversarially
+                reversed_features = GradientReversalFunction.apply(
+                    target_features, alpha
+                )
+                domain_pred = domain_classifier(reversed_features)
+                adversarial_loss = domain_criterion(
+                    domain_pred,
+                    torch.ones(len(target_data), dtype=torch.long)
+                )
+
+                optimizer_feat.zero_grad()
+                adversarial_loss.backward()
+                optimizer_feat.step()
+
+            return self.source_model
+
+        async def meta_learning_adaptation(self, target_data, target_labels):
+            """Meta-learning for fast adaptation"""
+
+            # MAML-style adaptation
+            class MAMLAdaptation:
+                def __init__(self, model, alpha=0.01, beta=0.001):
+                    self.model = model
+                    self.alpha = alpha  # Inner loop learning rate
+                    self.beta = beta    # Outer loop learning rate
+
+                def inner_loop_update(self, support_data, support_labels):
+                    """Fast adaptation on support set"""
+
+                    # Clone model for adaptation
+                    adapted_model = copy.deepcopy(self.model)
+                    optimizer = torch.optim.SGD(
+                        adapted_model.parameters(),
+                        lr=self.alpha
+                    )
+
+                    # Few gradient steps on support set
+                    for _ in range(5):
+                        optimizer.zero_grad()
+                        outputs = adapted_model(support_data)
+                        loss = nn.CrossEntropyLoss()(outputs, support_labels)
+                        loss.backward()
+                        optimizer.step()
+
+                    return adapted_model
+
+                def adapt(self, support_data, support_labels):
+                    """Adapt to new task with few examples"""
+                    return self.inner_loop_update(support_data, support_labels)
+
+            # Apply MAML adaptation
+            maml = MAMLAdaptation(self.source_model)
+            adapted_model = maml.adapt(target_data[:10], target_labels[:10])  # Few-shot
+
+            return adapted_model
+
+        async def cross_subject_validation(self, all_subjects_data,
+                                         all_subjects_labels,
+                                         adaptation_method="fine_tuning"):
+            """Cross-subject validation with transfer learning"""
+
+            results = []
+            n_subjects = len(all_subjects_data)
+
+            for target_subject in range(n_subjects):
+                print(f"Testing on subject {target_subject + 1}/{n_subjects}")
+
+                # Use other subjects as source data
+                source_indices = [i for i in range(n_subjects) if i != target_subject]
+                source_data = np.concatenate([
+                    all_subjects_data[i] for i in source_indices
+                ])
+                source_labels = np.concatenate([
+                    all_subjects_labels[i] for i in source_indices
+                ])
+
+                # Target subject data
+                target_data = all_subjects_data[target_subject]
+                target_labels = all_subjects_labels[target_subject]
+
+                # Train source model
+                source_model = await self.train_source_model(
+                    source_data, source_labels
+                )
+
+                # Adapt to target subject
+                adapted_model = await self.adapt_to_new_subject(
+                    target_data[:50],  # Use first 50 trials for adaptation
+                    target_labels[:50],
+                    method=adaptation_method
+                )
+
+                # Test on remaining target data
+                test_data = target_data[50:]
+                test_labels = target_labels[50:]
+
+                accuracy = await self.evaluate_model(
+                    adapted_model, test_data, test_labels
+                )
+
+                results.append({
+                    'subject': target_subject,
+                    'accuracy': accuracy,
+                    'method': adaptation_method
+                })
+
+            return results
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Model Training and Evaluation
+
+### Training Pipeline
+
+```python
+from neurascale.ml.training import BCITrainingPipeline
+from neurascale.ml.evaluation import BCIEvaluator
+
+class ComprehensiveTrainingPipeline:
+    def __init__(self, config):
+        self.config = config
+        self.pipeline = BCITrainingPipeline(config)
+        self.evaluator = BCIEvaluator()
+
+    async def train_model(self, model, train_data, val_data, test_data):
+        """Comprehensive model training with monitoring"""
+
+        # Setup training configuration
+        training_config = {
+            "optimizer": {
+                "type": "adamw",
+                "lr": 1e-3,
+                "weight_decay": 1e-5,
+                "betas": [0.9, 0.999]
+            },
+            "scheduler": {
+                "type": "cosine_annealing",
+                "T_max": 100,
+                "eta_min": 1e-6
+            },
+            "training": {
+                "epochs": 100,
+                "batch_size": 32,
+                "early_stopping": {
+                    "patience": 15,
+                    "monitor": "val_accuracy",
+                    "min_delta": 0.001
+                },
+                "gradient_clipping": 1.0
+            },
+            "regularization": {
+                "dropout": 0.25,
+                "label_smoothing": 0.1,
+                "mixup_alpha": 0.2
+            }
+        }
+
+        # Initialize training components
+        trainer = await self.pipeline.create_trainer(model, training_config)
+
+        # Setup monitoring
+        monitor = await self.setup_training_monitor()
+
+        # Training loop with comprehensive monitoring
+        best_model = None
+        best_accuracy = 0
+        patience_counter = 0
+
+        for epoch in range(training_config["training"]["epochs"]):
+            print(f"\nEpoch {epoch + 1}/{training_config['training']['epochs']}")
+
+            # Training phase
+            train_metrics = await trainer.train_epoch(train_data)
+
+            # Validation phase
+            val_metrics = await trainer.validate_epoch(val_data)
+
+            # Update learning rate
+            trainer.scheduler.step()
+
+            # Log metrics
+            await monitor.log_metrics(epoch, train_metrics, val_metrics)
+
+            # Check for improvement
+            if val_metrics["accuracy"] > best_accuracy:
+                best_accuracy = val_metrics["accuracy"]
+                best_model = copy.deepcopy(model)
+                patience_counter = 0
+
+                # Save checkpoint
+                await trainer.save_checkpoint(
+                    epoch, model,
+                    f"best_model_epoch_{epoch}.pth"
+                )
+            else:
+                patience_counter += 1
+
+            # Early stopping
+            if patience_counter >= training_config["training"]["early_stopping"]["patience"]:
+                print(f"Early stopping at epoch {epoch + 1}")
+                break
+
+            # Print progress
+            print(f"Train Loss: {train_metrics['loss']:.4f}, "
+                  f"Train Acc: {train_metrics['accuracy']:.4f}")
+            print(f"Val Loss: {val_metrics['loss']:.4f}, "
+                  f"Val Acc: {val_metrics['accuracy']:.4f}")
+
+        # Final evaluation
+        test_results = await self.evaluator.comprehensive_evaluation(
+            best_model, test_data
+        )
+
+        return {
+            "model": best_model,
+            "training_history": monitor.get_history(),
+            "test_results": test_results,
+            "best_accuracy": best_accuracy
+        }
+
+# Model evaluation and validation
+async def comprehensive_model_evaluation(model, test_data, test_labels):
+    """Comprehensive evaluation of BCI model"""
+
+    evaluator = BCIEvaluator()
+
+    # Basic metrics
+    predictions = await model.predict(test_data)
+    basic_metrics = await evaluator.calculate_basic_metrics(
+        test_labels, predictions
+    )
+
+    # Advanced metrics
+    advanced_metrics = await evaluator.calculate_advanced_metrics(
+        test_labels, predictions, test_data
+    )
+
+    # Cross-validation
+    cv_results = await evaluator.cross_validation(
+        model, test_data, test_labels, cv_folds=5
+    )
+
+    # Statistical significance tests
+    significance_tests = await evaluator.statistical_tests(
+        test_labels, predictions
+    )
+
+    # Generate comprehensive report
+    evaluation_report = {
+        "basic_metrics": basic_metrics,
+        "advanced_metrics": advanced_metrics,
+        "cross_validation": cv_results,
+        "significance_tests": significance_tests,
+        "confusion_matrix": await evaluator.plot_confusion_matrix(
+            test_labels, predictions
+        ),
+        "roc_curves": await evaluator.plot_roc_curves(
+            test_labels, predictions
+        )
+    }
+
+    return evaluation_report
+```
+
+## Model Deployment
+
+### Real-time Inference
+
+```python
+from neurascale.ml.deployment import RealTimeInference
+from neurascale.ml.serving import ModelServer
+
+class BCIModelServer:
+    def __init__(self, model_path, config):
+        self.model_path = model_path
+        self.config = config
+        self.model = None
+        self.preprocessor = None
+
+    async def initialize(self):
+        """Initialize model server"""
+
+        # Load trained model
+        self.model = await self.load_model(self.model_path)
+
+        # Setup preprocessing pipeline
+        self.preprocessor = await self.setup_preprocessing()
+
+        # Initialize inference engine
+        self.inference_engine = RealTimeInference(
+            model=self.model,
+            preprocessor=self.preprocessor,
+            config=self.config
+        )
+
+        print("Model server initialized successfully")
+
+    async def process_real_time_data(self, data_stream):
+        """Process real-time neural data stream"""
+
+        async for data_packet in data_stream:
+            try:
+                # Preprocess data
+                processed_data = await self.preprocessor.process(data_packet)
+
+                # Make prediction
+                prediction = await self.inference_engine.predict(processed_data)
+
+                # Post-process prediction
+                result = await self.post_process_prediction(prediction)
+
+                # Send result
+                await self.send_prediction_result(result)
+
+            except Exception as e:
+                print(f"Error processing data packet: {e}")
+                await self.handle_inference_error(e)
+
+    async def batch_inference(self, batch_data):
+        """Process batch of data for offline analysis"""
+
+        results = []
+
+        for data in batch_data:
+            processed_data = await self.preprocessor.process(data)
+            prediction = await self.inference_engine.predict(processed_data)
+            results.append(prediction)
+
+        return results
+
+# Deploy model with NeuraScale
+async def deploy_bci_model():
+    """Deploy trained BCI model for production use"""
+
+    deployment_config = {
+        "model": {
+            "path": "models/motor_imagery_model.pth",
+            "type": "pytorch",
+            "version": "1.0.0"
+        },
+        "serving": {
+            "batch_size": 1,
+            "max_latency": 50,  # milliseconds
+            "device": "cuda",
+            "precision": "fp16"
+        },
+        "monitoring": {
+            "enable_metrics": True,
+            "log_predictions": True,
+            "alert_on_degradation": True
+        }
+    }
+
+    # Deploy to NeuraScale platform
+    deployment = await ml_client.deploy_model(
+        model_name="motor_imagery_v1",
+        config=deployment_config
+    )
+
+    print(f"Model deployed: {deployment.endpoint_url}")
+
+    return deployment
+```
+
+<Callout type="info">
+  This ML development guide provides a comprehensive framework for building, training, and deploying machine learning models for BCI applications. For specific implementation details and advanced techniques, refer to the neurascale.ml module documentation.
+</Callout>
+
+## Best Practices
+
+### Model Development Guidelines
+
+1. **Data Quality**: Always validate data quality before training
+2. **Cross-Subject Validation**: Test models across different subjects
+3. **Robust Preprocessing**: Implement comprehensive artifact removal
+4. **Feature Engineering**: Combine multiple feature domains for better performance
+5. **Model Validation**: Use proper cross-validation and statistical testing
+6. **Real-time Constraints**: Consider latency requirements for online applications
+7. **Transfer Learning**: Leverage pre-trained models for faster development
+8. **Ensemble Methods**: Combine multiple models for improved reliability
+
+### Performance Optimization
+
+```python
+# Optimization tips for production deployment
+optimization_config = {
+    "model_optimization": {
+        "quantization": "int8",
+        "pruning": 0.3,  # 30% pruning
+        "knowledge_distillation": True
+    },
+    "inference_optimization": {
+        "batch_size": 8,
+        "use_tensorrt": True,
+        "enable_amp": True,  # Automatic Mixed Precision
+        "memory_optimization": True
+    },
+    "caching": {
+        "model_cache": True,
+        "feature_cache": True,
+        "prediction_cache": False  # For real-time applications
+    }
+}
+```
+
+This comprehensive ML development guide provides the foundation for building sophisticated brain-computer interface applications with NeuraScale's machine learning platform.

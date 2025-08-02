@@ -1,0 +1,1043 @@
+import { Tabs, Callout } from 'nextra/components'
+
+# Configuration Reference
+
+This comprehensive guide covers all configuration options for NeuraScale, from client initialization to advanced system tuning.
+
+## Client Configuration
+
+### Basic Configuration
+
+```python
+from neurascale import NeuraScaleClient
+
+# Minimal configuration
+client = NeuraScaleClient(api_key="your-api-key")
+
+# Comprehensive configuration
+client = NeuraScaleClient(
+    api_key="your-api-key",
+    base_url="https://api.neurascale.io",
+    timeout=30.0,
+    max_retries=3,
+    retry_backoff=2.0,
+    performance_mode="balanced"  # ultra_low_latency, balanced, high_throughput
+)
+```
+
+### Configuration File
+
+Create a configuration file for persistent settings:
+
+```yaml
+# neurascale.yaml
+api:
+  base_url: "https://api.neurascale.io"
+  timeout: 30.0
+  max_retries: 3
+  retry_backoff: 2.0
+  rate_limit:
+    requests_per_minute: 1000
+    burst_limit: 50
+
+performance:
+  mode: "balanced"  # ultra_low_latency, balanced, high_throughput
+  buffer_size: 1024
+  batch_size: 32
+  compression: true
+  keepalive: true
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "structured"  # simple, structured
+  file: "/var/log/neurascale.log"
+  max_size: "100MB"
+  backup_count: 5
+
+security:
+  verify_ssl: true
+  ca_bundle: "/path/to/ca-bundle.crt"
+  client_cert: "/path/to/client.crt"
+  client_key: "/path/to/client.key"
+```
+
+Load configuration from file:
+
+```python
+from neurascale import NeuraScaleClient
+from neurascale.config import load_config
+
+config = load_config("neurascale.yaml")
+client = NeuraScaleClient.from_config(config)
+```
+
+### Environment Variables
+
+Configure NeuraScale using environment variables:
+
+```bash
+# Core settings
+export NEURASCALE_API_KEY="your-api-key"
+export NEURASCALE_BASE_URL="https://api.neurascale.io"
+export NEURASCALE_TIMEOUT="30.0"
+
+# Performance settings
+export NEURASCALE_PERFORMANCE_MODE="balanced"
+export NEURASCALE_BUFFER_SIZE="1024"
+export NEURASCALE_COMPRESSION="true"
+
+# Security settings
+export NEURASCALE_VERIFY_SSL="true"
+export NEURASCALE_CLIENT_CERT="/path/to/cert.pem"
+
+# Logging
+export NEURASCALE_LOG_LEVEL="INFO"
+export NEURASCALE_LOG_FILE="/var/log/neurascale.log"
+```
+
+## Device Configuration
+
+### OpenBCI Configuration
+
+<Tabs items={['Cyton Board', 'Ganglion Board', 'Cyton+Daisy']}>
+  <Tabs.Tab>
+    **OpenBCI Cyton (8-channel) Configuration**
+
+    ```python
+    openbci_config = {
+        "device_id": "openbci_cyton_001",
+        "device_type": "openbci_cyton",
+        "connection": {
+            "port": "/dev/ttyUSB0",  # Linux/macOS
+            # "port": "COM3",        # Windows
+            "baudrate": 115200,
+            "timeout": 5.0,
+            "use_aux": False
+        },
+        "acquisition": {
+            "sample_rate": 250,  # 250 Hz default
+            "channels": [1, 2, 3, 4, 5, 6, 7, 8],
+            "channel_settings": {
+                "1": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "2": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "3": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "4": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "5": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "6": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "7": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True},
+                "8": {"gain": 24, "input_type": "normal", "bias": True, "srb2": True}
+            }
+        },
+        "filters": {
+            "notch": 60,      # Power line frequency (US: 60Hz, EU: 50Hz)
+            "highpass": 0.5,  # High-pass filter
+            "lowpass": 100,   # Low-pass filter
+            "enable_dc_correction": True
+        },
+        "impedance": {
+            "check_on_start": True,
+            "max_impedance": 50000,  # 50kΩ
+            "test_signal": {
+                "frequency": 10,  # Hz
+                "amplitude": 1.0  # µV
+            }
+        }
+    }
+    ```
+
+    **Channel Settings Options**:
+    - `gain`: 1, 2, 4, 6, 8, 12, 24 (default: 24)
+    - `input_type`: "normal", "shorted", "bias_meas", "mvdd", "temp", "test_signal"
+    - `bias`: Include channel in bias calculation (True/False)
+    - `srb2`: Connect to SRB2 reference (True/False)
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **OpenBCI Ganglion (4-channel) Configuration**
+
+    ```python
+    ganglion_config = {
+        "device_id": "openbci_ganglion_001",
+        "device_type": "openbci_ganglion",
+        "connection": {
+            "method": "bluetooth",  # or "wifi"
+            "mac_address": "00:11:22:33:44:55",
+            "timeout": 10.0,
+            "auto_reconnect": True
+        },
+        "acquisition": {
+            "sample_rate": 200,  # 200 Hz for Ganglion
+            "channels": [1, 2, 3, 4],
+            "synthetic_channels": {
+                "enable": False,  # Create synthetic 5th channel
+                "method": "average"  # average, interpolate
+            }
+        },
+        "filters": {
+            "notch": 60,
+            "highpass": 1.0,
+            "lowpass": 50,
+            "enable_digital_filters": True
+        },
+        "power": {
+            "battery_monitoring": True,
+            "low_power_mode": False,
+            "shutdown_voltage": 3.4  # Volts
+        },
+        "bluetooth": {
+            "scan_timeout": 30.0,
+            "connection_interval": 7.5,  # ms
+            "supervision_timeout": 20000  # ms
+        }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **OpenBCI Cyton+Daisy (16-channel) Configuration**
+
+    ```python
+    cyton_daisy_config = {
+        "device_id": "openbci_daisy_001",
+        "device_type": "openbci_cyton_daisy",
+        "connection": {
+            "port": "/dev/ttyUSB0",
+            "baudrate": 115200,
+            "timeout": 5.0,
+            "daisy_module": True
+        },
+        "acquisition": {
+            "sample_rate": 125,  # Reduced for 16 channels
+            "channels": list(range(1, 17)),  # 1-16
+            "channel_layout": {
+                "cyton": [1, 2, 3, 4, 5, 6, 7, 8],
+                "daisy": [9, 10, 11, 12, 13, 14, 15, 16]
+            }
+        },
+        "synchronization": {
+            "enable": True,
+            "sync_pin": "D17",  # Digital pin for sync
+            "sync_frequency": 1.0  # Hz
+        },
+        "advanced": {
+            "board_mode": "default",  # default, digital, marker, bdf_plus
+            "wifi_shield": False,
+            "external_trigger": {
+                "enable": False,
+                "pin": "D11",
+                "trigger_mode": "rising"  # rising, falling, both
+            }
+        }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Emotiv Configuration
+
+<Tabs items={['EPOC+', 'Insight', 'EPOC X']}>
+  <Tabs.Tab>
+    **Emotiv EPOC+ Configuration**
+
+    ```python
+    epoc_plus_config = {
+        "device_id": "emotiv_epoc_plus_001",
+        "device_type": "emotiv_epoc_plus",
+        "authentication": {
+            "client_id": "your_client_id",
+            "client_secret": "your_client_secret",
+            "license_key": "your_license_key"
+        },
+        "acquisition": {
+            "sample_rate": 128,  # Fixed for EPOC+
+            "channels": [
+                "AF3", "F7", "F3", "FC5", "T7", "P7", "O1", "O2",
+                "P8", "T8", "FC6", "F4", "F8", "AF4"
+            ],
+            "reference_channels": ["CMS", "DRL"],
+            "motion_sensors": {
+                "gyroscope": True,
+                "accelerometer": True,
+                "magnetometer": True
+            }
+        },
+        "filters": {
+            "notch": {
+                "enable": True,
+                "frequency": 50,  # or 60 Hz
+                "bandwidth": 1.0
+            },
+            "bandpass": {
+                "enable": True,
+                "low_cutoff": 0.2,
+                "high_cutoff": 45.0,
+                "order": 5
+            }
+        },
+        "contact_quality": {
+            "monitoring": True,
+            "update_interval": 1.0,  # seconds
+            "quality_threshold": 0.8,
+            "impedance_threshold": 100000  # 100kΩ
+        },
+        "performance": {
+            "buffer_size": 512,
+            "data_format": "32bit_float",  # 16bit_int, 32bit_float
+            "compression": False
+        }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Emotiv Insight Configuration**
+
+    ```python
+    insight_config = {
+        "device_id": "emotiv_insight_001",
+        "device_type": "emotiv_insight",
+        "authentication": {
+            "client_id": "your_client_id",
+            "client_secret": "your_client_secret"
+        },
+        "acquisition": {
+            "sample_rate": 128,
+            "channels": ["AF3", "AF4", "T7", "T8", "Pz"],
+            "dry_electrodes": True,
+            "auto_calibration": True
+        },
+        "battery": {
+            "monitoring": True,
+            "low_battery_threshold": 20,  # percent
+            "charging_status": True
+        },
+        "wireless": {
+            "bluetooth_version": "4.0",
+            "connection_stability": "high",  # high, balanced, power_saving
+            "auto_reconnect": True,
+            "scan_duration": 30.0
+        }
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Emotiv EPOC X Configuration**
+
+    ```python
+    epoc_x_config = {
+        "device_id": "emotiv_epoc_x_001",
+        "device_type": "emotiv_epoc_x",
+        "authentication": {
+            "client_id": "your_client_id",
+            "client_secret": "your_client_secret",
+            "license_key": "your_license_key"
+        },
+        "acquisition": {
+            "sample_rate": 256,  # Higher rate for EPOC X
+            "channels": [
+                "AF3", "F7", "F3", "FC5", "T7", "P7", "O1", "O2",
+                "P8", "T8", "FC6", "F4", "F8", "AF4", "FC1", "FC2"
+            ],
+            "density_mode": "high",  # standard, high
+            "electrode_type": "saline"  # saline, gel
+        },
+        "advanced": {
+            "head_tracking": True,
+            "facial_expression": True,
+            "mental_commands": True,
+            "performance_metrics": True
+        }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### LSL Stream Configuration
+
+```python
+lsl_config = {
+    "device_id": "lsl_stream_001",
+    "device_type": "lsl_stream",
+    "stream": {
+        "name": "EEG_Stream",
+        "type": "EEG",
+        "source_id": "unique_source_id",
+        "timeout": 5.0,
+        "resolve_minimum": 1
+    },
+    "data": {
+        "sample_rate": 250,
+        "channel_count": 8,
+        "channel_format": "float32",  # float32, double64, int32, int16, int8, string
+        "channel_labels": ["Fp1", "Fp2", "C3", "C4", "P7", "P8", "O1", "O2"]
+    },
+    "network": {
+        "multicast_address": "224.0.0.183",
+        "multicast_port": 16571,
+        "multicast_ttl": 1,
+        "use_ipv6": False
+    },
+    "buffering": {
+        "max_buflen": 360,  # seconds
+        "max_chunklen": 0,  # 0 = no chunking
+        "recover": True,
+        "processing_flags": 0
+    },
+    "clock_sync": {
+        "enable": True,
+        "method": "lsl_clock",  # lsl_clock, system_clock, ntp
+        "correction_interval": 5.0  # seconds
+    }
+}
+```
+
+## Processing Configuration
+
+### Signal Processing Pipeline
+
+```python
+processing_config = {
+    "pipeline": {
+        "stages": [
+            {
+                "name": "artifact_removal",
+                "type": "ica",
+                "parameters": {
+                    "method": "fastica",
+                    "n_components": 8,
+                    "max_iter": 200,
+                    "tolerance": 1e-4,
+                    "random_state": 42
+                }
+            },
+            {
+                "name": "filtering",
+                "type": "bandpass",
+                "parameters": {
+                    "low_freq": 0.5,
+                    "high_freq": 100,
+                    "filter_type": "butterworth",
+                    "order": 4,
+                    "zero_phase": True
+                }
+            },
+            {
+                "name": "epoching",
+                "type": "events",
+                "parameters": {
+                    "event_codes": [1, 2, 3, 4],
+                    "tmin": -0.5,
+                    "tmax": 2.0,
+                    "baseline": [-0.5, 0],
+                    "reject": {
+                        "eeg": 150e-6  # 150 µV
+                    }
+                }
+            },
+            {
+                "name": "feature_extraction",
+                "type": "spectral",
+                "parameters": {
+                    "method": "welch",
+                    "window": "hanning",
+                    "nperseg": 256,
+                    "overlap": 0.5,
+                    "frequency_bands": {
+                        "delta": [0.5, 4],
+                        "theta": [4, 8],
+                        "alpha": [8, 13],
+                        "beta": [13, 30],
+                        "gamma": [30, 100]
+                    }
+                }
+            }
+        ]
+    },
+    "quality_control": {
+        "enable_artifact_detection": True,
+        "artifact_types": ["eye_blinks", "muscle", "movement"],
+        "z_threshold": 3.0,
+        "min_signal_quality": 0.7
+    },
+    "real_time": {
+        "buffer_duration": 2.0,  # seconds
+        "update_interval": 0.1,  # seconds
+        "max_latency": 100,  # milliseconds
+        "parallel_processing": True,
+        "gpu_acceleration": False
+    }
+}
+```
+
+### Filter Configurations
+
+```python
+filter_configs = {
+    "notch_filters": {
+        "power_line_50hz": {
+            "frequency": 50,
+            "quality_factor": 30,
+            "filter_type": "iir"
+        },
+        "power_line_60hz": {
+            "frequency": 60,
+            "quality_factor": 30,
+            "filter_type": "iir"
+        }
+    },
+    "bandpass_filters": {
+        "eeg_standard": {
+            "low_freq": 0.5,
+            "high_freq": 100,
+            "order": 4,
+            "method": "butterworth"
+        },
+        "mu_beta": {
+            "low_freq": 8,
+            "high_freq": 30,
+            "order": 6,
+            "method": "chebyshev"
+        },
+        "gamma": {
+            "low_freq": 30,
+            "high_freq": 100,
+            "order": 4,
+            "method": "elliptic"
+        }
+    },
+    "spatial_filters": {
+        "car": {
+            "type": "common_average_reference",
+            "exclude_channels": []
+        },
+        "laplacian": {
+            "type": "surface_laplacian",
+            "order": 4,
+            "lambda": 1e-5
+        },
+        "csp": {
+            "type": "common_spatial_patterns",
+            "n_components": 4,
+            "reg": None
+        }
+    }
+}
+```
+
+## Session Configuration
+
+### Recording Sessions
+
+```python
+session_config = {
+    "session": {
+        "name": "Motor Imagery Experiment",
+        "description": "4-class motor imagery BCI session",
+        "protocol": "motor_imagery_4class",
+        "duration": 1800,  # 30 minutes in seconds
+        "participant_id": "P001",
+        "experimenter": "researcher_01"
+    },
+    "devices": [
+        {
+            "device_id": "openbci_001",
+            "role": "primary",
+            "start_delay": 0.0
+        }
+    ],
+    "stimulation": {
+        "paradigm": "motor_imagery",
+        "conditions": ["left_hand", "right_hand", "feet", "tongue"],
+        "trials_per_condition": 40,
+        "trial_duration": 4.0,
+        "inter_trial_interval": [1.0, 3.0],  # random between 1-3 seconds
+        "cue_duration": 1.0,
+        "feedback_delay": 0.5
+    },
+    "recording": {
+        "auto_start": True,
+        "format": "hdf5",
+        "compression": "gzip",
+        "chunk_size": 1000,
+        "backup_enabled": True,
+        "backup_interval": 300  # 5 minutes
+    },
+    "quality_monitoring": {
+        "impedance_check": True,
+        "signal_quality_monitoring": True,
+        "artifact_detection": True,
+        "real_time_feedback": True
+    }
+}
+```
+
+### Analysis Configuration
+
+```python
+analysis_config = {
+    "preprocessing": {
+        "resampling": {
+            "target_rate": 250,
+            "method": "polyphase"
+        },
+        "filtering": {
+            "apply_car": True,
+            "notch_filter": 60,
+            "bandpass": [0.1, 40]
+        },
+        "artifact_removal": {
+            "method": "ica",
+            "n_components": 0.95,
+            "exclude_components": "auto"
+        }
+    },
+    "feature_extraction": {
+        "time_domain": {
+            "enable": True,
+            "features": ["mean", "std", "variance", "skewness", "kurtosis"]
+        },
+        "frequency_domain": {
+            "enable": True,
+            "method": "welch",
+            "features": ["psd", "band_power", "spectral_entropy"]
+        },
+        "time_frequency": {
+            "enable": False,
+            "method": "morlet_wavelet",
+            "frequencies": "auto"
+        }
+    },
+    "classification": {
+        "algorithm": "lda",  # lda, svm, random_forest, neural_network
+        "cross_validation": {
+            "method": "stratified_kfold",
+            "n_splits": 5,
+            "shuffle": True,
+            "random_state": 42
+        },
+        "hyperparameters": {
+            "lda": {
+                "solver": "svd",
+                "shrinkage": None
+            },
+            "svm": {
+                "C": 1.0,
+                "kernel": "rbf",
+                "gamma": "scale"
+            }
+        }
+    }
+}
+```
+
+## System Configuration
+
+### Performance Tuning
+
+```python
+performance_config = {
+    "memory": {
+        "max_buffer_size": "1GB",
+        "chunk_size": 1000,
+        "memory_mapping": True,
+        "garbage_collection": {
+            "threshold": [700, 10, 10],
+            "enable_auto": True
+        }
+    },
+    "processing": {
+        "num_workers": 4,
+        "thread_pool_size": 8,
+        "process_pool_size": 2,
+        "async_io": True,
+        "cpu_affinity": [0, 1, 2, 3]
+    },
+    "networking": {
+        "connection_pool_size": 10,
+        "max_connections_per_host": 5,
+        "keepalive_timeout": 30,
+        "read_timeout": 30,
+        "connect_timeout": 10
+    },
+    "caching": {
+        "enable": True,
+        "max_size": "100MB",
+        "ttl": 3600,  # 1 hour
+        "backend": "memory"  # memory, redis, memcached
+    }
+}
+```
+
+### Logging Configuration
+
+```python
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+        },
+        "detailed": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
+        },
+        "json": {
+            "format": "%(timestamp)s %(level)s %(name)s %(message)s",
+            "class": "pythonjsonlogger.jsonlogger.JsonFormatter"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "standard",
+            "stream": "ext://sys.stdout"
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "detailed",
+            "filename": "neurascale.log",
+            "maxBytes": 10485760,  # 10MB
+            "backupCount": 5
+        },
+        "error_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "ERROR",
+            "formatter": "detailed",
+            "filename": "neurascale_errors.log",
+            "maxBytes": 10485760,
+            "backupCount": 3
+        }
+    },
+    "loggers": {
+        "neurascale": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False
+        },
+        "neurascale.devices": {
+            "level": "INFO",
+            "handlers": ["console", "file"],
+            "propagate": False
+        },
+        "neurascale.processing": {
+            "level": "WARNING",
+            "handlers": ["file"],
+            "propagate": False
+        }
+    },
+    "root": {
+        "level": "INFO",
+        "handlers": ["console"]
+    }
+}
+```
+
+## Security Configuration
+
+### Authentication & Authorization
+
+```python
+security_config = {
+    "authentication": {
+        "method": "jwt",
+        "token_expiry": 3600,  # 1 hour
+        "refresh_token_expiry": 86400,  # 24 hours
+        "secret_key": "your-secret-key",
+        "algorithm": "HS256"
+    },
+    "authorization": {
+        "enable_rbac": True,
+        "roles": {
+            "admin": ["*"],
+            "researcher": ["devices:read", "sessions:*", "data:*"],
+            "clinician": ["sessions:read", "data:read", "analysis:read"]
+        }
+    },
+    "encryption": {
+        "data_at_rest": {
+            "enable": True,
+            "algorithm": "AES-256-GCM",
+            "key_rotation": True,
+            "rotation_interval": 2592000  # 30 days
+        },
+        "data_in_transit": {
+            "tls_version": "1.3",
+            "cipher_suites": [
+                "TLS_AES_256_GCM_SHA384",
+                "TLS_CHACHA20_POLY1305_SHA256"
+            ]
+        }
+    },
+    "compliance": {
+        "hipaa": {
+            "enable": True,
+            "audit_logging": True,
+            "data_retention": 2555,  # 7 years in days
+            "access_controls": True
+        },
+        "gdpr": {
+            "enable": True,
+            "data_portability": True,
+            "right_to_deletion": True,
+            "consent_management": True
+        }
+    }
+}
+```
+
+### API Security
+
+```python
+api_security_config = {
+    "rate_limiting": {
+        "enabled": True,
+        "default_limit": "1000/hour",
+        "endpoints": {
+            "/auth/login": "10/minute",
+            "/data/export": "5/hour",
+            "/analysis/run": "100/hour"
+        },
+        "storage": "redis",  # memory, redis, database
+        "key_func": "user_id"  # ip, user_id, api_key
+    },
+    "cors": {
+        "enabled": True,
+        "allow_origins": ["https://app.neurascale.io"],
+        "allow_methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["Authorization", "Content-Type"],
+        "expose_headers": ["X-RateLimit-Remaining"],
+        "allow_credentials": True,
+        "max_age": 86400
+    },
+    "csrf": {
+        "enabled": True,
+        "token_name": "X-CSRF-Token",
+        "token_ttl": 3600,
+        "exclude_paths": ["/api/webhook/*"]
+    },
+    "content_security": {
+        "max_content_length": "100MB",
+        "allowed_file_types": [".edf", ".bdf", ".gdf", ".hdf5", ".mat"],
+        "scan_uploads": True,
+        "quarantine_suspicious": True
+    }
+}
+```
+
+## Environment-Specific Configurations
+
+### Development Environment
+
+```python
+dev_config = {
+    "environment": "development",
+    "debug": True,
+    "logging": {
+        "level": "DEBUG",
+        "console": True,
+        "file": False
+    },
+    "database": {
+        "url": "sqlite:///neurascale_dev.db",
+        "echo": True
+    },
+    "cache": {
+        "type": "simple",
+        "timeout": 60
+    },
+    "security": {
+        "verify_ssl": False,
+        "csrf_protection": False
+    },
+    "performance": {
+        "profile": True,
+        "memory_profiling": True
+    }
+}
+```
+
+### Production Environment
+
+```python
+prod_config = {
+    "environment": "production",
+    "debug": False,
+    "logging": {
+        "level": "WARNING",
+        "console": False,
+        "file": True,
+        "syslog": True
+    },
+    "database": {
+        "url": "postgresql://user:pass@host:5432/neurascale",
+        "pool_size": 20,
+        "max_overflow": 30,
+        "pool_timeout": 30
+    },
+    "cache": {
+        "type": "redis",
+        "url": "redis://localhost:6379/0",
+        "timeout": 3600
+    },
+    "security": {
+        "verify_ssl": True,
+        "csrf_protection": True,
+        "force_https": True
+    },
+    "monitoring": {
+        "enable_metrics": True,
+        "metrics_endpoint": "/metrics",
+        "health_check_endpoint": "/health"
+    }
+}
+```
+
+## Configuration Validation
+
+### Schema Validation
+
+```python
+from neurascale.config import ConfigValidator
+from jsonschema import validate, ValidationError
+
+# Define configuration schema
+config_schema = {
+    "type": "object",
+    "properties": {
+        "api": {
+            "type": "object",
+            "properties": {
+                "base_url": {"type": "string", "format": "uri"},
+                "timeout": {"type": "number", "minimum": 1, "maximum": 300},
+                "max_retries": {"type": "integer", "minimum": 0, "maximum": 10}
+            },
+            "required": ["base_url"]
+        },
+        "devices": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "device_id": {"type": "string"},
+                    "device_type": {"type": "string", "enum": ["openbci", "emotiv", "lsl"]},
+                    "config": {"type": "object"}
+                },
+                "required": ["device_id", "device_type"]
+            }
+        }
+    },
+    "required": ["api"]
+}
+
+# Validate configuration
+def validate_config(config):
+    try:
+        validate(config, config_schema)
+        return True, None
+    except ValidationError as e:
+        return False, str(e)
+
+# Example usage
+config = load_config("neurascale.yaml")
+is_valid, error = validate_config(config)
+
+if not is_valid:
+    print(f"Configuration error: {error}")
+    exit(1)
+```
+
+### Runtime Configuration Updates
+
+```python
+from neurascale.config import ConfigManager
+
+# Initialize configuration manager
+config_manager = ConfigManager("neurascale.yaml")
+
+# Watch for configuration changes
+config_manager.watch_changes(callback=lambda: print("Config updated"))
+
+# Update configuration at runtime
+config_manager.update({
+    "api.timeout": 45.0,
+    "logging.level": "INFO"
+})
+
+# Get current configuration
+current_config = config_manager.get_config()
+```
+
+<Callout type="info">
+  Configuration files support environment variable substitution using `${VARIABLE_NAME}` syntax. This allows for flexible deployment across different environments while keeping sensitive data secure.
+</Callout>
+
+## Configuration Examples
+
+### Complete Production Setup
+
+```yaml
+# production.yaml
+api:
+  base_url: "https://api.neurascale.io"
+  timeout: 30.0
+  max_retries: 3
+
+devices:
+  - device_id: "openbci_lab_001"
+    device_type: "openbci_cyton"
+    config:
+      connection:
+        port: "${OPENBCI_PORT}"
+        baudrate: 115200
+      acquisition:
+        sample_rate: 250
+        channels: [1, 2, 3, 4, 5, 6, 7, 8]
+
+processing:
+  pipeline:
+    stages:
+      - name: "filtering"
+        type: "bandpass"
+        parameters:
+          low_freq: 0.5
+          high_freq: 100
+
+security:
+  authentication:
+    token_expiry: 3600
+  encryption:
+    data_at_rest:
+      enable: true
+
+logging:
+  level: "INFO"
+  file: "/var/log/neurascale/app.log"
+
+monitoring:
+  enable_metrics: true
+  health_check_interval: 30
+```
+
+Load and use the configuration:
+
+```python
+from neurascale import NeuraScaleClient
+from neurascale.config import load_config
+
+# Load production configuration
+config = load_config("production.yaml")
+
+# Initialize client with configuration
+client = NeuraScaleClient.from_config(config)
+
+# Connect devices from configuration
+for device_config in config.devices:
+    device = await client.devices.connect(
+        device_config.device_id,
+        device_config.config
+    )
+    print(f"Connected: {device.name}")
+```

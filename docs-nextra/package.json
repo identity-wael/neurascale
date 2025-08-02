@@ -3,7 +3,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "next build && npm run build-search",
+    "build-search": "pagefind --site .next/static --output-path public/_pagefind",
     "dev": "next dev",
     "start": "next start"
   },

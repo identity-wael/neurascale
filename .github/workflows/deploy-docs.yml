@@ -1,15 +1,11 @@
-name: Deploy Documentation to GitHub Pages
+name: Deploy Nextra Documentation
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'docs/**'
-      - 'docs-site/**'
-      - 'console/README.md'
-      - 'console/FIREBASE_SETUP.md'
-      - 'console/infrastructure/README.md'
+      - 'docs-nextra/**'
       - 'README.md'
       - 'CONTRIBUTING.md'
       - 'SECURITY.md'
@@ -18,12 +14,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -32,35 +22,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ruby-version: '3.1'
-          bundler-cache: true
-          working-directory: ./docs-site
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: docs-nextra/package-lock.json
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Build with Jekyll
+      - name: Install dependencies
         run: |
-          cd docs-site
-          bundle exec jekyll build
+          cd docs-nextra
+          npm ci
+
+      - name: Build Nextra documentation
+        run: |
+          cd docs-nextra
+          npm run build
         env:
-          JEKYLL_ENV: production
+          NODE_ENV: production
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          path: ./docs-site/_site
+          name: nextra-build
+          path: docs-nextra/out
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  # Note: Actual deployment happens via Vercel
+  # This workflow is just for build verification

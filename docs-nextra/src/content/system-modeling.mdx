@@ -201,6 +201,248 @@ flowchart TB
   </Tabs.Tab>
 </Tabs>
 
+### Session Management Flow
+
+This flowchart shows the complete lifecycle of a neural recording session from creation to completion.
+
+```mermaid
+flowchart TB
+    Start([User Creates Session])
+
+    CreateSession[Create Session<br/>Metadata]
+    AssignID[Generate<br/>Session UUID]
+
+    SelectDevices{Select<br/>Devices}
+    ValidateDevices[Validate Device<br/>Availability]
+
+    ConfigSession[Configure Session<br/>Parameters]
+    SetDuration[Set Recording<br/>Duration]
+    SetTriggers[Configure<br/>Event Triggers]
+    SetStorage[Select Storage<br/>Options]
+
+    InitStorage[Initialize<br/>Storage Backend]
+    CreateFiles[Create Data<br/>Files]
+
+    StartRecording[Start<br/>Recording]
+
+    Recording([Active Recording])
+
+    MonitorHealth{Monitor<br/>Session Health}
+
+    PauseOption{User Action}
+    Pause[Pause<br/>Recording]
+    Resume[Resume<br/>Recording]
+
+    StopRecording[Stop<br/>Recording]
+
+    FinalizeData[Finalize<br/>Data Files]
+    GenerateMetadata[Generate Session<br/>Metadata]
+    ArchiveSession[Archive<br/>Session]
+
+    End([Session Complete])
+
+    Error[Session<br/>Error]
+    Cleanup[Cleanup<br/>Resources]
+
+    Start --> CreateSession
+    CreateSession --> AssignID
+    AssignID --> SelectDevices
+
+    SelectDevices --> ValidateDevices
+    ValidateDevices --> ConfigSession
+
+    ConfigSession --> SetDuration
+    SetDuration --> SetTriggers
+    SetTriggers --> SetStorage
+    SetStorage --> InitStorage
+
+    InitStorage --> CreateFiles
+    CreateFiles --> StartRecording
+    StartRecording --> Recording
+
+    Recording --> MonitorHealth
+    MonitorHealth -->|Healthy| PauseOption
+    MonitorHealth -->|Error| Error
+
+    PauseOption -->|Pause| Pause
+    PauseOption -->|Stop| StopRecording
+    PauseOption -->|Continue| Recording
+
+    Pause --> Resume
+    Resume --> Recording
+
+    StopRecording --> FinalizeData
+    FinalizeData --> GenerateMetadata
+    GenerateMetadata --> ArchiveSession
+    ArchiveSession --> End
+
+    Error --> Cleanup
+    Cleanup --> End
+
+    style Start fill:#34a853,color:#fff
+    style Recording fill:#4285f4,color:#fff
+    style Error fill:#ea4335,color:#fff
+    style End fill:#9c27b0,color:#fff
+```
+
+## Sequence Diagrams
+
+### Device Streaming Sequence
+
+This sequence diagram shows the time-ordered interactions between components during real-time device streaming.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as API Gateway
+    participant Auth as Auth Service
+    participant DM as Device Manager
+    participant Device as Device (OpenBCI)
+    participant RB as Ring Buffer
+    participant PS as Pub/Sub
+    participant DS as Data Service
+    participant WS as WebSocket
+
+    Client->>API: POST /devices/{id}/stream/start
+    API->>Auth: Validate JWT Token
+    Auth-->>API: Token Valid + User Permissions
+    API->>DM: StartStreaming(deviceId, config)
+
+    DM->>Device: Connect()
+    Device-->>DM: Connection Established
+
+    DM->>Device: Configure(sampleRate, channels)
+    Device-->>DM: Configuration ACK
+
+    DM->>RB: Initialize(size=1MB)
+    RB-->>DM: Buffer Ready
+
+    DM->>Device: StartDataStream()
+    Device-->>DM: Stream Started
+
+    loop Every 4ms (250Hz)
+        Device->>DM: DataPacket(samples, timestamp)
+        DM->>DM: Validate Packet
+        DM->>RB: Write(data)
+
+        alt Buffer Threshold Reached (1000 samples)
+            RB->>PS: PublishBatch(topic="device.data.raw")
+            PS-->>DS: Store(data)
+            PS-->>WS: Broadcast(data)
+            WS-->>Client: Real-time Data
+        end
+    end
+
+    Client->>API: POST /devices/{id}/stream/stop
+    API->>DM: StopStreaming(deviceId)
+    DM->>Device: StopDataStream()
+    Device-->>DM: Stream Stopped
+    DM->>RB: Flush()
+    RB->>PS: PublishRemaining()
+    DM->>Device: Disconnect()
+    Device-->>DM: Disconnected
+    DM-->>API: Success
+    API-->>Client: 200 OK
+```
+
+<Tabs items={['Timing Details', 'Message Formats', 'Error Scenarios']}>
+  <Tabs.Tab>
+    **Timing Specifications:**
+
+    | Operation | Typical Latency | Max Latency | Notes |
+    |-----------|----------------|-------------|--------|
+    | JWT Validation | 5-10ms | 50ms | Cached tokens faster |
+    | Device Connection | 100-500ms | 2000ms | USB fastest, BLE slowest |
+    | Configuration | 20-50ms | 100ms | Depends on parameters |
+    | Buffer Init | Less than 1ms | 5ms | Pre-allocated memory |
+    | Data Packet | 4ms | 8ms | 250Hz sampling rate |
+    | Pub/Sub Publish | 5-10ms | 20ms | Async operation |
+    | WebSocket Broadcast | 2-5ms | 10ms | Direct connection |
+
+    **Buffering Strategy:**
+    - Ring buffer size: 1MB (holds ~10s of data)
+    - Batch threshold: 1000 samples (~4 seconds)
+    - Flush interval: 100ms (failsafe)
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Key Message Formats:**
+
+    ```python
+    # Data Packet Structure
+    class NeuralDataPacket:
+        timestamp: datetime       # UTC timestamp
+        device_id: str           # Unique device identifier
+        sequence_number: int     # Packet sequence counter
+        samples: np.ndarray      # Shape: (n_channels, n_samples)
+        sample_rate: int         # Hz (250, 500, 1000)
+        channel_mask: int        # Active channels bitmask
+        battery_level: float     # 0.0 to 1.0
+        signal_quality: List[float]  # Per-channel quality
+    ```
+
+    **Pub/Sub Message Format:**
+    ```json
+    {
+        "topic": "device.data.raw",
+        "device_id": "openbci_cyton_001",
+        "timestamp": "2024-01-15T10:30:45.123Z",
+        "data": {
+            "packets": ["..."],
+            "batch_size": 1000,
+            "duration_ms": 4000
+        }
+    }
+    ```
+
+    **WebSocket Frame Format:**
+    ```json
+    {
+        "type": "data",
+        "device_id": "openbci_cyton_001",
+        "channels": [1.23, 4.56, 7.89],
+        "timestamp": 1705317045123,
+        "quality": [0.98, 0.99, 0.97]
+    }
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Error Handling Sequences:**
+
+    ```mermaid
+    sequenceDiagram
+        participant Client
+        participant DM as Device Manager
+        participant Device
+        participant PS as Pub/Sub
+
+        Note over Client,PS: Scenario 1: Connection Lost
+        Device--xDM: Connection Lost
+        DM->>DM: Detect Disconnection
+        DM->>PS: Publish("device.disconnected")
+        DM->>DM: Attempt Reconnection
+
+        alt Reconnection Successful
+            DM->>Device: Connect()
+            Device-->>DM: Connected
+            DM->>Device: Resume Stream
+            DM->>PS: Publish("device.reconnected")
+        else Reconnection Failed
+            DM->>PS: Publish("device.error")
+            DM-->>Client: Error Notification
+        end
+
+        Note over Client,PS: Scenario 2: Buffer Overflow
+        Device->>DM: DataPacket
+        DM->>DM: Buffer Full Check
+        DM->>PS: EmergencyFlush()
+        DM->>DM: Apply Backpressure
+        DM-->>Device: Slow Down Signal
+    ```
+  </Tabs.Tab>
+</Tabs>
+
 ## Service Architecture
 
 ### Device Service

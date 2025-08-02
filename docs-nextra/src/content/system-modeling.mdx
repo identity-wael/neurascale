@@ -641,6 +641,227 @@ stateDiagram-v2
   </Tabs.Tab>
 </Tabs>
 
+## Entity Relationship Diagrams
+
+### Core Data Model
+
+This ER diagram shows the relationships between core entities in the NeuraScale system.
+
+```mermaid
+erDiagram
+    User ||--o{ Session : creates
+    User ||--o{ Device : owns
+    User {
+        string user_id PK
+        string email UK
+        string name
+        string role
+        datetime created_at
+        datetime last_login
+        boolean is_active
+    }
+
+    Device ||--o{ Session : participates_in
+    Device ||--o{ DeviceStatus : has
+    Device {
+        string device_id PK
+        string user_id FK
+        string device_type
+        string serial_number UK
+        string firmware_version
+        json configuration
+        datetime registered_at
+        datetime last_seen
+    }
+
+    Session ||--o{ Recording : contains
+    Session ||--o{ Event : logs
+    Session {
+        string session_id PK
+        string user_id FK
+        string name
+        datetime start_time
+        datetime end_time
+        string status
+        json metadata
+        string storage_path
+    }
+
+    Recording ||--o{ DataChunk : stores
+    Recording ||--o{ Feature : extracts
+    Recording {
+        string recording_id PK
+        string session_id FK
+        string device_id FK
+        datetime timestamp
+        int sample_rate
+        int channel_count
+        string data_format
+        bigint sample_count
+    }
+
+    DataChunk ||--o{ Sample : contains
+    DataChunk {
+        string chunk_id PK
+        string recording_id FK
+        int sequence_number
+        datetime start_time
+        datetime end_time
+        blob compressed_data
+        string storage_location
+        int size_bytes
+    }
+
+    Sample {
+        bigint sample_id PK
+        string chunk_id FK
+        int channel
+        float value
+        int sample_index
+        float quality_score
+    }
+
+    Feature ||--o{ Classification : produces
+    Feature {
+        string feature_id PK
+        string recording_id FK
+        string feature_type
+        json feature_vector
+        datetime computed_at
+        string algorithm_version
+    }
+
+    Classification {
+        string classification_id PK
+        string feature_id FK
+        string model_id FK
+        string class_label
+        float confidence
+        json probabilities
+        datetime predicted_at
+    }
+
+    Event {
+        string event_id PK
+        string session_id FK
+        string event_type
+        json event_data
+        datetime timestamp
+        string severity
+    }
+
+    DeviceStatus {
+        string status_id PK
+        string device_id FK
+        float battery_level
+        json impedance_values
+        float signal_quality
+        datetime measured_at
+        boolean is_streaming
+    }
+```
+
+<Tabs items={['Entity Details', 'Relationships', 'Database Schema']}>
+  <Tabs.Tab>
+    **Core Entities:**
+
+    | Entity | Description | Primary Storage |
+    |--------|-------------|-----------------|
+    | **User** | System users (researchers, clinicians) | PostgreSQL |
+    | **Device** | Neural recording devices | PostgreSQL |
+    | **Session** | Recording sessions | PostgreSQL |
+    | **Recording** | Continuous data from a device | PostgreSQL + Bigtable |
+    | **DataChunk** | Compressed time-series segments | Bigtable |
+    | **Sample** | Individual data points | Bigtable |
+    | **Feature** | Extracted features from recordings | BigQuery |
+    | **Classification** | ML model predictions | BigQuery |
+    | **Event** | Session events and markers | PostgreSQL |
+    | **DeviceStatus** | Real-time device metrics | Redis + PostgreSQL |
+
+    **Data Volume Estimates:**
+    - Users: ~1,000
+    - Devices: ~10,000
+    - Sessions: ~100,000/month
+    - Recordings: ~1M/month
+    - Samples: ~100B/month (at 250Hz)
+    - Features: ~10M/month
+    - Classifications: ~10M/month
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Relationship Cardinalities:**
+
+    ```sql
+    -- One-to-Many Relationships
+    User (1) ----< (N) Session
+    User (1) ----< (N) Device
+    Device (1) ----< (N) Session
+    Device (1) ----< (N) DeviceStatus
+    Session (1) ----< (N) Recording
+    Session (1) ----< (N) Event
+    Recording (1) ----< (N) DataChunk
+    Recording (1) ----< (N) Feature
+    DataChunk (1) ----< (N) Sample
+    Feature (1) ----< (N) Classification
+
+    -- Many-to-Many Relationships (via junction tables)
+    Device <----> Session (via Recording)
+    User <----> Device (ownership can be transferred)
+    ```
+
+    **Referential Integrity Rules:**
+    - CASCADE DELETE: Session → Recording → DataChunk → Sample
+    - RESTRICT DELETE: User with active Sessions
+    - SET NULL: Device deletion sets Recording.device_id to NULL
+    - NO ACTION: Feature deletion prevents Classification deletion
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    **Physical Database Schema:**
+
+    ```sql
+    -- PostgreSQL Tables
+    CREATE TABLE users (
+        user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        email VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'researcher', 'clinician')),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_login TIMESTAMP WITH TIME ZONE,
+        is_active BOOLEAN DEFAULT true
+    );
+
+    CREATE TABLE devices (
+        device_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(user_id),
+        device_type VARCHAR(50) NOT NULL,
+        serial_number VARCHAR(255) UNIQUE NOT NULL,
+        firmware_version VARCHAR(50),
+        configuration JSONB DEFAULT '{}',
+        registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_seen TIMESTAMP WITH TIME ZONE,
+        INDEX idx_user_devices (user_id),
+        INDEX idx_device_type (device_type)
+    );
+
+    -- Bigtable Schema
+    Table: neural_data
+    Row Key: {recording_id}#{timestamp}#{channel}
+    Column Families:
+      - raw: raw_value, quality_score
+      - meta: sample_rate, device_id
+      - features: fft, psd, entropy
+
+    -- BigQuery Schema
+    Dataset: neurascale_analytics
+    Tables:
+      - features: Partitioned by DATE(computed_at)
+      - classifications: Partitioned by DATE(predicted_at)
+      - aggregated_metrics: Materialized views for dashboards
+    ```
+  </Tabs.Tab>
+</Tabs>
+
 ## Service Architecture
 
 ### Device Service

@@ -5,11 +5,11 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "react": "^18",
+    "react": "^19",
     "lucide-react": "^0.436.0"
   },
   "devDependencies": {
-    "@types/react": "^18",
+    "@types/react": "^19",
     "typescript": "^5"
   }
 }

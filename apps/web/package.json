@@ -31,7 +31,7 @@
     "react-dom": "^18.3.1",
     "react-intersection-observer": "^9.16.0",
     "react-is": "^19.1.0",
-    "sanity": "^3.99.0",
+    "sanity": "^4.2.0",
     "stripe": "^18.3.0",
     "three": "^0.160.1",
     "zod": "^3.22.0"

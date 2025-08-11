@@ -104,11 +104,11 @@ importers:
   apps/web:
     dependencies:
       '@babylonjs/core':
-        specifier: ^8.18.0
-        version: 8.18.0
+        specifier: ^8.22.2
+        version: 8.22.2
       '@babylonjs/gui':
         specifier: ^8.18.0
-        version: 8.18.0(@babylonjs/core@8.18.0)
+        version: 8.18.0(@babylonjs/core@8.22.2)
       '@prisma/client':
         specifier: ^6.12.0
         version: 6.12.0(prisma@6.12.0(typescript@5.8.3))(typescript@5.8.3)
@@ -950,8 +950,8 @@ packages:
     resolution: {integrity: sha512-x0LvFTekgSX+83TI28Y9wYPUfzrnl2aT5+5QLnO6v7mSJYtEEevuDRN0F0uSHRk1G1IWZC43o00Y0xDDrpBGPQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babylonjs/core@8.18.0':
-    resolution: {integrity: sha512-eBXbOCRX7i5H/lNeqJSe8nsC9d9eIp4i/3Okzc+zwY1bi7HKFf3HT/bjut0y5xd4cSAKRfty5JMJsDBl12n0rg==}
+  '@babylonjs/core@8.22.2':
+    resolution: {integrity: sha512-XTXEQuZueAlcRLjFFywWkdP2UFoyckH9sInmrso9Rq4szj/S8Q9Y8PdlLDOkuRg1il2xsHqAdEC26D6miR9U6w==}
 
   '@babylonjs/gui@8.18.0':
     resolution: {integrity: sha512-3+SZFkryCR/Hd7DO2HdAkFaxbhC7t99D3dXuy8YvxrYsKai0VasbYdzFNu7gh+pwUxoJKeGA6ajtYTHeuayn3w==}
@@ -9235,11 +9235,11 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@babylonjs/core@8.18.0': {}
+  '@babylonjs/core@8.22.2': {}
 
-  '@babylonjs/gui@8.18.0(@babylonjs/core@8.18.0)':
+  '@babylonjs/gui@8.18.0(@babylonjs/core@8.22.2)':
     dependencies:
-      '@babylonjs/core': 8.18.0
+      '@babylonjs/core': 8.22.2
 
   '@codemirror/autocomplete@6.18.6':
     dependencies:

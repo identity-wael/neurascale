@@ -107,8 +107,8 @@ importers:
         specifier: ^8.18.0
         version: 8.18.0
       '@babylonjs/gui':
-        specifier: ^8.18.0
-        version: 8.18.0(@babylonjs/core@8.18.0)
+        specifier: ^8.22.2
+        version: 8.22.2(@babylonjs/core@8.18.0)
       '@prisma/client':
         specifier: ^6.12.0
         version: 6.12.0(prisma@6.12.0(typescript@5.8.3))(typescript@5.8.3)
@@ -953,8 +953,8 @@ packages:
   '@babylonjs/core@8.18.0':
     resolution: {integrity: sha512-eBXbOCRX7i5H/lNeqJSe8nsC9d9eIp4i/3Okzc+zwY1bi7HKFf3HT/bjut0y5xd4cSAKRfty5JMJsDBl12n0rg==}
 
-  '@babylonjs/gui@8.18.0':
-    resolution: {integrity: sha512-3+SZFkryCR/Hd7DO2HdAkFaxbhC7t99D3dXuy8YvxrYsKai0VasbYdzFNu7gh+pwUxoJKeGA6ajtYTHeuayn3w==}
+  '@babylonjs/gui@8.22.2':
+    resolution: {integrity: sha512-lX2Gji8AfmIKRWHTQJhWDCSNQSKFSr07764m/b//HEMDHb+6Mp47BXkSEbqiW2DYAlsFv3iNkcRUksgDqO+CXA==}
     peerDependencies:
       '@babylonjs/core': ^8.0.0
 
@@ -9237,7 +9237,7 @@ snapshots:
 
   '@babylonjs/core@8.18.0': {}
 
-  '@babylonjs/gui@8.18.0(@babylonjs/core@8.18.0)':
+  '@babylonjs/gui@8.22.2(@babylonjs/core@8.18.0)':
     dependencies:
       '@babylonjs/core': 8.18.0
 

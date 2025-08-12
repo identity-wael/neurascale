@@ -15,19 +15,26 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy requirements files
-COPY requirements.txt constraints.txt ./
+# Copy requirements files (if they exist, otherwise create minimal ones)
+COPY neural-engine/requirements*.txt neural-engine/constraints.txt* ./
 
 # Create virtual environment and install dependencies
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install -c constraints.txt -r requirements.txt
+    if [ -f constraints.txt ]; then \
+        pip install -c constraints.txt -r requirements.txt; \
+    elif [ -f requirements.txt ]; then \
+        pip install -r requirements.txt; \
+    else \
+        # Install minimal requirements if files don't exist
+        pip install fastapi uvicorn pydantic; \
+    fi
 
 # Copy application code
-COPY src/ ./src/
-COPY api/ ./api/
+COPY neural-engine/src/ ./src/
+COPY neural-engine/api/ ./api/
 
 # Compile Python files for better performance
 RUN python -m compileall -b .

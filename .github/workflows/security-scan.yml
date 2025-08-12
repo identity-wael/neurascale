@@ -33,7 +33,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: neural-engine
           file: ${{ matrix.dockerfile }}
           push: false
           load: true

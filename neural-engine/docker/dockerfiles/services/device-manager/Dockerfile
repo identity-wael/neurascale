@@ -2,7 +2,9 @@
 # Manages neural device connections and data streaming
 
 # Stage 1: Dependencies
-FROM python:3.12-slim AS dependencies
+FROM python:3.12.11-slim-bookworm AS dependencies
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -31,7 +33,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
         pylsl==1.16.0
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.12.11-slim-bookworm AS builder
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -48,7 +52,9 @@ COPY neural-engine/devices ./legacy_devices
 RUN python -m compileall -b devices/ utils/
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.12.11-slim-bookworm AS runtime
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

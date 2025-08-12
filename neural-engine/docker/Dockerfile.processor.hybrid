@@ -28,7 +28,8 @@ RUN pip install --upgrade pip && \
     pip install tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
 
 # Stage 2: Core dependencies with Alpine
-FROM python:3.12-alpine AS core-dependencies
+FROM python:3.12.11-alpine3.21 AS core-dependencies
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 WORKDIR /tmp
 
@@ -50,7 +51,8 @@ RUN pip install --upgrade pip && \
     pip install -r requirements-minimal-alpine.txt
 
 # Stage 3: Runtime - minimal Alpine
-FROM python:3.12-alpine AS runtime
+FROM python:3.12.11-alpine3.21 AS runtime
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 # Install runtime dependencies
 RUN apk add --no-cache \

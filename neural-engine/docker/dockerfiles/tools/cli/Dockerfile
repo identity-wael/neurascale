@@ -2,7 +2,9 @@
 # Interactive command-line interface for neural data processing
 
 # Stage 1: Dependencies
-FROM python:3.12-slim AS dependencies
+FROM python:3.12.11-slim-bookworm AS dependencies
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -29,7 +31,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
         tabulate==0.9.0
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.12.11-slim-bookworm AS builder
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -54,7 +58,9 @@ RUN echo '#!/bin/bash\npython -m cli.main "$@"' > /app/neural-cli && \
     chmod +x /app/neural-cli
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.12.11-slim-bookworm AS runtime
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

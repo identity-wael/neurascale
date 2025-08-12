@@ -2,7 +2,9 @@
 # Using Debian slim for ML library compatibility (TensorFlow/PyTorch)
 
 # Stage 1: Dependencies
-FROM python:3.12-slim-bookworm AS dependencies
+FROM python:3.12.11-slim-bookworm AS dependencies
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -33,7 +35,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12-slim-bookworm AS builder
+FROM python:3.12.11-slim-bookworm AS builder
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -49,7 +53,9 @@ COPY neural-engine/requirements.txt ./
 RUN python -m compileall -b src/
 
 # Stage 3: Runtime
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.12.11-slim-bookworm AS runtime
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install runtime dependencies only
 RUN apt-get update && \

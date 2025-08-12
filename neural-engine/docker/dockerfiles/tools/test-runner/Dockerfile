@@ -1,5 +1,7 @@
 # Test runner container for integration tests
-FROM python:3.12-slim
+FROM python:3.12.11-slim-bookworm
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

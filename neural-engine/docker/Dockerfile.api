@@ -1,66 +1,89 @@
-# Neural Engine API Dockerfile
-FROM python:3.12.11-slim-bookworm AS base
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+# Neural Engine API Dockerfile - Optimized Multi-stage Build
+# Stage 1: Build dependencies
+FROM python:3.12.11-slim-bookworm AS builder
 
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     g++ \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set pip to use more parallel downloads and increase timeout
-ENV PIP_DEFAULT_TIMEOUT=300 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_RETRIES=3
+WORKDIR /build
 
-# First stage: Dependencies
-FROM base AS dependencies
-# Copy only requirements to cache dependencies
-COPY requirements.txt ./requirements.txt
-COPY constraints.txt ./constraints.txt
-# Install dependencies in chunks to avoid timeout
+# Copy requirements
+COPY requirements.txt constraints.txt ./
+
+# Create virtual environment and install dependencies
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install dependencies more efficiently
 RUN pip install --upgrade pip setuptools wheel && \
-    # Install core dependencies first
-    grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install Google Cloud dependencies
-    grep -E '^google-cloud-' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install ML dependencies
-    grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install remaining dependencies
-    pip install -c constraints.txt -r requirements.txt
+    pip install --no-cache-dir -c constraints.txt -r requirements.txt
 
-# Second stage: Application
-FROM dependencies AS app
-# Copy source code
+# Stage 2: Build application
+FROM python:3.12.11-slim-bookworm AS app-builder
+
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application code
 COPY src/ ./src/
+COPY api/ ./api/
 COPY processing/ ./processing/
 COPY devices/ ./devices/
-COPY api/ ./api/
 COPY monitoring/ ./monitoring/
 COPY security/ ./security/
 COPY ledger/ ./ledger/
-COPY setup.py .
-COPY README.md .
+COPY setup.py README.md ./
 
-# Install the package
-RUN pip install -e .
+# Install the application
+RUN pip install --no-deps -e .
 
-# Set environment variables
+# Compile Python files for faster startup
+RUN python -m compileall -b src/ api/ processing/ devices/ monitoring/ security/ ledger/
+
+# Stage 3: Final runtime image
+FROM python:3.12.11-slim-bookworm AS runtime
+
+# Apply security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r apiuser && useradd -r -g apiuser apiuser
+
+WORKDIR /app
+
+# Copy only the virtual environment and compiled application
+COPY --from=app-builder --chown=apiuser:apiuser /opt/venv /opt/venv
+COPY --from=app-builder --chown=apiuser:apiuser /app/src /app/src
+COPY --from=app-builder --chown=apiuser:apiuser /app/api /app/api
+
+# Set environment
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/key.json
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PORT=8080
+
+# Switch to non-root user
+USER apiuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')" || exit 1
 
 # Expose port
 EXPOSE 8080
 
-# Run the API server
-CMD ["gunicorn", "--bind", ":8080", "--workers", "4", "--threads", "8", "--timeout", "0", "src.api.main:app"]
+# Run with gunicorn
+CMD ["gunicorn", "--bind", ":8080", "--workers", "2", "--threads", "4", "--timeout", "120", "api.main:app"]

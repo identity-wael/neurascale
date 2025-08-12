@@ -1,0 +1,57 @@
+# Secure Neural Engine Base Dockerfile
+# Uses Google's distroless image for minimal attack surface
+
+# Build stage with full Python environment
+FROM python:3.12.11-slim-bookworm AS builder
+
+# Apply all security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements files
+COPY requirements.txt constraints.txt ./
+
+# Create virtual environment and install dependencies
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install -c constraints.txt -r requirements.txt
+
+# Copy application code
+COPY src/ ./src/
+COPY api/ ./api/
+
+# Compile Python files for better performance
+RUN python -m compileall -b .
+
+# Final stage using distroless image
+FROM gcr.io/distroless/python3-debian12:nonroot
+
+# Copy Python virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Copy application from builder
+COPY --from=builder /app /app
+
+# Set Python path
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONPATH="/app:$PYTHONPATH"
+
+# Use non-root user (comes with distroless)
+USER nonroot
+
+WORKDIR /app
+
+# Expose application port
+EXPOSE 8080
+
+# Run the application
+ENTRYPOINT ["python", "-m", "api.main"]

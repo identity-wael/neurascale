@@ -1,0 +1,23 @@
+# Trivy Ignore File
+# Format: CVE-ID or package name
+
+# False positives or accepted risks
+# These are OS-level vulnerabilities in base images that don't affect our application
+
+# Low severity vulnerabilities that are not exploitable in our context
+CVE-2005-2541  # tar - ancient vulnerability, not exploitable in container
+CVE-2007-5686  # ssh - not used in our containers
+CVE-2011-4116  # perl - development dependency only
+CVE-2013-4392  # systemd - not used in containers
+
+# Vulnerabilities in unused packages
+CVE-2022-0563  # util-linux - not used by our application
+CVE-2023-31437 # perl - only used during build
+CVE-2023-31438 # perl - only used during build
+CVE-2023-31439 # perl - only used during build
+
+# Temporary ignores (should be reviewed regularly)
+# Remove these once base images are updated
+TEMP-0290435-0B57B5  # Temporary advisory
+TEMP-0517018-A83CE6  # Temporary advisory
+TEMP-0628843-DBAD28  # Temporary advisory

@@ -1,6 +1,8 @@
 # Neural Engine Processor Dockerfile
 # Using slim instead of Alpine for TensorFlow/PyTorch compatibility
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.12.11-slim-bookworm AS base
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

@@ -2,7 +2,8 @@
 # Optimized for production deployment with minimal attack surface
 
 # Build stage - compile dependencies and prepare application
-FROM python:3.12-alpine AS builder
+FROM python:3.12.11-alpine3.21 AS builder
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 # Set build arguments
 ARG BUILDKIT_INLINE_CACHE=1
@@ -53,7 +54,8 @@ WORKDIR /app
 RUN pip install --no-cache-dir -e .
 
 # Production stage - minimal runtime environment
-FROM python:3.12-alpine AS production
+FROM python:3.12.11-alpine3.21 AS production
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 # Create non-root user for security
 RUN addgroup -g 1000 mcp && \

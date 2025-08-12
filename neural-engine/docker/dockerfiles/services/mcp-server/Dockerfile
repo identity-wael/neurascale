@@ -3,7 +3,9 @@
 # Using Debian slim for compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12-slim-bookworm AS dependencies
+FROM python:3.12.11-slim-bookworm AS dependencies
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -35,7 +37,9 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install aiohttp uvloop
 
 # Stage 2: Runtime
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.12.11-slim-bookworm AS runtime
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

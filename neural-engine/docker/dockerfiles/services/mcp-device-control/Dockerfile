@@ -2,7 +2,9 @@
 # Optimized for production with minimal attack surface
 
 # Stage 1: Dependencies
-FROM python:3.12-slim AS dependencies
+FROM python:3.12.11-slim-bookworm AS dependencies
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -28,7 +30,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.12.11-slim-bookworm AS builder
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
@@ -41,7 +45,9 @@ COPY neural-engine/README.md ./
 RUN python -m compileall src/mcp
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.12.11-slim-bookworm AS runtime
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
 RUN groupadd -r mcp && useradd -r -g mcp -u 1001 mcp

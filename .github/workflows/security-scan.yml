@@ -1,0 +1,121 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      matrix:
+        dockerfile:
+          - neural-engine/docker/Dockerfile.api
+          - neural-engine/docker/Dockerfile.processor
+          - neural-engine/docker/Dockerfile.ingestion
+          - neural-engine/docker/Dockerfile.mcp-server
+          - neural-engine/docker/Dockerfile.secure
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: neurascale/test:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: neurascale/test:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          trivyignores: '.trivyignore'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: trivy-${{ matrix.dockerfile }}
+
+      - name: Fail on critical vulnerabilities
+        run: |
+          trivy image --exit-code 1 --severity CRITICAL \
+            --ignore-unfixed --ignorefile .trivyignore \
+            neurascale/test:${{ github.sha }}
+
+  dependency-check:
+    name: Python Dependency Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.11'
+
+      - name: Install safety
+        run: pip install safety
+
+      - name: Check Python dependencies
+        run: |
+          cd neural-engine
+          safety check -r requirements.txt --json > safety-report.json || true
+
+          # Parse and display results
+          python -c "
+          import json
+          import sys
+
+          with open('safety-report.json') as f:
+              data = json.load(f)
+
+          if not data:
+              print('✅ No known vulnerabilities found in Python dependencies')
+              sys.exit(0)
+
+          print('⚠️ Found vulnerabilities in Python dependencies:')
+          for vuln in data:
+              print(f\"  - {vuln.get('package', 'Unknown')}: {vuln.get('vulnerability', 'Unknown')}\")
+          "
+
+      - name: Upload safety report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safety-report
+          path: neural-engine/safety-report.json
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

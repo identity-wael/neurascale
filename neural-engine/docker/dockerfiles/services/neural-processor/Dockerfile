@@ -78,7 +78,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libopenblas0 \
     liblapack3 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libgfortran5 \
     libgomp1 \
     ca-certificates \

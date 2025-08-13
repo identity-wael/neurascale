@@ -46,18 +46,19 @@ FROM base AS dependencies
 COPY requirements.txt .
 COPY constraints.txt .
 # Install dependencies in chunks to avoid timeout
-RUN pip install --upgrade pip setuptools wheel && \
+# Use --break-system-packages for Ubuntu 24.04 pip
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
     # Install core dependencies first
     grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install deep learning dependencies
     grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install Google Cloud dependencies
     grep -E '^google-cloud-' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install remaining dependencies
-    pip install -c constraints.txt -r requirements.txt
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app
@@ -73,7 +74,7 @@ COPY setup.py .
 COPY README.md .
 
 # Install the package
-RUN pip install -e .
+RUN python3.13 -m pip install --break-system-packages -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

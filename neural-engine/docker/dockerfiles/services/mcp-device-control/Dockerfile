@@ -56,7 +56,7 @@ RUN groupadd -r mcp && useradd -r -g mcp -u 1001 mcp
 
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libopenblas0 \
     liblapack3 \
     curl \

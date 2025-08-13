@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Runtime libraries
     libopenblas0 \
     liblapack3 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libgfortran5 \
     libstdc++6 \
     libuv1 \

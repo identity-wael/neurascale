@@ -86,7 +86,7 @@ RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libopenblas0 \
     ca-certificates \
     curl \

@@ -50,7 +50,7 @@ FROM python:3.13-slim AS runtime
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libopenblas0 \
     ca-certificates \
     curl \

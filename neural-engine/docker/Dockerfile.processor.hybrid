@@ -35,8 +35,8 @@ ENV PATH="/opt/ml-venv/bin:$PATH"
 
 # Install ML dependencies that require glibc
 COPY neural-engine/requirements.txt ./
-RUN pip install --upgrade pip && \
-    pip install tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
+RUN python3.13 -m pip install --break-system-packages --upgrade pip && \
+    python3.13 -m pip install --break-system-packages tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
 
 # Stage 2: Core dependencies with Alpine
 FROM python:3.12.11-alpine3.21 AS core-dependencies

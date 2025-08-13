@@ -2,7 +2,7 @@
 # Uses Google's distroless image for minimal attack surface
 
 # Build stage with full Python environment
-FROM python:3.12.11-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 
 # Apply all security updates
 RUN apt-get update && \

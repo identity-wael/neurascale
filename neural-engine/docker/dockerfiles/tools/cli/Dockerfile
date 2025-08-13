@@ -1,18 +1,21 @@
 # Multi-stage Dockerfile for Neural Engine CLI Tool
 # Interactive command-line interface for neural data processing
+# Uses Debian slim for HDF5 compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
+    build-essential \
     libhdf5-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
@@ -31,7 +34,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
         tabulate==0.9.0
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -58,7 +61,7 @@ RUN echo '#!/bin/bash\npython -m cli.main "$@"' > /app/neural-cli && \
     chmod +x /app/neural-cli
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM python:3.13-slim AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

@@ -8,7 +8,7 @@
 # This keeps the base image smaller and CI builds faster
 
 # Stage 1: Dependencies
-FROM python:3.12-slim AS dependencies
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
@@ -45,7 +45,7 @@ RUN pip install --no-cache-dir \
     scipy==1.14.1
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -63,7 +63,7 @@ COPY neural-engine/models ./models
 RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

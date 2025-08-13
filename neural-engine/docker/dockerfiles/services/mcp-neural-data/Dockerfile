@@ -1,21 +1,23 @@
 # Multi-stage Dockerfile for MCP Neural Data Server
 # Optimized for production with minimal attack surface
+# Uses Debian slim for HDF5 and numpy compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
-# Install system dependencies for building Python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    build-essential \
     libhdf5-dev \
     libopenblas-dev \
     liblapack-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and activate virtual environment
@@ -30,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -45,7 +47,7 @@ COPY neural-engine/README.md ./
 RUN python -m compileall src/mcp
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM python:3.13-slim AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

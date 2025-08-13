@@ -1,14 +1,26 @@
 # Multi-stage Dockerfile for ML Pipeline Service
 # Python-based machine learning inference service with GPU support
 #
-# NOTE: Large ML frameworks (TensorFlow, PyTorch) should be:
-# 1. Installed at runtime via pip when needed
-# 2. Mounted as volumes from pre-built images
-# 3. Or use specialized ML base images (nvidia/cuda, tensorflow/tensorflow)
-# This keeps the base image smaller and CI builds faster
+# Using NVIDIA CUDA base for optimal ML framework support
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
+FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -47,7 +59,7 @@ RUN pip install --no-cache-dir \
     scipy==1.14.1
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -67,7 +79,7 @@ COPY neural-engine/models ./models
 RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM python:3.13-slim AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

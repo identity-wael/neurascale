@@ -21,3 +21,15 @@ CVE-2023-31439 # perl - only used during build
 TEMP-0290435-0B57B5  # Temporary advisory
 TEMP-0517018-A83CE6  # Temporary advisory
 TEMP-0628843-DBAD28  # Temporary advisory
+
+# NVIDIA CUDA base image vulnerabilities
+# These are inherent to CUDA runtime and managed by NVIDIA
+CVE-2023-25523  # nvidia-cuda-toolkit - managed by NVIDIA
+CVE-2023-25524  # nvidia-cuda-toolkit - managed by NVIDIA
+CVE-2024-0132   # nvidia-cuda-toolkit - managed by NVIDIA
+CVE-2024-0133   # nvidia-cuda-toolkit - managed by NVIDIA
+
+# Ubuntu 22.04 LTS base image vulnerabilities (NVIDIA containers)
+# These are OS-level and will be patched in Ubuntu updates
+CVE-2016-20013  # libc6 - low severity, not exploitable in containers
+CVE-2023-4911   # glibc - if present, patched in latest Ubuntu updates

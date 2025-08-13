@@ -1,13 +1,13 @@
 # Test runner container for integration tests
-FROM python:3.12.11-slim-bookworm
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-alpine
 
-# Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install dependencies for Alpine
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
     curl \
-    wait-for-it \
-    && rm -rf /var/lib/apt/lists/*
+    bash \
+    netcat-openbsd
 
 # Install Python test dependencies
 RUN pip install --no-cache-dir \
@@ -21,8 +21,8 @@ RUN pip install --no-cache-dir \
 
 WORKDIR /tests
 
-# Create non-root user
-RUN useradd -m -u 1000 testuser
+# Create non-root user (Alpine uses adduser, not useradd)
+RUN adduser -D -u 1000 testuser
 USER testuser
 
 # Default command

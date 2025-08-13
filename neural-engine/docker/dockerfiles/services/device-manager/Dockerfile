@@ -1,20 +1,23 @@
 # Multi-stage Dockerfile for Device Manager Service
 # Manages neural device connections and data streaming
+# Uses Debian slim as device libraries need numpy for signal processing
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
+    build-essential \
     libusb-1.0-0-dev \
     libudev-dev \
     libhidapi-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
@@ -33,7 +36,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
         pylsl==1.16.0
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -52,7 +55,7 @@ COPY neural-engine/devices ./legacy_devices
 RUN python -m compileall -b devices/ utils/
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM python:3.13-slim AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

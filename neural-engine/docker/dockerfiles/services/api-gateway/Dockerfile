@@ -1,19 +1,19 @@
 # Multi-stage Dockerfile for API Gateway Service
 # FastAPI-based GraphQL/REST API gateway
-# Using Debian slim for compatibility
+# Using Debian slim for compatibility and security
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install build dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    build-essential \
     libffi-dev \
     libssl-dev \
     libpq-dev \
@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -c constraints.txt -r requirements.txt
 
 # Stage 2: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM python:3.13-slim AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

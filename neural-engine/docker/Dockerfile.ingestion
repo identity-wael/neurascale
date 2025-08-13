@@ -1,15 +1,32 @@
 # Neural Data Ingestion Service
-# Using Debian slim for numpy/pandas compatibility with better security
-FROM python:3.13-slim AS base
+# Using NVIDIA CUDA base for numpy/pandas compatibility
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS base
 
-# Install system dependencies and security updates
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    curl \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
+# Install system dependencies
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     build-essential \
-    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,8 +46,8 @@ COPY requirements-no-ml.txt ./requirements.txt
 COPY constraints.txt ./constraints.txt
 
 # Install Python dependencies
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install -c constraints.txt -r requirements.txt
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app
@@ -47,7 +64,7 @@ COPY setup.py .
 COPY README.md .
 
 # Install the package in development mode
-RUN pip install -e .
+RUN python3.13 -m pip install --break-system-packages -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

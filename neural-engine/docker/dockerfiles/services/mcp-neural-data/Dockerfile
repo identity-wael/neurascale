@@ -1,9 +1,24 @@
 # Multi-stage Dockerfile for MCP Neural Data Server
 # Optimized for production with minimal attack surface
-# Uses Debian slim for HDF5 and numpy compatibility
+# Uses NVIDIA CUDA base for HDF5 and numpy compatibility
 
 # Stage 1: Dependencies
-FROM python:3.13-slim AS dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -28,11 +43,26 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
-    pip install -c constraints.txt -r requirements.txt
+    python3.13 -m pip install --break-system-packages --upgrade pip && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.13-slim AS builder
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* AS builder
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -47,7 +77,22 @@ COPY neural-engine/README.md ./
 RUN python -m compileall src/mcp
 
 # Stage 3: Runtime
-FROM python:3.13-slim AS runtime
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* AS runtime
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

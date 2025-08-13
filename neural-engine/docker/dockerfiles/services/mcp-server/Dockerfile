@@ -1,30 +1,30 @@
 # Multi-stage Dockerfile for MCP Server
 # Model Context Protocol server for neural data processing
-# Using Debian slim for compatibility
+# Using Alpine for minimal attack surface and small image size
 
 # Stage 1: Dependencies
-FROM python:3.13-slim AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-alpine AS dependencies
 
 WORKDIR /tmp
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install build dependencies for Alpine
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
     gcc \
     g++ \
+    musl-dev \
+    linux-headers \
     libffi-dev \
-    libssl-dev \
+    openssl-dev \
     # For async support
-    libuv1-dev \
-    # For neural processing
-    libopenblas-dev \
-    liblapack-dev \
-    libhdf5-dev \
+    libuv-dev \
+    # For neural processing (Alpine packages)
+    openblas-dev \
+    lapack-dev \
+    hdf5-dev \
     gfortran \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    make
 
 # Create virtual environment
 RUN python -m venv /opt/venv
@@ -37,59 +37,53 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install aiohttp uvloop
 
 # Stage 2: Runtime
-FROM python:3.13-slim AS runtime
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM python:3.13-alpine AS runtime
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install runtime dependencies for Alpine
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
     # Runtime libraries
-    libopenblas0 \
-    liblapack3 \
-    libhdf5-103-1t64 \
-    libgfortran5 \
-    libstdc++6 \
-    libuv1 \
-    # Security and networking
+    openblas \
+    lapack \
+    hdf5 \
+    libgfortran \
+    libstdc++ \
+    libuv \
+    # Security and process management
     ca-certificates \
-    # Process management
-    tini \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    tini
 
 # Create non-root user
-RUN groupadd -r neural && useradd -r -g neural -m neural
+RUN addgroup -g 1000 neural && \
+    adduser -u 1000 -G neural -D neural
 
 # Copy virtual environment
 COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy MCP server code
+# Set working directory
 WORKDIR /app
-COPY --chown=neural:neural neural-engine/src/mcp ./src/mcp
 
-# Environment variables
-ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app \
-    MCP_ENV=production
+# Copy application code
+COPY neural-engine/src/mcp ./mcp
+COPY neural-engine/src/utils ./utils
 
-# Create necessary directories
-RUN mkdir -p /app/logs /app/tmp && \
-    chown -R neural:neural /app
+# Set ownership
+RUN chown -R neural:neural /app
 
 # Switch to non-root user
 USER neural
 
-# Expose MCP server port
-EXPOSE 3000
-
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD python -c "import aiohttp, asyncio; asyncio.run(aiohttp.ClientSession().get('http://localhost:3000/health'))" || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8080/health')" || exit 1
 
-# Use tini for signal handling
+# Expose port
+EXPOSE 8080
+
+# Use tini as entrypoint to handle signals properly
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Start MCP server
-CMD ["python", "-m", "src.mcp.servers.main", "--host", "0.0.0.0", "--port", "3000"]
+# Run the MCP server
+CMD ["python", "-m", "mcp.server"]

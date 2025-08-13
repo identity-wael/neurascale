@@ -2,7 +2,22 @@
 # Uses Google's distroless image for minimal attack surface
 
 # Build stage with full Python environment
-FROM python:3.13-slim AS builder
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS builder
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Apply all security updates
 RUN apt-get update && \
@@ -18,18 +33,15 @@ WORKDIR /app
 # Copy requirements files (if they exist, otherwise create minimal ones)
 COPY neural-engine/requirements*.txt neural-engine/constraints.txt* ./
 
-# Create virtual environment and install dependencies
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-RUN pip install --upgrade pip setuptools wheel && \
+# Install dependencies directly (no venv needed with --break-system-packages)
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
     if [ -f constraints.txt ]; then \
-        pip install -c constraints.txt -r requirements.txt; \
+        python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt; \
     elif [ -f requirements.txt ]; then \
-        pip install -r requirements.txt; \
+        python3.13 -m pip install --break-system-packages -r requirements.txt; \
     else \
         # Install minimal requirements if files don't exist
-        pip install fastapi uvicorn pydantic; \
+        python3.13 -m pip install --break-system-packages fastapi uvicorn pydantic; \
     fi
 
 # Copy application code

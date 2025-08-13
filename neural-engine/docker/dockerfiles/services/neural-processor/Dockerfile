@@ -2,7 +2,7 @@
 # Using NVIDIA CUDA base for ML library compatibility (TensorFlow/PyTorch)
 
 # Stage 1: Dependencies
-FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04 AS dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
 
 # Install Python 3.13
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -1,7 +1,7 @@
 # Neural Engine Processor Dockerfile
 # Using NVIDIA CUDA base for TensorFlow/PyTorch with GPU support
-# This image includes CUDA 12.2, cuDNN 8, Ubuntu 22.04 LTS
-FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04 AS base
+# This image includes CUDA 12.6 runtime, Ubuntu 24.04 LTS (latest)
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS base
 
 # Install Python 3.13
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -2,7 +2,7 @@
 # Uses NVIDIA CUDA base for ML libraries with GPU support
 
 # Stage 1: Dependencies with ML libraries (requires glibc)
-FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04 AS ml-dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS ml-dependencies
 
 WORKDIR /tmp
 

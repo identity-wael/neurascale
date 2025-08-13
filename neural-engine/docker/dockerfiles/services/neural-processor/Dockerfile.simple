@@ -1,5 +1,5 @@
 # Simple single-stage Dockerfile for testing
-FROM python:3.12.11-slim-bookworm
+FROM python:3.13-slim
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

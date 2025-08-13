@@ -1,22 +1,33 @@
 # Multi-stage Dockerfile for Neural Processor - Hybrid approach
-# Uses Alpine where possible, slim for ML dependencies
+# Uses NVIDIA CUDA base for ML libraries with GPU support
 
 # Stage 1: Dependencies with ML libraries (requires glibc)
-FROM python:3.12-slim-bookworm AS ml-dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS ml-dependencies
 
 WORKDIR /tmp
 
-# Security updates
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
     build-essential \
     gcc \
     g++ \
     libhdf5-dev \
     libatlas-base-dev \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Security updates
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment for ML packages
 RUN python -m venv /opt/ml-venv
@@ -24,8 +35,8 @@ ENV PATH="/opt/ml-venv/bin:$PATH"
 
 # Install ML dependencies that require glibc
 COPY neural-engine/requirements.txt ./
-RUN pip install --upgrade pip && \
-    pip install tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
+RUN python3.13 -m pip install --break-system-packages --upgrade pip && \
+    python3.13 -m pip install --break-system-packages tensorflow==2.17.0 torch==2.7.1 -f https://download.pytorch.org/whl/cpu
 
 # Stage 2: Core dependencies with Alpine
 FROM python:3.12.11-alpine3.21 AS core-dependencies

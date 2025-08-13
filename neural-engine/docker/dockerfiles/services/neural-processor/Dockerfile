@@ -1,8 +1,24 @@
 # Multi-stage Dockerfile for Neural Processor Service
-# Using Debian slim for ML library compatibility (TensorFlow/PyTorch)
+# Using NVIDIA CUDA base for ML library compatibility (TensorFlow/PyTorch)
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -23,19 +39,31 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create and activate virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Copy and install requirements
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip setuptools wheel && \
-    pip install -c constraints.txt -r requirements.txt
+    python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS builder
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -53,7 +81,23 @@ COPY neural-engine/requirements.txt ./
 RUN python -m compileall -b src/
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS runtime
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -62,7 +106,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libopenblas0 \
     liblapack3 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libgfortran5 \
     libgomp1 \
     ca-certificates \

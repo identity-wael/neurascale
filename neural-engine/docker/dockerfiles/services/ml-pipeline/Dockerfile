@@ -1,14 +1,26 @@
 # Multi-stage Dockerfile for ML Pipeline Service
 # Python-based machine learning inference service with GPU support
 #
-# NOTE: Large ML frameworks (TensorFlow, PyTorch) should be:
-# 1. Installed at runtime via pip when needed
-# 2. Mounted as volumes from pre-built images
-# 3. Or use specialized ML base images (nvidia/cuda, tensorflow/tensorflow)
-# This keeps the base image smaller and CI builds faster
+# Using NVIDIA CUDA base for optimal ML framework support
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -24,21 +36,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-# Create virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Copy and install requirements
 # Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
 # Install base requirements first
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -c constraints.txt -r requirements.txt
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Install only essential ML packages for CI builds
 # For production, use Dockerfile.gpu with full ML frameworks
-RUN pip install --no-cache-dir \
+RUN python3.13 -m pip install --break-system-packages \
     scikit-learn==1.4.0 \
     xgboost==2.0.3 \
     joblib==1.3.2 \
@@ -47,7 +55,23 @@ RUN pip install --no-cache-dir \
     scipy==1.14.1
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS builder
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -67,14 +91,30 @@ COPY neural-engine/models ./models
 RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS runtime
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libopenblas0 \
     ca-certificates \
     curl \

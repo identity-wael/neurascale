@@ -2,11 +2,11 @@
 
 ## Python Version Requirement
 
-**IMPORTANT**: This project uses **Python 3.12.11** exclusively.
+**IMPORTANT**: This project uses **Python 3.13** (latest version).
 
-- The system Python is located at: `/opt/homebrew/bin/python3.12`
-- All virtual environments must use Python 3.12.11
-- Do NOT use Python 3.12.5 or any other version
+- The system Python is located at: `/opt/homebrew/bin/python3.13`
+- All virtual environments must use Python 3.13
+- Dockerfiles have been updated to use Python 3.13 base images
 
 ## Virtual Environment Setup
 
@@ -18,7 +18,7 @@ To set up or fix virtual environments, run:
 
 This script will:
 
-- Verify Python 3.12.11 is available
+- Verify Python 3.13 is available
 - Create/recreate venvs with the correct Python version
 - Install requirements automatically
 
@@ -46,11 +46,11 @@ cd /Users/weg/NeuraScale/neurascale
 source neural-engine/venv/bin/activate
 
 # To verify you're in the correct venv
-python --version  # Should show Python 3.12.11
+python --version  # Should show Python 3.13.x
 which python      # Should show path within the venv directory
 ```
 
-**Important**: If you see "Python 3.12.5" or any version other than 3.12.11, the venv is incorrect. Run `./scripts/dev-tools/setup-venvs.sh` to fix it.
+**Important**: If you see any version other than Python 3.13, the venv is incorrect. Run `./scripts/dev-tools/setup-venvs.sh` to fix it.
 
 ## Pre-commit Hooks
 
@@ -99,13 +99,13 @@ This ensures project continuity and helps future Claude sessions understand the 
 
 ## Common Issues and Solutions
 
-### Issue: "Python 3.12.5 has a memory safety issue..."
+### Issue: Python version mismatch
 
 **Solution**: The venv is using the wrong Python version. Run `./scripts/dev-tools/setup-venvs.sh`
 
 ### Issue: Black failing in pre-commit hooks
 
-**Solution**: The neural-engine venv needs to be recreated with Python 3.12.11
+**Solution**: The neural-engine venv needs to be recreated with Python 3.13
 
 ### Issue: Module not found errors
 
@@ -116,7 +116,7 @@ This ensures project continuity and helps future Claude sessions understand the 
 1. Always verify Python version before starting work:
 
    ```bash
-   python --version  # Should show Python 3.12.11
+   python --version  # Should show Python 3.13.x
    ```
 
 2. Use the appropriate venv for the code you're working on

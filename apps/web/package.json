@@ -43,7 +43,7 @@
     "@types/three": "^0.160.0",
     "autoprefixer": "^10.4.21",
     "dotenv": "^17.2.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.34.0",
     "eslint-config-next": "^15.4.4",
     "firebase-admin": "^13.4.0",
     "next-auth": "^4.24.11",

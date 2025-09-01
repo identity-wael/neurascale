@@ -34,7 +34,7 @@
     "sanity": "^3.99.0",
     "stripe": "^18.3.0",
     "three": "^0.160.1",
-    "zod": "^3.22.0"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",

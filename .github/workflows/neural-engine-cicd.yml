@@ -172,7 +172,7 @@ jobs:
           project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ needs.setup.outputs.project_id }}
 
@@ -313,7 +313,7 @@ jobs:
           project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ needs.setup.outputs.project_id }}
 
@@ -586,7 +586,7 @@ jobs:
           project_id: ${{ needs.setup.outputs.project_id }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ needs.setup.outputs.project_id }}
 

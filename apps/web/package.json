@@ -33,14 +33,14 @@
     "react-is": "^19.1.0",
     "sanity": "^3.99.0",
     "stripe": "^18.3.0",
-    "three": "^0.160.1",
+    "three": "^0.180.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
-    "@types/three": "^0.160.0",
+    "@types/three": "^0.180.0",
     "autoprefixer": "^10.4.21",
     "dotenv": "^17.2.0",
     "eslint": "^8.57.1",

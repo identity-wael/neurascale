@@ -1268,3 +1268,42 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 _Bridging Mind and World Through Advanced Neural Cloud Technology_
 
 </div>
+## 📚 Educational Resources & Knowledge Graph
+
+NeuraScale is not just software—it's part of a broader educational initiative to make Brain-Computer Interface technology accessible to researchers, students, and developers.
+
+### Wikiversity Course
+
+We've developed a comprehensive **"Introduction to Brain-Computer Interfaces"** course on Wikiversity, covering:
+
+- BCI fundamentals and history
+- Neural signal types (EEG, ECoG, LFP, spikes)
+- Signal processing techniques
+- Machine learning for neural decoding (EEGNet, ShallowConvNet, DeepConvNet)
+- Device integration and clinical applications
+- Building cloud-native BCI platforms
+
+**Course Link:** [Introduction to Brain-Computer Interfaces](https://en.wikiversity.org/wiki/Introduction_to_Brain-Computer_Interfaces) *(coming soon)*
+
+### Wikidata Integration
+
+NeuraScale is indexed in the Wikidata knowledge graph for enhanced discoverability and semantic linking:
+
+| Entity | Wikidata ID | Description |
+|--------|-------------|-------------|
+| **NeuraScale** | [Q137553671](https://www.wikidata.org/wiki/Q137553671) | Open-source BCI platform |
+| **Brain-computer interface** | [Q622935](https://www.wikidata.org/wiki/Q622935) | Field of work |
+
+### Academic References
+
+This project implements techniques from peer-reviewed research:
+
+- **EEGNet**: Lawhern, V. J., et al. (2018). "EEGNet: A compact convolutional neural network for EEG-based brain–computer interfaces." *Journal of Neural Engineering*, 15(5).
+- **ShallowConvNet/DeepConvNet**: Schirrmeister, R. T., et al. (2017). "Deep learning with convolutional neural networks for EEG decoding and visualization." *Human Brain Mapping*, 38(11).
+- **BCI Principles**: Wolpaw, J. R., & Wolpaw, E. W. (2012). *Brain-Computer Interfaces: Principles and Practice*. Oxford University Press.
+
+### MIT CTO Program
+
+NeuraScale was developed as part of the **MIT Professional Education Chief Technology Officer (CTO) Program**, focusing on technology management, machine learning, and applied AI in healthcare.
+
+---

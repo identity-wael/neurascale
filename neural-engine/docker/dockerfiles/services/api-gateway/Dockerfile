@@ -1,37 +1,64 @@
 # Multi-stage Dockerfile for API Gateway Service
 # FastAPI-based GraphQL/REST API gateway
-# Using Debian slim for compatibility
+# Using NVIDIA CUDA base for numpy/pandas compatibility
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install build dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    build-essential \
     libffi-dev \
     libssl-dev \
     libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Copy and install requirements
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -c constraints.txt -r requirements.txt
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Stage 2: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS runtime
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

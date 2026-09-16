@@ -20,10 +20,13 @@ jobs:
     strategy:
       matrix:
         dockerfile:
+          # Alpine-based containers (smaller, more secure)
           - neural-engine/docker/Dockerfile.api
-          - neural-engine/docker/Dockerfile.processor
           - neural-engine/docker/Dockerfile.ingestion
           - neural-engine/docker/Dockerfile.mcp-server
+          # NVIDIA CUDA-based containers (for ML/AI workloads)
+          - neural-engine/docker/Dockerfile.processor
+          - neural-engine/docker/Dockerfile.processor.hybrid
       max-parallel: 2  # Balance between speed and disk usage
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +116,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12.11'
+          python-version: '3.13'
 
       - name: Install safety
         run: pip install safety

@@ -2,7 +2,7 @@
 # Optimized for production with minimal attack surface
 
 # Stage 1: Dependencies
-FROM python:3.12-slim AS dependencies
+FROM python:3.13-slim AS dependencies
 
 WORKDIR /tmp
 
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -c constraints.txt -r requirements.txt
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -45,12 +45,12 @@ COPY neural-engine/requirements.txt ./
 RUN python -m compileall -b src/
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libhdf5-103 \
+    libhdf5-103-1t64 \
     libopenblas0 \
     ca-certificates \
     curl \

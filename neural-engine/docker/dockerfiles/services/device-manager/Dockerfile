@@ -1,39 +1,69 @@
 # Multi-stage Dockerfile for Device Manager Service
 # Manages neural device connections and data streaming
+# Uses NVIDIA CUDA base as device libraries need numpy for signal processing
 
 # Stage 1: Dependencies
-FROM python:3.12.11-slim-bookworm AS dependencies
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS dependencies
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
+    build-essential \
     libusb-1.0-0-dev \
     libudev-dev \
     libhidapi-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Create virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy and install requirements
 # Use lightweight requirements for CI builds
 COPY neural-engine/requirements-minimal.txt ./requirements.txt
 COPY neural-engine/constraints.txt ./constraints.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -c constraints.txt -r requirements.txt && \
-    pip install --no-cache-dir \
+RUN python3.13 -m pip install --break-system-packages --upgrade pip && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt && \
+    python3.13 -m pip install --break-system-packages \
         pyusb==1.2.1 \
         hidapi==0.14.0 \
         pylsl==1.16.0
 
 # Stage 2: Builder
-FROM python:3.12.11-slim-bookworm AS builder
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS builder
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -52,7 +82,23 @@ COPY neural-engine/devices ./legacy_devices
 RUN python -m compileall -b devices/ utils/
 
 # Stage 3: Runtime
-FROM python:3.12.11-slim-bookworm AS runtime
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS runtime
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 

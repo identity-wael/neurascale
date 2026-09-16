@@ -1,6 +1,23 @@
 # Neural Engine Processor Dockerfile
-# Using slim instead of Alpine for TensorFlow/PyTorch compatibility
-FROM python:3.12.11-slim-bookworm AS base
+# Using NVIDIA CUDA base for TensorFlow/PyTorch with GPU support
+# This image includes CUDA 12.6 runtime, Ubuntu 24.04 LTS (latest)
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS base
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security updates
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -29,18 +46,19 @@ FROM base AS dependencies
 COPY requirements.txt .
 COPY constraints.txt .
 # Install dependencies in chunks to avoid timeout
-RUN pip install --upgrade pip setuptools wheel && \
+# Use --break-system-packages for Ubuntu 24.04 pip
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
     # Install core dependencies first
     grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install deep learning dependencies
     grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install Google Cloud dependencies
     grep -E '^google-cloud-' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r /dev/stdin && \
     # Install remaining dependencies
-    pip install -c constraints.txt -r requirements.txt
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app
@@ -56,7 +74,7 @@ COPY setup.py .
 COPY README.md .
 
 # Install the package
-RUN pip install -e .
+RUN python3.13 -m pip install --break-system-packages -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

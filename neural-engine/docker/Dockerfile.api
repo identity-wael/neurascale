@@ -1,15 +1,31 @@
 # Neural Engine API Dockerfile
-FROM python:3.12.11-slim-bookworm AS base
-# Security updates
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+# Using NVIDIA CUDA base for numpy/pandas compatibility
+FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04 AS base
+
+# Install Python 3.13
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
+    python3-pip \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies and security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,21 +38,11 @@ ENV PIP_DEFAULT_TIMEOUT=300 \
 # First stage: Dependencies
 FROM base AS dependencies
 # Copy only requirements to cache dependencies
-COPY requirements.txt ./requirements.txt
+COPY requirements-no-ml.txt ./requirements.txt
 COPY constraints.txt ./constraints.txt
-# Install dependencies in chunks to avoid timeout
-RUN pip install --upgrade pip setuptools wheel && \
-    # Install core dependencies first
-    grep -E '^(numpy|scipy|scikit-learn|pandas|joblib|h5py|matplotlib|pywavelets|lz4|msgpack)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install Google Cloud dependencies
-    grep -E '^google-cloud-' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install ML dependencies
-    grep -E '^(torch|tensorflow|tensorboard)' requirements.txt | \
-    pip install -c constraints.txt -r /dev/stdin && \
-    # Install remaining dependencies
-    pip install -c constraints.txt -r requirements.txt
+# Install dependencies
+RUN python3.13 -m pip install --break-system-packages --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --break-system-packages -c constraints.txt -r requirements.txt
 
 # Second stage: Application
 FROM dependencies AS app
@@ -52,7 +58,7 @@ COPY setup.py .
 COPY README.md .
 
 # Install the package
-RUN pip install -e .
+RUN python3.13 -m pip install --break-system-packages -e .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

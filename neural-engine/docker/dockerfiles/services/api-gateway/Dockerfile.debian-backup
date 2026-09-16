@@ -3,7 +3,7 @@
 # Using Alpine Linux for security
 
 # Stage 1: Dependencies
-FROM python:3.12-alpine AS dependencies
+FROM python:3.13-alpine AS dependencies
 
 WORKDIR /tmp
 
@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
         starlette-graphene3==0.6.0
 
 # Stage 2: Builder
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -50,7 +50,7 @@ COPY neural-engine/src/devices ./devices
 RUN python -m compileall -b .
 
 # Stage 3: Runtime
-FROM python:3.12-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
